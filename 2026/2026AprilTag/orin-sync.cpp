@@ -217,7 +217,7 @@ void COrinSync::vPrimaryWorker()
 				uint8_t const *pu8 = gru8Buff;
 
 				pu8 += UnPack( u32MsgId, pu8, sizeof(gru8Buff) );
-				printf( "Rcvd: %08x\n", u32MsgId );
+//				printf( "Rcvd: %08x\n", u32MsgId );
 				switch ( u32MsgId ) {
 				case s_u32SECONDARY_READY_MESSAGE:
 					{
@@ -288,8 +288,10 @@ void COrinSync::vPrimaryWorker()
 							}
 							ATDetection atd( u8Id, grCorners );
 							patf->vAddDetection( atd );
-							m_mbFrame.post( patf );
 						}
+//						printf( "Received Cam %u : %u %u (%ld bytes)\n", u16Cam, u32Seq, u16Tags, pu8 - gru8Buff );
+//						delete patf;
+						m_mbFrame.post( patf );
 					}
 					break;
 				}

@@ -598,7 +598,7 @@ int main( int argc, char **argv )
 			// it has not been connected
 			if (nSyncFreq > 0) {
 				std::this_thread::yield();
-				std::this_thread::sleep_for( std::chrono::milliseconds(20) );
+				std::this_thread::sleep_for( std::chrono::milliseconds(500) );
 				sg.bStart( nSyncFreq );
 			}
 		}
@@ -670,7 +670,8 @@ int main( int argc, char **argv )
 					if (bHaveAllCams)  {
 #if 1
 #if 0
-						if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
+//						if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
+						if (ps.bEstimate( qxRobot, vCamFrames )) {
 							if( ps.bSolve( qxRobot, vCamFrames ) ) {
 								Quaternion const &q = qxRobot.Rotation();
 								Point3d const &p = qxRobot.Translation();
@@ -680,6 +681,13 @@ int main( int argc, char **argv )
 								bHavePose = true;
 								if (bSendToRio) {
 									vSendFrame( udpSend, qxRobot, vCamFrames[0]->ts() );
+								}
+								if (bSendToStdout) {
+									printf( "(%.4f %.4f %.4f %.4f) (%.1f %.1f %.1f)\n",
+										qxRobot.Rotation().q0(), qxRobot.Rotation().x(),
+										qxRobot.Rotation().y(), qxRobot.Rotation().z(),
+										qxRobot.Translation().x(), qxRobot.Translation().y(),
+										qxRobot.Translation().z() );
 								}
 							}
 							else {
