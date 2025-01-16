@@ -45,32 +45,8 @@ protected:
 			m_nSize = 0;
 		}
 	};
-	struct v4lBuff
-	{
-		memBuff	m_grMappedBuffers[MAX_PLANES];
 
-		v4lBuff()
-		{
-		}
-		~v4lBuff()
-		{
-		}
-
-		memBuff &operator[]( size_t n ) 
-		{
-			if( n < 0 || n >= MAX_PLANES )
-				throw invalid_argument( string("v4lBuff::operator[] - out of bounds" ) );
-				
-			return m_grMappedBuffers[n];
-		}
-		void free()
-		{
-			for( int i = 0; i < MAX_PLANES; i++ )
-				m_grMappedBuffers[i].free();
-		}
-	};
-
-	v4lBuff m_grBuffers[12];
+	memBuff m_grBuffers[12];
 
 	int xioctl( int req, void *pArg )
 	{
@@ -89,7 +65,7 @@ protected:
 		memset( &req, 0, sizeof(req) );
 
 		req.count = m_nBuffers;
-		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory = V4L2_MEMORY_MMAP;
 
 		if( -1 == xioctl( VIDIOC_REQBUFS, &req ) )
@@ -107,14 +83,11 @@ protected:
 		for( int i = 0; i < req.count; ++i )
 		{
 			v4l2_buffer buf;
-			v4l2_plane planes[3];
 
 			memset( &buf, 0, sizeof(buf) );
-			buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+			buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			buf.memory  = V4L2_MEMORY_MMAP;
-			buf.m.planes = planes;
 			buf.index	= i;
-			buf.length = 3;
 
 			if( -1 == xioctl( VIDIOC_QUERYBUF, &buf ) )
 			{
@@ -122,12 +95,7 @@ protected:
 				throw invalid_argument( string("invalid v4l request") );
 			}
 
-			m_nPlanes = buf.length;
-			for( int j = 0; j < m_nPlanes; j++ )
-			{
-				if( !m_grBuffers[i][j].mapm( m_fd, buf.m.planes[j].m.mem_offset, buf.m.planes[j].length ) )
-					throw runtime_error( string("Failed mapping buffer") );
-			}
+			m_grBuffers[i].mapm( m_fd, buf.m.offset, buf.length );
 
 		}
 	}
@@ -142,7 +110,7 @@ public:
 		if( -1 == xioctl( VIDIOC_QUERYCAP, &cap ) )
 			throw invalid_argument( string("invalid file") );
 
-		if( !(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) )
+		if( !(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) )
 			throw invalid_argument( string("dev not capable of VIDEO Capture") );
 
 		if( !(cap.capabilities & V4L2_CAP_STREAMING) )
@@ -220,7 +188,7 @@ public:
 	{
 		v4l2_cropcap	cropcap;
 		memset( &cropcap, 0, sizeof(cropcap) );
-		cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+		cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if( !xioctl( VIDIOC_CROPCAP, &cropcap ) ) 
 		{
 			v4l2_crop crop;
@@ -249,7 +217,7 @@ public:
 		v4l2_format fmt;
 
 		memset( &fmt, 0, sizeof(fmt) );
-		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 		fmt.fmt.pix_mp.width = nWidth;
 		fmt.fmt.pix_mp.height = nHeight;
@@ -263,7 +231,7 @@ public:
 		}
 
 		memset( &fmt, 0, sizeof(fmt) );
-		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if( -1 == xioctl( VIDIOC_G_FMT, &fmt ) )
 		{
 			printf( "Error = %s (%d)\n", strerror( errno ), errno );
@@ -289,15 +257,9 @@ public:
 			v4l2_plane planes[3];
 
 			memset( &buf, 0, sizeof(buf) );
-			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			buf.memory = V4L2_MEMORY_MMAP;
 			buf.index = i;
-			buf.m.planes = planes;
-			buf.length = m_nPlanes;
-			for( int j = 0; j < m_nPlanes; j++ )
-			{
-				buf.m.planes[j].bytesused = m_grBuffers[i][j].m_nSize;
-			}
 
 			if( xioctl( VIDIOC_QBUF, &buf ) == -1 )
 			{
@@ -305,7 +267,7 @@ public:
 			}
 			
 		}
-		v4l2_buf_type typ = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+		v4l2_buf_type typ = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if( xioctl(VIDIOC_STREAMON, &typ) == -1 )
 		{
 			printf( "STREAMON: %s\n", strerror(errno) );
@@ -324,10 +286,8 @@ public:
 		do {
 			v4l2_plane planes[3];
 			memset( &buf, 0, sizeof(buf) );
-			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			buf.memory = V4L2_MEMORY_MMAP;
-			buf.m.planes = planes;
-			buf.length = m_nPlanes;
 
 			if( xioctl( VIDIOC_DQBUF, &buf ) == 0 )
 			{
@@ -351,7 +311,7 @@ public:
 	}
 	virtual bool bStop()
 	{
-		v4l2_buf_type typ = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+		v4l2_buf_type typ = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 		if( xioctl( VIDIOC_STREAMOFF, &typ ) == -1 )
 			throw runtime_error( string("failed to stop streaming") );
