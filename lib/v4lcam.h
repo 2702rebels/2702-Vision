@@ -1,7 +1,21 @@
 #ifndef V4L_CAMERA_H
 #define V4L_CAMERA_H
 
-#define MAX_PLANES	3
+#include <inttypes.h>
+
+class v4lImageProcessor
+{
+public:
+	v4lImageProcessor()
+	{
+	}
+	virtual ~v4lImageProcessor()
+	{
+	}
+	virtual bool bProcessImage( v4l2_buffer &buf )
+	{
+	}
+};
 
 class v4lcam
 {
@@ -16,6 +30,8 @@ protected:
 	int			m_nCols;
 	int			m_nBuffers;
 
+	v4lImageProcessor	*m_pProc = 0;
+
 	struct memBuff 
 	{
 		size_t	m_nSize;
@@ -28,24 +44,52 @@ protected:
 		{
 			free();
 		}
-		bool mapm( int fd, off_t nOffset, size_t nLen )
+		void alloc( size_t nLen )
 		{
+			if (m_nSize && nLen != m_nSize) {
+				free();
+			}
+			m_pMem = ::malloc( nLen );
+			if (!m_pMem) {
+				throw std::runtime_error("Unable to alloca video buffer");
+			}
 			m_nSize = nLen;
-			m_pMem = mmap( 0, nLen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, nOffset );
-
-			if( MAP_FAILED == m_pMem )
-				return false;
-
-			return true;
 		}
 		void free()
 		{
-			munmap( m_pMem, m_nSize );
+			::free( m_pMem );
 			m_pMem = 0;
 			m_nSize = 0;
 		}
+		inline size_t len() const {
+			return m_nSize;
+		}
+		inline uint8_t *buf() {
+			return (uint8_t *)m_pMem;
+		}
+	};
+	struct v4lBuff
+	{
+		memBuff	m_mb;
+
+		v4lBuff()
+		{
+		}
+		~v4lBuff()
+		{
+		}
+
+		operator memBuff&()
+		{
+			return m_mb;
+		}
+		void free()
+		{
+			m_mb.free();
+		}
 	};
 
+//	v4lBuff m_grBuffers[12];
 	memBuff m_grBuffers[12];
 
 	int xioctl( int req, void *pArg )
@@ -58,7 +102,7 @@ protected:
 
 		return res;
 	}
-	void initMMAP()
+	void initMem()
 	{
 		v4l2_requestbuffers req;
 
@@ -66,39 +110,34 @@ protected:
 
 		req.count = m_nBuffers;
 		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		req.memory = V4L2_MEMORY_MMAP;
+		req.memory = V4L2_MEMORY_USERPTR;
 
 		if( -1 == xioctl( VIDIOC_REQBUFS, &req ) )
 		{
 			if( EINVAL == errno )
-				throw invalid_argument( string("video device does not support memory mapping" ) );
+				throw invalid_argument( string("video device does not support userptrs" ) );
 
-			printf( "initMMAP()\n" );
+			printf( "initMem()\n" );
 			throw invalid_argument( string(strerror(errno)) );
 		}
 
 		if( req.count != m_nBuffers )
 			throw invalid_argument( string("insufficient buffers") );
 
-		for( int i = 0; i < req.count; ++i )
-		{
-			v4l2_buffer buf;
-
-			memset( &buf, 0, sizeof(buf) );
-			buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory  = V4L2_MEMORY_MMAP;
-			buf.index	= i;
-
-			if( -1 == xioctl( VIDIOC_QUERYBUF, &buf ) )
-			{
-				printf( "VIDIOC_QUERYBUF %s\n", strerror(errno) );
-				throw invalid_argument( string("invalid v4l request") );
-			}
-
-			m_grBuffers[i].mapm( m_fd, buf.m.offset, buf.length );
-
+		unsigned uPageSize = getpagesize();
+		unsigned uBufferSize = (m_nRows * m_nCols + uPageSize - 1) & ~(uPageSize -1);
+		printf( "Allocating %u\n", uBufferSize );
+		for( int i = 0; i < req.count; ++i ) {
+			m_grBuffers[i].alloc( uBufferSize );
 		}
 	}
+	void freeMem()
+	{
+		for (int i = 0; i < m_nBuffers; i++) {
+			m_grBuffers[i].free();
+		}
+	}
+
 public:
 	v4lcam( char const *psz ) : m_bStreaming( false ), m_nPlanes( 0 )
 	{
@@ -110,7 +149,7 @@ public:
 		if( -1 == xioctl( VIDIOC_QUERYCAP, &cap ) )
 			throw invalid_argument( string("invalid file") );
 
-		if( !(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) )
+		if( !(cap.capabilities & V4L2_BUF_TYPE_VIDEO_CAPTURE) )
 			throw invalid_argument( string("dev not capable of VIDEO Capture") );
 
 		if( !(cap.capabilities & V4L2_CAP_STREAMING) )
@@ -133,8 +172,8 @@ public:
 		memset( &req, 0, sizeof(req) );
 
 		req.count = 0;
-		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-		req.memory = V4L2_MEMORY_MMAP;
+		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		req.memory = V4L2_MEMORY_USERPTR;
 
 		if( -1 == xioctl( VIDIOC_REQBUFS, &req ) )
 		{
@@ -152,10 +191,18 @@ public:
 		if( m_fd >=0 )
 			close( m_fd );
 	}
+	virtual void vSetProcessor( v4lImageProcessor *pProc )
+	{
+		m_pProc = pProc;
+	}
 	virtual bool bProcessFrame( v4l2_buffer &buf )
 	{
-		printf( "Frame %lu\n", buf.sequence );
-
+		if (m_pProc) {
+			return m_pProc->bProcessImage( buf );
+		}
+		else {
+			printf( "Frame %" PRIu32 " Idx = %d\n", buf.sequence, buf.index );
+		}
 		// flag to requeue the buffer
 		return true;
 	}
@@ -249,16 +296,17 @@ public:
 		m_tvLast.tv_sec = 0;
 		m_tvLast.tv_usec = 0;
 
-		initMMAP();
+		initMem();
 
 		for( int i = 0; i < sizeof(m_grBuffers)/sizeof(m_grBuffers[0]) / 3; i++ )
 		{
 			v4l2_buffer buf;
-			v4l2_plane planes[3];
 
 			memset( &buf, 0, sizeof(buf) );
 			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory = V4L2_MEMORY_MMAP;
+			buf.memory = V4L2_MEMORY_USERPTR;
+			buf.m.userptr = (unsigned long)m_grBuffers[i].buf();
+			buf.length = m_grBuffers[i].len();
 			buf.index = i;
 
 			if( xioctl( VIDIOC_QBUF, &buf ) == -1 )
@@ -284,13 +332,21 @@ public:
 		v4l2_buffer buf;
 
 		do {
-			v4l2_plane planes[3];
 			memset( &buf, 0, sizeof(buf) );
 			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory = V4L2_MEMORY_MMAP;
+			buf.memory = V4L2_MEMORY_USERPTR;
 
 			if( xioctl( VIDIOC_DQBUF, &buf ) == 0 )
 			{
+				int i;
+				for( i = 0; i < m_nBuffers; i++ ) {
+					if (buf.m.userptr == (unsigned long)m_grBuffers[i].buf() && buf.length == m_grBuffers[i].len()) {
+						break;
+					}
+				}
+				if (i>=m_nBuffers) {
+					throw std::runtime_error( "Unexpected buffer from camera!" );
+				}
 				// process this frame...
 				if( bProcessFrame( buf ))
 				{
@@ -322,6 +378,7 @@ public:
 	{
 		v4l2_control ctrl;
 
+printf( "bSetAutoExposure( %d )\n", bOn );
 		memset( &ctrl, 0, sizeof(ctrl) );
 		ctrl.id = V4L2_CID_EXPOSURE_AUTO;
 		ctrl.value = bOn ? V4L2_EXPOSURE_AUTO : V4L2_EXPOSURE_MANUAL;
@@ -331,14 +388,21 @@ public:
 
 		return true;
 	}
-	virtual bool bSetExposure( uint32_t uExp )
+	virtual bool bSetExposure( uint64_t uExp )
 	{
 		v4l2_control ctrl;
 
 		memset( &ctrl, 0, sizeof(ctrl) );
-		ctrl.id = V4L2_CID_EXPOSURE;
+		ctrl.id = 0x009a2001;
 		ctrl.value = uExp;
 
+#if 0
+		static int i = 144;
+		i = (i+1)%145;
+		if (i) {
+			return true;
+		}
+#endif
 		if( ioctl( m_fd, VIDIOC_S_CTRL, &ctrl ) )
 			throw invalid_argument( string( "V4L2_CID_EXPOSURE_ABSOLUTE" ) );
 
@@ -348,6 +412,7 @@ public:
 	{
 		v4l2_control ctrl;
 
+printf( "bSetAutoGain( %d )\n", bOn );
 		memset( &ctrl, 0, sizeof(ctrl) );
 		ctrl.id = V4L2_CID_AUTOGAIN;
 		ctrl.value = bOn ? 1 : 0;
@@ -417,7 +482,7 @@ public:
 	{
 		struct v4l2_selection sel =
 		{
-			.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+			.type = V4L2_BUF_TYPE_VIDEO_CAPTURE,
 			.target = V4L2_SEL_TGT_CROP,
 			.flags = 0,
 		};
@@ -496,7 +561,7 @@ public:
 		{
 			if( !(queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) )
 			{
-				printf( "Control %08x - %s\n", queryctrl.id, queryctrl.name );
+				printf( "Control %08x - %s  Min: %lld  Max: %lld\n", queryctrl.id, queryctrl.name, queryctrl.minimum, queryctrl.maximum );
 
 				if( queryctrl.type == V4L2_CTRL_TYPE_MENU )
 					enumerateMenu( queryctrl );
