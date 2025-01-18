@@ -59,7 +59,7 @@ public:
 	}
 	virtual void ProcessFrame( int nCam, CameraFrame const *pcf )
 	{
-		printf( "Have Frame from %d\n", nCam );
+		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
 	}
 };
 

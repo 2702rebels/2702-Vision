@@ -44,20 +44,19 @@ protected:
 		{
 			free();
 		}
-		void alloc( size_t nLen )
+		bool mapm( int fd, off_t nOffset, size_t nLen )
 		{
-			if (m_nSize && nLen != m_nSize) {
-				free();
-			}
-			m_pMem = ::malloc( nLen );
-			if (!m_pMem) {
-				throw std::runtime_error("Unable to alloca video buffer");
-			}
 			m_nSize = nLen;
+			m_pMem = mmap( 0, nLen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, nOffset );
+
+			if (MAP_FAILED == m_pMem) {
+				return false;
+			}
+			return true;
 		}
 		void free()
 		{
-			::free( m_pMem );
+			munmap( m_pMem, m_nSize );
 			m_pMem = 0;
 			m_nSize = 0;
 		}
@@ -110,7 +109,7 @@ protected:
 
 		req.count = m_nBuffers;
 		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		req.memory = V4L2_MEMORY_USERPTR;
+		req.memory = V4L2_MEMORY_MMAP;
 
 		if( -1 == xioctl( VIDIOC_REQBUFS, &req ) )
 		{
@@ -124,11 +123,19 @@ protected:
 		if( req.count != m_nBuffers )
 			throw invalid_argument( string("insufficient buffers") );
 
-		unsigned uPageSize = getpagesize();
-		unsigned uBufferSize = (m_nRows * m_nCols + uPageSize - 1) & ~(uPageSize -1);
-		printf( "Allocating %u\n", uBufferSize );
 		for( int i = 0; i < req.count; ++i ) {
-			m_grBuffers[i].alloc( uBufferSize );
+			v4l2_buffer buf;
+
+			memset( &buf, 0, sizeof(buf) );
+			buf.type	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			buf.memory  = V4L2_MEMORY_MMAP;
+			buf.index	= i;
+
+			if( -1 == xioctl( VIDIOC_QUERYBUF, &buf ) )
+				throw invalid_argument( "Failed to query buffer" );
+
+			if( !m_grBuffers[i].mapm( m_fd, buf.m.offset, buf.length ) )
+				throw runtime_error( "Failed mapping buffer" );
 		}
 	}
 	void freeMem()
@@ -173,7 +180,7 @@ public:
 
 		req.count = 0;
 		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		req.memory = V4L2_MEMORY_USERPTR;
+		req.memory = V4L2_MEMORY_MMAP;
 
 		if( -1 == xioctl( VIDIOC_REQBUFS, &req ) )
 		{
@@ -298,15 +305,13 @@ public:
 
 		initMem();
 
-		for( int i = 0; i < sizeof(m_grBuffers)/sizeof(m_grBuffers[0]) / 3; i++ )
+		for( int i = 0; i < sizeof(m_grBuffers)/sizeof(m_grBuffers[0]); i++ )
 		{
 			v4l2_buffer buf;
 
 			memset( &buf, 0, sizeof(buf) );
 			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory = V4L2_MEMORY_USERPTR;
-			buf.m.userptr = (unsigned long)m_grBuffers[i].buf();
-			buf.length = m_grBuffers[i].len();
+			buf.memory = V4L2_MEMORY_MMAP;
 			buf.index = i;
 
 			if( xioctl( VIDIOC_QBUF, &buf ) == -1 )
@@ -334,19 +339,10 @@ public:
 		do {
 			memset( &buf, 0, sizeof(buf) );
 			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory = V4L2_MEMORY_USERPTR;
+			buf.memory = V4L2_MEMORY_MMAP;
 
 			if( xioctl( VIDIOC_DQBUF, &buf ) == 0 )
 			{
-				int i;
-				for( i = 0; i < m_nBuffers; i++ ) {
-					if (buf.m.userptr == (unsigned long)m_grBuffers[i].buf() && buf.length == m_grBuffers[i].len()) {
-						break;
-					}
-				}
-				if (i>=m_nBuffers) {
-					throw std::runtime_error( "Unexpected buffer from camera!" );
-				}
 				// process this frame...
 				if( bProcessFrame( buf ))
 				{
