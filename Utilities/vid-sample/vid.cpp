@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include <X11/Xlib.h>
+//#include <X11/Xlib.h>
 //#include <cameraserver/CameraServer.h>
 //#include <networktables/NetworkTableInstance.h>
 
@@ -65,7 +65,6 @@ public:
 
 int main( int argc, char **argv )
 {
-	XInitThreads();
 	signal( SIGINT, sighandler );
 
 #if 0

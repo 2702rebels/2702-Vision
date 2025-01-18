@@ -14,6 +14,7 @@ public:
 	}
 	virtual bool bProcessImage( v4l2_buffer &buf )
 	{
+		return true;
 	}
 };
 
@@ -389,7 +390,7 @@ printf( "bSetAutoExposure( %d )\n", bOn );
 		v4l2_control ctrl;
 
 		memset( &ctrl, 0, sizeof(ctrl) );
-		ctrl.id = 0x009a2001;
+		ctrl.id = V4L2_CID_EXPOSURE;
 		ctrl.value = uExp;
 
 #if 0
@@ -400,7 +401,7 @@ printf( "bSetAutoExposure( %d )\n", bOn );
 		}
 #endif
 		if( ioctl( m_fd, VIDIOC_S_CTRL, &ctrl ) )
-			throw invalid_argument( string( "V4L2_CID_EXPOSURE_ABSOLUTE" ) );
+			throw invalid_argument( string( "V4L2_CID_EXPOSURE" ) );
 
 		return true;
 	}

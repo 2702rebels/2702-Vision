@@ -27,7 +27,7 @@
 #include <sys/resource.h>
 #include <sched.h>
 
-#define AUTO_GAIN	0
+#define AUTO_GAIN	1
 #define APRILTAGS	0
 #define ANNOTATE	0
 
@@ -61,7 +61,7 @@ CameraManager::CameraManager( char const *pszVid, int nExposures, int nCam, FrmP
 
 //	printf( "Instance:: %x\n", (uint32_t)frc::CameraServer::GetInstance() );
 
-	bSetExposure( 0x1000 );
+//	bSetExposure( 0x1000 );
 //	bSetSelection( 1, 5, 640, 480 );
 //	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_SGRBG8 );
 //	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_Y10 );
