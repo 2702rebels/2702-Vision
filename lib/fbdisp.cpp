@@ -46,7 +46,7 @@ fbDisp::fbDisp( int nLeft, int nTop, int nRows, int nCols ) :
 
 	// Map the device to memory
 	m_pu8Mem = (uint8_t *)mmap(0, m_u32Size, PROT_READ | PROT_WRITE, MAP_SHARED, m_fd, 0);
-	if ((int)m_pu8Mem == -1)
+	if ((long)m_pu8Mem == -1)
 		throw runtime_error( string("Failed mapping Frame Buffer memory") );
 
 

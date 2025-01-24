@@ -3,10 +3,11 @@ MAKEFLAGS := --jobs=$(shell nproc)
 #CXXFLAGS=-I/usr/local/frc/include -I/usr/local/include/opencv4
 #CXXFLAGS=-I/usr/local/include/opencv4
 CXXFLAGS+=$(shell pkg-config --cflags opencv4)
+CXXFLAGS+=$(shell pkg-config --cflags libcamera)
 CXXFLAGS+=-g
 
 #OBJS=VisLog.o Bayer2RGB.o 2702camera.o 2702math.o genio.o Bayer2Grey.o cammgr.o
-OBJS=VisLog.o Bayer2RGB.o 2702camera.o 2702math.o Bayer2Grey.o cammgr.o fbdisp.o
+OBJS=VisLog.o Bayer2RGB.o 2702camera.o 2702math.o Bayer2Grey.o cammgr.o fbdisp.o rpicam.o
 
 lib2702.a: $(OBJS)
 	ar -r lib2702.a $(OBJS)

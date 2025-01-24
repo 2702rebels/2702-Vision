@@ -18,12 +18,14 @@
 #endif
 
 #include "VisLog.h"
+#include "frmprocessor.h"
 
 // maximum # of managed exposure times.
 #define MAX_EXPOSURES	8
 #define NUM_WORKERS	4
 
-class CameraFrame
+
+class CamManagerFrame : public CameraFrame
 {
 	friend class CameraManager;
 	int				m_nBuffer;
@@ -35,67 +37,50 @@ class CameraFrame
 
 	struct timeval	m_ts;
 public:
-	CameraFrame() :
+	CamManagerFrame() :
+		CameraFrame(),
 		m_pu8Img( 0 )
 	{
 	}
-	~CameraFrame()
+	virtual ~CamManagerFrame()
 	{
 	}
-	inline uint32_t u32Sequence() const 
+	virtual uint32_t u32Sequence() const 
 	{
 		return m_u32Seq;
 	}
-	inline uint32_t u32Exposure() const
+	virtual uint32_t u32Exposure() const
 	{
 		return m_u32Exp;
 	}
-	inline int nRows() const
+	virtual int nRows() const
 	{
 		return m_nRows;
 	}
-	inline int nCols() const
+	virtual int nCols() const
 	{
 		return m_nCols;
 	}
-	inline uint8_t const *pu8Image() const
+	virtual uint8_t const *pu8Image() const
 	{
 		return m_pu8Img;
 	}
-	inline uint8_t *pu8Image()
+	virtual uint8_t *pu8Image()
 	{
 		return m_pu8Img;
 	}
-	inline const struct timeval *ts() const
+	virtual const struct timeval *ts() const
 	{
 		return &m_ts;
 	}
 };
 
-class FrmProcessor
-{
-public:
-	FrmProcessor()
-	{
-	}
-	virtual ~FrmProcessor()
-	{
-	}
-	virtual void ProcessFrame( int nCam, CameraFrame const *pnf )
-	{
-	}
-};
-
 class CameraManager : public v4lcam
 {
-	int			m_nExposures;
-	uint64_t	m_u32MaxExp;
-	uint64_t	m_gruCurExp[MAX_EXPOSURES];
-	uint64_t	m_gruNextExp[MAX_EXPOSURES];
 	bool 		m_bSave = true;
 
 	FrmProcessor	&m_nfp;
-	CameraFrame		*m_grpFrms;
+	CamManagerFrame	*m_grpFrms;
 
 	std::thread	m_grthWorkers[NUM_WORKERS];
 	std::thread m_thCamera;
@@ -107,7 +92,7 @@ class CameraManager : public v4lcam
 	int			m_nCam;
 	int			m_nWorkersRunning;
 	int			m_nWorkersWaiting;
-	CameraFrame		*m_pNextFrame;
+	CamManagerFrame		*m_pNextFrame;
 
 #if DISPLAY
 	fbDisp			m_disp;
@@ -122,27 +107,25 @@ class CameraManager : public v4lcam
 
 	uint32_t		m_u32Frames = 0;
 	std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds> m_tpStart;
-public:
-	CameraManager( char const *pszVid, int nExposures, int nCam, FrmProcessor &nfp );
-	virtual ~CameraManager();
-	virtual void UpdateExposure( uint32_t u32Frame, uint32_t u32Exposure );
-	virtual bool bProcessFrame( v4l2_buffer &buf );
-	virtual bool bStart();
-	virtual bool bStop();
-
-	virtual void FrameComplete( CameraFrame *pFrame );
-
-	void SetThreadPriority( int policy, int pri );
 
 	//camera thread functions
 	void cameraThreadFn();
 	virtual bool QueueWork( v4l2_buffer const &Buff );
 
+	void SetThreadPriority( int policy, int pri );
 
 	// Worker thread functions
-	CameraFrame *waitForWork();
+	CamManagerFrame *waitForWork();
 	void workerThreadFn();
-	void procGreenFrame( CameraFrame *pFrm, cv::Mat &mat, uint8_t &u8Max );
-	void procColorFrame( CameraFrame *pFrm, cv::Mat &mat );
+public:
+	CameraManager( char const *pszVid, int nCam, int nRows, int nCols, uint32_t u32PixFmt, FrmProcessor &nfp );
+	virtual ~CameraManager();
+	virtual bool bProcessFrame( v4l2_buffer &buf );
+	virtual bool bStart();
+	virtual bool bStop();
+
+	virtual void FrameComplete( CamManagerFrame *pFrame );
+
+	virtual void vDoSetup( int nWidth, int nHeight, uint32_t u32PixFmt );
 };
 

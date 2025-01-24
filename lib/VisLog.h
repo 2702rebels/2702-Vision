@@ -6,10 +6,10 @@
 
 class VisionLog
 {
-	fstream m_fs;
-	bool 	m_bWrite;
+	std::fstream	m_fs;
+	bool 			m_bWrite;
 
-	std::mutex	m_mtx;
+	std::mutex		m_mtx;
 
 	int32_t i32ReadVal();
 

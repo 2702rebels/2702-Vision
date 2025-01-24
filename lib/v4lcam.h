@@ -31,6 +31,8 @@ protected:
 	int			m_nCols;
 	int			m_nBuffers;
 
+	int			m_nExposure = -1;
+
 	v4lImageProcessor	*m_pProc = 0;
 
 	struct memBuff 
@@ -68,28 +70,7 @@ protected:
 			return (uint8_t *)m_pMem;
 		}
 	};
-	struct v4lBuff
-	{
-		memBuff	m_mb;
 
-		v4lBuff()
-		{
-		}
-		~v4lBuff()
-		{
-		}
-
-		operator memBuff&()
-		{
-			return m_mb;
-		}
-		void free()
-		{
-			m_mb.free();
-		}
-	};
-
-//	v4lBuff m_grBuffers[12];
 	memBuff m_grBuffers[12];
 
 	int xioctl( int req, void *pArg )
@@ -375,7 +356,6 @@ public:
 	{
 		v4l2_control ctrl;
 
-printf( "bSetAutoExposure( %d )\n", bOn );
 		memset( &ctrl, 0, sizeof(ctrl) );
 		ctrl.id = V4L2_CID_EXPOSURE_AUTO;
 		ctrl.value = bOn ? V4L2_EXPOSURE_AUTO : V4L2_EXPOSURE_MANUAL;
@@ -393,23 +373,27 @@ printf( "bSetAutoExposure( %d )\n", bOn );
 		ctrl.id = V4L2_CID_EXPOSURE;
 		ctrl.value = uExp;
 
-#if 0
-		static int i = 144;
-		i = (i+1)%145;
-		if (i) {
-			return true;
-		}
-#endif
 		if( ioctl( m_fd, VIDIOC_S_CTRL, &ctrl ) )
 			throw invalid_argument( string( "V4L2_CID_EXPOSURE" ) );
 
 		return true;
 	}
+	virtual int nGetExposure()
+	{
+		v4l2_control ctrl;
+
+		memset( &ctrl, 0, sizeof(ctrl) );
+		ctrl.id = V4L2_CID_EXPOSURE;
+
+		if( ioctl( m_fd, VIDIOC_G_CTRL, &ctrl ) )
+			throw invalid_argument( string( "V4L2_CID_EXPOSURE" ) );
+
+		return ctrl.value;
+	}
 	virtual bool bSetAutoGain( bool bOn )
 	{
 		v4l2_control ctrl;
 
-printf( "bSetAutoGain( %d )\n", bOn );
 		memset( &ctrl, 0, sizeof(ctrl) );
 		ctrl.id = V4L2_CID_AUTOGAIN;
 		ctrl.value = bOn ? 1 : 0;
@@ -508,6 +492,12 @@ printf( "bSetAutoGain( %d )\n", bOn );
 		printf( "ver:    %08x\n", cap.version );
 		printf( "caps:   %08x\n", cap.capabilities );
 		printf( "devcaps:%08x\n", cap.device_caps );
+		if (cap.device_caps & V4L2_CAP_VIDEO_CAPTURE) {
+			printf( "        Video Capture\n" );
+		}
+		if (cap.device_caps & V4L2_CAP_STREAMING) {
+			printf( "        Streaming\n" );
+		}
 	}
 	void printStandards()
 	{

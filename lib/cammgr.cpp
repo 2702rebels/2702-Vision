@@ -33,21 +33,10 @@
 
 using namespace std;
 
-#if 0
-#define RES_ROWS	(480/2)
-#define RES_COLS	(752/2)
-#else
-#define RES_ROWS	800
-#define RES_COLS	1280
-#endif
-
-#define MAX_EXP		0x18000
-
 #include "cammgr.h"
 
-CameraManager::CameraManager( char const *pszVid, int nExposures, int nCam, FrmProcessor &nfp ) :
+CameraManager::CameraManager( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, FrmProcessor &nfp ) :
 	v4lcam( pszVid ),
-	m_nExposures( nExposures ),
 	m_grpFrms( 0 ),
 	m_bShutdown( false ),
 	m_nCam( nCam ),
@@ -56,24 +45,7 @@ CameraManager::CameraManager( char const *pszVid, int nExposures, int nCam, FrmP
 	m_pNextFrame( 0 ),
 	m_nfp( nfp )
 {
-	if( m_nExposures > MAX_EXPOSURES )
-		throw invalid_argument( string( "CameraManager(): num exposures exceeds max" ) );
-
-//	printf( "Instance:: %x\n", (uint32_t)frc::CameraServer::GetInstance() );
-
-//	bSetExposure( 0x1000 );
-//	bSetSelection( 1, 5, 640, 480 );
-//	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_SGRBG8 );
-//	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_Y10 );
-	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_GREY );
-
-	m_u32MaxExp = MAX_EXP;
-	for( int i = 0; i < nExposures; i++ )
-	{
-		m_gruNextExp[i] = MAX_EXP;
-	}
-
-//	cv::namedWindow( "Img", cv::WINDOW_AUTOSIZE );
+	vDoSetup( nWidth, nHeight, u32PixFmt );
 
 	for( int i = 0; i < NUM_WORKERS; i++ )
 	{
@@ -96,47 +68,24 @@ CameraManager::~CameraManager()
 
 	m_thCamera.join();
 
-	for( int i = 0; i < m_nExposures; i++ ) {
-		printf( "Exposure %d = %lu\n", i, m_gruNextExp[i] );
-	}
-	
 	delete [] m_grpFrms;
 }
 
-void CameraManager::UpdateExposure( uint32_t u32Frame, uint32_t u32Exposure )
+void CameraManager::vDoSetup( int nWidth, int nHeight, uint32_t u32PixFmt )
 {
-	if( u32Exposure > m_u32MaxExp )
-		u32Exposure = m_u32MaxExp;
-	else if( !u32Exposure )
-		u32Exposure = 1;
-
-	m_gruNextExp[ u32Frame % m_nExposures ] = u32Exposure;
+	if (!bSetRes( nWidth, nHeight, u32PixFmt )) {
+		throw runtime_error( string("Failed Setting video resolution") );
+	}
 }
 
 bool CameraManager::bProcessFrame( v4l2_buffer &buf )
 {
-	uint32_t u32Frm = buf.sequence % m_nExposures ;
-
 	//Grab some info from the buffer and store in the associted frame
 	int nIdx = buf.index;
 	m_grpFrms[nIdx].m_u32Seq = buf.sequence;
-	m_grpFrms[nIdx].m_u32Exp = m_gruCurExp[u32Frm];
+	m_grpFrms[nIdx].m_u32Exp = nGetExposure();
 	m_grpFrms[nIdx].m_ts = buf.timestamp;
 	m_grpFrms[nIdx].m_pu8Img = (uint8_t *)m_grBuffers[nIdx].m_pMem;
-
-	// update the exposure for the next frame to be exposed...
-	// for the mt9v032, exposure has to be set 3 frames in adavance...
-	//	frame n+1 has already been exposed, and is about to be transferred
-	// 	frame n+2 exposure time has already been loaded
-	//  frame n+3 will be the frame affected by an updated exposure time
-	// this may need to be tweaked for other sensors.
-	uint32_t u32UpdateFrm = (buf.sequence + 3) % m_nExposures;
-	uint32_t u32NextExp = m_gruNextExp[ u32UpdateFrm ];
-
-#if !AUTO_GAIN
-	bSetExposure( u32NextExp );
-#endif
-	m_gruCurExp[ u32UpdateFrm ] = u32NextExp;
 
 	// If there is a worker thread waiting, queue this frame
 	// Return false so buffer is not automatically re-queued
@@ -146,7 +95,7 @@ bool CameraManager::bProcessFrame( v4l2_buffer &buf )
 
 bool CameraManager::bStart()
 {
-	m_grpFrms = new CameraFrame[nBuffers()];
+	m_grpFrms = new CamManagerFrame[nBuffers()];
 
 	for( int i = 0; i < nBuffers(); i++ )
 	{
@@ -165,7 +114,7 @@ bool CameraManager::bStop()
 }
 
 // Processing complete for frame, re-queue buffer to the driver
-void CameraManager::FrameComplete( CameraFrame *pFrame )
+void CameraManager::FrameComplete( CamManagerFrame *pFrame )
 {
 	v4l2_buffer buf;
 
@@ -273,7 +222,7 @@ void CameraManager::SetThreadPriority( int policy, int pri )
 #endif
 }
 
-CameraFrame *CameraManager::waitForWork()
+CamManagerFrame *CameraManager::waitForWork()
 {
 	std::unique_lock<std::mutex> l( m_queueMutex );
 	m_nWorkersWaiting++;
@@ -283,20 +232,13 @@ CameraFrame *CameraManager::waitForWork()
 
 	// get the pointer to the new frame to be processed
 	// and reset it to 0 so no other threads try to process it
-	CameraFrame *pFrm = m_pNextFrame;
+	CamManagerFrame *pFrm = m_pNextFrame;
 	m_pNextFrame = 0;
 	return pFrm;
 }
 
 void CameraManager::workerThreadFn()
 {
-	int nRows = m_nRows/2;
-	int nCols = m_nCols/2;
-	cv::Mat green( nRows, nCols, CV_8UC1 );
-	cv::Mat color( nRows, nCols, CV_8UC3 );
-	cv::Mat blurOut;
-	cv::Mat ThreshOut;
-
 	std::unique_lock<std::mutex> l( m_queueMutex );
 	int nWorkerId = m_nWorkersRunning++;
 	printf( "Worker %d started\n", m_nWorkersRunning );
@@ -306,7 +248,7 @@ void CameraManager::workerThreadFn()
 
 	while( !m_bShutdown )
 	{
-		CameraFrame *pFrm = waitForWork();
+		CamManagerFrame *pFrm = waitForWork();
 
 		m_nfp.ProcessFrame( m_nCam, pFrm );
 		FrameComplete( pFrm );
