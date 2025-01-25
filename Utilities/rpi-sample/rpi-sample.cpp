@@ -25,6 +25,7 @@
 #include <stdexcept>
 
 #include "rpicam.h"
+#include "VisLog.h"
 
 using namespace std;
 
@@ -50,8 +51,13 @@ void sighandler( int nSig )
 
 class imgProc : public FrmProcessor
 {
+	VisionLog	m_vl;
+	std::mutex	m_mtxLog;
 public:
-	imgProc()
+	imgProc( char const *pszLogFile ) :
+		FrmProcessor(),
+		m_vl( pszLogFile, true )
+		
 	{
 	}
 	virtual ~imgProc()
@@ -61,6 +67,13 @@ public:
 	virtual void ProcessFrame( int nCam, CameraFrame const *pcf )
 	{
 		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
+
+		if (m_mtxLog.try_lock()) {
+			cv::Mat img( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
+			m_vl.bWritePNG( img, pcf->u32Sequence(), pcf->u32Exposure() );
+			m_mtxLog.unlock();
+		}
+		
 	}
 };
 
@@ -81,7 +94,7 @@ int main( int argc, char **argv )
 	//	auto ntinst = nt::NetworkTableInstance::GetDefault();
 	//	ntinst.StartClientTeam( 2702 );
 	//	ntinst.StartServer();
-		imgProc proc;
+		imgProc proc( "test.log" );
 //		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
 		RPICamera mycam0( "/dev/video0", 0, 800, 600, DRM_FORMAT_BGR888, proc );
 	//	nvCamera mycam1( "/dev/video1", 4, 1 );
