@@ -123,3 +123,5 @@ bool VisionLog::bWritePNG( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp 
 
 	return m_fs.failbit ? false : true;
 }
+
+
