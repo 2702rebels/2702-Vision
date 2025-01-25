@@ -9,9 +9,9 @@ using namespace std;
 #include "Bayer2RGB.h"
 #include "Bayer2Grey.h"
 
-enum pmode { pmcolor, pmcolor2, pmgrey, pmgrey2, pmbayer, pmgreen, pmred, pmblue };
+enum pmode { pmcolor, pmcolor2, pmgrey, pmgrey2, pmbayer, pmgreen, pmred, pmblue, pminput };
 
-pmode procmode = pmcolor;
+pmode procmode = pminput;
 
 void Bayer2Red( cv::Mat &matRed, cv::Mat const &matBayer )
 {
@@ -101,6 +101,8 @@ int main( int argc, char **argv )
 				procmode = pmgreen;
 			else if( !strcmp( argv[i], "-blue" ) )
 				procmode = pmblue;
+			else if( !strcmp( argv[i], "-blue" ) )
+				procmode = pminput;
 			else if( argv[i][1] == 'i' )
 				pszImgFileSpec = argv[i] + 2;
 			else
@@ -133,6 +135,9 @@ int main( int argc, char **argv )
 
 		cv::Mat imgOut;
 		switch( procmode ) {
+		case pminput:
+			imgOut = img;
+			break;
 		case pmgrey:
 			{
 				cv::Mat matGrey( img.rows, img.cols, CV_8UC1 );
