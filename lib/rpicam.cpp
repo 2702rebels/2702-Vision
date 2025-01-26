@@ -399,7 +399,7 @@ RPICamera::~RPICamera()
 void RPICamera::requestComplete(libcamera::Request *request)
 {
 	// Check whether the frame should be requeued.
-	if (QueueWork( request )) {
+	if (QueueWork( request ) && !m_bShutdown) {
 		/* Re-queue the Request to the camera. */
 		request->reuse(libcamera::Request::ReuseBuffers);
 		m_cam->queueRequest(request);

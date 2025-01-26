@@ -42,10 +42,10 @@ class RPICamera : public CamBase
 	std::mutex	m_queueMutex;
 	std::condition_variable	m_queueCV;;
 
-	bool		m_bShutdown;
-	int			m_nCam;
-	int			m_nWorkersRunning;
-	int			m_nWorkersWaiting;
+	bool			m_bShutdown;
+	int				m_nCam;
+	int				m_nWorkersRunning;
+	volatile int	m_nWorkersWaiting;
 
 #if DISPLAY
 	fbDisp			m_disp;
