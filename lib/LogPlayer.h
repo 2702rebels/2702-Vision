@@ -4,7 +4,7 @@
 
 class LogPlayer : public VisionLog
 {
-	FrmProcessor	m_fp;
+	FrmProcessor	&m_fp;
 public:
 	LogPlayer( char const *pszFile, FrmProcessor &fp );
 	virtual ~LogPlayer();

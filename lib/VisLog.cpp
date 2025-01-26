@@ -84,6 +84,12 @@ int32_t VisionLog::i32ReadNext( cv::Mat &img, int &nExp )
 	return -1;
 }
 
+bool VisionLog::bRewind()
+{
+	m_fs.seekg( 0 );
+	return true;
+}
+
 static std::string strPrintf( char const *psz, ... )
 {
 	va_list va;

@@ -3,33 +3,40 @@
 
 #include "LogPlayer.h"
 
-
 class LogFrame : public CameraFrame
 {
 	cv::Mat		&m_mat;
 	uint32_t	m_u32Exp;
 	uint32_t	m_u32Seq;
-	timeval		m_ts;
 public:
-	LogFrame( cv::Mat m, uint32_t u32Seq, uint32_t u32Exp ) :
+	LogFrame( cv::Mat &m, uint32_t u32Seq, uint32_t u32Exp ) :
+		CameraFrame(),
 		m_mat(m),
 		m_u32Exp( u32Exp ),
 		m_u32Seq( u32Seq )
 	{
+		m_nRows = m_mat.rows;
+		m_nCols = m_mat.cols;
 		gettimeofday( &m_ts, 0 );
 	}
-	~LogFrame();
+	virtual ~LogFrame()
+	{
+	}
 
-	virtual uint32_t u32Sequence() const {
+	virtual uint32_t u32Sequence() const
+	{
 		return m_u32Seq;
 	}
-	virtual uint32_t u32Exposure() const {
+	virtual uint32_t u32Exposure() const
+	{
 		return m_u32Exp;
 	}
-	virtual int nRows() const {
+	virtual int nRows() const
+	{
 		return m_mat.rows;
 	}
-	virtual int nCols() const {
+	virtual int nCols() const
+	{
 		return m_mat.cols;
 	}
 	virtual uint8_t const *pu8Image() const
@@ -61,7 +68,6 @@ bool LogPlayer::bNextFrame()
 	cv::Mat mat;
 	int nExp;
 	int nSeq = i32ReadNext( mat, nExp );
-
 	if (nSeq < 0) {
 		return false;
 	}
@@ -70,4 +76,8 @@ bool LogPlayer::bNextFrame()
 	m_fp.ProcessFrame( 0, &lf );
 	
 	return true;
+}
+
+void LogPlayer::vRewind()
+{
 }

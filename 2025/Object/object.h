@@ -1,13 +1,17 @@
 #pragma once
 
+#ifndef IMGPROC_GUI
+#define IMGPROC_GUI	0
+#endif
+
 class imgProc : public FrmProcessor
 {
-	uint8_t		m_u8HLow = 179;
-	uint8_t		m_u8SLow = 0;
-	uint8_t		m_u8VLow = 147;
-	uint8_t		m_u8HHigh = 180;
-	uint8_t		m_u8SHigh = 255;
-	uint8_t		m_u8VHigh = 255;
+	int			m_nHLow = 179;
+	int			m_nSLow = 0;
+	int			m_nVLow = 147;
+	int			m_nHHigh = 180;
+	int			m_nSHigh = 255;
+	int			m_nVHigh = 255;
 
 	double		m_fCDiam = 0.1016;
 
@@ -23,11 +27,20 @@ class imgProc : public FrmProcessor
 	
 public:
 	imgProc() :
-    		CAMERA_CENTER(mtx.at<double>(0, 2), mtx.at<double>(1, 2))
+		FrmProcessor(),
+   		CAMERA_CENTER(mtx.at<double>(0, 2), mtx.at<double>(1, 2))
 	{
-	       	m_focalLen = (mtx.at<double>(0, 0) + mtx.at<double>(1, 1)) / 2;
-#ifndef __ARM_ARCH 
-			cv::namedWindow("Filtered Video");
+		m_focalLen = (mtx.at<double>(0, 0) + mtx.at<double>(1, 1)) / 2;
+
+#if (IMGPROC_GUI)
+		cv::namedWindow("Filtered Video");
+
+		cv::createTrackbar("PV Hue Min", "Filtered Video", &m_nHLow, 360);
+		cv::createTrackbar("PV Hue Max", "Filtered Video", &m_nHHigh, 360);
+		cv::createTrackbar("Sat Min", "Filtered Video", &m_nSLow, 255);
+		cv::createTrackbar("Sat Max", "Filtered Video", &m_nSHigh, 255);
+		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
+		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
 
 	}
@@ -108,21 +121,21 @@ public:
 		return { hull, { majorAxisEndPoint1, majorAxisEndPoint2 } };
 	}
 
-
 	virtual void ProcessFrame( int nCam, CameraFrame const *pcf )
 	{
 		printf( "Have Frame from %d:%d %dx%d\n", nCam, pcf->u32Sequence(), pcf->nRows(), pcf->nCols() );
 		cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
+		cv::imshow( "Raw", frame );
 		// cv::Mat hsv( pcf->nRows(), pcf->nCols(), CV_8UC3);
 
 		// cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
 
 		// cv::Mat thresh;
-		// cv::inRange(hsv, cv::Scalar( m_u8HLow, m_u8SLow, m_u8VLow), cv::Scalar( m_u8HHigh, m_u8SHigh, m_u8VHigh), thresh);
+		// cv::inRange(hsv, cv::Scalar( m_nHLow, m_nSLow, m_nVLow), cv::Scalar( m_nHHigh, m_nSHigh, m_nVHigh), thresh);
 
 		//frame = cv::undistort_frame(frame, mtx, dist);
 
-        cv::Mat mask = filter_hsv_inverted(frame, m_u8HLow, m_u8HHigh, m_u8SLow, m_u8SHigh, m_u8VLow, m_u8VHigh);
+        cv::Mat mask = filter_hsv_inverted(frame, m_nHLow, m_nHHigh, m_nSLow, m_nSHigh, m_nVLow, m_nVHigh);
         cv::Mat filtered_frame;
         cv::bitwise_and(frame, frame, filtered_frame, mask);
 
@@ -143,7 +156,7 @@ public:
                 // Calculate distance and angle
                 auto [distance, angle] = calculate_distance_and_angle(*largest_contour, m_focalLen, m_fCDiam, CAMERA_CENTER);
 
-#ifndef __ARM_ARCH
+#if (IMGPROC_GUI)
                 // Draw the fitted contour
                 cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
 
@@ -165,7 +178,7 @@ public:
         }
 
 
-#ifndef __ARM_ARCH 
+#if (IMGPROC_GUI)
 		// Display the results
    		cv::imshow("Filtered Video", filtered_frame);
         cv::imshow("Mask", mask);
@@ -175,7 +188,6 @@ public:
 			exit(0);
 		}
 #endif
-		printf( "Done\n" );
 	}
 };
 

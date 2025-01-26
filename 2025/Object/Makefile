@@ -11,9 +11,15 @@ CXXFLAGS+=$(shell pkg-config --cflags libcamera )
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
 
+all: object replay
+
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui $(LIBS)
+
+replay: replay.o ../../lib/lib2702.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o replay replay.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
 
 #	$(CXX) $(CXXFLAGS) -o rpi-sample $(OBJS) -l2702 -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_calib3d -lpthread -lntcore -lcscore -lcameraserver -lwpiutil -lapriltag -lwpimath
 
 object.o: object.cpp object.h
+replay.o: replay.cpp object.h

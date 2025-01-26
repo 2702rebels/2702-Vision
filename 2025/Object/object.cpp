@@ -31,9 +31,9 @@ using namespace std;
 
 #include <signal.h>
 
-#include "object.h"
-
 bool bStop = false;
+
+#include "object.h"
 
 void sighandler( int nSig )
 {

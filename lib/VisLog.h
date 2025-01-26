@@ -19,6 +19,8 @@ public:
 	virtual ~VisionLog();
 
 	int32_t i32ReadNext( cv::Mat &mat, int &nExp );
+	bool bRewind();
+
 	bool bWriteRaw( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp );
 	bool bWritePNG( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp );
 };

@@ -2,6 +2,7 @@
 
 class CameraFrame
 {
+protected:
 	int				m_nBuffer;
 	int				m_nRows;
 	int				m_nCols;
