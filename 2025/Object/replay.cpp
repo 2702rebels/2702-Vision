@@ -49,7 +49,11 @@ int main( int argc, char **argv )
 	imgProc ip;
 	LogPlayer lp( argv[1], ip );
 
-	while (lp.bNextFrame()) {
+	while (1) {
+		if (!lp.bNextFrame()) {
+			printf( "About to rewind\n" );
+			lp.vRewind();
+		}
 		sleep( 1 );
 	}
 

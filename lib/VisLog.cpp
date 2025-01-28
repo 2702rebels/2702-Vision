@@ -86,6 +86,7 @@ int32_t VisionLog::i32ReadNext( cv::Mat &img, int &nExp )
 
 bool VisionLog::bRewind()
 {
+	m_fs.clear();
 	m_fs.seekg( 0 );
 	return true;
 }

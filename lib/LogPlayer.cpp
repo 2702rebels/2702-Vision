@@ -80,4 +80,5 @@ bool LogPlayer::bNextFrame()
 
 void LogPlayer::vRewind()
 {
+	bRewind();
 }
