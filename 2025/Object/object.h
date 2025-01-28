@@ -125,7 +125,9 @@ public:
 	{
 		printf( "Have Frame from %d:%d %dx%d\n", nCam, pcf->u32Sequence(), pcf->nRows(), pcf->nCols() );
 		cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
+#if (IMGPROC_GUI)
 		cv::imshow( "Raw", frame );
+#endif
 		// cv::Mat hsv( pcf->nRows(), pcf->nCols(), CV_8UC3);
 
 		// cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
