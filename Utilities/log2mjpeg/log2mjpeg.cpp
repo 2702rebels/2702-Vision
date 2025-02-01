@@ -64,7 +64,7 @@ void Bayer2Green( cv::Mat &matGreen, cv::Mat const &matBayer )
 
 void Usage()
 {
-	cerr << "Usage: log2mjpeg [-colour|colour2|grey|grey2|bayer|red|green|blue] [-iimgfilespec] infile outfile\n";
+	cerr << "Usage: log2mjpeg [-colour|colour2|grey|grey2|bayer|red|green|blue|input] [-iimgfilespec] infile outfile\n";
 	cerr << "      colour     -> RGB\n";
 	cerr << "      colour2    -> RGB 1/2 resolution\n";
 	cerr << "      grey       -> GreyScale\n";
@@ -101,7 +101,7 @@ int main( int argc, char **argv )
 				procmode = pmgreen;
 			else if( !strcmp( argv[i], "-blue" ) )
 				procmode = pmblue;
-			else if( !strcmp( argv[i], "-blue" ) )
+			else if( !strcmp( argv[i], "-input" ) )
 				procmode = pminput;
 			else if( argv[i][1] == 'i' )
 				pszImgFileSpec = argv[i] + 2;
