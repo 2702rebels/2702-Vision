@@ -6,6 +6,10 @@ CXXFLAGS+=-I../../lib
 CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
+CXXFLAGS+=-I/usr/local/include/cameraserver
+CXXFLAGS+=-I/usr/local/include/wpiutil
+CXXFLAGS+=-I/usr/local/include/cscore
+CXXFLAGS+=-I/usr/local/include/ntcore
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 CXXFLAGS+=$(shell pkg-config --cflags libcamera )
 LDFLAGS+=-L../../lib
