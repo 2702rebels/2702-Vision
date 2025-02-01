@@ -71,7 +71,7 @@ public:
 	virtual void ProcessFrame( int nCam, CameraFrame const *pcf )
 	{
 		cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
-		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
+//		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
 
 		if (m_mtxLog.try_lock()) {
 			cv::Mat img( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
@@ -94,8 +94,13 @@ int main( int argc, char **argv )
 	char szLog[1024] = "test.log";
 
 	if (access("/data/logs", F_OK) == 0) {
-		sprintf( szLog, "/data/logs/test.log" );
+		for( int i = 0; i < 1024; i++) {
+			sprintf( szLog, "/data/logs/test%05d.log", i );
+			if (access(szLog, F_OK) != 0)
+				break;
+		}
 	}
+	printf( "Logging to %s\n", szLog );
 
 	signal( SIGINT, sighandler );
 	if (argc == 2) {
