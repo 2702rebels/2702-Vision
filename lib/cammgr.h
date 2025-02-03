@@ -118,7 +118,7 @@ class CameraManager : public v4lcam
 	CamManagerFrame *waitForWork();
 	void workerThreadFn();
 public:
-	CameraManager( char const *pszVid, int nCam, int nRows, int nCols, uint32_t u32PixFmt, FrmProcessor &nfp );
+	CameraManager( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, FrmProcessor &nfp );
 	virtual ~CameraManager();
 	virtual bool bProcessFrame( v4l2_buffer &buf );
 	virtual bool bStart();

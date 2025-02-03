@@ -2,6 +2,7 @@
 #define V4L_CAMERA_H
 
 #include <inttypes.h>
+#include <malloc.h>
 
 class v4lImageProcessor
 {
@@ -20,7 +21,10 @@ public:
 
 class v4lcam
 {
+public:
+	enum eMemType {eMTNone, eMTUserptr, eMTmmap};
 protected:
+	eMemType	m_eType;
 	bool 		m_bStreaming;
 	int 		m_fd;
 	int 		m_nPlanes;
@@ -29,6 +33,7 @@ protected:
 	uint32_t	m_u32PixFmt;
 	int			m_nRows;
 	int			m_nCols;
+	int			m_nImgSize;
 	int			m_nBuffers;
 
 	int			m_nExposure = -1;
@@ -37,10 +42,11 @@ protected:
 
 	struct memBuff 
 	{
+		eMemType	m_eType;
 		size_t	m_nSize;
 		void	*m_pMem;
 
-		memBuff() : m_nSize( 0 ), m_pMem( 0 )
+		memBuff() : m_nSize( 0 ), m_pMem( 0 ), m_eType(eMTNone)
 		{
 		}
 		~memBuff()
@@ -49,6 +55,7 @@ protected:
 		}
 		bool mapm( int fd, off_t nOffset, size_t nLen )
 		{
+			m_eType = eMTNone;
 			m_nSize = nLen;
 			m_pMem = mmap( 0, nLen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, nOffset );
 
@@ -57,9 +64,30 @@ protected:
 			}
 			return true;
 		}
+		bool alloc( size_t nLen )
+		{
+			size_t sPage = getpagesize();
+			size_t sBuffer = (nLen + sPage - 1) & ~(sPage - 1);
+#if (JETSON_NANO)				
+			cudaMallocManaged( &m_pMem, sBuffer, cudaMemAttachGlobal );
+#else
+			m_pMem = memalign( sPage, sBuffer );
+#endif
+			m_nSize = sBuffer;
+			return true;
+		}
 		void free()
 		{
-			munmap( m_pMem, m_nSize );
+			if (m_eType == eMTmmap) {
+				munmap( m_pMem, m_nSize );
+			}
+			else {
+#if (JETSON_NANO)				
+				cudaFree( m_pMem );
+#else
+				::free( m_pMem );
+#endif
+			}
 			m_pMem = 0;
 			m_nSize = 0;
 		}
@@ -83,7 +111,7 @@ protected:
 
 		return res;
 	}
-	void initMem()
+	virtual void initMem()
 	{
 		v4l2_requestbuffers req;
 
@@ -91,12 +119,12 @@ protected:
 
 		req.count = m_nBuffers;
 		req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		req.memory = V4L2_MEMORY_MMAP;
+		req.memory = (m_eType == eMTmmap) ? V4L2_MEMORY_MMAP : V4L2_MEMORY_USERPTR;
 
 		if( -1 == xioctl( VIDIOC_REQBUFS, &req ) )
 		{
 			if( EINVAL == errno )
-				throw invalid_argument( string("video device does not support userptrs" ) );
+				throw invalid_argument( string("video device does not support requested memory type" ) );
 
 			printf( "initMem()\n" );
 			throw invalid_argument( string(strerror(errno)) );
@@ -105,22 +133,30 @@ protected:
 		if( req.count != m_nBuffers )
 			throw invalid_argument( string("insufficient buffers") );
 
-		for( int i = 0; i < req.count; ++i ) {
-			v4l2_buffer buf;
+		if (m_eType == eMTmmap) {
+			for( int i = 0; i < req.count; ++i ) {
+				v4l2_buffer buf;
 
-			memset( &buf, 0, sizeof(buf) );
-			buf.type	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory  = V4L2_MEMORY_MMAP;
-			buf.index	= i;
+				memset( &buf, 0, sizeof(buf) );
+				buf.type	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+				buf.memory  = V4L2_MEMORY_MMAP;
+				buf.index	= i;
 
-			if( -1 == xioctl( VIDIOC_QUERYBUF, &buf ) )
-				throw invalid_argument( "Failed to query buffer" );
+				if( -1 == xioctl( VIDIOC_QUERYBUF, &buf ) )
+					throw invalid_argument( "Failed to query buffer" );
 
-			if( !m_grBuffers[i].mapm( m_fd, buf.m.offset, buf.length ) )
-				throw runtime_error( "Failed mapping buffer" );
+				if( !m_grBuffers[i].mapm( m_fd, buf.m.offset, buf.length ) )
+					throw runtime_error( "Failed mapping buffer" );
+			}
+		}
+		else {
+			for( int i = 0; i < req.count; ++i) {
+				if( !m_grBuffers[i].alloc( m_nImgSize ) )
+					throw runtime_error( "Failed allocating vidoe buffer" );
+			}
 		}
 	}
-	void freeMem()
+	virtual void freeMem()
 	{
 		for (int i = 0; i < m_nBuffers; i++) {
 			m_grBuffers[i].free();
@@ -128,7 +164,7 @@ protected:
 	}
 
 public:
-	v4lcam( char const *psz ) : m_bStreaming( false ), m_nPlanes( 0 )
+	v4lcam( char const *psz, eMemType eType = eMTmmap ) : m_eType(eType), m_bStreaming( false ), m_nPlanes( 0 )
 	{
 		m_fd = open( psz, O_RDWR );
 		if( m_fd < 0 )
@@ -276,6 +312,7 @@ public:
 
 		m_nRows = nHeight;
 		m_nCols = nWidth;
+		m_nImgSize = fmt.fmt.pix.sizeimage;
 		m_u32PixFmt = u32PixFmt;
 
 		return true;
@@ -293,8 +330,15 @@ public:
 
 			memset( &buf, 0, sizeof(buf) );
 			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory = V4L2_MEMORY_MMAP;
 			buf.index = i;
+			if( m_eType == eMTmmap ) {	
+				buf.memory = V4L2_MEMORY_MMAP;
+			}
+			else {
+				buf.memory = V4L2_MEMORY_USERPTR;
+				buf.m.userptr   = (unsigned long)m_grBuffers[i].m_pMem;
+				buf.length		= m_grBuffers[i].m_nSize;
+			}
 
 			if( xioctl( VIDIOC_QBUF, &buf ) == -1 )
 			{
@@ -321,10 +365,16 @@ public:
 		do {
 			memset( &buf, 0, sizeof(buf) );
 			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory = V4L2_MEMORY_MMAP;
+			if (m_eType == eMTmmap) {
+				buf.memory = V4L2_MEMORY_MMAP;
+			}
+			else {
+				buf.memory = V4L2_MEMORY_USERPTR;
+			}
 
 			if( xioctl( VIDIOC_DQBUF, &buf ) == 0 )
 			{
+				printf( "Buf: %d\n", buf.index );
 				// process this frame...
 				if( bProcessFrame( buf ))
 				{
@@ -374,7 +424,7 @@ public:
 		ctrl.value = uExp;
 
 		if( ioctl( m_fd, VIDIOC_S_CTRL, &ctrl ) )
-			throw invalid_argument( string( "V4L2_CID_EXPOSURE" ) );
+			throw invalid_argument( string( "set V4L2_CID_EXPOSURE" ) );
 
 		return true;
 	}
@@ -386,7 +436,7 @@ public:
 		ctrl.id = V4L2_CID_EXPOSURE;
 
 		if( ioctl( m_fd, VIDIOC_G_CTRL, &ctrl ) )
-			throw invalid_argument( string( "V4L2_CID_EXPOSURE" ) );
+			throw invalid_argument( string( "get V4L2_CID_EXPOSURE" ) );
 
 		return ctrl.value;
 	}
