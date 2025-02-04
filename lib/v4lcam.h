@@ -150,6 +150,7 @@ protected:
 			}
 		}
 		else {
+			printf( "Allocating %d byte buffers\n", m_nImgSize );
 			for( int i = 0; i < req.count; ++i) {
 				if( !m_grBuffers[i].alloc( m_nImgSize ) )
 					throw runtime_error( "Failed allocating vidoe buffer" );
@@ -291,10 +292,10 @@ public:
 		memset( &fmt, 0, sizeof(fmt) );
 		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-		fmt.fmt.pix_mp.width = nWidth;
-		fmt.fmt.pix_mp.height = nHeight;
-		fmt.fmt.pix_mp.pixelformat = u32PixFmt;
-		fmt.fmt.pix_mp.field = V4L2_FIELD_NONE;
+		fmt.fmt.pix.width = nWidth;
+		fmt.fmt.pix.height = nHeight;
+		fmt.fmt.pix.pixelformat = u32PixFmt;
+		fmt.fmt.pix.field = V4L2_FIELD_NONE;
 
 		if( -1 == xioctl( VIDIOC_S_FMT, &fmt ) )
 		{
@@ -310,8 +311,8 @@ public:
 			throw invalid_argument( string( "failed requesting video format" ) );
 		}
 
-		m_nRows = nHeight;
-		m_nCols = nWidth;
+		m_nRows = fmt.fmt.pix.height;
+		m_nCols = fmt.fmt.pix.width;
 		m_nImgSize = fmt.fmt.pix.sizeimage;
 		m_u32PixFmt = u32PixFmt;
 
