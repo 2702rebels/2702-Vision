@@ -26,6 +26,9 @@
 #include <stdexcept>
 
 #include "rpicam.h"
+#include <networktables/NetworkTableInstance.h>
+#include <networktables/NetworkTable.h>
+#include <networktables/DoubleTopic.h>
 
 using namespace std;
 
@@ -45,7 +48,6 @@ void sighandler( int nSig )
 int main( int argc, char **argv )
 {
 	signal( SIGINT, sighandler );
-
 #if 0
 	char szImgName[100];
 	sprintf( szImgName, "Testing" );
@@ -56,9 +58,19 @@ int main( int argc, char **argv )
 	cv::waitKey(0);
 #endif
 	try {
-	//	auto ntinst = nt::NetworkTableInstance::GetDefault();
-	//	ntinst.StartClientTeam( 2702 );
-	//	ntinst.StartServer();
+		NetworkTableInstance networkTableManager = nt::NetworkTableInstance::GetDefault();
+		NetworkTable objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
+		DoubleTopic hueMinTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/HueMin").Subscribe(0.0);
+		DoubleTopic hueMaxTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/HueMax").Subscribe(0.0);
+		DoubleTopic saturationMinTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/SaturationMin").Subscribe(0.0);
+		DoubleTopic saturationMaxTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/SaturationMax").Subscribe(0.0);
+		DoubleTopic valueMinTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/ValueMin").Subscribe(0.0);
+		DoubleTopic valueMaxTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/ValueMax").Subscribe(0.0);
+		networkTableManager.StartClient4("networkTableClient");
+		networkTableManager.SetServerTeam(2702);
+		#if false
+		networkTableManager.StartDSClient(); // Should only be run on actual robot
+		#endif
 		imgProc proc;
 //		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
 		RPICamera mycam0( "/dev/video0", 0, 800, 600, DRM_FORMAT_BGR888, proc );
@@ -74,6 +86,9 @@ int main( int argc, char **argv )
 			if (cv::waitKey(1) == 'l')
 			{
 				ConfigUtils::triggerConfigLoad(proc);
+			std::cout << "NetworkTables are " << networkTableManager.IsConnected() ? "Connected" : "Not Connected";
+			if(networkTableManager.IsConnected()){
+				
 			}
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );
 		}
