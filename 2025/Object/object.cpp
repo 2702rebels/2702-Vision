@@ -63,16 +63,16 @@ int main( int argc, char **argv )
 #endif
 	try {
 		#if USE_NETWORK_TABLES
-		NetworkTableInstance networkTableManager = nt::NetworkTableInstance::GetDefault();
+		auto networkTableManager = nt::NetworkTableInstance::GetDefault();
 		std::mt19937 randomNumberGen = std::mt19937();
 		std::uniform_int_distribution<uint32_t> networkTableRandomRange = std::uniform_int_distribution<uint32_t>(0,20);
-		NetworkTable objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
-		IntegerTopic hueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMin").Subscribe(0);
-		IntegerTopic hueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMax").Subscribe(0);
-		IntegerTopic saturationMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMin").Subscribe(0);
-		IntegerTopic saturationMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMax").Subscribe(0);
-		IntegerTopic valueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMin").Subscribe(0);
-		IntegerTopic valueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMax").Subscribe(0);
+		auto objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
+		nt::IntegerSubscriber hueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMin").Subscribe(0);
+		nt::IntegerSubscriber hueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMax").Subscribe(0);
+		nt::IntegerSubscriber saturationMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMin").Subscribe(0);
+		nt::IntegerSubscriber saturationMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMax").Subscribe(0);
+		nt::IntegerSubscriber valueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMin").Subscribe(0);
+		nt::IntegerSubscriber valueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMax").Subscribe(0);
 		networkTableManager.StartClient4("networkTableClient");
 		networkTableManager.SetServerTeam(2702);
 		#if false
