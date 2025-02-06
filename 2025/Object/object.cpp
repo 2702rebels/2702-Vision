@@ -29,6 +29,7 @@
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/DoubleTopic.h>
+#include <cmath>
 
 using namespace std;
 
@@ -38,6 +39,8 @@ bool bStop = false;
 
 #include "object.h"
 #include "config.h"
+
+#define USE_NETWORK_TABLES 1
 
 void sighandler( int nSig )
 {
@@ -58,6 +61,7 @@ int main( int argc, char **argv )
 	cv::waitKey(0);
 #endif
 	try {
+		#if USE_NETWORK_TABLES
 		NetworkTableInstance networkTableManager = nt::NetworkTableInstance::GetDefault();
 		NetworkTable objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
 		DoubleTopic hueMinTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/HueMin").Subscribe(0.0);
@@ -70,6 +74,7 @@ int main( int argc, char **argv )
 		networkTableManager.SetServerTeam(2702);
 		#if false
 		networkTableManager.StartDSClient(); // Should only be run on actual robot
+		#endif
 		#endif
 		imgProc proc;
 //		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
@@ -86,10 +91,18 @@ int main( int argc, char **argv )
 			if (cv::waitKey(1) == 'l')
 			{
 				ConfigUtils::triggerConfigLoad(proc);
+			}
+			#if USE_NETWORK_TABLES
 			std::cout << "NetworkTables are " << networkTableManager.IsConnected() ? "Connected" : "Not Connected";
 			if(networkTableManager.IsConnected()){
-				
+				proc.setPVHueMin(static_cast<int>(round(hueMinTopic.GetAtomic().value)));
+				proc.setPVHueMax(static_cast<int>(round(hueMaxTopic.GetAtomic().value)));
+				proc.setSaturationMin(static_cast<int>(round(saturationMinTopic.GetAtomic().value)));
+				proc.setSaturationMax(static_cast<int>(round(saturationMaxTopic.GetAtomic().value)));
+				proc.setValueMin(static_cast<int>(round(valueMinTopic.GetAtomic().value)));
+				proc.setValueMax(static_cast<int>(round(valueMaxTopic.GetAtomic().value)));
 			}
+			#endif
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );
 		}
 	}
