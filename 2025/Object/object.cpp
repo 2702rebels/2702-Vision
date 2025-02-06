@@ -28,7 +28,8 @@
 #include "rpicam.h"
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
-#include <networktables/DoubleTopic.h>
+#include <networktables/IntegerTopic.h>
+#include <random>
 #include <cmath>
 
 using namespace std;
@@ -63,13 +64,15 @@ int main( int argc, char **argv )
 	try {
 		#if USE_NETWORK_TABLES
 		NetworkTableInstance networkTableManager = nt::NetworkTableInstance::GetDefault();
+		std::mt19937 randomNumberGen = std::mt19937();
+		std::uniform_int_distribution<uint32_t> networkTableRandomRange = std::uniform_int_distribution<uint32_t>(0,20);
 		NetworkTable objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
-		DoubleTopic hueMinTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/HueMin").Subscribe(0.0);
-		DoubleTopic hueMaxTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/HueMax").Subscribe(0.0);
-		DoubleTopic saturationMinTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/SaturationMin").Subscribe(0.0);
-		DoubleTopic saturationMaxTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/SaturationMax").Subscribe(0.0);
-		DoubleTopic valueMinTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/ValueMin").Subscribe(0.0);
-		DoubleTopic valueMaxTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/ValueMax").Subscribe(0.0);
+		IntegerTopic hueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMin").Subscribe(0);
+		IntegerTopic hueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMax").Subscribe(0);
+		IntegerTopic saturationMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMin").Subscribe(0);
+		IntegerTopic saturationMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMax").Subscribe(0);
+		IntegerTopic valueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMin").Subscribe(0);
+		IntegerTopic valueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMax").Subscribe(0);
 		networkTableManager.StartClient4("networkTableClient");
 		networkTableManager.SetServerTeam(2702);
 		#if false
@@ -93,14 +96,15 @@ int main( int argc, char **argv )
 				ConfigUtils::triggerConfigLoad(proc);
 			}
 			#if USE_NETWORK_TABLES
-			std::cout << "NetworkTables are " << networkTableManager.IsConnected() ? "Connected" : "Not Connected";
-			if(networkTableManager.IsConnected()){
-				proc.setPVHueMin(static_cast<int>(round(hueMinTopic.GetAtomic().value)));
-				proc.setPVHueMax(static_cast<int>(round(hueMaxTopic.GetAtomic().value)));
-				proc.setSaturationMin(static_cast<int>(round(saturationMinTopic.GetAtomic().value)));
-				proc.setSaturationMax(static_cast<int>(round(saturationMaxTopic.GetAtomic().value)));
-				proc.setValueMin(static_cast<int>(round(valueMinTopic.GetAtomic().value)));
-				proc.setValueMax(static_cast<int>(round(valueMaxTopic.GetAtomic().value)));
+			std::cout << "NetworkTables are " << (networkTableManager.IsConnected() ? "Connected" : "Not Connected") << "\n";
+			if(networkTableManager.IsConnected() && networkTableRandomRange(randomNumberGen) == 1){
+				std::cout << "Updated configs from network table\n";
+				proc.setPVHueMin(hueMinTopic.GetAtomic().value);
+				proc.setPVHueMax(hueMaxTopic.GetAtomic().value);
+				proc.setSaturationMin(saturationMinTopic.GetAtomic().value);
+				proc.setSaturationMax(saturationMaxTopic.GetAtomic().value);
+				proc.setValueMin(valueMinTopic.GetAtomic().value);
+				proc.setValueMax(valueMaxTopic.GetAtomic().value);
 			}
 			#endif
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );
