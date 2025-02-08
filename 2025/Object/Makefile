@@ -9,16 +9,17 @@ CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 CXXFLAGS+=$(shell pkg-config --cflags libcamera )
-CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/ntcore/src/main/native/include/
-CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/wpiutil/src/main/native/include/
-CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/nanopb/include/
-CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/llvm/include/
-CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/fmtlib/include/
-CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/ntcore/src/generated/main/native/include/
-CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/json/include/
+CXXFLAGS+=-I$(shell echo ~)/wpilib/allwpilib/ntcore/src/main/native/include/
+CXXFLAGS+=-I$(shell echo ~)/wpilib/allwpilib/wpiutil/src/main/native/include/
+CXXFLAGS+=-I$(shell echo ~)/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/nanopb/include/
+CXXFLAGS+=-I$(shell echo ~)/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/llvm/include/
+CXXFLAGS+=-I$(shell echo ~)/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/fmtlib/include/
+CXXFLAGS+=-I$(shell echo ~)/wpilib/allwpilib/ntcore/src/generated/main/native/include/
+CXXFLAGS+=-I$(shell echo ~)/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/json/include/
 LDFLAGS+=-L../../lib
+LDFLAGS+=-L/usr/local/lib
 LIBS+=$(shell pkg-config -libs libcamera)
-
+LIBS+=-lntcore
 all: object replay
 
 object: $(OBJS) ../../lib/lib2702.a
