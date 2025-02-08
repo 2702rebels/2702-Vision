@@ -17,21 +17,24 @@ class imgProc : public FrmProcessor
 
 	double		distance;
 	
-	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 568.20791041, 0.0, 341.37830129,
-											0.0, 568.20791041, 240.37830129,
-											0.0, 0.0, 1.0);
+	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 888.7765991141953, 0, 304.4048631642603,
+0, 892.4756367000551, 370.9657053548069,
+0, 0, 1);
 
-	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.08705563, 0.10725078, -0.01064468, 0.01151696, -0.33419273);
+	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.1164723784381825, 0.5948511019477938, 0.0178130457349927, -0.03413649680380905, -1.650075067124663);
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
 	
 public:
 	imgProc() :
 		FrmProcessor(),
-   		CAMERA_CENTER(mtx.at<double>(0, 2), mtx.at<double>(1, 2))
+   		CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2))
 	{
-		m_focalLen = (mtx.at<double>(0, 0) + mtx.at<double>(1, 1)) / 2;
+		m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
+    std::cout << "Camera Matrix: " << mtx << endl;
+    std::cout << "Focal Length Coefficients: " << mtx.at<float>(0,0) << "    " << mtx.at<float>(1,2) << endl;
+    std::cout << "Focal Length: " << m_focalLen << endl;
 #if (IMGPROC_GUI)
 		cv::namedWindow("Filtered Video");
 
