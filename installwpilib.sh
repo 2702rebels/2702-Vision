@@ -1,4 +1,6 @@
 #!/bin/bash
+#for ubuntu noble LTS
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 root=${PWD}
 echo ${PWD}
 git clone https://github.com/wpilibsuite/allwpilib.git
