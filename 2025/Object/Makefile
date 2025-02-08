@@ -21,5 +21,5 @@ replay: replay.o ../../lib/lib2702.a
 
 #	$(CXX) $(CXXFLAGS) -o rpi-sample $(OBJS) -l2702 -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_calib3d -lpthread -lntcore -lcscore -lcameraserver -lwpiutil -lapriltag -lwpimath
 
-object.o: object.cpp object.h
-replay.o: replay.cpp object.h
+object.o: object.cpp object.h config.h
+replay.o: replay.cpp object.h config.h

@@ -34,6 +34,7 @@ using namespace std;
 bool bStop = false;
 
 #include "object.h"
+#include "config.h"
 
 void sighandler( int nSig )
 {
@@ -64,7 +65,16 @@ int main( int argc, char **argv )
 	//	nvCamera mycam1( "/dev/video1", 4, 1 );
 
 	//	printinfo( mycam0 );
+	ConfigUtils::triggerConfigLoad(proc);
 		while( !bStop ) {
+			if (ConfigUtils::configHasChanged(proc))
+			{
+				ConfigUtils::triggerConfigSave(proc);
+			}
+			if (cv::waitKey(1) == 'l')
+			{
+				ConfigUtils::triggerConfigLoad(proc);
+			}
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );
 		}
 	}

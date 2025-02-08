@@ -38,6 +38,7 @@ bool bStop = false;
 #define IMGPROC_GUI	1
 
 #include "object.h"
+#include "config.h"
 
 int main( int argc, char **argv )
 {
@@ -48,8 +49,11 @@ int main( int argc, char **argv )
 	
 	imgProc ip;
 	LogPlayer lp( argv[1], ip );
-
+	ConfigUtils::triggerConfigLoad(ip);
 	while (1) {
+		if(ConfigUtils::configHasChanged(ip)){
+			ConfigUtils::triggerConfigSave(ip);
+		}
 		if (!lp.bNextFrame()) {
 			printf( "About to rewind\n" );
 			lp.vRewind();

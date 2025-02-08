@@ -45,7 +45,60 @@ public:
 		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
-
+	}
+	virtual void setPVHueMin(int newValue)
+	{
+		m_nHLow = newValue;
+		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
+	}
+	virtual void setPVHueMax(int newValue)
+	{
+		m_nHHigh = newValue;
+		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
+	}
+	virtual void setSaturationMin(int newValue)
+	{
+		m_nSLow = newValue;
+		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
+	}
+	virtual void setSaturationMax(int newValue)
+	{
+		m_nSHigh = newValue;
+		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
+	}
+	virtual void setValueMin(int newValue)
+	{
+		m_nVLow = newValue;
+		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
+	}
+	virtual void setValueMax(int newValue)
+	{
+		m_nVHigh = newValue;
+		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
+	}
+	virtual int getPVHueMin() const
+	{
+		return m_nHLow;
+	}
+	virtual int getPVHueMax() const
+	{
+		return m_nHHigh;
+	}
+	virtual int getSaturationMin() const
+	{
+		return m_nSLow;
+	}
+	virtual int getSaturationMax() const
+	{
+		return m_nSHigh;
+	}
+	virtual int getValueMin() const
+	{
+		return m_nVLow;
+	}
+	virtual int getValueMax() const
+	{
+		return m_nVHigh;
 	}
 	virtual ~imgProc()
 	{

@@ -1,0 +1,138 @@
+#define SETTING_HUE_MIN "hueMin"
+#define SETTING_HUE_MAX "hueMax"
+#define SETTING_SATURATION_MIN "satMin"
+#define SETTING_SATURATION_MAX "satMax"
+#define SETTING_VALUE_MIN "valMin"
+#define SETTING_VALUE_MAX "valMax"
+#define SETTINGS_FILE_PATH "./processorSettings.txt"
+#include <nlohmann/json.hpp>
+ 
+using json = nlohmann::json;
+ 
+class imageProcessingFilterSettings
+{
+public:
+	int hueMin;
+	int hueMax;
+	int saturationMin;
+	int saturationMax;
+	int valueMin;
+	int valueMax;
+ 
+	imageProcessingFilterSettings(std::string jsonString)
+	{
+		json filterSettings = json::parse(jsonString);
+		this->hueMin = filterSettings[SETTING_HUE_MIN];
+		this->hueMax = filterSettings[SETTING_HUE_MAX];
+		this->saturationMin = filterSettings[SETTING_SATURATION_MIN];
+		this->saturationMax = filterSettings[SETTING_SATURATION_MAX];
+		this->valueMin = filterSettings[SETTING_VALUE_MIN];
+		this->valueMax = filterSettings[SETTING_VALUE_MAX];
+	}
+	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax)
+	{
+		this->hueMin = hueMin;
+		this->hueMax = hueMax;
+		this->saturationMin = saturationMin;
+		this->saturationMax = saturationMax;
+		this->valueMin = valueMin;
+		this->valueMax = valueMax;
+	}
+	void writeSettings()
+	{
+		std::ofstream settingsfile;
+		settingsfile.open(SETTINGS_FILE_PATH, std::ios::trunc);
+		json settingsdata;
+		settingsdata[SETTING_HUE_MIN] = hueMin;
+		settingsdata[SETTING_HUE_MAX] = hueMax;
+		settingsdata[SETTING_SATURATION_MIN] = saturationMin;
+		settingsdata[SETTING_SATURATION_MAX] = saturationMax;
+		settingsdata[SETTING_VALUE_MIN] = valueMin;
+		settingsdata[SETTING_VALUE_MAX] = valueMax;
+		const std::string jsonStr = settingsdata.dump().c_str();
+		settingsfile.write(jsonStr.c_str(), jsonStr.length());
+		settingsfile.close();
+	}
+};
+ 
+class ConfigUtils
+{
+public:
+	static int m_npreviousHueMin;
+	static int m_npreviousHueMax;
+	static int m_npreviousSaturationMin;
+	static int m_npreviousSaturationMax;
+	static int m_npreviousValueMin;
+	static int m_npreviousValueMax;
+	static bool configHasChanged(imgProc &imageProcessor)
+	{
+		if (m_npreviousHueMin != imageProcessor.getPVHueMin())
+		{
+			return true;
+		}
+		if (m_npreviousHueMax != imageProcessor.getPVHueMax())
+		{
+			return true;
+		}
+		if (m_npreviousSaturationMin != imageProcessor.getSaturationMin())
+		{
+			return true;
+		}
+		if (m_npreviousSaturationMax != imageProcessor.getSaturationMax())
+		{
+			return true;
+		}
+		if (m_npreviousValueMin != imageProcessor.getValueMin())
+		{
+			return true;
+		}
+		if (m_npreviousValueMax != imageProcessor.getValueMax())
+		{
+			return true;
+		}
+		return false;
+	}
+	static void triggerConfigLoad(imgProc &imageProcessor)
+	{
+		std::ifstream file(SETTINGS_FILE_PATH);
+		if (file.is_open())
+		{
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			std::string jsonConfig = buffer.str();
+			file.close();
+			imageProcessingFilterSettings config = imageProcessingFilterSettings(jsonConfig);
+			imageProcessor.setPVHueMin(config.hueMin);
+			imageProcessor.setPVHueMax(config.hueMax);
+			imageProcessor.setSaturationMin(config.saturationMin);
+			imageProcessor.setSaturationMax(config.saturationMax);
+			imageProcessor.setValueMin(config.valueMin);
+			imageProcessor.setValueMax(config.valueMax);
+			m_npreviousHueMin = config.hueMin;
+			m_npreviousHueMax = config.hueMax;
+			m_npreviousSaturationMin = config.saturationMin;
+			m_npreviousSaturationMax = config.saturationMax;
+			m_npreviousValueMin = config.valueMin;
+			m_npreviousValueMax = config.valueMax;
+		}
+	}
+	static void triggerConfigSave(imgProc &imageProcessor)
+	{
+		imageProcessingFilterSettings config = imageProcessingFilterSettings(imageProcessor.getPVHueMin(), imageProcessor.getPVHueMax(),
+																			 imageProcessor.getSaturationMin(), imageProcessor.getSaturationMax(), imageProcessor.getValueMin(), imageProcessor.getValueMax());
+		config.writeSettings();
+		m_npreviousHueMin = config.hueMin;
+		m_npreviousHueMax = config.hueMax;
+		m_npreviousSaturationMin = config.saturationMin;
+		m_npreviousSaturationMax = config.saturationMax;
+		m_npreviousValueMin = config.valueMin;
+		m_npreviousValueMax = config.valueMax;
+	}
+};
+ 
+int ConfigUtils::m_npreviousHueMin;
+int ConfigUtils::m_npreviousHueMax;
+int ConfigUtils::m_npreviousSaturationMin;
+int ConfigUtils::m_npreviousSaturationMax;
+int ConfigUtils::m_npreviousValueMin;
+int ConfigUtils::m_npreviousValueMax;
