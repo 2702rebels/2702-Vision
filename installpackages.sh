@@ -1,3 +1,4 @@
+sudo apt-get update
 sudo apt install -y libopencv-dev
 sudo apt install -y libcamera-dev
 sudo apt install -y build-essential
