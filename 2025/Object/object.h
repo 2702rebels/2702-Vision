@@ -1,3 +1,6 @@
+#include <networktables/NetworkTableInstance.h>
+#include <networktables/NetworkTable.h>
+#include <networktables/DoubleTopic.h>
 #pragma once
 
 #ifndef IMGPROC_GUI
@@ -12,6 +15,10 @@ class imgProc : public FrmProcessor
 	int			m_nHHigh = 180;
 	int			m_nSHigh = 255;
 	int			m_nVHigh = 255;
+
+	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
+	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("ObjectDetection/CoralDistance").Publish();
+	nt::DoublePublisher m_nLastCoralAngleTopic = m_nObjectDetectionNetTable->GetDoubleTopic("ObjectDetection/CoralAngle").Publish();
 
 	double		m_fCDiam = 0.1016;
 
@@ -141,7 +148,8 @@ public:
 		double dx = rect.center.x - camera_center.x;
 		double angle = std::atan2(dx, focal_length);
 		double angle_degrees = angle * 180.0 / CV_PI;
-
+		m_nLastCoralDistanceTopic.SetDefault(distance);
+		m_nLastCoralAngleTopic.SetDefault(angle);
 		return { distance, angle_degrees };
 	}
 
