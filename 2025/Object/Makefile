@@ -18,8 +18,8 @@ CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/ntcore/src/generated/main/native
 CXXFLAGS+=-I/home/2702robotics/wpilib/allwpilib/wpiutil/src/main/native/thirdparty/json/include/
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
-
-all: object replay
+LIBS+=-lntcore
+all: object replay nettableserver
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui $(LIBS)
@@ -28,6 +28,9 @@ replay: replay.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o replay replay.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
 
 #	$(CXX) $(CXXFLAGS) -o rpi-sample $(OBJS) -l2702 -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_calib3d -lpthread -lntcore -lcscore -lcameraserver -lwpiutil -lapriltag -lwpimath
+nettableserver: nettableserver.o ../../lib/lib2702.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o nettableserver nettableserver.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
 
 object.o: object.cpp object.h config.h
 replay.o: replay.cpp object.h config.h
+nettableserver.o: nettableserver.cpp
