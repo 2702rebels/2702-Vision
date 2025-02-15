@@ -1,6 +1,8 @@
+#pragma once
 #include <string>
 #include <span>
-#include <Struct.h>
+#include <wpi/struct/Struct.h>
+#include <vector>
 
 #define PACKET_KEY 5
 #define PACKET_KEY_SIZE 1
@@ -10,11 +12,13 @@
 class CoralDetection {
     public:
     CoralDetection(float distance, float angle, int quality);
+    CoralDetection();
     float m_distance;
     float m_angle;
     int m_quality;
-}
+};
 
+template <>
 struct wpi::Struct<CoralDetection> {
     static constexpr std::string_view GetTypeName(){return "CoralDetection";}
     static constexpr size_t GetSize(){return 9;}
@@ -25,27 +29,28 @@ struct wpi::Struct<CoralDetection> {
     static void Pack(std::span<uint8_t> data, const CoralDetection& value);
 };
 
-static_assert(StructSerializable<CoralDetection>);
+static_assert(wpi::StructSerializable<CoralDetection>);
 
 class ObjectDetectionPacket {
     public:
-    ObjectDetectionPacket(std::string key, long t, int versionNumber, int count, CoralDetection corals[4]);
-    long m_t;
+    ObjectDetectionPacket(int key, long t, int versionNumber, int count, std::array<CoralDetection, 4> corals);
+    long m_time;
     int m_count;
-    std::string m_key;
+    int m_key;
     int m_versionNumber;
-    CoralDetection m_corals[4];
-}
+    std::array<CoralDetection, 4> m_corals;
+};
 
+template <>
 struct wpi::Struct<ObjectDetectionPacket> {
     static constexpr std::string_view GetTypeName(){return "ObjectDetectionPacket";}
-    static constexpr size_t GetSize({return 4 * CoralDetection.GetSize() + 9 + 1 + 1 + 4;})
-    static constexpr std::string_view GetSchema({
+    static constexpr size_t GetSize(){return 4 * 9 + 9 + 1 + 1 + 4;}
+    static constexpr std::string_view GetSchema(){
         return "char[9] key;int versionNumber;long t;int count;CoralDetection[4] corals";
-    })
+    }
 
     static ObjectDetectionPacket Unpack(std::span<const uint8_t> data);
     static void Pack(std::span<uint8_t> data, const ObjectDetectionPacket& value);
-}
+};
 
-static_assert(StructSerializeable<ObjectDetectionPacket>);
+static_assert(wpi::StructSerializable<ObjectDetectionPacket>);
