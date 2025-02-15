@@ -19,7 +19,7 @@ CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/json/include/
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=-lntcore
-all: object replay nettableserver testnetworktablesclient
+all: udppackets object replay nettableserver testnetworktablesclient
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui $(LIBS)
@@ -38,3 +38,4 @@ object.o: object.cpp object.h config.h
 replay.o: replay.cpp object.h config.h
 nettableserver.o: nettableserver.cpp
 testnetworktablesclient.o: testnetworktablesclient.cpp
+udppackets.o: udppackets.cpp udppackets.h
