@@ -32,7 +32,7 @@ void sighandler(int nSig){
 
 void showHelp(){
     std::cout << "Valid commands are: \n" << "print - logs all current topic values\n" << "pushdist - push a new distance value\n"
-    << "pushangle - push a new angle value\n" << "stop - shuts the server down\n" << "help - displays this text\n";
+    << "pushangle - push a new angle value\n" << "stop - shuts the client down\n" << "help - displays this text\n";
 }
 
 void shutdown(){
@@ -71,7 +71,7 @@ int main( int argc, char **argv ){
     commandMap["pushangle"] = pushAngleValue;
     nt::NetworkTableInstance netTableManager = nt::NetworkTableInstance::GetDefault();
     netTableManager.StartClient4("testnettableclient");
-    netTableManager.SetServerTeam(2702);
+    netTableManager.SetServer("localhost", 5810U);
     auto objectDetectionTable = netTableManager.GetTable("ObjectDetection");
     hueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMin").Subscribe(0);
     hueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMax").Subscribe(0);
@@ -107,6 +107,7 @@ int main( int argc, char **argv ){
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(800));
     }
+    std::cout << "Exiting...\n";
     netTableManager.StopClient();
     return 0;
 }

@@ -43,7 +43,7 @@ void shutdown(){
 
 void printNetworkTableValues(){
     printf("Last received coral distance: %.6f\n",coralDistanceTopic.GetAtomic(0.0f).value);
-    printf("Last received coral angle: %.6f\n",coralDistanceTopic.GetAtomic(0.0f).value);
+    printf("Last received coral angle: %.6f\n",coralAngleTopic.GetAtomic(0.0f).value);
 }
 
 void pushHueMin(){
@@ -135,6 +135,7 @@ int main( int argc, char **argv ){
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
+    std::cout << "Exiting...\n";
     netTableManager.StopServer();
     return 0;
 }
