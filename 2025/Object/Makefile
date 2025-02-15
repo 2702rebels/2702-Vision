@@ -13,7 +13,7 @@ CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
-all: object replay nettableserver
+all: object replay nettableserver testnetworktablesclient
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui $(LIBS)
@@ -25,6 +25,10 @@ replay: replay.o ../../lib/lib2702.a
 nettableserver: nettableserver.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o nettableserver nettableserver.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
 
+testnetworktablesclient: testnetworktablesclient.o ../../lib/lib2702.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testnetworktablesclient testnetworktablesclient.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+
 object.o: object.cpp object.h config.h
 replay.o: replay.cpp object.h config.h
 nettableserver.o: nettableserver.cpp
+testnetworktablesclient.o: testnetworktablesclient.cpp
