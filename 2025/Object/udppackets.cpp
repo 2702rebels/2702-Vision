@@ -84,7 +84,3 @@ ObjectDetectionPacket::ObjectDetectionPacket(int key, long t, int versionNumber,
     m_count = count;
     m_corals = corals;
 }
-
-int main(int argc, char** argv){
-    return 0;
-}
