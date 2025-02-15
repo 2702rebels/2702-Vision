@@ -1,3 +1,8 @@
+*
+!*.*
+!2025/
+!Utilities/
+!lib/
 *.o
 *.a
 /Logs
@@ -5,3 +10,5 @@
 # Exclude persistent data from networktable server
 networktables.json
 allwpilib/
+*.o
+*.a
