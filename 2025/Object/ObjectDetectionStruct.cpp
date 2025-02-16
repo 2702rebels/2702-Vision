@@ -10,13 +10,13 @@ constexpr size_t distOff = 0;
 constexpr size_t angleOff = distOff + 4;
 constexpr size_t qualityOff = angleOff + 4;
 constexpr size_t keyOff = 0;
-constexpr size_t versionOff = keyOff + 1;
-constexpr size_t timeOff = versionOff + 1;
-constexpr size_t countOff = timeOff + 4;
-constexpr size_t coral1Off = countOff + 1;
-constexpr size_t coral2Off = coral1Off + 9;
-constexpr size_t coral3Off = coral2Off + 9;
-constexpr size_t coral4Off = coral3Off + 9;
+constexpr size_t versionOff = keyOff + 4;
+constexpr size_t timeOff = versionOff + 4;
+constexpr size_t countOff = timeOff + 8;
+constexpr size_t coral1Off = countOff + 4;
+constexpr size_t coral2Off = coral1Off + 12;
+constexpr size_t coral3Off = coral2Off + 12;
+constexpr size_t coral4Off = coral3Off + 12;
 }  // namespace
 
 CoralDetection::CoralDetection(float distance, float angle, int quality) : m_distance(distance), m_angle(angle), m_quality(quality){}
