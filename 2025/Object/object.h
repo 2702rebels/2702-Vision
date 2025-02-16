@@ -173,10 +173,9 @@ public:
 
 		double dx = rect.center.x - camera_center.x;
 		double angle = std::atan2(dx, focal_length);
-		double angle_degrees = angle * 180.0 / CV_PI;
 		m_nLastCoralDistanceTopic.SetDefault(distance);
 		m_nLastCoralAngleTopic.SetDefault(angle);
-		return { distance, angle_degrees, angle };
+		return { distance, angle };
 	}
 
 	std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> fit_cylinder_contour(const std::vector<cv::Point>& contour)
@@ -246,7 +245,7 @@ public:
 
             if (!fitted_contour.empty()) {
                 // Calculate distance and angle
-                auto [distance, angle, angleRads] = calculate_distance_and_angle(*largest_contour, m_focalLen, m_fCDiam, CAMERA_CENTER);
+                auto [distance, angle] = calculate_distance_and_angle(*largest_contour, m_focalLen, m_fCDiam, CAMERA_CENTER);
 
 #if (IMGPROC_GUI)
                 // Draw the fitted contour
@@ -260,7 +259,7 @@ public:
                 // Display distance and angle (only if valid values were calculated)
                 if (distance != -1.0 && angle != -1.0) {
                     std::string dist_text = "Distance: " + std::to_string(distance) + "m";
-                    std::string angle_text = "Angle: " + std::to_string(angle) + "deg";
+                    std::string angle_text = "Angle: " + std::to_string(angle) + "rad";
                     cv::putText(filtered_frame, dist_text, cv::Point(10, 60), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                     cv::putText(filtered_frame, angle_text, cv::Point(10, 90), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                 }
@@ -276,7 +275,7 @@ public:
 	
 				// Calculate delta between when frame was catured and now.
 				timersub( &tvCur, pcf->ts(), &tvDelta );
-				ObjectdetectionPacket packet(PACKET_KEY, PACKET_VERSION,nt::Now() - tvDelta.tv_usec, 1, ObjectDetectionInfo(distance, angleRads, 20, ObjectDetectionTypes.CORAL), ObjectDetectionInfo(), ObjectDetectionInfo(), ObjectDetectionInfo());
+				ObjectdetectionPacket packet(PACKET_KEY, PACKET_VERSION,nt::Now() - tvDelta.tv_usec, 1, ObjectDetectionInfo(distance, angle, 20, ObjectDetectionTypes.CORAL), ObjectDetectionInfo(), ObjectDetectionInfo(), ObjectDetectionInfo());
 				SendObjectDetectionPacket(packet);
             }
         }
