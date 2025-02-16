@@ -275,7 +275,7 @@ public:
 	
 				// Calculate delta between when frame was catured and now.
 				timersub( &tvCur, pcf->ts(), &tvDelta );
-				ObjectDetectionInfo coral1(distance, angle, 20, ObjectDetectionTypes.CORAL);
+				ObjectDetectionInfo coral1(distance, angle, 20, ObjectDetectionTypes::CORAL);
 				ObjectDetectionInfo coral2();
 				ObjectDetectionInfo coral3();
 				ObjectDetectionInfo coral4();
