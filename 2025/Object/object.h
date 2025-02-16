@@ -280,7 +280,7 @@ public:
 				ObjectDetectionInfo coral3 = ObjectDetectionInfo();
 				ObjectDetectionInfo coral4 = ObjectDetectionInfo();
 				long time = nt::Now() - tvDelta.tv_usec;
-				ObjectDetectionPacket packet = ObjectDetectionPacket(PACKET_KEY, PACKET_VERSION, time, 1, coral1, coral2, coral3, coral4);
+				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, 1, coral1, coral2, coral3, coral4);
 				SendObjectDetectionPacket(packet);
             }
         }
