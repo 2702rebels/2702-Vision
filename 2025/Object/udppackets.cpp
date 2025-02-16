@@ -8,8 +8,8 @@
 namespace
 {
     constexpr size_t coralDetectDistOff = 0;
-    constexpr size_t coralDetectAngleOff = coralDetectDistOff + 4;
-    constexpr size_t coralDetectQualityOff = coralDetectAngleOff + 4;
+    constexpr size_t coralDetectAngleOff = coralDetectDistOff + 8;
+    constexpr size_t coralDetectQualityOff = coralDetectAngleOff + 8;
     constexpr size_t packetKeyOff = 0;
     constexpr size_t versionNumberOff = packetKeyOff + PACKET_KEY_SIZE;
     constexpr size_t timeOff = versionNumberOff + 1;
@@ -28,7 +28,7 @@ CoralDetection StructTypeCoralDetection::Unpack(std::span<const uint8_t> data)
     return CoralDetection(
         wpi::UnpackStruct<float, coralDetectQualityOff>(data),
         wpi::UnpackStruct<float, coralDetectAngleOff>(data),
-        wpi::UnpackStruct<int, coralDetectQualityOff>(data));
+        wpi::UnpackStruct<uint8_t, coralDetectQualityOff>(data));
 }
 
 void StructTypeCoralDetection::Pack(std::span<uint8_t> data, const CoralDetection &value)
@@ -40,14 +40,18 @@ void StructTypeCoralDetection::Pack(std::span<uint8_t> data, const CoralDetectio
 
 ObjectDetectionPacket StructTypeObjectDetectionPacket::Unpack(std::span<const uint8_t> data)
 {
-    int key = wpi::UnpackStruct<int, packetKeyOff>(data);
-    int versionNumber = wpi::UnpackStruct<int, versionNumberOff>(data);
+    uint8_t key = wpi::UnpackStruct<uint8_t, packetKeyOff>(data);
+    uint8_t versionNumber = wpi::UnpackStruct<uint8_t, versionNumberOff>(data);
     std::array<CoralDetection, 4> corals;
     corals[0] = wpi::UnpackStruct<CoralDetection, detect1Off>(data);
     corals[1] = wpi::UnpackStruct<CoralDetection, detect2Off>(data);
     corals[2] = wpi::UnpackStruct<CoralDetection, detect3Off>(data);
     corals[3] = wpi::UnpackStruct<CoralDetection, detect4Off>(data);
-    return ObjectDetectionPacket(key, wpi::UnpackStruct<long, timeOff>(data), versionNumber, wpi::UnpackStruct<int, countOff>(data),
+    std::span<const uint8_t> subspan(data.begin() + timeOff, data.begin() + timeOff + 3);
+    std::cout << std::string(subspan.begin(), subspan.end()) << "\n";
+    long testTime;
+    memcpy(&testTime, subspan.data(), sizeof(subspan.data()));
+    return ObjectDetectionPacket(key, testTime, versionNumber, wpi::UnpackStruct<uint8_t, countOff>(data),
                                  corals);
 }
 
@@ -55,7 +59,11 @@ void StructTypeObjectDetectionPacket::Pack(std::span<uint8_t> data, const Object
 {
     wpi::PackStruct<packetKeyOff>(data, value.m_key);
     wpi::PackStruct<versionNumberOff>(data, value.m_versionNumber);
-    wpi::PackStruct<timeOff>(data, value.m_time);
+    // pack long
+    data[timeOff] = (int)((value.m_time >> 24) & 0xFF);
+    data[timeOff + 1] = (int)((value.m_time >> 16) & 0xFF);
+    data[timeOff + 2] = (int)((value.m_time >> 8) & 0XFF);
+    data[timeOff + 3] = (int)((value.m_time & 0XFF));
     wpi::PackStruct<countOff>(data, value.m_count);
     wpi::PackStruct<detect1Off>(data, value.m_corals[0]);
     wpi::PackStruct<detect2Off>(data, value.m_corals[1]);
