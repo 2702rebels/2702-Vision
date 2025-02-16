@@ -5,6 +5,10 @@
 #include <iostream>
 #include <vector>
 
+enum ObjectDetectionTypes {
+    CORAL
+};
+
 class ObjectDetectionInfo
 {
 public:
