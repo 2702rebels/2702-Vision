@@ -275,12 +275,12 @@ public:
 	
 				// Calculate delta between when frame was catured and now.
 				timersub( &tvCur, pcf->ts(), &tvDelta );
-				ObjectDetectionInfo coral1(distance, angle, 20, ObjectDetectionTypes::CORAL);
+				ObjectDetectionInfo coral1(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL);
 				ObjectDetectionInfo coral2();
 				ObjectDetectionInfo coral3();
 				ObjectDetectionInfo coral4();
 				long time = nt::Now() - tvDelta.tv_usec;
-				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, 1, coral1, coral2, coral3, coral4);
+				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, (uint8_t)1, coral1, coral2, coral3, coral4);
 				SendObjectDetectionPacket(packet);
             }
         }
