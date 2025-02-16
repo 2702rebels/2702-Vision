@@ -4,7 +4,9 @@ MAKEFLAGS := --jobs=$(shell nproc)
 #CXXFLAGS=-I/usr/local/include/opencv4
 CXXFLAGS+=$(shell pkg-config --cflags opencv4)
 CXXFLAGS+=$(shell pkg-config --cflags camera)
+CXXFLAGS+=$(shell pkg-config --cflags ../pkgconfig/ubuntu/wpilib.pc)
 CXXFLAGS+=-g
+LIBS+=$(shell pkg-config -libs ../pkgconfig/ubuntu/wpilib.pc)
 
 OBJS=VisLog.o Bayer2RGB.o 2702camera.o 2702math.o Bayer2Grey.o cammgr.o fbdisp.o LogPlayer.o
 
