@@ -31,6 +31,8 @@
 #include <networktables/IntegerTopic.h>
 #include <random>
 #include <cmath>
+#include <asio.hpp>
+using asio::ip::udp;
 
 using namespace std;
 

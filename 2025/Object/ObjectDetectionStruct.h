@@ -5,6 +5,9 @@
 #include <iostream>
 #include <vector>
 
+#define PACKET_KEY 5
+#define PACKET_VERSION 1
+
 enum ObjectDetectionTypes {
     CORAL
 };

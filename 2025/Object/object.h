@@ -1,11 +1,21 @@
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/DoubleTopic.h>
+#include <asio.hpp>
+using asio::ip::udp;
+#include <sys/time.h>
+#include "ObjectDetectionStruct.h"
+#include "ObjectDetectionStruct.cpp"
 #pragma once
 
 #ifndef IMGPROC_GUI
 #define IMGPROC_GUI	0
 #endif
+#define OBJECT_DETECTION_SERVER_IP "127.0.0.1"
+#define OBJECT_DETECTION_SERVER_PORT "6666"
+
+using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
+using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 class imgProc : public FrmProcessor
 {
@@ -31,6 +41,9 @@ class imgProc : public FrmProcessor
 	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.1164723784381825, 0.5948511019477938, 0.0178130457349927, -0.03413649680380905, -1.650075067124663);
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
+
+	udp::socket m_objectDetectionDataSocket;
+	udp::endpoint m_objectDetectionEndpoint;
 	
 public:
 	imgProc() :
@@ -42,6 +55,11 @@ public:
     std::cout << "Camera Matrix: " << mtx << endl;
     std::cout << "Focal Length Coefficients: " << mtx.at<float>(0,0) << "    " << mtx.at<float>(1,2) << endl;
     std::cout << "Focal Length: " << m_focalLen << endl;
+	asio::io_context io_context;
+	udp::resolver resolver(io_context);
+	m_objectDetectionEndpoint = *resolver.resolve(udp::v4(), OBJECT_DETECTION_SERVER_IP, OBJECT_DETECTION_SERVER_PORT).begin();
+	m_objectDetectionDataSocket = udp::socket(io_context);
+	m_objectDetectionDataSocket.open(udp::v4());
 #if (IMGPROC_GUI)
 		cv::namedWindow("Filtered Video");
 
@@ -111,6 +129,14 @@ public:
 	{
 
 	}
+
+	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
+		std::vector<uint8_t> bytesVec(89);
+		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
+		ObjectDetectionPacketStructType::Pack(bytes, packet);
+		m_objectDetectionDataSocket.send_to(asio::buffer(bytes), m_objectDetectionEndpoint);
+	}
+
 	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
 	{
 		cv::Mat hsv, mask;
@@ -150,7 +176,7 @@ public:
 		double angle_degrees = angle * 180.0 / CV_PI;
 		m_nLastCoralDistanceTopic.SetDefault(distance);
 		m_nLastCoralAngleTopic.SetDefault(angle);
-		return { distance, angle_degrees };
+		return { distance, angle_degrees, angle };
 	}
 
 	std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> fit_cylinder_contour(const std::vector<cv::Point>& contour)
@@ -220,7 +246,7 @@ public:
 
             if (!fitted_contour.empty()) {
                 // Calculate distance and angle
-                auto [distance, angle] = calculate_distance_and_angle(*largest_contour, m_focalLen, m_fCDiam, CAMERA_CENTER);
+                auto [distance, angle, angleRads] = calculate_distance_and_angle(*largest_contour, m_focalLen, m_fCDiam, CAMERA_CENTER);
 
 #if (IMGPROC_GUI)
                 // Draw the fitted contour
@@ -240,6 +266,18 @@ public:
                 }
 #endif
 				printf( "%.3f   %.3f\n", distance, angle );
+				struct timespec tsCur;
+				struct timeval tvCur;
+				struct timeval tvDelta;
+	
+				// Get current time since power on
+				clock_gettime(CLOCK_MONOTONIC, &tsCur );
+				TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
+	
+				// Calculate delta between when frame was catured and now.
+				timersub( &tvCur, pcf->ts(), &tvDelta );
+				ObjectdetectionPacket packet(PACKET_KEY, PACKET_VERSION,nt::Now() - tvDelta.tv_usec, 1, ObjectDetectionInfo(distance, angleRads, 20, ObjectDetectionTypes.CORAL), ObjectDetectionInfo(), ObjectDetectionInfo(), ObjectDetectionInfo());
+				SendObjectDetectionPacket(packet);
             }
         }
 
