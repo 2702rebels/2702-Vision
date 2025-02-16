@@ -16,6 +16,7 @@ CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/llvm/include/
 CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/fmtlib/include/
 CXXFLAGS+=-I../../allwpilib/ntcore/src/generated/main/native/include/
 CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/json/include/
+CXXFLAGS+=-I../../allwpilib/wpinet/src/main/native/include/
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=-lntcore
