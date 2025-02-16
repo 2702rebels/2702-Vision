@@ -7,7 +7,7 @@
 #include <asio.hpp> // Include asio
 
 #define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 27021
+#define SERVER_PORT "27021"
 #define PI_IP "192.168.1.173"
 #define OLEG_IP "192.168.1.142"
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
