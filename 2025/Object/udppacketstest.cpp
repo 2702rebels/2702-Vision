@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <asio.hpp> // Include asio
 
+#include "config.h"
+
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT "27021"
 #define PI_IP "192.168.1.173"
@@ -34,17 +36,20 @@ void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::s
         ObjectDetectionPacketStructType::Pack(packetBytes, packet);
 
         socket.send_to(asio::buffer(send_buf), receiver_endpoint);
-
-        std::cout << "Packet sent to " << host << ":" << port << std::endl; //TODO Add debug flag to disable
-    
+        #ifdef Debug_Flag
+        std::cout << "Packet sent to " << host << ":" << port << std::endl;
+        #endif
     //ensuring that if the packet doesn't send correctly the code will not crash
     } catch (std::exception& e) {
-        std::cerr << "Exception in sendObjectDetectionPacket: " << e.what() << std::endl; //TODO Add debug flag to disable
+        #ifdef Debug_Flag
+        std::cerr << "Exception in sendObjectDetectionPacket: " << e.what() << std::endl;
+        #endif
     }
 }
 
 int main( int argc, char **argv ){
-    std::cout << "test123\n"; // TODO remove once we're done with bug fixing
+    #ifdef Debug_Flag
+    std::cout << "test123\n"; 
 
     ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 1); //TODO Merge with object detection to get non-test data
     ObjectDetectionInfo coral2 = ObjectDetectionInfo(50.2f, 24.3f, 15, 1);
@@ -107,6 +112,7 @@ int main( int argc, char **argv ){
         std::cout << "packet test failed :C" << "\n";
     }
     //Debug flag ends here
+    #endif
 
     sendObjectDetectionPacket(packet, OLEG_IP, SERVER_PORT); //Mandatory - Telling the code to go send the thing
 } 

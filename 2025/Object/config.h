@@ -6,7 +6,10 @@
 #define SETTING_VALUE_MAX "valMax"
 #define SETTINGS_FILE_PATH "./processorSettings.txt"
 #include <nlohmann/json.hpp>
- 
+
+//setting up debug Variable. comment out if not debugging.
+#define Debug_Flag
+
 using json = nlohmann::json;
  
 class imageProcessingFilterSettings
