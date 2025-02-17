@@ -8,9 +8,10 @@ CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 CXXFLAGS+=$(shell pkg-config --cflags libcamera )
+CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
-
+LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
 all: object replay
 
 object: $(OBJS) ../../lib/lib2702.a
