@@ -41,17 +41,19 @@ bool bStop = false;
 #include "object.h"
 #include "config.h"
 
-#define USE_NETWORK_TABLES 1
+#define USE_NETWORK_TABLES 1 //TODO Move into a header so it can be accessed globally
 
 void sighandler( int nSig )
 {
-	printf( "Received Signal %d\n", nSig );
+	printf( "Received Signal %d\n", nSig ); //TODO set into a debug flag
 	bStop = true;
 }
 
 int main( int argc, char **argv )
 {
 	signal( SIGINT, sighandler );
+	//TODO Set up a flag instead of just voiding the code?
+	//Setting up a window for testing purposes
 #if 0
 	char szImgName[100];
 	sprintf( szImgName, "Testing" );
@@ -75,7 +77,7 @@ int main( int argc, char **argv )
 		nt::IntegerSubscriber valueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMax").Subscribe(0);
 		networkTableManager.StartClient4("networkTableClient");
 		networkTableManager.SetServerTeam(2702);
-		#if false
+		#if false //TODO Set up a flag instead of just voiding the code?
 		networkTableManager.StartDSClient(); // Should only be run on actual robot
 		#endif
 		#endif
@@ -111,7 +113,7 @@ int main( int argc, char **argv )
 		}
 	}
 	catch (std::exception &e) {
-		printf( "Exception: %s\n", e.what() );
+		printf( "Exception: %s\n", e.what() ); //TODO Set up debug flagging
 	}
 
 	return 0;
