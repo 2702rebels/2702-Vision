@@ -9,16 +9,10 @@ CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 CXXFLAGS+=$(shell pkg-config --cflags libcamera )
-CXXFLAGS+=-I../../allwpilib/ntcore/src/main/native/include/
-CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/include/
-CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/nanopb/include/
-CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/llvm/include/
-CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/fmtlib/include/
-CXXFLAGS+=-I../../allwpilib/ntcore/src/generated/main/native/include/
-CXXFLAGS+=-I../../allwpilib/wpiutil/src/main/native/thirdparty/json/include/
-CXXFLAGS+=-I../../allwpilib/wpinet/src/main/native/include/
+CXXFLAGS+=$(shell pkg-config --cflags wpilib )
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
+LIBS+=$(shell pkg-config -libs )
 LIBS+=-lntcore
 all: object replay nettableserver testnetworktablesclient udppacketstest
 
