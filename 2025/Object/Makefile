@@ -24,3 +24,6 @@ replay: replay.o ../../lib/lib2702.a
 
 object.o: object.cpp object.h config.h
 replay.o: replay.cpp object.h config.h
+
+clean:
+	rm -f *.o object replay
