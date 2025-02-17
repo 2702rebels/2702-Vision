@@ -1,7 +1,4 @@
-*
-!*.*
-!Utilities/
-!lib/
+
 *.o
 *.a
 /Logs

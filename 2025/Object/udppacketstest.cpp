@@ -41,22 +41,23 @@ void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::s
         #endif
     //ensuring that if the packet doesn't send correctly the code will not crash
     } catch (std::exception& e) {
-        #ifdef Debug_Flag
+        #ifdef Debug_Flag //TODO: Change to #if
         std::cerr << "Exception in sendObjectDetectionPacket: " << e.what() << std::endl;
         #endif
     }
 }
 
 int main( int argc, char **argv ){
-    #ifdef Debug_Flag
+    #ifdef Debug_Flag //TODO: Change to #if
     std::cout << "test123\n"; 
+    #endif
 
     ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 1); //TODO Merge with object detection to get non-test data
     ObjectDetectionInfo coral2 = ObjectDetectionInfo(50.2f, 24.3f, 15, 1);
 
-    std::cout << "initialized detects successfully\n"; //TODO Add debug flag to disable
+    #ifdef Debug_Flag //TODO: Change to #if
+    std::cout << "initialized detects successfully\n"; 
 
-    //TODO add debug flag for test seralization and deserialization (from line below to next comment)
     std::vector<uint8_t> coralBytesVec(1000); 
     std::span<uint8_t> coralBytes(coralBytesVec.data(), coralBytesVec.size());
     StructTypeObjectDetectionInfo::Pack(coralBytes, coral1);
@@ -80,7 +81,6 @@ int main( int argc, char **argv ){
     ObjectDetectionPacket unpackedPacket = StructTypeObjectDetectionPacket::Unpack(packetBytes);
     //End of debugging flag for serialization
 
-    //TODO Debug flag for all values we're printing simply to check if we get the right ones
     std::cout << "unpacked properties:" << "\n"; 
     std::cout << "key: " << unpackedPacket.m_key << "\n";
     std::cout << "version: " << unpackedPacket.m_versionNumber << "\n";
@@ -102,9 +102,7 @@ int main( int argc, char **argv ){
     std::cout << "angle4: " << unpackedPacket.m_coral4.m_angle << "\n";
     std::cout << "quality4: " << unpackedPacket.m_coral4.m_quality << "\n";
     std::cout << "type4: " << unpackedPacket.m_coral4.m_type << "\n";
-    //to here
 
-    //TODO Debug flag this code so we can check if the packet test worked
     if(unpackedPacket.m_key == packet.m_key && unpackedPacket.m_count == packet.m_count && unpackedPacket.m_time == packet.m_time && unpackedPacket.m_versionNumber == packet.m_versionNumber && unpackedPacket.m_coral1.m_distance == packet.m_coral1.m_distance && unpackedPacket.m_coral1.m_angle == packet.m_coral1.m_angle && unpackedPacket.m_coral1.m_quality == packet.m_coral1.m_quality && unpackedPacket.m_coral2.m_distance == packet.m_coral2.m_distance && unpackedPacket.m_coral2.m_angle == packet.m_coral2.m_angle && unpackedPacket.m_coral2.m_quality == packet.m_coral2.m_quality && unpackedPacket.m_coral3.m_distance == packet.m_coral3.m_distance && unpackedPacket.m_coral3.m_angle == packet.m_coral3.m_angle && unpackedPacket.m_coral3.m_quality == packet.m_coral3.m_quality && unpackedPacket.m_coral4.m_distance == packet.m_coral4.m_distance && unpackedPacket.m_coral4.m_angle == packet.m_coral4.m_angle && unpackedPacket.m_coral4.m_quality == packet.m_coral4.m_quality && unpackedPacket.m_coral1.m_type == packet.m_coral1.m_type && unpackedPacket.m_coral2.m_type == packet.m_coral2.m_type && unpackedPacket.m_coral3.m_type == packet.m_coral3.m_type && unpackedPacket.m_coral4.m_type == packet.m_coral4.m_type){
         std::cout << "packet serialized and deserialized successfully" << "\n"; /
     }
