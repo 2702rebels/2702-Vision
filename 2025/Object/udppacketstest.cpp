@@ -1,3 +1,12 @@
+/*
+This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet
+to an IP
+Depends on:
+- asio(UDP client library)
+- ObjectDetectionStruct.h and ObjectDetectionStruct.h
+*/
+
+
 #include <iostream>
 #include "ObjectDetectionStruct.h"
 #include "ObjectDetectionStruct.cpp"
@@ -13,7 +22,7 @@ using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 using asio::ip::udp;
 
-// Function to send the ObjectDetectionPacket
+/* Serialize and send an object detection packet */
 void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::string& host, const std::string& port) {
     try {
         asio::io_context io_context;
@@ -41,9 +50,11 @@ void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::s
 
 int main( int argc, char **argv ){
     std::cout << "test123\n";
-    ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 1);
-    ObjectDetectionInfo coral2 = ObjectDetectionInfo(50.2f, 24.3f, 15, 1);
+    // Create object detections with testing data
+    ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 0);
+    ObjectDetectionInfo coral2 = ObjectDetectionInfo(50.2f, 24.3f, 15, 0);
     std::cout << "initialized detects successfully\n";
+    // Initialize a span with a 1000 byte length(this should be compressed in production code), filled with 0s by default
     std::vector<uint8_t> coralBytesVec(1000);
     std::span<uint8_t> coralBytes(coralBytesVec.data(), coralBytesVec.size());
     StructTypeObjectDetectionInfo::Pack(coralBytes, coral1);
@@ -58,8 +69,10 @@ int main( int argc, char **argv ){
     else{
         std::cout << "coral is sad :C" << "\n";
     }
+    // Initialize a 1000-byte span, should be condensed in production code, filled with 0s by default
     std::vector<uint8_t> packetBytesVec(1000);
     std::span<uint8_t> packetBytes(packetBytesVec.data(), packetBytesVec.size());
+    // Create a testing packet
     ObjectDetectionPacket packet(5, 1, 123123L, 2, coral1, coral2, ObjectDetectionInfo(), ObjectDetectionInfo());
     StructTypeObjectDetectionPacket::Pack(packetBytes, packet);
     ObjectDetectionPacket unpackedPacket = StructTypeObjectDetectionPacket::Unpack(packetBytes);
