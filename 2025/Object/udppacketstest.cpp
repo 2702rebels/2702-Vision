@@ -15,8 +15,6 @@
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT "27021"
-#define PI_IP "192.168.1.173"
-#define OLEG_IP "192.168.1.142"
 // This is the structure types where the serialization and deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
@@ -110,5 +108,5 @@ int main( int argc, char **argv ){
     else{
         std::cout << "packet test failed :C" << "\n";
     }
-    sendObjectDetectionPacket(packet, OLEG_IP, SERVER_PORT);
+    sendObjectDetectionPacket(packet, SERVER_IP, SERVER_PORT);
 }
