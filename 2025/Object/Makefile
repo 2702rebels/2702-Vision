@@ -2,6 +2,7 @@ MAKEFLAGS := --jobs=$(shell nproc)
 #MAKEFLAGS +=--output-sync=target
 
 OBJS=object.o
+CXXFLAGS+=--std=c++20
 CXXFLAGS+=-I../../lib 
 CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
