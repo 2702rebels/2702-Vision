@@ -1,8 +1,8 @@
 /* Contains the object detection image processing classes. Main is located in object.cpp
-Depends on:
-- wpilib ntcore
-- ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
-- asio(UDP client library)*/
+* Depends on:
+* - wpilib ntcore
+* - ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
+* - asio(UDP client library)*/
 
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
@@ -17,10 +17,8 @@ using asio::ip::udp;
 #ifndef IMGPROC_GUI
 #define IMGPROC_GUI	0
 #endif
-// UDP address to send object detection packets to
-#define OBJECT_DETECTION_SERVER_IP "127.0.0.1"
-// UDP port to send object detection packets to
-#define OBJECT_DETECTION_SERVER_PORT "6666"
+#define OBJECT_DETECTION_SERVER_IP "127.0.0.1" // UDP address to send object detection packets to
+#define OBJECT_DETECTION_SERVER_PORT "6666" // UDP port to send object detection packets to
 
 // Structure classes where the serialization / deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
@@ -80,74 +78,98 @@ public:
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
 	}
-	/* Sets hue min object detection parameter 
-	@param newValue - integer representing the new hue min value*/
+	/* 
+	* Sets hue min object detection parameter 
+	* \param newValue - integer representing the new hue min value
+	*/
 	virtual void setPVHueMin(int newValue)
 	{
 		m_nHLow = newValue;
 		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
 	}
-	/* Sets hue max object detection parameter
-	@param newValue - integer representing the new hue max value*/
+	/* 
+	* Sets hue max object detection parameter
+	* \param newValue - integer representing the new hue max value
+	*/
 	virtual void setPVHueMax(int newValue)
 	{
 		m_nHHigh = newValue;
 		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
 	}
-	/* Sets saturation min object detection parameter
-	@param newValue - integer representing the new saturation min value*/
+	/* 
+	* Sets saturation min object detection parameter
+	* \param newValue - integer representing the new saturation min value
+	*/
 	virtual void setSaturationMin(int newValue)
 	{
 		m_nSLow = newValue;
 		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
 	}
-	/* Sets saturation max object detection parameter
-	@param newValue - integer representing the new saturation max value*/
+	/* 
+	* Sets saturation max object detection parameter
+	* \param newValue - integer representing the new saturation max value
+	*/
 	virtual void setSaturationMax(int newValue)
 	{
 		m_nSHigh = newValue;
 		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
 	}
-	/* Sets value min object detection parameter
-	@param newValue - integer representing the new value min value*/
+	/* 
+	* Sets value min object detection parameter
+	* \param newValue - integer representing the new value min value
+	*/
 	virtual void setValueMin(int newValue)
 	{
 		m_nVLow = newValue;
 		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
 	}
-	/* Sets value max object detection parameter
-	@param newValue - integer representing the new value max value*/
+	/* 
+	* Sets value max object detection parameter
+	* \param newValue - integer representing the new value max value
+	*/
 	virtual void setValueMax(int newValue)
 	{
 		m_nVHigh = newValue;
 		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
 	}
-	/* Returns the hue min object detection parameter */
+	/* 
+	* Returns the hue min object detection parameter 
+	*/
 	virtual int getPVHueMin() const
 	{
 		return m_nHLow;
 	}
-	/* Returns the hue max object detection parameter */
+	/* 
+	* Returns the hue max object detection parameter 
+	*/
 	virtual int getPVHueMax() const
 	{
 		return m_nHHigh;
 	}
-	/* Returns the saturation min object detection parameter */
+	/* 
+	* Returns the saturation min object detection parameter 
+	*/
 	virtual int getSaturationMin() const
 	{
 		return m_nSLow;
 	}
-	/* Returns the saturation max object detection parameter */
+	/* 
+	* Returns the saturation max object detection parameter 
+	*/
 	virtual int getSaturationMax() const
 	{
 		return m_nSHigh;
 	}
-	/* Returns the value min object detection parameter */
+	/* 
+	* Returns the value min object detection parameter 
+	*/
 	virtual int getValueMin() const
 	{
 		return m_nVLow;
 	}
-	/* Returns the value max object detection parameter */
+	/* 
+	* Returns the value max object detection parameter 
+	*/
 	virtual int getValueMax() const
 	{
 		return m_nVHigh;
@@ -157,8 +179,10 @@ public:
 
 	}
 
-	/* Sends an object detection packet
-	@param packet - The @link ObjectDetectionPacket to send*/
+	/* 
+	* Sends an object detection packet
+	* \param packet - The @link ObjectDetectionPacket to send
+	*/
 	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
 		std::vector<uint8_t> bytesVec(89);
 		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
@@ -190,7 +214,9 @@ public:
 		return mask;
 	}
 	
-	/* Returns object distance from the camera in meters and the object angle from the camera in radians*/
+	/* 
+	* Returns object distance from the camera in meters and the object angle from the camera in radians
+	*/
 	std::pair<double, double> calculate_distance_and_angle(const std::vector<cv::Point>& contour, double focal_length, double actual_diameter, const cv::Point2d& camera_center)
 	{
 		if (contour.size() < 5) {

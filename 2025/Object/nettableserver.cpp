@@ -1,8 +1,8 @@
 /*
-    This is a program that acts as a network table server to receive and send object detection data
-    for testing purposes. 
-    Depends on: 
-    - wpilib's ntcore
+ *   This is a program that acts as a network table server to receive and send object detection data
+ *   for testing purposes. 
+ *   Depends on: 
+ *   - wpilib's ntcore
 */
 
 // TODO, some of this should be converted to a class so it can be better documented

@@ -1,8 +1,8 @@
 /*
-This is a program that acts as a network tables client to test sending values to a server for debugging purposes. Can also print out
-object detection parameters that are received from the server.
-Depends on:
-- wpilib ntcore
+* This is a program that acts as a network tables client to test sending values to a server for debugging purposes. Can also print out
+* object detection parameters that are received from the server.
+* Depends on:
+* - wpilib ntcore
 */
 
 #include <iostream>

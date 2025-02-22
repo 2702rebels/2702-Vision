@@ -1,9 +1,9 @@
 /*
-This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet
-to an IP
-Depends on:
-- asio(UDP client library)
-- ObjectDetectionStruct.h and ObjectDetectionStruct.h
+* This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet
+* to an IP
+* Depends on:
+* - asio(UDP client library)
+* - ObjectDetectionStruct.h and ObjectDetectionStruct.h
 */
 
 
