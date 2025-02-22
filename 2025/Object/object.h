@@ -61,9 +61,9 @@ class imgProc : public FrmProcessor
    	cv::Point2d CAMERA_CENTER;
 
 	/*! \brief UDP endpoint to send object detection data packets to. */
-	udp::endpoint m_objectDetectionEndpoint;
+	udp::endpoint *m_objectDetectionEndpoint;
 	/*! \brief Socket through which object detection data packets are sent. */
-	udp::socket m_objectDetectionDataSocket;
+	udp::socket *m_objectDetectionDataSocket;
 	
 public:
 	imgProc() :
@@ -86,10 +86,14 @@ public:
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
 		asio::io_context io_context;
+
 		udp::resolver resolver(io_context);
-		m_objectDetectionEndpoint = *resolver.resolve(udp::v4(), OBJECT_DETECTION_SERVER_IP, OBJECT_DETECTION_SERVER_PORT).begin();
-		m_objectDetectionDataSocket = udp::socket(io_context);
-		m_objectDetectionDataSocket.open(udp::v4());
+		udp::endpoint receiver_endpoint = *resolver.resolve(udp::v4(), OBJECT_DETECTION_SERVER_IP, OBJECT_DETECTION_SERVER_PORT).begin();
+
+		udp::socket socket(io_context);
+		socket.open(udp::v4());
+		m_objectDetectionDataSocket = &socket;
+		m_objectDetectionEndpoint = &receiver_endpoint;
 	}
 	/*! 
 	* \brief Sets hue min object detection parameter. 
@@ -199,7 +203,7 @@ public:
 		std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
 		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
 		ObjectDetectionPacketStructType::Pack(bytes, packet);
-		m_objectDetectionDataSocket.send_to(asio::buffer(bytes), m_objectDetectionEndpoint);
+		m_objectDetectionDataSocket->send_to(asio::buffer(bytes), *m_objectDetectionEndpoint);
 	}
 
 	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
