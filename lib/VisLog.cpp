@@ -9,7 +9,10 @@ using namespace std;
 #include <opencv2/imgcodecs.hpp>
 #include "VisLog.h"
 
-
+/*! \brief Creates a VisionLog from a logfile path and write spec. 
+* \param psz - The path of the logfile to load or write to. 
+* \param bWrite - Whether we are writing or loading the logfile. 
+*/
 VisionLog::VisionLog( char const *psz, bool bWrite ) 
 {
 	m_bWrite = bWrite;
@@ -31,7 +34,7 @@ int32_t VisionLog::i32ReadVal()
 	return atoi( str.c_str() );
 }
 
-// returns sequence #
+/*! \brief Returns the sequence number of the frame. */
 int32_t VisionLog::i32ReadNext( cv::Mat &img, int &nExp )
 {
 	if( m_bWrite )
@@ -84,6 +87,9 @@ int32_t VisionLog::i32ReadNext( cv::Mat &img, int &nExp )
 	return -1;
 }
 
+/*! \brief Rewinds the video playback to the start. 
+* \returns true if successful, false if not. 
+*/
 bool VisionLog::bRewind()
 {
 	m_fs.clear();
@@ -107,7 +113,11 @@ static std::string strPrintf( char const *psz, ... )
 	return std::string(szTmp);
 }
 
-
+/*! \brief Writes a frame to the logfile in raw format. 
+* \param img - The openCV material containing the frames. 
+* \param u32Seq - The sequence number of the frame to write. 
+* \param u32Exp - The exposure used to process the frame. 
+*/
 bool VisionLog::bWriteRaw( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp )
 {
 	std::unique_lock<std::mutex> l( m_mtx );
@@ -118,6 +128,12 @@ bool VisionLog::bWriteRaw( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp 
 	return m_fs.failbit ? false : true;
 }
 
+/*! \brief Writes a frame to the logfile in png format.
+* \param img - The openCV material containing the frames.
+* \param u32Seq - The frame number of the frame to write.
+* \param u32Exp - The exposure used to process the frame.
+* \returns true if successful, false if not.
+*/
 bool VisionLog::bWritePNG( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp )
 {
 	std::unique_lock<std::mutex> l( m_mtx );

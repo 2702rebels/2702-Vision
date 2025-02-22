@@ -12,6 +12,11 @@ using namespace cv;
 
 
 // MatGrey must be initialized to same size as matBayer and must be of type CV_8UC1
+/*! 
+* \brief MatGrey must be initialized to same size as matBayer and must be of type CV_8UC1. 
+* \param matGrey - The grayscale material that will be written with the result of the conversion. 
+* \param matBayer - The bayer material to convert to the grayscale material. 
+*/
 void Bayer2Grey( Mat &matGrey, Mat &matBayer )
 {
 	int nRows = matBayer.rows;
@@ -122,6 +127,10 @@ void Bayer2Grey( Mat &matGrey, Mat &matBayer )
 }
 
 // MatGrey must be initialized to same size as matBayer and must be of type CV_8UC1
+/*! \brief Converts a bayer material to a half grayscale material. 
+* \param matGrey - Must be initialized to the same size as matBayer and must be of type CV_8UC1, will be written as the result of the conversion.
+* \param matBayer - The bayer material to convert to the half grayscale material. 
+*/
 void Bayer2HalfGrey( Mat &matGrey, Mat const &matBayer )
 {
 	assert( (matGrey.cols & 0x7) == 0 );
