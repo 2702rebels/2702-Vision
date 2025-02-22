@@ -110,4 +110,4 @@ struct wpi::Struct<ObjectDetectionPacket>
 
 // Checks that the object detection packet is serializable
 static_assert(wpi::StructSerializable<ObjectDetectionPacket>);
-static_assert(wpi::HasNestedStruct<ObjectDetectionInfo>);
+static_assert(wpi::HasNestedStruct<ObjectDetectionPacket>);
