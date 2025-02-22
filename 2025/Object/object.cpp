@@ -1,3 +1,13 @@
+/* Main for object detection. Cannot be run in a desktop testing environment. Uses NetworkTables to update object detection config at runtime.
+Depends on: 
+- opencv
+- rpicam
+- wpilib ntcore
+- asio(UDP client library)
+- object.h
+- config.h
+*/
+
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/stat.h>
@@ -46,6 +56,8 @@ bool bStop = false;
 #define USE_NETWORK_TABLES 1
 #define IS_ROBOT 0
 
+/* Handles Ctrl+C interrupts
+@param nSig - Should always be equal to @link SIGINT*/
 void sighandler( int nSig )
 {
 	printf( "Received Signal %d\n", nSig );

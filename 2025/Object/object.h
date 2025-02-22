@@ -1,3 +1,9 @@
+/* Contains the object detection image processing classes. Main is located in object.cpp
+Depends on:
+- wpilib ntcore
+- ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
+- asio(UDP client library)*/
+
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/DoubleTopic.h>
@@ -11,20 +17,23 @@ using asio::ip::udp;
 #ifndef IMGPROC_GUI
 #define IMGPROC_GUI	0
 #endif
+// UDP address to send object detection packets to
 #define OBJECT_DETECTION_SERVER_IP "127.0.0.1"
+// UDP port to send object detection packets to
 #define OBJECT_DETECTION_SERVER_PORT "6666"
 
+// Structure classes where the serialization / deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 class imgProc : public FrmProcessor
 {
-	int			m_nHLow = 179;
-	int			m_nSLow = 0;
-	int			m_nVLow = 147;
-	int			m_nHHigh = 180;
-	int			m_nSHigh = 255;
-	int			m_nVHigh = 255;
+	int			m_nHLow = 179; // Hue min
+	int			m_nSLow = 0; // Saturation min
+	int			m_nVLow = 147; // Value min
+	int			m_nHHigh = 180; // Hue max
+	int			m_nSHigh = 255; // Saturation max
+	int			m_nVHigh = 255; // Value max
 
 	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
 	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("ObjectDetection/CoralDistance").Publish();
@@ -36,14 +45,14 @@ class imgProc : public FrmProcessor
 	
 	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 888.7765991141953, 0, 304.4048631642603,
 0, 892.4756367000551, 370.9657053548069,
-0, 0, 1);
+0, 0, 1); // Camera calibration matrix
 
-	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.1164723784381825, 0.5948511019477938, 0.0178130457349927, -0.03413649680380905, -1.650075067124663);
-	double		 m_focalLen;
+	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.1164723784381825, 0.5948511019477938, 0.0178130457349927, -0.03413649680380905, -1.650075067124663); // Camera distortion coefficients
+	double		 m_focalLen; // Focal length of camera
    	cv::Point2d CAMERA_CENTER;
 
-	udp::socket m_objectDetectionDataSocket;
-	udp::endpoint m_objectDetectionEndpoint;
+	udp::socket m_objectDetectionDataSocket; // UDP socket for object detection data packets
+	udp::endpoint m_objectDetectionEndpoint; // UDP endpoint for object detection data packets, created from @link OBJECT_DETECTION_SERVER_IP and @link OBJECT_DETECTION_SERVER_PORT
 	
 public:
 	imgProc() :
@@ -56,7 +65,7 @@ public:
     std::cout << "Focal Length Coefficients: " << mtx.at<float>(0,0) << "    " << mtx.at<float>(1,2) << endl;
     std::cout << "Focal Length: " << m_focalLen << endl;
 	asio::io_context io_context;
-	udp::resolver resolver(io_context);
+	udp::resolver resolver(io_context); // UDP DNS resolver
 	m_objectDetectionEndpoint = *resolver.resolve(udp::v4(), OBJECT_DETECTION_SERVER_IP, OBJECT_DETECTION_SERVER_PORT).begin();
 	m_objectDetectionDataSocket = udp::socket(io_context);
 	m_objectDetectionDataSocket.open(udp::v4());
@@ -71,56 +80,74 @@ public:
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
 	}
+	/* Sets hue min object detection parameter 
+	@param newValue - integer representing the new hue min value*/
 	virtual void setPVHueMin(int newValue)
 	{
 		m_nHLow = newValue;
 		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
 	}
+	/* Sets hue max object detection parameter
+	@param newValue - integer representing the new hue max value*/
 	virtual void setPVHueMax(int newValue)
 	{
 		m_nHHigh = newValue;
 		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
 	}
+	/* Sets saturation min object detection parameter
+	@param newValue - integer representing the new saturation min value*/
 	virtual void setSaturationMin(int newValue)
 	{
 		m_nSLow = newValue;
 		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
 	}
+	/* Sets saturation max object detection parameter
+	@param newValue - integer representing the new saturation max value*/
 	virtual void setSaturationMax(int newValue)
 	{
 		m_nSHigh = newValue;
 		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
 	}
+	/* Sets value min object detection parameter
+	@param newValue - integer representing the new value min value*/
 	virtual void setValueMin(int newValue)
 	{
 		m_nVLow = newValue;
 		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
 	}
+	/* Sets value max object detection parameter
+	@param newValue - integer representing the new value max value*/
 	virtual void setValueMax(int newValue)
 	{
 		m_nVHigh = newValue;
 		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
 	}
+	/* Returns the hue min object detection parameter */
 	virtual int getPVHueMin() const
 	{
 		return m_nHLow;
 	}
+	/* Returns the hue max object detection parameter */
 	virtual int getPVHueMax() const
 	{
 		return m_nHHigh;
 	}
+	/* Returns the saturation min object detection parameter */
 	virtual int getSaturationMin() const
 	{
 		return m_nSLow;
 	}
+	/* Returns the saturation max object detection parameter */
 	virtual int getSaturationMax() const
 	{
 		return m_nSHigh;
 	}
+	/* Returns the value min object detection parameter */
 	virtual int getValueMin() const
 	{
 		return m_nVLow;
 	}
+	/* Returns the value max object detection parameter */
 	virtual int getValueMax() const
 	{
 		return m_nVHigh;
@@ -130,6 +157,8 @@ public:
 
 	}
 
+	/* Sends an object detection packet
+	@param packet - The @link ObjectDetectionPacket to send*/
 	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
 		std::vector<uint8_t> bytesVec(89);
 		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
@@ -160,7 +189,8 @@ public:
 		cv::inRange(hsv, lower_bound, upper_bound, mask);
 		return mask;
 	}
-
+	
+	/* Returns object distance from the camera in meters and the object angle from the camera in radians*/
 	std::pair<double, double> calculate_distance_and_angle(const std::vector<cv::Point>& contour, double focal_length, double actual_diameter, const cv::Point2d& camera_center)
 	{
 		if (contour.size() < 5) {
