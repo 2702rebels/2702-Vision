@@ -13,6 +13,7 @@ CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
+LIBS+=$(shell pkg-config -libs opencv4)
 all: object replay nettableserver testnetworktablesclient udppacketstest calibrate
 
 object: $(OBJS) ../../lib/lib2702.a
