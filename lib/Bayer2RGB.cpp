@@ -12,6 +12,10 @@ using namespace cv;
 
 
 // MatRGB must be initialized to same size as matBayer and must be of type CV_8UC3
+/*! \brief Converts a bayer material to an RGB scheme. 
+* \param matRGB - Must be initialized to same size as matBayer and must be of type CV_8UC3, will be written to as the result of the conversion. 
+* \param matBayer - The bayer material to convert.
+*/
 void Bayer2RGB( Mat &matRGB, Mat const &matBayer )
 {
 	int nRows = matBayer.rows;
@@ -114,6 +118,10 @@ void Bayer2RGB( Mat &matRGB, Mat const &matBayer )
 	// Need to handle last row...
 }
 
+/*! \brief Converts a bayer material to half RGB scheme. 
+* \param matRGB - must be initialized to same size as matBayer and be of type CV_8UC3, will be written to as the result of the conversion.
+* \param matBayer - The bayer material to convert.
+*/
 void Bayer2HalfRGB1( Mat &matRGB, Mat const &matBayer )
 {
 	assert( matRGB.rows == matBayer.rows/2 && matRGB.cols == matBayer.cols/2 );
@@ -155,6 +163,10 @@ void Bayer2HalfRGB1( Mat &matRGB, Mat const &matBayer )
 	}
 }
 
+/*! \brief Converts a bayer material to half RGB scheme. 
+* \param matRGB - must be initialized to same size as matBayer and be of type CV_8UC3, will be written to as the result of the conversion.
+* \param matBayer - The bayer material to convert. 
+*/
 void Bayer2HalfRGB( Mat &matRGB, Mat const &matBayer )
 {
 	assert( (matRGB.cols & 0x7) == 0 );
