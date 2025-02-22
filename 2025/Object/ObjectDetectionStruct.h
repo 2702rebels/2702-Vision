@@ -1,6 +1,6 @@
 /*!
 * \brief Defines the structure of the UDP object detection packets that will be sent to the roborio. The serialization and deserialization
-* \brief functions are location in ObjectDetectionStruct.cpp. The code in this file can be tested by using udppacketstest.cpp
+*       functions are location in ObjectDetectionStruct.cpp. The code in this file can be tested by using udppacketstest.cpp
 */
 
 #pragma once
@@ -36,6 +36,12 @@ public:
     double m_angle;
     /*! \brief Quality of the detection, usually derived primarily from distance and how much the object matches the pattern. */
     uint8_t m_quality;
+    bool operator==(ObjectDetectionInfo other){
+        if(other.m_distance == m_distance && other.m_angle == m_angle && other.m_quality == m_quality && other.m_type == m_type){
+            return true;
+        }
+        return false;
+    }
 };
 
 template <>
@@ -91,6 +97,12 @@ public:
     ObjectDetectionInfo m_coral3;
     /*! \brief Fourth coral */
     ObjectDetectionInfo m_coral4;
+    bool operator==(ObjectDetectionPacket other){
+        if(other.m_key == m_key && other.m_count == m_count && other.m_time == m_time && other.m_versionNumber == m_versionNumber && other.m_coral1 == m_coral1 && other.m_coral2 == m_coral2 && other.m_coral3 == m_coral3 && other.m_coral4 == m_coral4){
+            return true;
+        }
+        return false;
+    }
 };
 
 template <>
