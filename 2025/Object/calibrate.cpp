@@ -11,7 +11,7 @@ Loads all png images from /data/calibration/ to create these calibration values.
 using namespace cv;
 using namespace std;
 
-int main(int argc, char** \brief argv) {
+int main(int argc, char** argv) {
     // Define the checkerboard pattern size
     Size patternSize(9, 6);  // 9x6 checkerboard
 
