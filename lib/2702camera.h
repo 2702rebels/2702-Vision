@@ -10,15 +10,22 @@ class CamParm {
   float m_fV;
   float m_fU0;
   float m_fV0;
-  float m_fk1;  // radial distortion terms
+  /*! \brief Radial distortion term 1 */
+  float m_fk1;
+  /*! \brief Radial distortion term 2 */
   float m_fk2;
+  /*! \brief Radial distortion term 3 */
   float m_fk3;
-  float m_fp1;  // tangential distortion terms;
+  /*! \brief Tangential distortion term 1 */
+  float m_fp1;
+  /*! \brief Tangential distortion term 2 */
   float m_fp2;
   int m_nURes;
   int m_nVRes;
 
+  /*! \brief Camera rotation as a \ref Quaternion */
   Quaternion m_camRot;
+  /*! \brief Camera position as a \ref Point3d */
   Point3d m_camPos;
 
  public:
@@ -57,7 +64,9 @@ class CamParm {
   CamParm &operator=(CamParm const &src);
 };
 
+/*! \brief Class containing two cameras. */
 class StereoCam {
+  /*! \brief The two cameras to be used */
   CamParm m_grCams[2];
   Quaternion m_CamToRobotRot;
   Point3d m_CamToRobotXlat;
