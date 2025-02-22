@@ -1,4 +1,13 @@
+!*.*
+!2025/
+!Utilities/
+!lib/
 *.o
 *.a
 /Logs
 /.vscode
+# Exclude persistent data from networktable server
+networktables.json
+allwpilib/
+*.o
+*.a
