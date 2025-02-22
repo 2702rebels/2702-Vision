@@ -27,6 +27,10 @@ CamParm::CamParm() {
   m_fp2 = 0.F;
 }
 
+/*! \brief Loads a camera configuration from a file path.
+* \param psz - The file path to load the camera config from
+* \returns true if successful, false otherwise. 
+*/
 bool CamParm::Load(char const *psz) {
   char szTmp[128];
   ifstream flCam;
@@ -93,6 +97,10 @@ bool CamParm::Load(char const *psz) {
   return true;
 }
 
+/*! \brief Save the current camera configuration to a file. 
+* \param psz - The file path to save the configuration to.
+* \returns true if successful, false otherwise. 
+*/
 bool CamParm::Save(char const *psz) {
   ofstream of;
   of.open(psz);

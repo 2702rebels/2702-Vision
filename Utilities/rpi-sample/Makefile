@@ -12,8 +12,10 @@ CXXFLAGS+=-I/usr/local/include/cscore
 CXXFLAGS+=-I/usr/local/include/ntcore
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 CXXFLAGS+=$(shell pkg-config --cflags libcamera )
+CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 LDFLAGS+=-L../../lib -L/usr/local/lib
 LIBS+=$(shell pkg-config -libs libcamera)
+LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
 LIBS+=-lntcore -lcscore -lcameraserver -lwpiutil
 
 rpi-sample: $(OBJS) ../../lib/lib2702.a

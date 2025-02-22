@@ -6,8 +6,10 @@ CXXFLAGS+=-std=c++14 -I../../lib
 CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
+CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 LDFLAGS+=-L../../lib
+LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
 
 vid: $(OBJS)
 	$(CXX) $(LDFLAGS) -o vid $(OBJS) -l2702 -lopencv_core

@@ -95,6 +95,10 @@ nvCamera::~nvCamera()
 	delete [] m_pFrames;
 }
 
+/*! \brief Sets the exposure of the camera. 
+* \param uExp - The new exposure of the camera. 
+* \returns true if successful, false if not. 
+*/
 bool nvCamera::bSetExposure( uint64_t uExp )
 {
 	v4l2_control ctrl;
@@ -109,6 +113,7 @@ bool nvCamera::bSetExposure( uint64_t uExp )
 	return true;
 }
 
+/*! \brief Returns the exposure of the camera. */
 int nvCamera::nGetExposure()
 {
 	v4l2_control ctrl;
@@ -122,6 +127,11 @@ int nvCamera::nGetExposure()
 	return ctrl.value;
 }
 
+/*! \brief Updates the exposure of the camera for the next frame.
+* \bug The frame number currently has no impact, just sets for the next frame.  
+* \param u32Frame - The frame number to adjust the exposure for.
+* \param u64Exposure - The new exposure to use for the frame. 
+*/
 void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
 {
 	if( u64Exposure > m_u64MaxExp )
@@ -132,6 +142,10 @@ void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
 	m_u64NextExp = u64Exposure;
 }
 
+/*! \brief Process a frame from a buffer. 
+* \param buf - The buffer to process the frame from.
+* \returns true if successful, false if not. 
+*/
 bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 {
 	printf( "Process Frame: %d/%d\n", buf.index, buf.sequence );
@@ -152,6 +166,9 @@ bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 	return QueueWork( buf );
 }
 
+/*! \brief Start intaking frames. 
+* \returns true if successful, false if not. 
+*/
 bool nvCamera::bStart()
 {
 	m_pFrames = new nvFrame[nBuffers()];
@@ -167,12 +184,17 @@ bool nvCamera::bStart()
 	return v4lcam::bStart();
 }
 
+/*! \brief Stop intaking frames. 
+* \returns true if successful, false if not. 
+*/
 bool nvCamera::bStop()
 {
 	return v4lcam::bStop();
 }
 
-// Processing complete for frame, re-queue buffer to the driver
+/*! \brief Triggers when processing is complete for frame, re-queue buffer to the driver.
+* \param pFrame - The frame that has finished processing.
+*/
 void nvCamera::FrameComplete( nvFrame *pFrame )
 {
 	v4l2_buffer buf;
@@ -229,6 +251,10 @@ void nvCamera::cameraThreadFn()
 	bStop();
 }
 
+/*! \brief Queues a frame to be processed. 
+* \param buff - The frame as a buffer. 
+* \returns true if successful, false if not. 
+*/
 bool nvCamera::QueueWork( v4l2_buffer const &buff )
 {
 	std::unique_lock<std::mutex> l( m_queueMutex );
@@ -289,6 +315,7 @@ void nvCamera::SetThreadPriority( int policy, int pri )
 #endif
 }
 
+/*! \brief Wait for work from the manager thread. */
 nvFrame *nvCamera::waitForWork()
 {
 	std::unique_lock<std::mutex> l( m_queueMutex );
@@ -304,6 +331,9 @@ nvFrame *nvCamera::waitForWork()
 	return pFrm;
 }
 
+/*! \brief Function that runs on the worker threads that are processing frames.
+Continously intakes frames and processes them, sending the processed frames back to the manager thread. 
+*/
 void nvCamera::workerThreadFn()
 {
 	int nRows = m_nRows/2;
