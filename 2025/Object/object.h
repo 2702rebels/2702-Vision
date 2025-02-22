@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include "ObjectDetectionStruct.h"
 #include "ObjectDetectionStruct.cpp"
+#include <asio.hpp>
 #pragma once
 
 #ifndef IMGPROC_GUI
@@ -23,6 +24,7 @@
 // Structure classes where the serialization / deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
+using asio::ip::udp;
 
 class imgProc : public FrmProcessor
 {
@@ -57,6 +59,11 @@ class imgProc : public FrmProcessor
 	/*! \brief Focal length of camera. */
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
+
+	/*! \brief Pointer to UDP endpoint to send object detection data packets to. */
+	udp::endpoint *m_objectDetectionEndpoint;
+	/*! \brief Pointer to socket through which object detection data packets are sent. */
+	udp::socket *m_objectDetectionDataSocket;
 	
 public:
 	imgProc() :
@@ -78,6 +85,15 @@ public:
 		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
+		asio::io_context io_context;
+
+		udp::resolver resolver(io_context);
+		udp::endpoint receiver_endpoint = *resolver.resolve(udp::v4(), OBJECT_DETECTION_SERVER_IP, OBJECT_DETECTION_SERVER_PORT).begin();
+
+		udp::socket socket(io_context);
+		socket.open(udp::v4());
+		m_objectDetectionDataSocket = &socket;
+		m_objectDetectionEndpoint = &receiver_endpoint;
 	}
 	/*! 
 	* \brief Sets hue min object detection parameter. 
@@ -178,6 +194,16 @@ public:
 	virtual ~imgProc()
 	{
 
+	}
+
+	/*! \brief Send an \ref ObjectDetectionPacket .
+	* \param packet - Packet to send.
+	*/
+	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
+		std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
+		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
+		ObjectDetectionPacketStructType::Pack(bytes, packet);
+		m_objectDetectionDataSocket->send_to(asio::buffer(bytes), *m_objectDetectionEndpoint);
 	}
 
 	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
@@ -321,6 +347,14 @@ public:
 	
 				// Calculate delta between when frame was catured and now.
 				timersub( &tvCur, pcf->ts(), &tvDelta );
+				ObjectDetectionInfo coral1(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL);
+				// Other corals are empty
+				ObjectDetectionInfo coral2 = ObjectDetectionInfo();
+				ObjectDetectionInfo coral3 = ObjectDetectionInfo();
+				ObjectDetectionInfo coral4 = ObjectDetectionInfo();
+				long time = nt::Now() - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, (uint8_t)1, coral1, coral2, coral3, coral4);
+				SendObjectDetectionPacket(packet);
             }
         }
 
