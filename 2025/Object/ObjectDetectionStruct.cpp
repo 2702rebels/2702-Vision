@@ -1,3 +1,8 @@
+/*
+This file defines the serialization and deserialization functions for the UDP packet data structures found in ObjectDetectionStruct.h
+The code in this file can be tested using udppacketstest.cpp
+*/
+
 #include "ObjectDetectionStruct.h"
 #include <string>
 #include <span>
@@ -7,6 +12,7 @@
 
 namespace
 {
+    // Packet byte offsets
     constexpr size_t typeOff = 0;
     constexpr size_t distOff = typeOff + 1;
     constexpr size_t angleOff = distOff + 8;
@@ -21,8 +27,16 @@ namespace
     constexpr size_t coral4Off = coral3Off + 18;
 } // namespace
 
+/* Creates an ObjectDetection from its distance from the camera, its angle relative to the camera, the quality of the detection
+and the type of detection(see @link ObjectDetectionTypes)
+@param distance - The distance of the object from the camera as a distance on the ground in meters
+@param angle - The angle of the detection relative to the camera
+@param quality - The quality of the detection
+@param type - Type of detection(see @link ObjectDetectionTypes)
+*/
 ObjectDetectionInfo::ObjectDetectionInfo(double distance, double angle, uint8_t quality, uint8_t type) : m_distance(distance), m_angle(angle), m_quality(quality), m_type(type) {}
 
+/* Creates an empty @link ObjectDetectionInfo with all values set to 0 */
 ObjectDetectionInfo::ObjectDetectionInfo()
 {
     m_distance = 0.0f;
@@ -31,10 +45,13 @@ ObjectDetectionInfo::ObjectDetectionInfo()
     m_type = 0;
 }
 
+// Importing the structure that will contain the serialization and deserialization functions for the ObjectDetection
 using ObjectDetectionInfoStructType = wpi::Struct<ObjectDetectionInfo>;
 
+/* Deserializes an ObjectDetectionInfo from a span of bytes. Returns the deserialized class(@link ObjectDetectionInfo) */
 ObjectDetectionInfo ObjectDetectionInfoStructType::Unpack(std::span<const uint8_t> data)
 {
+    // Unpack the data into the span using the type and the offsets found at the top of this file
     uint8_t type = wpi::UnpackStruct<uint8_t, typeOff>(data);
     double dist = wpi::UnpackStruct<double, distOff>(data);
     double angle = wpi::UnpackStruct<double, angleOff>(data);
@@ -42,14 +59,19 @@ ObjectDetectionInfo ObjectDetectionInfoStructType::Unpack(std::span<const uint8_
     return ObjectDetectionInfo(dist, angle, quality, type);
 }
 
+/* Serializes an ObjectDetectionInfo into a span of bytes to be sent as a UDP packet
+@param data - a bytes span, should be large enough to hold the serialized data(see @link ObjectDetectionInfoStructType::GetSize())
+@param value - The ObjectDetectionInfo class to serialize */
 void ObjectDetectionInfoStructType::Pack(std::span<uint8_t> data, const ObjectDetectionInfo &value)
 {
+    // Pack the data into the span using the offsets found at the top of this file, detects the type automatically from the inputted value
     wpi::PackStruct<typeOff>(data, value.m_type);
     wpi::PackStruct<distOff>(data, value.m_distance);
     wpi::PackStruct<angleOff>(data, value.m_angle);
     wpi::PackStruct<qualityOff>(data, value.m_quality);
 }
 
+/* Initializes an empty ObjectDetectionPacket */
 ObjectDetectionPacket::ObjectDetectionPacket()
 {
     m_key = 0;
@@ -62,11 +84,22 @@ ObjectDetectionPacket::ObjectDetectionPacket()
     m_coral4 = ObjectDetectionInfo();
 }
 
+/* Initializes a complete ObjectDetectionPacket. 
+@param key - Magic number used as a packet corruption measure, use @link PACKET_KEY to set
+@param versionNumber - Version number used to prevent reading packets from wrong serialization version, use @link PACKET_VERSION to set this
+@param timestamp - Server-adjusted timestamp obtained from NetworkTables in microseconds
+@param count - How many of the corals have valid data in them, i.e 2 means coral1 and coral2 have data
+@param coral1 - The first coral, can use @link ObjectDetectionPacket() to initialize empty
+@param coral2 - The second coral, can use @link ObjectDetectionPacket() to initialize empty
+@param coral3 - The third coral, can use @link ObjectDetectionPacket() to initialize empty
+@param coral4 - The fourth coral, can use @link ObjectDetectionPacket() to initialize empty */
 ObjectDetectionPacket::ObjectDetectionPacket(int key, int versionNumber, long timestamp, uint8_t count, ObjectDetectionInfo coral1, ObjectDetectionInfo coral2, ObjectDetectionInfo coral3, ObjectDetectionInfo coral4) 
 : m_key(key), m_versionNumber(versionNumber), m_time(timestamp), m_count(count), m_coral1(coral1), m_coral2(coral2), m_coral3(coral3), m_coral4(coral4) {}
 
+// Structure class that will contain the serialization and deserialization functions for the object detection packet
 using ObjectDetectionPacketStructType = wpi::Struct<ObjectDetectionPacket>;
 
+/* Deserializes an ObjectDetectionPacket from a byte span. Returns the data in a @link ObjectDetectionPacket class instance. */
 ObjectDetectionPacket ObjectDetectionPacketStructType::Unpack(std::span<const uint8_t> data)
 {
     int key = wpi::UnpackStruct<int, keyOff>(data);
@@ -80,6 +113,9 @@ ObjectDetectionPacket ObjectDetectionPacketStructType::Unpack(std::span<const ui
     return ObjectDetectionPacket(key, versionNumber, time, count, coral1, coral2, coral3, coral4);
 }
 
+/* Serializes an ObjectDetectionPacket into the provided byte span
+@param data - Byte span that has enough size to hold the ObjectDetectionPacket(see @link ObjectDetectionPacketStructType::GetSize())
+@param value - ObjectDetectionPacket to be serialized */
 void ObjectDetectionPacketStructType::Pack(std::span<uint8_t> data, const ObjectDetectionPacket &value)
 {
     wpi::PackStruct<keyOff>(data, value.m_key);
