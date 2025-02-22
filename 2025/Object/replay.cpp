@@ -1,3 +1,11 @@
+/* Replays log files fetched from the pi through image processing. This can be built and run on a desktop environment.
+Usage is ./replay logfilepath
+Depends on: 
+- opencv
+- rpicam
+*/
+
+
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/stat.h>
