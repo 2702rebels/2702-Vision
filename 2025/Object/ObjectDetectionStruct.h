@@ -17,6 +17,7 @@
 * \brief An enum that defines what the type byte means in the object detection schema 
 */
 enum ObjectDetectionTypes {
+    /*! \brief Coral object detection. */
     CORAL
 };
 
@@ -27,9 +28,13 @@ class ObjectDetectionInfo
 public:
     ObjectDetectionInfo();
     ObjectDetectionInfo(double distance, double angle, uint8_t quality, uint8_t type);
+    /*! \brief Object type, corresponds to an enum value from \ref ObjectDetectionTypes . */
     uint8_t m_type;
+    /*! \brief 2D plane distance of object from camera. */
     double m_distance;
+    /*! \brief Angle of object relative to camera. */
     double m_angle;
+    /*! \brief Quality of the detection, usually derived primarily from distance and how much the object matches the pattern. */
     uint8_t m_quality;
 };
 
@@ -63,20 +68,28 @@ struct wpi::Struct<ObjectDetectionInfo>
 static_assert(wpi::StructSerializable<ObjectDetectionInfo>); // Ensure that the ObjectDetection is serializable
 
 /*! \brief Class correlating to the ObjectDetectionPacket structure used for UDP packet serialization / deserialization. 
-* Provides an accessible way to access the deserialized data and pass in data for serialization. 
+* Provides an accessible way to access the deserialized data and pass in data for serialization. Holds a max of 4 objects
 */
 class ObjectDetectionPacket
 {
 public:
     ObjectDetectionPacket();
     ObjectDetectionPacket(int key, int versionNumber, long time, uint8_t count, ObjectDetectionInfo coral1, ObjectDetectionInfo coral2, ObjectDetectionInfo coral3, ObjectDetectionInfo coral4);
+    /*! \brief Magic number used to check for corruption / invalid packet, set using \ref PACKET_KEY */
     int m_key;
+    /*! \brief Version number of packet, set using \ref PACKET_VERSION */
     int m_versionNumber;
+    /*! \brief Timestamp of packet, microseconds from NetworkTables adjusted for server */
     long m_time;
+    /*! \brief How many of the corals are filled with real data */
     uint8_t m_count;
+    /*! \brief First coral */
     ObjectDetectionInfo m_coral1;
+    /*! \brief Second coral */
     ObjectDetectionInfo m_coral2;
+    /*! \brief Third coral */
     ObjectDetectionInfo m_coral3;
+    /*! \brief Fourth coral */
     ObjectDetectionInfo m_coral4;
 };
 

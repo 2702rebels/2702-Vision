@@ -1,6 +1,6 @@
 /*!
 * \brief This file defines the serialization and deserialization functions for the UDP packet data structures found in ObjectDetectionStruct.h
-* \brief The code in this file can be tested using udppacketstest.cpp
+* The code in this file can be tested using udppacketstest.cpp
 */
 
 #include "ObjectDetectionStruct.h"
@@ -63,7 +63,7 @@ using ObjectDetectionInfoStructType = wpi::Struct<ObjectDetectionInfo>; // Impor
 
 /*!
 * \brief Deserializes an ObjectDetectionInfo from a span of bytes. 
-* \brief Returns the deserialized class(\ref ObjectDetectionInfo ).
+* \returns Returns the deserialized class(\ref ObjectDetectionInfo ).
 */
 ObjectDetectionInfo ObjectDetectionInfoStructType::Unpack(std::span<const uint8_t> data)
 {
@@ -134,8 +134,8 @@ ObjectDetectionPacket ObjectDetectionPacketStructType::Unpack(std::span<const ui
 }
 
 /*! \brief Serializes an ObjectDetectionPacket into the provided byte span.
-* \param  data - Byte span that has enough size to hold the ObjectDetectionPacket(see \ref ObjectDetectionPacketStructType::GetSize() ).
-* \param  value - ObjectDetectionPacket to be serialized.
+* \param data - Byte span that has enough size to hold the ObjectDetectionPacket(see \ref ObjectDetectionPacketStructType::GetSize() ).
+* \param value - ObjectDetectionPacket to be serialized.
 */
 void ObjectDetectionPacketStructType::Pack(std::span<uint8_t> data, const ObjectDetectionPacket &value)
 {
