@@ -60,9 +60,9 @@ class imgProc : public FrmProcessor
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
 
-	/*! \brief UDP endpoint to send object detection data packets to. */
+	/*! \brief Pointer to UDP endpoint to send object detection data packets to. */
 	udp::endpoint *m_objectDetectionEndpoint;
-	/*! \brief Socket through which object detection data packets are sent. */
+	/*! \brief Pointer to socket through which object detection data packets are sent. */
 	udp::socket *m_objectDetectionDataSocket;
 	
 public:
@@ -348,6 +348,7 @@ public:
 				// Calculate delta between when frame was catured and now.
 				timersub( &tvCur, pcf->ts(), &tvDelta );
 				ObjectDetectionInfo coral1(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL);
+				// Other corals are empty
 				ObjectDetectionInfo coral2 = ObjectDetectionInfo();
 				ObjectDetectionInfo coral3 = ObjectDetectionInfo();
 				ObjectDetectionInfo coral4 = ObjectDetectionInfo();
