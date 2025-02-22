@@ -42,7 +42,7 @@ namespace
 * Created from its distance from the camera, its angle relative to the camera, the quality of the detection,
 * and the type of detection(see \ref ObjectDetectionTypes )
 * \param  distance - The distance of the object from the camera as a distance on the ground in meters
-* \param  angle - The angle of the detection relative to the camera
+* \param  angle - The angle of the detection relative to the camera in radians
 * \param  quality - The quality of the detection
 * \param  type - Type of detection(see \ref ObjectDetectionTypes )
 */
