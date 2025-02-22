@@ -27,7 +27,7 @@ public:
  
 	/*!  
 	* \brief Fetches the object detection settings from json 
-	* \param  jsonString - a JSON string that contains the config data, should be checked before passing into this function
+	* \param  jsonString - a JSON string that contains the config data, must be checked before passing into this function
 	*/
 	imageProcessingFilterSettings(std::string jsonString)
 	{
