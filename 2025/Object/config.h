@@ -60,7 +60,7 @@ public:
 	}
 
 	/*!  
-	* \brief Write the settings stored in the class to the config file at location @link SETTINGS_FILE_PATH 
+	* \brief Write the settings stored in the class to the config file at location \ref SETTINGS_FILE_PATH 
 	*/
 	void writeSettings()
 	{
@@ -95,7 +95,7 @@ public:
 	/*!  
 	* \brief Returns true if image processor's configuration is different from what is currently written to the config file. 
 	* \brief Otherwise returns false.
-	* \param  imageProcessor - the @link imgProc with the current settings being used for object detection
+	* \param  imageProcessor - the \ref imgProc with the current settings being used for object detection
 	*/
 	static bool configHasChanged(imgProc &imageProcessor)
 	{
@@ -127,7 +127,7 @@ public:
 	}
 	/*!  
 	* \brief Loads the config from the file and effects the settings in the image processor. 
-	* \brief Looks for config file at @link SETTINGS_FILE_PATH
+	* \brief Looks for config file at \ref SETTINGS_FILE_PATH
 	* \param  imageProcessor - The image processor to set the config on
 	*/
 	static void triggerConfigLoad(imgProc &imageProcessor)
@@ -155,7 +155,7 @@ public:
 		}
 	}
 	/*!  
-	* \brief Writes a config save file at @link SETTINGS_FILE_PATH with the current settings from the image processor.
+	* \brief Writes a config save file at \ref SETTINGS_FILE_PATH with the current settings from the image processor.
 	* \param  imageProcessor - the image processor with the settings to save to the config file
 	*/
 	static void triggerConfigSave(imgProc &imageProcessor)

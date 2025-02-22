@@ -56,7 +56,7 @@ bool bStop = false;
 #define USE_NETWORK_TABLES 1
 
 /*! \brief Handles Ctrl+C interrupts.
- * \param nSig - Should always be equal to @link SIGINT.*/
+ * \param nSig - Should always be equal to \ref SIGINT.*/
 void sighandler( int nSig )
 {
 	printf( "Received Signal %d\n", nSig );

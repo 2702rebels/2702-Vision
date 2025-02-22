@@ -2,13 +2,11 @@
 * Depends on:
 * - wpilib ntcore
 * - ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
-* - asio(UDP client library)*/
+*/
 
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/DoubleTopic.h>
-#include <asio.hpp>
-using asio::ip::udp;
 #include <sys/time.h>
 #include "ObjectDetectionStruct.h"
 #include "ObjectDetectionStruct.cpp"
@@ -59,11 +57,6 @@ class imgProc : public FrmProcessor
 	/*! \brief Focal length of camera. */
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
-
-	/*! \brief UDP socket for object detection data packets. */
-	udp::socket m_objectDetectionDataSocket;
-	/*! \brief UDP endpoint for object detection data packets, created from \ref OBJECT_DETECTION_SERVER_IP and \ref OBJECT_DETECTION_SERVER_PORT*/
-	udp::endpoint m_objectDetectionEndpoint;
 	
 public:
 	imgProc() :
@@ -75,11 +68,6 @@ public:
     std::cout << "Camera Matrix: " << mtx << endl;
     std::cout << "Focal Length Coefficients: " << mtx.at<float>(0,0) << "    " << mtx.at<float>(1,2) << endl;
     std::cout << "Focal Length: " << m_focalLen << endl;
-	asio::io_context io_context;
-	udp::resolver resolver(io_context); // UDP DNS resolver
-	m_objectDetectionEndpoint = *resolver.resolve(udp::v4(), OBJECT_DETECTION_SERVER_IP, OBJECT_DETECTION_SERVER_PORT).begin();
-	m_objectDetectionDataSocket = udp::socket(io_context);
-	m_objectDetectionDataSocket.open(udp::v4());
 #if (IMGPROC_GUI)
 		cv::namedWindow("Filtered Video");
 
@@ -190,17 +178,6 @@ public:
 	virtual ~imgProc()
 	{
 
-	}
-
-	/*! 
-	* \brief Sends an object detection packet.
-	* \param  packet - The @link ObjectDetectionPacket to send.
-	*/
-	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
-		std::vector<uint8_t> bytesVec(89);
-		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
-		ObjectDetectionPacketStructType::Pack(bytes, packet);
-		m_objectDetectionDataSocket.send_to(asio::buffer(bytes), m_objectDetectionEndpoint);
 	}
 
 	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
@@ -344,13 +321,6 @@ public:
 	
 				// Calculate delta between when frame was catured and now.
 				timersub( &tvCur, pcf->ts(), &tvDelta );
-				ObjectDetectionInfo coral1(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL);
-				ObjectDetectionInfo coral2 = ObjectDetectionInfo();
-				ObjectDetectionInfo coral3 = ObjectDetectionInfo();
-				ObjectDetectionInfo coral4 = ObjectDetectionInfo();
-				long time = nt::Now() - tvDelta.tv_usec;
-				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, (uint8_t)1, coral1, coral2, coral3, coral4);
-				SendObjectDetectionPacket(packet);
             }
         }
 
