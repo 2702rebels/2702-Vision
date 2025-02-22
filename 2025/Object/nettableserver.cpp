@@ -1,8 +1,8 @@
 /*
- *   This is a program that acts as a network table server to receive and send object detection data
- *   for testing purposes. 
- *   Depends on: 
- *   - wpilib's ntcore
+ * \brief   This is a program that acts as a network table server to receive and send object detection data
+ * \brief   for testing purposes. 
+ * \brief   Depends on: 
+ * \brief   - wpilib's ntcore
 */
 
 // TODO, some of this should be converted to a class so it can be better documented
@@ -24,7 +24,7 @@ using namespace std::literals;
 bool bStop = false;
 bool readyForNewCmdThread = false;
 
-/* This is where all the commands are stored, in order to add a command, set a key(string) value to a void function like this:
+/* \brief This is where all the commands are stored, in order to add a command, set a key(string) value to a void function like this:
  void testcommand(){
     do your thing here
  }
@@ -55,18 +55,18 @@ void showHelp(){
     << "stop - shuts the server down\n" << "help - displays this text\n";
 }
 
-/* Shuts down the server. Note that this is not immediate, and the program will walk through one more tick before exiting.*/
+/* \brief Shuts down the server. Note that this is not immediate, and the program will walk through one more tick before exiting.*/
 void shutdown(){
     bStop = true;
 }
 
-/* Prints the network table values to console. This does not auto-update as more topics are added, so this should be updated when a new topic is added */
+/* \brief Prints the network table values to console. This does not auto-update as more topics are added, so this should be updated when a new topic is added */
 void printNetworkTableValues(){
     printf("Last received coral distance: %.6f\n",coralDistanceTopic.GetAtomic(0.0f).value);
     printf("Last received coral angle: %.6f\n",coralAngleTopic.GetAtomic(0.0f).value);
 }
 
-/* Pushes a new hue min value to the associated networktable topic. Value is provided through cin input */
+/* \brief Pushes a new hue min value to the associated networktable topic. Value is provided through cin input */
 void pushHueMin(){
     std::string value;
     std::cout << "Please enter a value: ";
@@ -74,7 +74,7 @@ void pushHueMin(){
     hueMinTopic.SetDefault(stoi(value));
 }
 
-/* Pushes a new hue max value to the associated networktable topic. Value is provided through cin input */
+/* \brief Pushes a new hue max value to the associated networktable topic. Value is provided through cin input */
 void pushHueMax(){
     std::string value;
     std::cout << "Please enter a value: ";
@@ -82,7 +82,7 @@ void pushHueMax(){
     hueMaxTopic.SetDefault(stoi(value));
 }
 
-/* Pushes a new saturation min value to the associated networktable topic. Value is provided through cin input */
+/* \brief Pushes a new saturation min value to the associated networktable topic. Value is provided through cin input */
 void pushSaturationMin(){
     std::string value;
     std::cout << "Please enter a value: ";
@@ -90,7 +90,7 @@ void pushSaturationMin(){
     saturationMinTopic.SetDefault(stoi(value));
 }
 
-/* Pushes a new saturation max value to the associated networktable topic. Value is provided through cin input */
+/* \brief Pushes a new saturation max value to the associated networktable topic. Value is provided through cin input */
 void pushSaturationMax(){
     std::string value;
     std::cout << "Please enter a value: ";
@@ -98,7 +98,7 @@ void pushSaturationMax(){
     saturationMaxTopic.SetDefault(stoi(value));
 }
 
-/* Pushes a new value min value to the associated networktable topic. Value is provided through cin input */
+/* \brief Pushes a new value min value to the associated networktable topic. Value is provided through cin input */
 void pushValueMin(){
     std::string value;
     std::cout << "Please enter a value: ";
@@ -106,7 +106,7 @@ void pushValueMin(){
     valueMinTopic.SetDefault(stoi(value));
 }
 
-/* Pushes a new value max value to the associated networktable topic. Value is provided through cin input */
+/* \brief Pushes a new value max value to the associated networktable topic. Value is provided through cin input */
 void pushValueMax(){
     std::string value;
     std::cout << "Please enter a value: ";

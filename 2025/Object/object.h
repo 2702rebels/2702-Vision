@@ -1,8 +1,8 @@
-/* Contains the object detection image processing classes. Main is located in object.cpp
-* Depends on:
-* - wpilib ntcore
-* - ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
-* - asio(UDP client library)*/
+/* \brief Contains the object detection image processing classes. Main is located in object.cpp
+* \brief Depends on:
+* \brief - wpilib ntcore
+* \brief - ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
+* \brief - asio(UDP client library)*/
 
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
@@ -78,97 +78,97 @@ public:
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
 	}
-	/* 
-	* Sets hue min object detection parameter 
-	* \param newValue - integer representing the new hue min value
+	/* \brief 
+	* \brief Sets hue min object detection parameter 
+	* \param  newValue - integer representing the new hue min value
 	*/
 	virtual void setPVHueMin(int newValue)
 	{
 		m_nHLow = newValue;
 		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
 	}
-	/* 
-	* Sets hue max object detection parameter
-	* \param newValue - integer representing the new hue max value
+	/* \brief 
+	* \brief Sets hue max object detection parameter
+	* \param  newValue - integer representing the new hue max value
 	*/
 	virtual void setPVHueMax(int newValue)
 	{
 		m_nHHigh = newValue;
 		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
 	}
-	/* 
-	* Sets saturation min object detection parameter
-	* \param newValue - integer representing the new saturation min value
+	/* \brief 
+	* \brief Sets saturation min object detection parameter
+	* \param  newValue - integer representing the new saturation min value
 	*/
 	virtual void setSaturationMin(int newValue)
 	{
 		m_nSLow = newValue;
 		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
 	}
-	/* 
-	* Sets saturation max object detection parameter
-	* \param newValue - integer representing the new saturation max value
+	/* \brief 
+	* \brief Sets saturation max object detection parameter
+	* \param  newValue - integer representing the new saturation max value
 	*/
 	virtual void setSaturationMax(int newValue)
 	{
 		m_nSHigh = newValue;
 		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
 	}
-	/* 
-	* Sets value min object detection parameter
-	* \param newValue - integer representing the new value min value
+	/* \brief 
+	* \brief Sets value min object detection parameter
+	* \param  newValue - integer representing the new value min value
 	*/
 	virtual void setValueMin(int newValue)
 	{
 		m_nVLow = newValue;
 		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
 	}
-	/* 
-	* Sets value max object detection parameter
-	* \param newValue - integer representing the new value max value
+	/* \brief 
+	* \brief Sets value max object detection parameter
+	* \param  newValue - integer representing the new value max value
 	*/
 	virtual void setValueMax(int newValue)
 	{
 		m_nVHigh = newValue;
 		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
 	}
-	/* 
-	* Returns the hue min object detection parameter 
+	/* \brief 
+	* \brief Returns the hue min object detection parameter 
 	*/
 	virtual int getPVHueMin() const
 	{
 		return m_nHLow;
 	}
-	/* 
-	* Returns the hue max object detection parameter 
+	/* \brief 
+	* \brief Returns the hue max object detection parameter 
 	*/
 	virtual int getPVHueMax() const
 	{
 		return m_nHHigh;
 	}
-	/* 
-	* Returns the saturation min object detection parameter 
+	/* \brief 
+	* \brief Returns the saturation min object detection parameter 
 	*/
 	virtual int getSaturationMin() const
 	{
 		return m_nSLow;
 	}
-	/* 
-	* Returns the saturation max object detection parameter 
+	/* \brief 
+	* \brief Returns the saturation max object detection parameter 
 	*/
 	virtual int getSaturationMax() const
 	{
 		return m_nSHigh;
 	}
-	/* 
-	* Returns the value min object detection parameter 
+	/* \brief 
+	* \brief Returns the value min object detection parameter 
 	*/
 	virtual int getValueMin() const
 	{
 		return m_nVLow;
 	}
-	/* 
-	* Returns the value max object detection parameter 
+	/* \brief 
+	* \brief Returns the value max object detection parameter 
 	*/
 	virtual int getValueMax() const
 	{
@@ -179,9 +179,9 @@ public:
 
 	}
 
-	/* 
-	* Sends an object detection packet
-	* \param packet - The @link ObjectDetectionPacket to send
+	/* \brief 
+	* \brief Sends an object detection packet
+	* \param  packet - The @link ObjectDetectionPacket to send
 	*/
 	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
 		std::vector<uint8_t> bytesVec(89);
@@ -214,8 +214,8 @@ public:
 		return mask;
 	}
 	
-	/* 
-	* Returns object distance from the camera in meters and the object angle from the camera in radians
+	/* \brief 
+	* \brief Returns object distance from the camera in meters and the object angle from the camera in radians
 	*/
 	std::pair<double, double> calculate_distance_and_angle(const std::vector<cv::Point>& contour, double focal_length, double actual_diameter, const cv::Point2d& camera_center)
 	{
@@ -225,7 +225,7 @@ public:
 
 		cv::RotatedRect rect = cv::fitEllipse(contour);
 		double apparent_diameter = std::min(rect.size.width, rect.size.height);
-		double distance = (actual_diameter * focal_length) / apparent_diameter;
+		double distance = (actual_diameter * \brief focal_length) / apparent_diameter;
 
 		double dx = rect.center.x - camera_center.x;
 		double angle = std::atan2(dx, focal_length);
@@ -247,17 +247,17 @@ public:
 		float angle = ellipse.angle;
 
 		// Convert angle to radians
-		float angleRad = angle * CV_PI / 180.0;
+		float angleRad = angle * \brief CV_PI / 180.0;
 
 		// Calculate the endpoints of the major axis
 		cv::Point2f majorAxisEndPoint1(
-			center.x + majorAxisLength / 2 * cos(angleRad),
-			center.y + majorAxisLength / 2 * sin(angleRad)
+			center.x + majorAxisLength / 2 * \brief cos(angleRad),
+			center.y + majorAxisLength / 2 * \brief sin(angleRad)
 		);
 
 		cv::Point2f majorAxisEndPoint2(
-			center.x - majorAxisLength / 2 * cos(angleRad),
-			center.y - majorAxisLength / 2 * sin(angleRad)
+			center.x - majorAxisLength / 2 * \brief cos(angleRad),
+			center.y - majorAxisLength / 2 * \brief sin(angleRad)
 		);
 
 		std::vector<cv::Point> hull;

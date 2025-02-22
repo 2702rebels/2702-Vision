@@ -1,11 +1,11 @@
-/* Main for object detection. Cannot be run in a desktop testing environment. Uses NetworkTables to update object detection config at runtime.
-* Depends on: 
-* - opencv
-* - rpicam
-* - wpilib ntcore
-* - asio(UDP client library)
-* - object.h
-* - config.h
+/* \brief Main for object detection. Cannot be run in a desktop testing environment. Uses NetworkTables to update object detection config at runtime.
+* \brief Depends on: 
+* \brief - opencv
+* \brief - rpicam
+* \brief - wpilib ntcore
+* \brief - asio(UDP client library)
+* \brief - object.h
+* \brief - config.h
 */
 
 #include <unistd.h>
@@ -54,9 +54,8 @@ bool bStop = false;
 #include "config.h"
 
 #define USE_NETWORK_TABLES 1
-#define IS_ROBOT 0
 
-/* Handles Ctrl+C interrupts
+/* \brief Handles Ctrl+C interrupts
 \param nSig - Should always be equal to @link SIGINT*/
 void sighandler( int nSig )
 {
@@ -90,7 +89,7 @@ int main( int argc, char **argv )
 		nt::IntegerSubscriber valueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMax").Subscribe(0);
 		networkTableManager.StartClient4("networkTableClient");
 		networkTableManager.SetServerTeam(2702);
-		#if IS_ROBOT
+		#if false
 		networkTableManager.StartDSClient(); // Should only be run on actual robot
 		#endif
 		#endif

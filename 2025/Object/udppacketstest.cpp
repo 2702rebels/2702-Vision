@@ -1,9 +1,9 @@
 /*
-* This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet
-* to an IP
-* Depends on:
-* - asio(UDP client library)
-* - ObjectDetectionStruct.h and ObjectDetectionStruct.h
+* \brief This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet
+* \brief to an IP
+* \brief Depends on:
+* \brief - asio(UDP client library)
+* \brief - ObjectDetectionStruct.h and ObjectDetectionStruct.h
 */
 
 
@@ -17,12 +17,13 @@
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT "27021"
+// This is the structure types where the serialization and deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 using asio::ip::udp;
 
-/* Serialize and send an object detection packet */
+/* \brief Serialize and send an object detection packet */
 void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::string& host, const std::string& port) {
     try {
         asio::io_context io_context;
@@ -63,6 +64,7 @@ int main( int argc, char **argv ){
     std::cout << "unpackedCoral angle: " << unpackedCoral.m_angle << "\n";
     std::cout << "unpackedCoral quality: " << unpackedCoral.m_quality << "\n";
     std::cout << "unpackedCoral type: " << unpackedCoral.m_type << "\n";
+    // Check that the serialized and original detections are the same
     if(unpackedCoral == coral1){
         std::cout << ":D coral serialized and deserialized successfully" << "\n";
     }
@@ -97,11 +99,12 @@ int main( int argc, char **argv ){
     std::cout << "angle4: " << unpackedPacket.m_coral4.m_angle << "\n";
     std::cout << "quality4: " << unpackedPacket.m_coral4.m_quality << "\n";
     std::cout << "type4: " << unpackedPacket.m_coral4.m_type << "\n";
+    // Check that the original and deserialized packet are the same
     if(unpackedPacket == packet){
         std::cout << "packet serialized and deserialized successfully" << "\n";
     }
     else{
         std::cout << "packet test failed :C" << "\n";
     }
-    sendObjectDetectionPacket(packet, SERVER_IP, SERVER_PORT);
+    sendObjectDetectionPacket(packet, OLEG_IP, SERVER_PORT);
 }
