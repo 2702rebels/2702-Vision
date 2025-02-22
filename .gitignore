@@ -12,3 +12,4 @@ doxygenlog.txt
 allwpilib/
 *.o
 *.a
+/docs
