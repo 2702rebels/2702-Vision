@@ -8,8 +8,6 @@
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT "27021"
-#define PI_IP "192.168.1.173"
-#define OLEG_IP "192.168.1.142"
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
@@ -54,7 +52,7 @@ int main( int argc, char **argv ){
     std::cout << "unpackedCoral angle: " << unpackedCoral.m_angle << "\n";
     std::cout << "unpackedCoral quality: " << unpackedCoral.m_quality << "\n";
     std::cout << "unpackedCoral type: " << unpackedCoral.m_type << "\n";
-    if(unpackedCoral.m_distance == coral1.m_distance && unpackedCoral.m_angle == coral1.m_angle && unpackedCoral.m_quality == coral1.m_quality && unpackedCoral.m_type == coral1.m_type){
+    if(unpackedCoral == coral1){
         std::cout << ":D coral serialized and deserialized successfully" << "\n";
     }
     else{
@@ -86,11 +84,11 @@ int main( int argc, char **argv ){
     std::cout << "angle4: " << unpackedPacket.m_coral4.m_angle << "\n";
     std::cout << "quality4: " << unpackedPacket.m_coral4.m_quality << "\n";
     std::cout << "type4: " << unpackedPacket.m_coral4.m_type << "\n";
-    if(unpackedPacket.m_key == packet.m_key && unpackedPacket.m_count == packet.m_count && unpackedPacket.m_time == packet.m_time && unpackedPacket.m_versionNumber == packet.m_versionNumber && unpackedPacket.m_coral1.m_distance == packet.m_coral1.m_distance && unpackedPacket.m_coral1.m_angle == packet.m_coral1.m_angle && unpackedPacket.m_coral1.m_quality == packet.m_coral1.m_quality && unpackedPacket.m_coral2.m_distance == packet.m_coral2.m_distance && unpackedPacket.m_coral2.m_angle == packet.m_coral2.m_angle && unpackedPacket.m_coral2.m_quality == packet.m_coral2.m_quality && unpackedPacket.m_coral3.m_distance == packet.m_coral3.m_distance && unpackedPacket.m_coral3.m_angle == packet.m_coral3.m_angle && unpackedPacket.m_coral3.m_quality == packet.m_coral3.m_quality && unpackedPacket.m_coral4.m_distance == packet.m_coral4.m_distance && unpackedPacket.m_coral4.m_angle == packet.m_coral4.m_angle && unpackedPacket.m_coral4.m_quality == packet.m_coral4.m_quality && unpackedPacket.m_coral1.m_type == packet.m_coral1.m_type && unpackedPacket.m_coral2.m_type == packet.m_coral2.m_type && unpackedPacket.m_coral3.m_type == packet.m_coral3.m_type && unpackedPacket.m_coral4.m_type == packet.m_coral4.m_type){
+    if(unpackedPacket == packet){
         std::cout << "packet serialized and deserialized successfully" << "\n";
     }
     else{
         std::cout << "packet test failed :C" << "\n";
     }
-    sendObjectDetectionPacket(packet, OLEG_IP, SERVER_PORT);
+    sendObjectDetectionPacket(packet, SERVER_IP, SERVER_PORT);
 }
