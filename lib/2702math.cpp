@@ -87,9 +87,9 @@ Point3d &Point3d::operator*=(float const scalar) {
 /*! \brief Divides a \ref Point3d by a scalar.
 * \param scalar - The value to divide the coordinates by.
 * \returns A new \ref Point3d with the values divided by the scalar. 
+* \bug Will crash if is divided by 0.
 */
 Point3d Point3d::operator/(float const scalar) const {
-  // todo: catch divide by 0
   Point3d ret(m_fX / scalar, m_fY / scalar, m_fZ / scalar);
   return ret;
 }
