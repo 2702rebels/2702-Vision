@@ -1,3 +1,8 @@
+/*! \brief Class for loading / saving configs from disk. 
+Depends on: 
+- nlohmannjson */
+
+// JSON field names
 #define SETTING_HUE_MIN "hueMin"
 #define SETTING_HUE_MAX "hueMax"
 #define SETTING_SATURATION_MIN "satMin"
@@ -8,7 +13,8 @@
 #include <nlohmann/json.hpp>
  
 using json = nlohmann::json;
- 
+
+/*! \brief Class representing the parameters used for object detection */
 class imageProcessingFilterSettings
 {
 public:
@@ -19,6 +25,10 @@ public:
 	int valueMin;
 	int valueMax;
  
+	/*!  
+	* \brief Fetches the object detection settings from json 
+	* \param  jsonString - a JSON string that contains the config data, must be checked before passing into this function
+	*/
 	imageProcessingFilterSettings(std::string jsonString)
 	{
 		json filterSettings = json::parse(jsonString);
@@ -29,6 +39,16 @@ public:
 		this->valueMin = filterSettings[SETTING_VALUE_MIN];
 		this->valueMax = filterSettings[SETTING_VALUE_MAX];
 	}
+
+	/*!  
+	* \brief Initialize an instance of the class from the settings
+	* \param  hueMin - integer representing the hueMin parameter
+	* \param  hueMax - integer representing the hueMax parameter
+	* \param  saturationMin - integer representing the saturationMin parameter
+	* \param  saturationMax - integer representing the satuartionMax parameter
+	* \param  valueMin - integer representing the valueMin parameter
+	* \param  valueMax - integer representing the valueMax parameter
+	*/
 	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax)
 	{
 		this->hueMin = hueMin;
@@ -38,6 +58,10 @@ public:
 		this->valueMin = valueMin;
 		this->valueMax = valueMax;
 	}
+
+	/*!  
+	* \brief Write the settings stored in the class to the config file at location \ref SETTINGS_FILE_PATH 
+	*/
 	void writeSettings()
 	{
 		std::ofstream settingsfile;
@@ -54,7 +78,11 @@ public:
 		settingsfile.close();
 	}
 };
- 
+
+/*!  
+* \brief Class containing the static functions for interacting with imageProcessingFilterSettings and the config file. 
+* \brief Cannot be instantiated
+*/
 class ConfigUtils
 {
 public:
@@ -64,6 +92,11 @@ public:
 	static int m_npreviousSaturationMax;
 	static int m_npreviousValueMin;
 	static int m_npreviousValueMax;
+	/*!  
+	* \brief Returns true if image processor's configuration is different from what is currently written to the config file. 
+	* \brief Otherwise returns false.
+	* \param  imageProcessor - the \ref imgProc with the current settings being used for object detection
+	*/
 	static bool configHasChanged(imgProc &imageProcessor)
 	{
 		if (m_npreviousHueMin != imageProcessor.getPVHueMin())
@@ -92,6 +125,11 @@ public:
 		}
 		return false;
 	}
+	/*!  
+	* \brief Loads the config from the file and effects the settings in the image processor. 
+	* \brief Looks for config file at \ref SETTINGS_FILE_PATH
+	* \param  imageProcessor - The image processor to set the config on
+	*/
 	static void triggerConfigLoad(imgProc &imageProcessor)
 	{
 		std::ifstream file(SETTINGS_FILE_PATH);
@@ -116,6 +154,10 @@ public:
 			m_npreviousValueMax = config.valueMax;
 		}
 	}
+	/*!  
+	* \brief Writes a config save file at \ref SETTINGS_FILE_PATH with the current settings from the image processor.
+	* \param  imageProcessor - the image processor with the settings to save to the config file
+	*/
 	static void triggerConfigSave(imgProc &imageProcessor)
 	{
 		imageProcessingFilterSettings config = imageProcessingFilterSettings(imageProcessor.getPVHueMin(), imageProcessor.getPVHueMax(),
@@ -129,7 +171,7 @@ public:
 		m_npreviousValueMax = config.valueMax;
 	}
 };
- 
+// Instantiate the static values
 int ConfigUtils::m_npreviousHueMin;
 int ConfigUtils::m_npreviousHueMax;
 int ConfigUtils::m_npreviousSaturationMin;

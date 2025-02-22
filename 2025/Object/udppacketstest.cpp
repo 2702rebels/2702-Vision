@@ -1,3 +1,10 @@
+/*! \brief This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet to an IP.
+* Depends on:
+* - asio(UDP client library)
+* - ObjectDetectionStruct.h and ObjectDetectionStruct.h
+*/
+
+
 #include <iostream>
 #include "ObjectDetectionStruct.h"
 #include "ObjectDetectionStruct.cpp"
@@ -8,12 +15,17 @@
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT "27021"
+// This is the structure types where the serialization and deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 using asio::ip::udp;
 
-// Function to send the ObjectDetectionPacket
+/*! \brief Serialize and send an object detection packet.
+* \param packet - The packet to send.
+* \param host - The IP to send the packet to.
+* \param port - The port on the IP to send the packet to.
+*/
 void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::string& host, const std::string& port) {
     try {
         asio::io_context io_context;
@@ -41,9 +53,11 @@ void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::s
 
 int main( int argc, char **argv ){
     std::cout << "test123\n";
-    ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 1);
-    ObjectDetectionInfo coral2 = ObjectDetectionInfo(50.2f, 24.3f, 15, 1);
+    // Create object detections with testing data
+    ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 0);
+    ObjectDetectionInfo coral2 = ObjectDetectionInfo(50.2f, 24.3f, 15, 0);
     std::cout << "initialized detects successfully\n";
+    // Initialize a span with a 1000 byte length(this should be compressed in production code), filled with 0s by default
     std::vector<uint8_t> coralBytesVec(1000);
     std::span<uint8_t> coralBytes(coralBytesVec.data(), coralBytesVec.size());
     StructTypeObjectDetectionInfo::Pack(coralBytes, coral1);
@@ -52,14 +66,17 @@ int main( int argc, char **argv ){
     std::cout << "unpackedCoral angle: " << unpackedCoral.m_angle << "\n";
     std::cout << "unpackedCoral quality: " << unpackedCoral.m_quality << "\n";
     std::cout << "unpackedCoral type: " << unpackedCoral.m_type << "\n";
+    // Check that the serialized and original detections are the same
     if(unpackedCoral == coral1){
         std::cout << ":D coral serialized and deserialized successfully" << "\n";
     }
     else{
         std::cout << "coral is sad :C" << "\n";
     }
+    // Initialize a 1000-byte span, should be condensed in production code, filled with 0s by default
     std::vector<uint8_t> packetBytesVec(1000);
     std::span<uint8_t> packetBytes(packetBytesVec.data(), packetBytesVec.size());
+    // Create a testing packet
     ObjectDetectionPacket packet(5, 1, 123123L, 2, coral1, coral2, ObjectDetectionInfo(), ObjectDetectionInfo());
     StructTypeObjectDetectionPacket::Pack(packetBytes, packet);
     ObjectDetectionPacket unpackedPacket = StructTypeObjectDetectionPacket::Unpack(packetBytes);
@@ -84,6 +101,7 @@ int main( int argc, char **argv ){
     std::cout << "angle4: " << unpackedPacket.m_coral4.m_angle << "\n";
     std::cout << "quality4: " << unpackedPacket.m_coral4.m_quality << "\n";
     std::cout << "type4: " << unpackedPacket.m_coral4.m_type << "\n";
+    // Check that the original and deserialized packet are the same
     if(unpackedPacket == packet){
         std::cout << "packet serialized and deserialized successfully" << "\n";
     }

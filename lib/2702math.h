@@ -10,7 +10,9 @@ namespace Rebels {
 #endif
 
 class Point2d {
+  /*! \brief Horizontal component of point. */
   float m_fU;
+  /*! \brief Vertical component of point. */
   float m_fV;
 
  public:
@@ -20,11 +22,17 @@ class Point2d {
 
   Point2d &operator=(Point2d const &src);
 
+  /*! \brief Assign new values to point coordinates. 
+  * \param fU - new horizontal component of point.
+  * \param fV - new vertical component of point.
+  */
   inline void set(float fU, float fV) {
     m_fU = fU;
     m_fV = fV;
   }
+  /*! \brief Returns horizontal component of point. */
   inline float u() const { return m_fU; }
+  /*! \brief Returns vertical component of point. */
   inline float v() const { return m_fV; };
 };
 
@@ -35,8 +43,11 @@ class Euler;
 class Point3d {
   friend class Quaternion;
   friend class RotationMatrix;
+  /*! \brief X component of point. */
   float m_fX;
+  /*! \brief Y component of point. */
   float m_fY;
+  /*! \brief Z component of point. */
   float m_fZ;
 
  public:
@@ -57,12 +68,14 @@ class Point3d {
 
   Point3d CrossProduct(Point3d const &v2) const;
   float DotProduct(Point3d const &v2) const;
-
   void Normalize();
   float length() const;
 
+  /*! \brief Returns x component of point. */
   inline float x() const { return m_fX; }
+  /*! \brief Returns y component of point. */
   inline float y() const { return m_fY; }
+  /*! \brief Returns z component of point. */
   inline float z() const { return m_fZ; }
 };
 
@@ -124,9 +137,13 @@ public:
 
 class Quaternion {
   friend class RotationMatrix;
+  /*! \brief Q component of rotation. */
   float m_fQ0;
+  /*! \brief X component of rotation. */
   float m_fX;
+  /*! \brief Y component of rotation. */
   float m_fY;
+  /*! \brief Z component of rotation. */
   float m_fZ;
 
  public:
@@ -146,9 +163,13 @@ class Quaternion {
 
   Point3d operator*(const Point3d &other) const;
 
+  /*! \brief Returns q component of rotation. */
   inline float q0() const { return m_fQ0; }
+  /*! \brief Returns x component of rotation. */
   inline float x() const { return m_fX; }
+  /*! \brief Retursn y component of rotation. */
   inline float y() const { return m_fY; }
+  /*! \brief Returns z component of rotation. */
   inline float z() const { return m_fZ; }
 };
 
