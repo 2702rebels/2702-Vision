@@ -1,9 +1,7 @@
-/*
-* \brief This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet
-* \brief to an IP
-* \brief Depends on:
-* \brief - asio(UDP client library)
-* \brief - ObjectDetectionStruct.h and ObjectDetectionStruct.h
+/*! \brief This program serves to test the object detection packet serialziation and deserializing, as well as being able to send a test packet to an IP.
+* Depends on:
+* - asio(UDP client library)
+* - ObjectDetectionStruct.h and ObjectDetectionStruct.h
 */
 
 
@@ -17,13 +15,19 @@
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT "27021"
+#define PI_IP "192.168.1.173"
+#define OLEG_IP "192.168.1.142"
 // This is the structure types where the serialization and deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 using asio::ip::udp;
 
-/* \brief Serialize and send an object detection packet */
+/*! \brief Serialize and send an object detection packet.
+* \param packet - The packet to send.
+* \param host - The IP to send the packet to.
+* \param port - The port on the IP to send the packet to.
+*/
 void sendObjectDetectionPacket(const ObjectDetectionPacket& packet, const std::string& host, const std::string& port) {
     try {
         asio::io_context io_context;
@@ -65,7 +69,7 @@ int main( int argc, char **argv ){
     std::cout << "unpackedCoral quality: " << unpackedCoral.m_quality << "\n";
     std::cout << "unpackedCoral type: " << unpackedCoral.m_type << "\n";
     // Check that the serialized and original detections are the same
-    if(unpackedCoral == coral1){
+    if(unpackedCoral.m_distance == coral1.m_distance && unpackedCoral.m_angle == coral1.m_angle && unpackedCoral.m_quality == coral1.m_quality && unpackedCoral.m_type == coral1.m_type){
         std::cout << ":D coral serialized and deserialized successfully" << "\n";
     }
     else{
@@ -100,7 +104,7 @@ int main( int argc, char **argv ){
     std::cout << "quality4: " << unpackedPacket.m_coral4.m_quality << "\n";
     std::cout << "type4: " << unpackedPacket.m_coral4.m_type << "\n";
     // Check that the original and deserialized packet are the same
-    if(unpackedPacket == packet){
+    if(unpackedPacket.m_key == packet.m_key && unpackedPacket.m_count == packet.m_count && unpackedPacket.m_time == packet.m_time && unpackedPacket.m_versionNumber == packet.m_versionNumber && unpackedPacket.m_coral1.m_distance == packet.m_coral1.m_distance && unpackedPacket.m_coral1.m_angle == packet.m_coral1.m_angle && unpackedPacket.m_coral1.m_quality == packet.m_coral1.m_quality && unpackedPacket.m_coral2.m_distance == packet.m_coral2.m_distance && unpackedPacket.m_coral2.m_angle == packet.m_coral2.m_angle && unpackedPacket.m_coral2.m_quality == packet.m_coral2.m_quality && unpackedPacket.m_coral3.m_distance == packet.m_coral3.m_distance && unpackedPacket.m_coral3.m_angle == packet.m_coral3.m_angle && unpackedPacket.m_coral3.m_quality == packet.m_coral3.m_quality && unpackedPacket.m_coral4.m_distance == packet.m_coral4.m_distance && unpackedPacket.m_coral4.m_angle == packet.m_coral4.m_angle && unpackedPacket.m_coral4.m_quality == packet.m_coral4.m_quality && unpackedPacket.m_coral1.m_type == packet.m_coral1.m_type && unpackedPacket.m_coral2.m_type == packet.m_coral2.m_type && unpackedPacket.m_coral3.m_type == packet.m_coral3.m_type && unpackedPacket.m_coral4.m_type == packet.m_coral4.m_type){
         std::cout << "packet serialized and deserialized successfully" << "\n";
     }
     else{

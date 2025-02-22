@@ -1,8 +1,6 @@
-/*
-* \brief This is a program that acts as a network tables client to test sending values to a server for debugging purposes. Can also print out
-* \brief object detection parameters that are received from the server.
-* \brief Depends on:
-* \brief - wpilib ntcore
+/*! \brief This is a program that acts as a network tables client to test sending values to a server for debugging purposes, can also print out object detection parameters that are received from the server.
+* Depends on:
+* - wpilib ntcore
 */
 
 #include <iostream>
@@ -32,26 +30,25 @@ nt::IntegerSubscriber valueMaxTopic;
 nt::DoublePublisher coralDistanceTopic;
 nt::DoublePublisher coralAngleTopic;
 
-/* \brief Handle Ctrl+C interrupts */
+/*! \brief Handle Ctrl+C interrupts */
 void sighandler(int nSig){
     printf("Received Signal: %d\n", nSig);
     std::cout << "Can't use Ctrl+C to exit, use stop command\n";
 }
 
-/* \brief Print the list of commands to the console */
+/*! \brief Print the list of commands to the console */
 void showHelp(){
     std::cout << "Valid commands are: \n" << "print - logs all current topic values\n" << "pushdist - push a new distance value\n"
     << "pushangle - push a new angle value\n" << "stop - shuts the client down\n" << "help - displays this text\n";
 }
 
-/* \brief Shuts down the client. Note that this is not an immediate effect, program will run for another tick before exiting. */
+/*! \brief Shuts down the client. Note that this is not an immediate effect, program will run for another tick before exiting. */
 void shutdown(){
     bStop = true;
 }
 
-/* \brief 
-Prints the current parameter networktable values. This function does not automatically update as new topics are added and will
-need to be modified if new topics are added
+/*! \brief Prints the current parameter networktable values. 
+This function does not automatically update as new topics are added and will need to be modified if new topics are added
 */
 void printNetworkTableValues(){
     printf("huemin: %ld\n", hueMinTopic.GetAtomic(0.0f).value);
@@ -62,7 +59,7 @@ void printNetworkTableValues(){
     printf("valmax: %ld\n", valueMaxTopic.GetAtomic(0.0f).value);
 }
 
-/* \brief Pushes a new coral distance value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
+/*! \brief Pushes a new coral distance value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
 void pushDistanceValue(){
     std::string value;
     std::cout << "Please enter a value: ";
@@ -70,7 +67,7 @@ void pushDistanceValue(){
     coralDistanceTopic.SetDefault(stof(value));
 }
 
-/* \brief Pushes a new coral angle value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
+/*! \brief Pushes a new coral angle value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
 void pushAngleValue(){
     std::string value;
     std::cout << "Please enter a value: ";

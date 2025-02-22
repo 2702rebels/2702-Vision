@@ -1,4 +1,4 @@
-/* \brief Class for loading / saving configs from disk. 
+/*! \brief Class for loading / saving configs from disk. 
 Depends on: 
 - nlohmannjson */
 
@@ -14,7 +14,7 @@ Depends on:
  
 using json = nlohmann::json;
 
-/* \brief Class representing the parameters used for object detection */
+/*! \brief Class representing the parameters used for object detection */
 class imageProcessingFilterSettings
 {
 public:
@@ -25,7 +25,7 @@ public:
 	int valueMin;
 	int valueMax;
  
-	/* \brief 
+	/*!  
 	* \brief Fetches the object detection settings from json 
 	* \param  jsonString - a JSON string that contains the config data, should be checked before passing into this function
 	*/
@@ -40,7 +40,7 @@ public:
 		this->valueMax = filterSettings[SETTING_VALUE_MAX];
 	}
 
-	/* \brief 
+	/*!  
 	* \brief Initialize an instance of the class from the settings
 	* \param  hueMin - integer representing the hueMin parameter
 	* \param  hueMax - integer representing the hueMax parameter
@@ -59,7 +59,7 @@ public:
 		this->valueMax = valueMax;
 	}
 
-	/* \brief 
+	/*!  
 	* \brief Write the settings stored in the class to the config file at location @link SETTINGS_FILE_PATH 
 	*/
 	void writeSettings()
@@ -79,7 +79,7 @@ public:
 	}
 };
 
-/* \brief 
+/*!  
 * \brief Class containing the static functions for interacting with imageProcessingFilterSettings and the config file. 
 * \brief Cannot be instantiated
 */
@@ -92,7 +92,7 @@ public:
 	static int m_npreviousSaturationMax;
 	static int m_npreviousValueMin;
 	static int m_npreviousValueMax;
-	/* \brief 
+	/*!  
 	* \brief Returns true if image processor's configuration is different from what is currently written to the config file. 
 	* \brief Otherwise returns false.
 	* \param  imageProcessor - the @link imgProc with the current settings being used for object detection
@@ -125,7 +125,7 @@ public:
 		}
 		return false;
 	}
-	/* \brief 
+	/*!  
 	* \brief Loads the config from the file and effects the settings in the image processor. 
 	* \brief Looks for config file at @link SETTINGS_FILE_PATH
 	* \param  imageProcessor - The image processor to set the config on
@@ -154,7 +154,7 @@ public:
 			m_npreviousValueMax = config.valueMax;
 		}
 	}
-	/* \brief 
+	/*!  
 	* \brief Writes a config save file at @link SETTINGS_FILE_PATH with the current settings from the image processor.
 	* \param  imageProcessor - the image processor with the settings to save to the config file
 	*/

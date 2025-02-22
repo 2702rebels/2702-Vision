@@ -1,11 +1,11 @@
-/* \brief Main for object detection. Cannot be run in a desktop testing environment. Uses NetworkTables to update object detection config at runtime.
-* \brief Depends on: 
-* \brief - opencv
-* \brief - rpicam
-* \brief - wpilib ntcore
-* \brief - asio(UDP client library)
-* \brief - object.h
-* \brief - config.h
+/*! \brief Main for object detection. Cannot be run in a desktop testing environment. Uses NetworkTables to update object detection config at runtime.
+* Depends on: 
+*  - opencv
+*  - rpicam
+*  - wpilib ntcore
+*  - asio(UDP client library)
+*  - object.h
+*  - config.h
 */
 
 #include <unistd.h>
@@ -55,8 +55,8 @@ bool bStop = false;
 
 #define USE_NETWORK_TABLES 1
 
-/* \brief Handles Ctrl+C interrupts
-\param nSig - Should always be equal to @link SIGINT*/
+/*! \brief Handles Ctrl+C interrupts.
+ * \param nSig - Should always be equal to @link SIGINT.*/
 void sighandler( int nSig )
 {
 	printf( "Received Signal %d\n", nSig );

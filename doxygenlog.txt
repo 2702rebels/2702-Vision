@@ -1,0 +1,21 @@
+/media/sf_2702-Vision/2025/Object/ObjectDetectionStruct.h:39: warning: Internal inconsistency: scope for class wpi::Struct< ObjectDetectionInfo > not found!
+/media/sf_2702-Vision/2025/Object/ObjectDetectionStruct.h:85: warning: Internal inconsistency: scope for class wpi::Struct< ObjectDetectionPacket > not found!
+/media/sf_2702-Vision/2025/Object/config.h:159: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/config.h:63: warning: unable to resolve link to 'SETTINGS_FILE_PATH.' for \link command
+/media/sf_2702-Vision/2025/Object/config.h:64: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/object.cpp:59: warning: unable to resolve link to 'SIGINT.' for \link command
+/media/sf_2702-Vision/2025/Object/object.cpp:60: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/config.h:159: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/config.h:100: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/config.h:132: warning: Illegal command '@param' as part of a \link
+/media/sf_2702-Vision/2025/Object/config.h:133: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/config.h:159: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/config.h:63: warning: unable to resolve link to 'SETTINGS_FILE_PATH.' for \link command
+/media/sf_2702-Vision/2025/Object/config.h:64: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/config.h:63: warning: unable to resolve link to 'SETTINGS_FILE_PATH.' for \link command
+/media/sf_2702-Vision/2025/Object/config.h:64: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/object.h:198: warning: Unexpected end of comment while inside link command
+/media/sf_2702-Vision/2025/Object/ObjectDetectionStruct.cpp:78: warning: argument 'data' from the argument list of wpi::Struct< ObjectDetectionInfo >::Pack has multiple @param documentation sections
+/media/sf_2702-Vision/2025/Object/ObjectDetectionStruct.cpp:78: warning: argument 'value' from the argument list of wpi::Struct< ObjectDetectionInfo >::Pack has multiple @param documentation sections
+/media/sf_2702-Vision/2025/Object/ObjectDetectionStruct.cpp:136: warning: argument 'data' from the argument list of wpi::Struct< ObjectDetectionPacket >::Pack has multiple @param documentation sections
+/media/sf_2702-Vision/2025/Object/ObjectDetectionStruct.cpp:136: warning: argument 'value' from the argument list of wpi::Struct< ObjectDetectionPacket >::Pack has multiple @param documentation sections

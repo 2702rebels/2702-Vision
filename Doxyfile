@@ -215,7 +215,7 @@ SHORT_NAMES            = NO
 # explicit @brief command for a brief description.)
 # The default value is: NO.
 
-JAVADOC_AUTOBRIEF      = YES
+JAVADOC_AUTOBRIEF      = NO
 
 # If the JAVADOC_BANNER tag is set to YES then Doxygen will interpret a line
 # such as
@@ -925,7 +925,7 @@ WARN_NO_PARAMDOC       = NO
 # will automatically be disabled.
 # The default value is: NO.
 
-WARN_IF_UNDOC_ENUM_VAL = NO
+WARN_IF_UNDOC_ENUM_VAL = YES
 
 # If WARN_LAYOUT_FILE option is set to YES, Doxygen will warn about issues found
 # while parsing the user defined layout file, such as missing or wrong elements.
@@ -979,7 +979,7 @@ WARN_LINE_FORMAT       = "at line $line of file $file"
 # specified the warning and error messages are written to standard output
 # (stdout).
 
-WARN_LOGFILE           =
+WARN_LOGFILE           = doxygenlog.txt
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -2053,7 +2053,7 @@ EXTRA_SEARCH_MAPPINGS  =
 # If the GENERATE_LATEX tag is set to YES, Doxygen will generate LaTeX output.
 # The default value is: YES.
 
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of

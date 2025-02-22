@@ -1,7 +1,7 @@
-/* \brief 
-* \brief Program to get the calibration data for the camera. Loads all png images from /data/calibration/ to create these calibration values.
-* \brief Depends on:
-* \brief - opencv
+/*! \brief Program to get the calibration data for the camera. 
+Loads all png images from /data/calibration/ to create these calibration values.
+* Depends on:
+* - opencv
 */
 
 #include <opencv2/opencv.hpp>

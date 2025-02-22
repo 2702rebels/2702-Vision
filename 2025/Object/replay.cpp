@@ -1,8 +1,9 @@
-/* \brief Replays log files fetched from the pi through image processing. This can be built and run on a desktop environment.
-* \brief Usage is ./replay logfilepath
-* \brief Depends on: 
-* \brief - opencv
-* \brief - rpicam
+/*! \brief Replays log files fetched from the pi through image processing. 
+* This can be built and run on a desktop environment.
+* Usage is ./replay logfilepath
+* Depends on: 
+* - opencv
+* - rpicam
 */
 
 
