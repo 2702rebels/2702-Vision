@@ -1,4 +1,10 @@
 2702-Vision
 ===============
 
-Code for vision processing including game-piece detection, apriltags, and utilities. To generate docs, run doxygen at this directory. Note that you may need to run it with sudo if this is a mounted directory.
+Code for vision processing including game-piece detection, apriltags, and utilities.
+
+### Building the docs
+
+1. Install doxygen from their website (Doxygen | Install)[https://www.doxygen.nl/download.html]
+2. Run ```doxygen``` in the project root directory(the directory where this file is)
+3. In file explorer, look for and open index.html in the /docs/ folder.
