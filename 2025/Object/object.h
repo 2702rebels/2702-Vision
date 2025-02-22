@@ -1,19 +1,42 @@
+/*! \brief Contains the object detection image processing classes. Main is located in object.cpp
+* Depends on:
+* - wpilib ntcore
+* - ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
+*/
+
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/DoubleTopic.h>
+#include <sys/time.h>
+#include "ObjectDetectionStruct.h"
+#include "ObjectDetectionStruct.cpp"
 #pragma once
 
 #ifndef IMGPROC_GUI
 #define IMGPROC_GUI	0
 #endif
+/*! \brief UDP address to send object detection packets to. */
+#define OBJECT_DETECTION_SERVER_IP "127.0.0.1"
+/*! \brief UDP port to send object detection packets to. */
+#define OBJECT_DETECTION_SERVER_PORT "6666"
+
+// Structure classes where the serialization / deserialization functions are defined
+using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
+using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 class imgProc : public FrmProcessor
 {
+	/*! \brief Hue min object detection parameter. */
 	int			m_nHLow = 179;
+	/*! \brief Saturation min object detection parameter. */
 	int			m_nSLow = 0;
+	/*! \brief Value min object detection parameter. */
 	int			m_nVLow = 147;
+	/*! \brief Hue max object detection parameter. */
 	int			m_nHHigh = 180;
+	/*! \brief Saturation max object detection parameter. */
 	int			m_nSHigh = 255;
+	/*! \brief Value max object detection parameter. */
 	int			m_nVHigh = 255;
 
 	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
@@ -24,11 +47,14 @@ class imgProc : public FrmProcessor
 
 	double		distance;
 	
+	/*! \brief Camera calibration matrix. */
 	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 888.7765991141953, 0, 304.4048631642603,
 0, 892.4756367000551, 370.9657053548069,
 0, 0, 1);
 
+	/*! \brief Camera distortion coefficients. */
 	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.1164723784381825, 0.5948511019477938, 0.0178130457349927, -0.03413649680380905, -1.650075067124663);
+	/*! \brief Focal length of camera. */
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
 	
@@ -53,56 +79,98 @@ public:
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
 	}
+	/*! 
+	* \brief Sets hue min object detection parameter. 
+	* \param  newValue - integer representing the new hue min value
+	*/
 	virtual void setPVHueMin(int newValue)
 	{
 		m_nHLow = newValue;
 		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
 	}
+	/*! 
+	* \brief Sets hue max object detection parameter.
+	* \param  newValue - integer representing the new hue max value
+	*/
 	virtual void setPVHueMax(int newValue)
 	{
 		m_nHHigh = newValue;
 		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
 	}
+	/*! 
+	* \brief Sets saturation min object detection parameter.
+	* \param  newValue - integer representing the new saturation min value
+	*/
 	virtual void setSaturationMin(int newValue)
 	{
 		m_nSLow = newValue;
 		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
 	}
+	/*! 
+	* \brief Sets saturation max object detection parameter.
+	* \param  newValue - integer representing the new saturation max value
+	*/
 	virtual void setSaturationMax(int newValue)
 	{
 		m_nSHigh = newValue;
 		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
 	}
+	/*! 
+	* \brief Sets value min object detection parameter.
+	* \param  newValue - integer representing the new value min value
+	*/
 	virtual void setValueMin(int newValue)
 	{
 		m_nVLow = newValue;
 		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
 	}
+	/*! 
+	* \brief Sets value max object detection parameter.
+	* \param  newValue - integer representing the new value max value
+	*/
 	virtual void setValueMax(int newValue)
 	{
 		m_nVHigh = newValue;
 		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
 	}
+	/*! 
+	* \brief Returns the hue min object detection parameter. 
+	*/
 	virtual int getPVHueMin() const
 	{
 		return m_nHLow;
 	}
+	/*! 
+	* \brief Returns the hue max object detection parameter. 
+	*/
 	virtual int getPVHueMax() const
 	{
 		return m_nHHigh;
 	}
+	/*! 
+	* \brief Returns the saturation min object detection parameter. 
+	*/
 	virtual int getSaturationMin() const
 	{
 		return m_nSLow;
 	}
+	/*! 
+	* \brief Returns the saturation max object detection parameter. 
+	*/
 	virtual int getSaturationMax() const
 	{
 		return m_nSHigh;
 	}
+	/*! 
+	* \brief Returns the value min object detection parameter. 
+	*/
 	virtual int getValueMin() const
 	{
 		return m_nVLow;
 	}
+	/*! 
+	* \brief Returns the value max object detection parameter. 
+	*/
 	virtual int getValueMax() const
 	{
 		return m_nVHigh;
@@ -111,6 +179,7 @@ public:
 	{
 
 	}
+
 	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
 	{
 		cv::Mat hsv, mask;
@@ -134,7 +203,10 @@ public:
 		cv::inRange(hsv, lower_bound, upper_bound, mask);
 		return mask;
 	}
-
+	
+	/*! 
+	* \brief Returns object distance from the camera in meters and the object angle from the camera in radians.
+	*/
 	std::pair<double, double> calculate_distance_and_angle(const std::vector<cv::Point>& contour, double focal_length, double actual_diameter, const cv::Point2d& camera_center)
 	{
 		if (contour.size() < 5) {
@@ -147,10 +219,9 @@ public:
 
 		double dx = rect.center.x - camera_center.x;
 		double angle = std::atan2(dx, focal_length);
-		double angle_degrees = angle * 180.0 / CV_PI;
 		m_nLastCoralDistanceTopic.SetDefault(distance);
 		m_nLastCoralAngleTopic.SetDefault(angle);
-		return { distance, angle_degrees };
+		return { distance, angle };
 	}
 
 	std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> fit_cylinder_contour(const std::vector<cv::Point>& contour)
@@ -234,12 +305,22 @@ public:
                 // Display distance and angle (only if valid values were calculated)
                 if (distance != -1.0 && angle != -1.0) {
                     std::string dist_text = "Distance: " + std::to_string(distance) + "m";
-                    std::string angle_text = "Angle: " + std::to_string(angle) + "deg";
+                    std::string angle_text = "Angle: " + std::to_string(angle) + "rad";
                     cv::putText(filtered_frame, dist_text, cv::Point(10, 60), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                     cv::putText(filtered_frame, angle_text, cv::Point(10, 90), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                 }
 #endif
 				printf( "%.3f   %.3f\n", distance, angle );
+				struct timespec tsCur;
+				struct timeval tvCur;
+				struct timeval tvDelta;
+	
+				// Get current time since power on
+				clock_gettime(CLOCK_MONOTONIC, &tsCur );
+				TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
+	
+				// Calculate delta between when frame was catured and now.
+				timersub( &tvCur, pcf->ts(), &tvDelta );
             }
         }
 
