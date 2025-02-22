@@ -11,3 +11,5 @@ networktables.json
 allwpilib/
 *.o
 *.a
+/docs
+doxygenlog.txt
