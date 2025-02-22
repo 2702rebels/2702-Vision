@@ -76,7 +76,7 @@ ObjectDetectionInfo ObjectDetectionInfoStructType::Unpack(std::span<const uint8_
 }
 
 /*! \brief Serializes an ObjectDetectionInfo into a span of bytes to be sent as a UDP packet.
-* \param  data - a bytes span, should be large enough to hold the serialized data(see \ref ObjectDetectionInfoStructType::GetSize() ).
+* \param  data - a bytes span, must be large enough to hold the serialized data(see \ref ObjectDetectionInfoStructType::GetSize() ).
 * \param  value - The ObjectDetectionInfo class to serialize. */
 void ObjectDetectionInfoStructType::Pack(std::span<uint8_t> data, const ObjectDetectionInfo &value)
 {
@@ -134,7 +134,7 @@ ObjectDetectionPacket ObjectDetectionPacketStructType::Unpack(std::span<const ui
 }
 
 /*! \brief Serializes an ObjectDetectionPacket into the provided byte span.
-* \param data - Byte span that has enough size to hold the ObjectDetectionPacket(see \ref ObjectDetectionPacketStructType::GetSize() ).
+* \param data - Byte span that must be large enough to hold the ObjectDetectionPacket(see \ref ObjectDetectionPacketStructType::GetSize() ).
 * \param value - ObjectDetectionPacket to be serialized.
 */
 void ObjectDetectionPacketStructType::Pack(std::span<uint8_t> data, const ObjectDetectionPacket &value)
