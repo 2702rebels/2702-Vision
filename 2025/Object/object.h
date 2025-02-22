@@ -238,7 +238,7 @@ public:
 
 		cv::RotatedRect rect = cv::fitEllipse(contour);
 		double apparent_diameter = std::min(rect.size.width, rect.size.height);
-		double distance = (actual_diameter * \brief focal_length) / apparent_diameter;
+		double distance = (actual_diameter * focal_length) / apparent_diameter;
 
 		double dx = rect.center.x - camera_center.x;
 		double angle = std::atan2(dx, focal_length);
@@ -260,17 +260,17 @@ public:
 		float angle = ellipse.angle;
 
 		// Convert angle to radians
-		float angleRad = angle * \brief CV_PI / 180.0;
+		float angleRad = angle * CV_PI / 180.0;
 
 		// Calculate the endpoints of the major axis
 		cv::Point2f majorAxisEndPoint1(
-			center.x + majorAxisLength / 2 * \brief cos(angleRad),
-			center.y + majorAxisLength / 2 * \brief sin(angleRad)
+			center.x + majorAxisLength / 2 * cos(angleRad),
+			center.y + majorAxisLength / 2 * sin(angleRad)
 		);
 
 		cv::Point2f majorAxisEndPoint2(
-			center.x - majorAxisLength / 2 * \brief cos(angleRad),
-			center.y - majorAxisLength / 2 * \brief sin(angleRad)
+			center.x - majorAxisLength / 2 * cos(angleRad),
+			center.y - majorAxisLength / 2 * sin(angleRad)
 		);
 
 		std::vector<cv::Point> hull;

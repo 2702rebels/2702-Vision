@@ -100,7 +100,7 @@ struct wpi::Struct<ObjectDetectionPacket>
     /*! \brief  Returns the name of the class that represents the data in this packet as a string.  */
     static constexpr std::string_view GetTypeName() { return "ObjectDetectionPacket"; }
     /*! \brief Returns the size of the packet in bytes. This is a constant value. */
-    static constexpr size_t GetSize() { return 4 + 4 + 8 + 1 + 18 * \brief 4; }
+    static constexpr size_t GetSize() { return 4 + 4 + 8 + 1 + 18 * 4; }
     /*! \brief Returns the schema of the packet detailing its format as a string. */
     static constexpr std::string_view GetSchema()
     {
