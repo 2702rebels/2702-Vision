@@ -8,6 +8,7 @@
 /.vscode
 # Exclude persistent data from networktable server
 networktables.json
+doxygenlog.txt
 allwpilib/
 *.o
 *.a
