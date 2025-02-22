@@ -21,7 +21,7 @@ enum ObjectDetectionTypes {
     CORAL
 };
 
-/*! \brief Class correlating to ObjectDetectionInfo structure, provides an accessible way to access the deserialized data and pass in data for serialization 
+/*! \brief Class correlating to \ref wpi::Struct<ObjectDetectionInfo> structure, provides an accessible way to access the deserialized data and pass in data for serialization 
 */
 class ObjectDetectionInfo
 {
@@ -67,7 +67,7 @@ struct wpi::Struct<ObjectDetectionInfo>
 
 static_assert(wpi::StructSerializable<ObjectDetectionInfo>); // Ensure that the ObjectDetection is serializable
 
-/*! \brief Class correlating to the ObjectDetectionPacket structure used for UDP packet serialization / deserialization. 
+/*! \brief Class correlating to the \ref wpi::Struct<ObjectDetectionPacket> structure used for UDP packet serialization / deserialization. 
 * Provides an accessible way to access the deserialized data and pass in data for serialization. Holds a max of 4 objects
 */
 class ObjectDetectionPacket
