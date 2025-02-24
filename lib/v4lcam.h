@@ -375,7 +375,7 @@ public:
 
 			if( xioctl( VIDIOC_DQBUF, &buf ) == 0 )
 			{
-				printf( "Buf: %d\n", buf.index );
+//				printf( "Buf: %d\n", buf.index );
 				// process this frame...
 				if( bProcessFrame( buf ))
 				{
@@ -583,11 +583,13 @@ public:
 		memset( &menu, 0, sizeof(menu) );
 		menu.id = ctrl.id;
 
+#if 0
 		for( menu.index = ctrl.minimum; menu.index < ctrl.maximum; menu.index++ )
 		{
 			if( !ioctl( m_fd, VIDIOC_QUERYMENU, &menu ) )
 				printf( "    %-3d %s\n", menu.index, menu.name );
 		}
+#endif
 	}
 	void printControls()
 	{

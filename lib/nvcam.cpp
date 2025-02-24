@@ -134,7 +134,7 @@ void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
 
 bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 {
-	printf( "Process Frame: %d/%d\n", buf.index, buf.sequence );
+//	printf( "Process Frame: %d/%d\n", buf.index, buf.sequence );
 	//Grab some info from the buffer and store in the associted frame
 	int nIdx = buf.index;
 	m_pFrames[nIdx].m_u32Seq = buf.sequence;
