@@ -11,6 +11,7 @@
 
 #include <linux/videodev2.h>
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <thread>
@@ -32,6 +33,8 @@ using namespace std;
 #include "nvcam.h"
 
 #include <signal.h>
+
+#define MAX_EXP	0x18000
 
 void printinfo( v4lcam &cam )
 {
@@ -99,7 +102,7 @@ class imgProc : public nvFrmProcessor
 	bool		m_bFirstVid = true;
 	cs::CvSource 	m_outputStream;
 
-    detectorstruct detector;
+	detectorstruct detector;
 public:
 	imgProc()
 	{
@@ -108,10 +111,28 @@ public:
 	{
 
 	}
-	virtual void ProcessFrame( int nCam,  const nvFrame *pcf )
+	virtual void ProcessFrame( nvCamera *pCam,  const nvFrame *pcf )
 	{
-//		printf( "Have Frame from %d:%d - %d/%d\n", nCam, pcf->u32Sequence(), pcf->nCols(), pcf->nRows() );
+//		printf( "Have Frame from %d:%d - %d/%d\n", pCam->nCam(), pcf->u32Sequence(), pcf->nCols(), pcf->nRows() );
 		cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC1, (void *)pcf->pu8Image() );
+#if 0
+		uint64_t u64Exp = pCam->u64GetExposure() + 1;
+		u64Exp &= 0xFFFFF;
+
+		pCam->bSetExposure( u64Exp );
+#endif
+		if (pcf->u32Sequence() % 2) {
+			if (m_mtxCS.try_lock()) { 
+				if (m_bFirstVid) {
+					m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows() );
+					m_bFirstVid = false;
+				}
+				
+				m_outputStream.PutFrame(frame);
+				m_mtxCS.unlock();
+			}
+			return;
+		}
 		if (m_mtxAT.try_lock()) {
 			if (m_bFirstAT) {
 				detector.camera_matrix = create_camera_matrix();
@@ -125,7 +146,7 @@ public:
 			}
 			
 	        	detector.gpu_detector_->DetectGray((uint8_t *)pcf->pu8Image());
-#if 0
+#if 1
        		 	const zarray_t *detections = detector.gpu_detector_->Detections();
 		        if( zarray_size(detections)) {
 				for (int i = 0; i < zarray_size(detections); ++i) {
@@ -141,15 +162,7 @@ public:
 			m_mtxAT.unlock();
 		}
 		else {
-			printf( "Skipping %d\n", pcf->u32Sequence() );
-		}
-		if (m_mtxCS.try_lock()) { 
-			if (m_bFirstVid) {
-				m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows() );
-				m_bFirstVid = false;
-			}
-//			m_outputStream.PutFrame(frame);
-			m_mtxCS.unlock();
+			printf( "Skipping %d:%d\n", pCam->nCam(), pcf->u32Sequence() );
 		}
 	}
 };
@@ -173,10 +186,15 @@ int main( int argc, char **argv )
 	//	ntinst.StartServer();
 	//		RPICamera mycam0( "/dev/video0", 0, 800, 600, DRM_FORMAT_BGR888, proc );
 	//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
-		imgProc proc;
+		imgProc proc0;
+		imgProc proc1;
 //		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_RGB24, proc );
-		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_GREY, proc );
-	//	nvCamera mycam1( "/dev/video1", 4, 1 );
+		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_GREY, proc0 );
+		nvCamera mycam1( "/dev/video1", 1, 1280, 800, V4L2_PIX_FMT_GREY, proc1 );
+		mycam0.bSetExposure( 8000 );
+		mycam1.bSetExposure( 8000 );
+		printf( "Exp = %lu\n", mycam0.u64GetExposure() );
+//		mycam1.bSetExposure( MAX_EXP * 3 / 4);
 
 		printinfo( mycam0 );
 		while( !bStop ) {

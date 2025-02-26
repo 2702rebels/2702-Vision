@@ -69,7 +69,7 @@ protected:
 			size_t sPage = getpagesize();
 			size_t sBuffer = (nLen + sPage - 1) & ~(sPage - 1);
 #if (JETSON_NANO)				
-			cudaMallocManaged( &m_pMem, sBuffer, cudaMemAttachGlobal );
+			cudaMallocManaged( &m_pMem, sBuffer, cudaMemAttachHost );
 #else
 			m_pMem = memalign( sPage, sBuffer );
 #endif

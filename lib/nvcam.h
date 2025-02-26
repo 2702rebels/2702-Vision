@@ -19,6 +19,7 @@
 #define MAX_EXPOSURES	8
 #define NUM_WORKERS	4
 
+class nvCamera;
 class nvFrame
 {
 	friend class nvCamera;
@@ -77,7 +78,7 @@ public:
 	virtual ~nvFrmProcessor()
 	{
 	}
-	virtual void ProcessFrame( int nCam, nvFrame const *pnf )
+	virtual void ProcessFrame( nvCamera *pCam, nvFrame const *pnf )
 	{
 	}
 };
@@ -122,8 +123,10 @@ class nvCamera : public v4lcam
 public:
 	nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, nvFrmProcessor &nfp );
 	virtual ~nvCamera();
+	virtual int nCam();
 	virtual bool bSetExposure( uint64_t uExp );
 	virtual int nGetExposure();
+	virtual uint64_t u64GetExposure();
 
 	virtual void UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure );
 	virtual bool bProcessFrame( v4l2_buffer &buf );

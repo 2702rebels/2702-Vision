@@ -95,31 +95,68 @@ nvCamera::~nvCamera()
 	delete [] m_pFrames;
 }
 
+int nvCamera::nCam()
+{
+	return m_nCam;
+}
+
 bool nvCamera::bSetExposure( uint64_t uExp )
 {
-	v4l2_control ctrl;
+	v4l2_ext_control ctrl;
+	v4l2_ext_controls ctrls;
 
 	memset( &ctrl, 0, sizeof(ctrl) );
+	memset( &ctrls, 0, sizeof(ctrls) );
 	ctrl.id = 0x009a200a;
-	ctrl.value = uExp;
+//	ctrl.id = V4L2_CID_EXPOSURE;
+	ctrl.value64 = uExp;
 
-	if( ioctl( m_fd, VIDIOC_S_CTRL, &ctrl ) )
-		throw invalid_argument( string( "bSetExposure() failed" ) );
+	ctrls.count = 1;
+	ctrls.controls = &ctrl;
+
+	if( ioctl( m_fd, VIDIOC_S_EXT_CTRLS, &ctrls ) ) {
+		char szTmp[1024];
+		sprintf( szTmp, "bSetExposure(%lu) failed: %d\n", uExp, errno );
+		throw invalid_argument( szTmp );
+	}
 
 	return true;
 }
 
 int nvCamera::nGetExposure()
 {
-	v4l2_control ctrl;
+	v4l2_ext_control ctrl;
+	v4l2_ext_controls ctrls;
 
 	memset( &ctrl, 0, sizeof(ctrl) );
 	ctrl.id = 0x009a200a;
 
-	if( ioctl( m_fd, VIDIOC_G_CTRL, &ctrl ) )
+	ctrls.which = V4L2_CTRL_WHICH_CUR_VAL;
+	ctrls.count = 1;
+	ctrls.controls = &ctrl;
+
+	if( ioctl( m_fd, VIDIOC_G_EXT_CTRLS, &ctrls ) )
 		throw invalid_argument( string( "nvCamera::get V4L2_CID_EXPOSURE" ) );
 
-	return ctrl.value;
+	return ctrl.value64;
+}
+
+uint64_t nvCamera::u64GetExposure()
+{
+	v4l2_ext_control ctrl;
+	v4l2_ext_controls ctrls;
+
+	memset( &ctrl, 0, sizeof(ctrl) );
+	ctrl.id = 0x009a200a;
+
+	ctrls.which = V4L2_CTRL_WHICH_CUR_VAL;
+	ctrls.count = 1;
+	ctrls.controls = &ctrl;
+
+	if( ioctl( m_fd, VIDIOC_G_EXT_CTRLS, &ctrls ) )
+		throw invalid_argument( string( "nvCamera::get V4L2_CID_EXPOSURE" ) );
+
+	return ctrl.value64;
 }
 
 void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
@@ -324,7 +361,7 @@ void nvCamera::workerThreadFn()
 	{
 		nvFrame *pFrm = waitForWork();
 
-		m_nfp.ProcessFrame( m_nCam, pFrm );
+		m_nfp.ProcessFrame( this, pFrm );
 		FrameComplete( pFrm );
 	}
 	l.lock();

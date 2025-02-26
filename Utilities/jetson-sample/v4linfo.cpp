@@ -34,9 +34,9 @@ void printinfo( v4lcam &cam )
 
 int main( int argc, char **argv )
 {
-	cv::Mat abc( 800, 1280, CV_8UC4 );
+//	cv::Mat abc( 800, 1280, CV_8UC4 );
 
-	printf( "%d x %d -> %ld %ld %ld\n", abc.cols, abc.rows, abc.total(), abc.elemSize(), *abc.step.p );
+//	printf( "%d x %d -> %ld %ld %ld\n", abc.cols, abc.rows, abc.total(), abc.elemSize(), *abc.step.p );
 	try {
 		v4lcam mycam0( "/dev/video0" );
 		printinfo( mycam0 );
