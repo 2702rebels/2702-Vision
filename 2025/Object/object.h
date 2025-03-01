@@ -378,7 +378,7 @@ public:
 				#endif
                 // Draw the fitted contour
 				#if DEBUG_VIDEO || IMGPROC_GUI
-                //cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
+                cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
 
                 // Draw the major axis line if endpoints are valid
                 if (endpoints.first.x != 0 || endpoints.first.y != 0 || endpoints.second.x != 0 || endpoints.second.y != 0) {
