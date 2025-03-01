@@ -102,6 +102,8 @@ class imgProc : public FrmProcessor
 	std::mutex	m_mtxCS;
 	bool		m_bFirstVid = true;
 	cs::CvSource 	m_outputStream;
+	std::ofstream distFile;
+	std::ofstream angleFile;
 	#endif
 	
 public:
@@ -123,6 +125,10 @@ public:
 		cv::createTrackbar("Sat Max", "Filtered Video", &m_nSHigh, 255);
 		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
+#endif
+#if DEBUG
+	angleFile.open("/media/sf_2702-Vision/2025/Object/angle.txt");
+	distFile.open("/media/sf_2702-Vision/2025/Object/dist.txt");
 #endif
 /*
 		asio::io_context io_context;
@@ -378,6 +384,8 @@ public:
 				#endif
                 // Draw the fitted contour
 				#if DEBUG_VIDEO || IMGPROC_GUI
+				distFile << distance << "\n";
+				angleFile << angle << "\n";
                 cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
 
                 // Draw the major axis line if endpoints are valid
