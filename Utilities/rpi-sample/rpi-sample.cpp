@@ -122,7 +122,7 @@ int main( int argc, char **argv )
 		ntinst.StartServer();
 		imgProc proc( szLog );
 //		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
-		RPICamera mycam0( "/dev/video0", 0, 800, 600, DRM_FORMAT_RGB888, proc );
+		RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
 
 		while( !bStop ) {
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );
