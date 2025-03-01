@@ -11,6 +11,36 @@
 #include "ObjectDetectionStruct.h"
 #include "ObjectDetectionStruct.cpp"
 #include <asio.hpp>
+#include <unistd.h>
+#include <stdint.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <span>
+
+//#include <X11/Xlib.h>
+#include <linux/videodev2.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <thread>
+#include <vector>
+#include <mutex>
+#include <condition_variable>
+
+#include <string>
+#include <stdexcept>
+
+#include <cameraserver/CameraServer.h>
+#include <networktables/NetworkTableInstance.h>
+#include <drm/drm_fourcc.h>
+
+#include "rpicam.h"
+#include "VisLog.h"
+
 #pragma once
 
 #ifndef IMGPROC_GUI
@@ -20,6 +50,9 @@
 #define OBJECT_DETECTION_SERVER_IP "127.0.0.1"
 /*! \brief UDP port to send object detection packets to. */
 #define OBJECT_DETECTION_SERVER_PORT "6666"
+#define DEBUG 1
+#define DEBUG_VIDEO 1
+#define SEND_PACKETS 0
 
 // Structure classes where the serialization / deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
@@ -29,15 +62,15 @@ using asio::ip::udp;
 class imgProc : public FrmProcessor
 {
 	/*! \brief Hue min object detection parameter. */
-	int			m_nHLow = 179;
+	int			m_nHLow = 315;
 	/*! \brief Saturation min object detection parameter. */
 	int			m_nSLow = 0;
 	/*! \brief Value min object detection parameter. */
-	int			m_nVLow = 147;
+	int			m_nVLow = 198;
 	/*! \brief Hue max object detection parameter. */
-	int			m_nHHigh = 180;
+	int			m_nHHigh = 359;
 	/*! \brief Saturation max object detection parameter. */
-	int			m_nSHigh = 255;
+	int			m_nSHigh = 74;
 	/*! \brief Value max object detection parameter. */
 	int			m_nVHigh = 255;
 
@@ -64,6 +97,12 @@ class imgProc : public FrmProcessor
 	udp::endpoint *m_objectDetectionEndpoint;
 	/*! \brief Pointer to socket through which object detection data packets are sent. */
 	udp::socket *m_objectDetectionDataSocket;
+
+	#if DEBUG
+	std::mutex	m_mtxCS;
+	bool		m_bFirstVid = true;
+	cs::CvSource 	m_outputStream;
+	#endif
 	
 public:
 	imgProc() :
@@ -85,6 +124,7 @@ public:
 		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
+/*
 		asio::io_context io_context;
 
 		udp::resolver resolver(io_context);
@@ -93,7 +133,7 @@ public:
 		udp::socket socket(io_context);
 		socket.open(udp::v4());
 		m_objectDetectionDataSocket = &socket;
-		m_objectDetectionEndpoint = &receiver_endpoint;
+		m_objectDetectionEndpoint = &receiver_endpoint;*/
 	}
 	/*! 
 	* \brief Sets hue min object detection parameter. 
@@ -102,7 +142,9 @@ public:
 	virtual void setPVHueMin(int newValue)
 	{
 		m_nHLow = newValue;
+		#if (IMGPROC_GUI)
 		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
+		#endif
 	}
 	/*! 
 	* \brief Sets hue max object detection parameter.
@@ -111,7 +153,9 @@ public:
 	virtual void setPVHueMax(int newValue)
 	{
 		m_nHHigh = newValue;
+		#if (IMGPROC_GUI)
 		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
+		#endif
 	}
 	/*! 
 	* \brief Sets saturation min object detection parameter.
@@ -120,7 +164,9 @@ public:
 	virtual void setSaturationMin(int newValue)
 	{
 		m_nSLow = newValue;
+		#if (IMGPROC_GUI)
 		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
+		#endif
 	}
 	/*! 
 	* \brief Sets saturation max object detection parameter.
@@ -129,7 +175,9 @@ public:
 	virtual void setSaturationMax(int newValue)
 	{
 		m_nSHigh = newValue;
+		#if (IMGPROC_GUI)
 		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
+		#endif
 	}
 	/*! 
 	* \brief Sets value min object detection parameter.
@@ -138,7 +186,9 @@ public:
 	virtual void setValueMin(int newValue)
 	{
 		m_nVLow = newValue;
+		#if (IMGPROC_GUI)
 		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
+		#endif
 	}
 	/*! 
 	* \brief Sets value max object detection parameter.
@@ -147,7 +197,9 @@ public:
 	virtual void setValueMax(int newValue)
 	{
 		m_nVHigh = newValue;
+		#if (IMGPROC_GUI)
 		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
+		#endif
 	}
 	/*! 
 	* \brief Returns the hue min object detection parameter. 
@@ -200,10 +252,10 @@ public:
 	* \param packet - Packet to send.
 	*/
 	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
-		std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
+		/*std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
 		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
 		ObjectDetectionPacketStructType::Pack(bytes, packet);
-		m_objectDetectionDataSocket->send_to(asio::buffer(bytes), *m_objectDetectionEndpoint);
+		m_objectDetectionDataSocket->send_to(asio::buffer(bytes), *m_objectDetectionEndpoint);*/ // This is throwing, probably because server isn't connected yet
 	}
 
 	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
@@ -297,14 +349,11 @@ public:
 		// cv::inRange(hsv, cv::Scalar( m_nHLow, m_nSLow, m_nVLow), cv::Scalar( m_nHHigh, m_nSHigh, m_nVHigh), thresh);
 
 		//frame = cv::undistort_frame(frame, mtx, dist);
-
         cv::Mat mask = filter_hsv_inverted(frame, m_nHLow, m_nHHigh, m_nSLow, m_nSHigh, m_nVLow, m_nVHigh);
         cv::Mat filtered_frame;
         cv::bitwise_and(frame, frame, filtered_frame, mask);
-
         std::vector<std::vector<cv::Point>> contours;
         cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
         if (!contours.empty()) {
             // Find the largest contour (assuming it's the cylinder)
             auto largest_contour = std::max_element(contours.begin(), contours.end(),
@@ -314,14 +363,22 @@ public:
 
             // Fit a contour and get endpoints
             auto [fitted_contour, endpoints] = fit_cylinder_contour(*largest_contour);
-
             if (!fitted_contour.empty()) {
-                // Calculate distance and angle
                 auto [distance, angle] = calculate_distance_and_angle(*largest_contour, m_focalLen, m_fCDiam, CAMERA_CENTER);
-
-#if (IMGPROC_GUI)
+								printf( "%.3f   %.3f\n", distance, angle );
+				#if SEND_PACKETS
+				ObjectDetectionInfo coral1(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL);
+				// Other corals are empty
+				ObjectDetectionInfo coral2 = ObjectDetectionInfo();
+				ObjectDetectionInfo coral3 = ObjectDetectionInfo();
+				ObjectDetectionInfo coral4 = ObjectDetectionInfo();
+				long time = nt::Now() - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, (uint8_t)1, coral1, coral2, coral3, coral4);
+				SendObjectDetectionPacket(packet);
+				#endif
                 // Draw the fitted contour
-                cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
+				#if DEBUG_VIDEO || IMGPROC_GUI
+                //cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
 
                 // Draw the major axis line if endpoints are valid
                 if (endpoints.first.x != 0 || endpoints.first.y != 0 || endpoints.second.x != 0 || endpoints.second.y != 0) {
@@ -332,31 +389,39 @@ public:
                 if (distance != -1.0 && angle != -1.0) {
                     std::string dist_text = "Distance: " + std::to_string(distance) + "m";
                     std::string angle_text = "Angle: " + std::to_string(angle) + "rad";
+
                     cv::putText(filtered_frame, dist_text, cv::Point(10, 60), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                     cv::putText(filtered_frame, angle_text, cv::Point(10, 90), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+					
                 }
-#endif
-				printf( "%.3f   %.3f\n", distance, angle );
-				struct timespec tsCur;
-				struct timeval tvCur;
-				struct timeval tvDelta;
-	
-				// Get current time since power on
-				clock_gettime(CLOCK_MONOTONIC, &tsCur );
-				TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
-	
-				// Calculate delta between when frame was catured and now.
-				timersub( &tvCur, pcf->ts(), &tvDelta );
-				ObjectDetectionInfo coral1(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL);
-				// Other corals are empty
-				ObjectDetectionInfo coral2 = ObjectDetectionInfo();
-				ObjectDetectionInfo coral3 = ObjectDetectionInfo();
-				ObjectDetectionInfo coral4 = ObjectDetectionInfo();
-				long time = nt::Now() - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
-				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, (uint8_t)1, coral1, coral2, coral3, coral4);
-				SendObjectDetectionPacket(packet);
+				#endif
             }
         }
+		#if DEBUG
+		struct timespec tsCur;
+		struct timeval tvCur;
+		struct timeval tvDelta;
+	
+		// Get current time since power on
+		clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
+		TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
+		// Calculate delta between when frame was catured and now.
+		timersub( &tvCur, pcf->ts(), &tvDelta );
+		std::string latency_text = "Latency: " + std::to_string(tvDelta.tv_usec) + "us";
+		std::cout << latency_text << "\n";
+		// TODO: post latency to nettables
+		#if DEBUG_VIDEO || IMGPROC_GUI
+		cv::putText(filtered_frame, latency_text, cv::Point(10, 120), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+		if (m_mtxCS.try_lock()) { 
+			if (m_bFirstVid) {
+				m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows() );
+				m_bFirstVid = false;
+			}
+			m_outputStream.PutFrame(filtered_frame);
+			m_mtxCS.unlock();
+		}
+		#endif
+		#endif
 
 
 #if (IMGPROC_GUI)

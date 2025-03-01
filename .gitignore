@@ -13,3 +13,4 @@ allwpilib/
 *.o
 *.a
 /docs
+.vs/
