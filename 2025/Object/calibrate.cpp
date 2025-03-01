@@ -14,7 +14,15 @@ using namespace std;
 int main(int argc, char** argv) {
     // Define the checkerboard pattern size
     Size patternSize(9, 6);  // 9x6 checkerboard
-
+    char const *inputDir = 0;
+    if(argc == 1 || argc > 2){
+        std::cerr << "Usage: ./calibrate inputDir, where inputDir is a path to a directory with .jpg imgs to calibrate\n";
+        std::cerr << "Example: ./calibrate /media/sf_2702_Vision/2025/Object/good/\n";
+        return 1;
+    }
+    else{
+        inputDir = argv[1];
+    }
     // Create vectors to store the object points and image points
     vector<vector<Point3f>> objectPoints;
     vector<vector<Point2f>> imagePoints;
@@ -29,7 +37,7 @@ int main(int argc, char** argv) {
 
     // Load the checkerboard images
     vector<String> filenames;
-    glob("/data/calibration/*.png", filenames);
+    glob(std::string(inputDir) + "*.jpg", filenames);
 
     // Detect checkerboard corners in each image
     Mat gray;
