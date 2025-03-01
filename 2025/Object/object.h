@@ -83,12 +83,12 @@ class imgProc : public FrmProcessor
 	double		distance;
 	
 	/*! \brief Camera calibration matrix. */
-	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 888.7765991141953, 0, 304.4048631642603,
-0, 892.4756367000551, 370.9657053548069,
+	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 628.7018037037665, 0, 319.4182728213091,
+0, 629.2321964334733, 269.3476034213892,
 0, 0, 1);
 
 	/*! \brief Camera distortion coefficients. */
-	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.1164723784381825, 0.5948511019477938, 0.0178130457349927, -0.03413649680380905, -1.650075067124663);
+	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.07802536050603302, 0.4404814608182007, 0.002405181700916917, 0.002392433126475636, -2.16656699611926);
 	/*! \brief Focal length of camera. */
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
