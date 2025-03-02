@@ -50,8 +50,11 @@
 #define OBJECT_DETECTION_SERVER_IP "127.0.0.1"
 /*! \brief UDP port to send object detection packets to. */
 #define OBJECT_DETECTION_SERVER_PORT "6666"
+/*! \brief Prints the latency to console and write distance and angle values to .txt files in the directory */
 #define DEBUG 1
+/*! \brief Performs all the actions of \ref DEBUG plus annotating the video stream and sending it to the camera server for viewing in the browser.*/
 #define DEBUG_VIDEO 1
+/*! \brief Enables or disables the sending of UDP packets to the server. Should be disabled when the server is not active. */
 #define SEND_PACKETS 0
 
 // Structure classes where the serialization / deserialization functions are defined
