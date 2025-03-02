@@ -7,6 +7,7 @@ CXXFLAGS+=-I../../lib
 CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
+CXXFLAGS+=-Ofast
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 CXXFLAGS+=$(shell pkg-config --cflags libcamera )
 CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
@@ -14,7 +15,7 @@ LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
 LIBS+=$(shell pkg-config -libs opencv4)
-all: object replay nettableserver testnetworktablesclient udppacketstest calibrate
+all: object replay nettableserver testnetworktablesclient udppacketstest calibrate testudpserver
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui $(LIBS)
@@ -35,9 +36,13 @@ udppacketstest: udppacketstest.o ../../lib/lib2702.a
 calibrate: calibrate.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o calibrate calibrate.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
 
+testudpserver: testudpserver.o ../../lib/lib2702.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testudpserver testudpserver.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+
 object.o: object.cpp object.h config.h ObjectDetectionStruct.cpp ObjectDetectionStruct.h
 replay.o: replay.cpp object.h config.h
 nettableserver.o: nettableserver.cpp
 testnetworktablesclient.o: testnetworktablesclient.cpp
 udppacketstest.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp udppacketstest.cpp
 calibrate.o: calibrate.cpp
+testudpserver.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp testudpserver.cpp

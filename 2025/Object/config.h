@@ -11,6 +11,7 @@ Depends on:
 #define SETTING_VALUE_MAX "valMax"
 #define SETTINGS_FILE_PATH "./processorSettings.txt"
 #include <nlohmann/json.hpp>
+#include <fstream>
  
 using json = nlohmann::json;
 

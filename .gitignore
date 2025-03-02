@@ -10,6 +10,7 @@
 networktables.json
 doxygenlog.txt
 allwpilib/
-*.o
-*.a
 /docs
+.vs/
+*.jpg
+*.png

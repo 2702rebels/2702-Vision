@@ -68,7 +68,7 @@ class RPIFrame : public CameraFrame
 
 		m_u32Seq = rmd.sequence; //pReq->sequence();
 		m_ts.tv_sec = rmd.timestamp / 1000000000;
-		m_ts.tv_usec = rmd.timestamp - (m_ts.tv_sec * 1000000000);
+		m_ts.tv_usec = (rmd.timestamp - (m_ts.tv_sec * 1000000000)) / 1000;
 
 		auto cookie = pBuf->cookie();
 

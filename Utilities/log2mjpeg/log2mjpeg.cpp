@@ -7,9 +7,13 @@ using namespace std;
 
 #include "VisLog.h"
 #include "Bayer2RGB.h"
+#include <filesystem>
 #include "Bayer2Grey.h"
+#include <dirent.h>
 
 enum pmode { pmcolor, pmcolor2, pmgrey, pmgrey2, pmbayer, pmgreen, pmred, pmblue, pminput };
+
+namespace fs = std::filesystem;
 
 pmode procmode = pminput;
 
@@ -64,7 +68,7 @@ void Bayer2Green( cv::Mat &matGreen, cv::Mat const &matBayer )
 
 void Usage()
 {
-	cerr << "Usage: log2mjpeg [-colour|colour2|grey|grey2|bayer|red|green|blue|input] [-iimgfilespec] infile outfile\n";
+	cerr << "Usage: log2mjpeg [-colour|colour2|grey|grey2|bayer|red|green|blue|input] infile outdir\n";
 	cerr << "      colour     -> RGB\n";
 	cerr << "      colour2    -> RGB 1/2 resolution\n";
 	cerr << "      grey       -> GreyScale\n";
@@ -73,8 +77,6 @@ void Usage()
 	cerr << "      red        -> Extracts the red pixels\n";
 	cerr << "      green      -> Extracts the green pixels\n";
 	cerr << "      blue       -> Extracts the blue pixels\n";
-	cerr << "     -iimgfilespec  saves each image to a file ... eg: img%04d.png\n";
-
 	exit(1);
 }
 
@@ -82,7 +84,6 @@ int main( int argc, char **argv )
 {
 	char const *pszIn = 0;
 	char const *pszOut = 0;
-	char const *pszImgFileSpec = 0;
 	for( int i = 1; i < argc; i++ ) {
 		if( argv[i][0] == '-' ) {
 			if( !strcmp( argv[i], "-colour" ) )
@@ -103,8 +104,6 @@ int main( int argc, char **argv )
 				procmode = pmblue;
 			else if( !strcmp( argv[i], "-input" ) )
 				procmode = pminput;
-			else if( argv[i][1] == 'i' )
-				pszImgFileSpec = argv[i] + 2;
 			else
 				Usage();
 		}
@@ -121,10 +120,9 @@ int main( int argc, char **argv )
 	}
 
 	VisionLog vl( pszIn );
-	ofstream of( pszOut );
-	if( !of.is_open() ) {
-		cerr << "Unable to open output file\n";
-		return 1;
+	DIR* dir = opendir(pszOut);
+	if(!dir){
+		fs::create_directories(pszOut);
 	}
 
 	cv::Mat img;
@@ -192,17 +190,10 @@ int main( int argc, char **argv )
 			}
 			break;
 		}
-
-		if( pszImgFileSpec ) {
-			char szTmp[1024];
-			sprintf( szTmp, pszImgFileSpec, nSeq );
-			cv::imwrite( szTmp, imgOut ); 
-		}
 		vector<uchar> vJPEG;
 		cv::imencode( ".jpg", imgOut, vJPEG );
-
-		of.write( (const char *)vJPEG.data(), vJPEG.size() );
-		
+		ofstream outfile(std::string(pszOut) + "/" + std::to_string(nSeq) + ".jpg");
+		outfile.write( (const char *)vJPEG.data(), vJPEG.size() );
 	}
 	return 0;
 }
