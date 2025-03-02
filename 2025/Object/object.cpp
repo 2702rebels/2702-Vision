@@ -55,7 +55,6 @@ bool bStop = false;
 
 #define USE_NETWORK_TABLES 1
 #define IS_ROBOT 0
-#define IS_PI 1
 
 /*! \brief Handles Ctrl+C interrupts.
  * \param nSig - Should always be equal to \ref SIGINT.*/
@@ -101,11 +100,8 @@ int main( int argc, char **argv )
 	//	nvCamera mycam1( "/dev/video1", 4, 1 );
 
 	//	printinfo( mycam0 );
-	#if !IS_PI
 	ConfigUtils::triggerConfigLoad(proc);
-	#endif
 		while( !bStop ) {
-			#if !IS_PI
 			if (ConfigUtils::configHasChanged(proc))
 			{
 				ConfigUtils::triggerConfigSave(proc);
@@ -114,7 +110,6 @@ int main( int argc, char **argv )
 			{
 				ConfigUtils::triggerConfigLoad(proc);
 			}
-			#endif
 			#if USE_NETWORK_TABLES
 			std::cout << "NetworkTables are " << (networkTableManager.IsConnected() ? "Connected" : "Not Connected") << "\n";
 			if(networkTableManager.IsConnected() && networkTableRandomRange(randomNumberGen) == 1){
