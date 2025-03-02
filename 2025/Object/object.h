@@ -129,8 +129,8 @@ public:
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
 #if DEBUG
-	angleFile.open("/data/logs/angle.txt");
-	distFile.open("/data/logs/dist.txt");
+	angleFile.open("./angle.txt");
+	distFile.open("./dist.txt");
 #endif
 		#if SEND_PACKETS
 		asio::io_context io_context;
