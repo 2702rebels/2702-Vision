@@ -56,6 +56,8 @@
 #define DEBUG_VIDEO 1
 /*! \brief Enables or disables the sending of UDP packets to the server. Should be disabled when the server is not active. */
 #define SEND_PACKETS 0
+/*! \brief Disables all debug flags and enables all features. */
+#define PRODUCTION 0
 
 // Structure classes where the serialization / deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
@@ -96,14 +98,14 @@ class imgProc : public FrmProcessor
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
 	
-	#if SEND_PACKETS
+	#if SEND_PACKETS || PRODUCTION
 	/*! \brief Pointer to UDP endpoint to send object detection data packets to. */
 	udp::endpoint *m_objectDetectionEndpoint;
 	/*! \brief Pointer to socket through which object detection data packets are sent. */
 	udp::socket *m_objectDetectionDataSocket;
 	#endif
 
-	#if DEBUG
+	#if DEBUG && !PRODUCTION
 	std::mutex	m_mtxCS;
 	bool		m_bFirstVid = true;
 	cs::CvSource 	m_outputStream;
@@ -121,7 +123,7 @@ public:
     std::cout << "Camera Matrix: " << mtx << endl;
     std::cout << "Focal Length Coefficients: " << mtx.at<float>(0,0) << "    " << mtx.at<float>(1,2) << endl;
     std::cout << "Focal Length: " << m_focalLen << endl;
-#if (IMGPROC_GUI)
+#if (IMGPROC_GUI && !PRODUCTION)
 		cv::namedWindow("Filtered Video");
 
 		cv::createTrackbar("PV Hue Min", "Filtered Video", &m_nHLow, 360);
@@ -131,11 +133,11 @@ public:
 		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
-#if DEBUG
+#if DEBUG && !PRODUCTION
 	angleFile.open("./angle.txt");
 	distFile.open("./dist.txt");
 #endif
-		#if SEND_PACKETS
+		#if SEND_PACKETS || PRODUCTION
 		asio::io_context io_context;
 
 		udp::resolver resolver(io_context);
@@ -154,7 +156,7 @@ public:
 	virtual void setPVHueMin(int newValue)
 	{
 		m_nHLow = newValue;
-		#if (IMGPROC_GUI)
+		#if (IMGPROC_GUI && !PRODUCTION)
 		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
 		#endif
 	}
@@ -165,7 +167,7 @@ public:
 	virtual void setPVHueMax(int newValue)
 	{
 		m_nHHigh = newValue;
-		#if (IMGPROC_GUI)
+		#if (IMGPROC_GUI && !PRODUCTION)
 		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
 		#endif
 	}
@@ -176,7 +178,7 @@ public:
 	virtual void setSaturationMin(int newValue)
 	{
 		m_nSLow = newValue;
-		#if (IMGPROC_GUI)
+		#if (IMGPROC_GUI && !PRODUCTION)
 		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
 		#endif
 	}
@@ -187,7 +189,7 @@ public:
 	virtual void setSaturationMax(int newValue)
 	{
 		m_nSHigh = newValue;
-		#if (IMGPROC_GUI)
+		#if (IMGPROC_GUI && !PRODUCTION)
 		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
 		#endif
 	}
@@ -198,7 +200,7 @@ public:
 	virtual void setValueMin(int newValue)
 	{
 		m_nVLow = newValue;
-		#if (IMGPROC_GUI)
+		#if (IMGPROC_GUI && !PRODUCTION)
 		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
 		#endif
 	}
@@ -209,7 +211,7 @@ public:
 	virtual void setValueMax(int newValue)
 	{
 		m_nVHigh = newValue;
-		#if (IMGPROC_GUI)
+		#if (IMGPROC_GUI && !PRODUCTION)
 		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
 		#endif
 	}
@@ -264,7 +266,7 @@ public:
 	* \param packet - Packet to send.
 	*/
 	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
-		#if SEND_PACKETS
+		#if SEND_PACKETS || PRODUCTION
 		std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
 		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
 		ObjectDetectionPacketStructType::Pack(bytes, packet);
@@ -352,7 +354,7 @@ public:
 	{
 		printf( "Have Frame from %d:%d %dx%d\n", nCam, pcf->u32Sequence(), pcf->nRows(), pcf->nCols() );
 		cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
-#if (IMGPROC_GUI)
+#if (IMGPROC_GUI && !PRODUCTION)
 		cv::imshow( "Raw", frame );
 #endif
 		// cv::Mat hsv( pcf->nRows(), pcf->nCols(), CV_8UC3);
@@ -380,7 +382,7 @@ public:
             if (!fitted_contour.empty()) {
                 auto [distance, angle] = calculate_distance_and_angle(*largest_contour, m_focalLen, m_fCDiam, CAMERA_CENTER);
 								printf( "%.3f   %.3f\n", distance, angle );
-				#if SEND_PACKETS
+				#if SEND_PACKETS || PRODUCTION
 				ObjectDetectionInfo coral1(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL);
 				// Other corals are empty
 				ObjectDetectionInfo coral2 = ObjectDetectionInfo();
@@ -391,7 +393,7 @@ public:
 				SendObjectDetectionPacket(packet);
 				#endif
                 // Draw the fitted contour
-				#if DEBUG_VIDEO || IMGPROC_GUI
+				#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
 				distFile << distance << "\n";
 				angleFile << angle << "\n";
                 cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
@@ -413,7 +415,7 @@ public:
 				#endif
             }
         }
-		#if DEBUG
+		#if DEBUG && !PRODUCTION
 		struct timespec tsCur;
 		struct timeval tvCur;
 		struct timeval tvDelta;
@@ -426,7 +428,7 @@ public:
 		std::string latency_text = "Latency: " + std::to_string(tvDelta.tv_usec) + "us";
 		std::cout << latency_text << "\n";
 		// TODO: post latency to nettables
-		#if DEBUG_VIDEO || IMGPROC_GUI
+		#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
 		cv::putText(filtered_frame, latency_text, cv::Point(10, 120), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 		if (m_mtxCS.try_lock()) { 
 			if (m_bFirstVid) {
@@ -440,7 +442,7 @@ public:
 		#endif
 
 
-#if (IMGPROC_GUI)
+#if (IMGPROC_GUI && !PRODUCTION)
 		// Display the results
    		cv::imshow("Filtered Video", filtered_frame);
         cv::imshow("Mask", mask);
