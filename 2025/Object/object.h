@@ -50,9 +50,9 @@
 #define OBJECT_DETECTION_SERVER_IP "127.0.0.1"
 /*! \brief UDP port to send object detection packets to. */
 #define OBJECT_DETECTION_SERVER_PORT "6666"
-/*! \brief Prints the latency to console and write distance and angle values to .txt files in the directory */
+/*! \brief Prints the latency to console and write distance and angle values to .txt files in the directory. */
 #define DEBUG 1
-/*! \brief Performs all the actions of \ref DEBUG plus annotating the video stream and sending it to the camera server for viewing in the browser.*/
+/*! \brief Performs all the actions of \ref DEBUG plus annotating the video stream and sending it to the camera server for viewing in the browser. Does nothing if DEBUG is off*/
 #define DEBUG_VIDEO 1
 /*! \brief Enables or disables the sending of UDP packets to the server. Should be disabled when the server is not active. */
 #define SEND_PACKETS 0
@@ -264,10 +264,12 @@ public:
 	* \param packet - Packet to send.
 	*/
 	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
-		/*std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
+		#if SEND_PACKETS
+		std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
 		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
 		ObjectDetectionPacketStructType::Pack(bytes, packet);
-		m_objectDetectionDataSocket->send_to(asio::buffer(bytes), *m_objectDetectionEndpoint);*/ // This is throwing, probably because server isn't connected yet
+		m_objectDetectionDataSocket->send_to(asio::buffer(bytes), *m_objectDetectionEndpoint);
+		#endif
 	}
 
 	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
