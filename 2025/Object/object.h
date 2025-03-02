@@ -92,11 +92,13 @@ class imgProc : public FrmProcessor
 	/*! \brief Focal length of camera. */
 	double		 m_focalLen;
    	cv::Point2d CAMERA_CENTER;
-
+	
+	#if SEND_PACKETS
 	/*! \brief Pointer to UDP endpoint to send object detection data packets to. */
 	udp::endpoint *m_objectDetectionEndpoint;
 	/*! \brief Pointer to socket through which object detection data packets are sent. */
 	udp::socket *m_objectDetectionDataSocket;
+	#endif
 
 	#if DEBUG
 	std::mutex	m_mtxCS;
@@ -130,7 +132,7 @@ public:
 	angleFile.open("/data/logs/angle.txt");
 	distFile.open("/data/logs/dist.txt");
 #endif
-/*
+		#if SEND_PACKETS
 		asio::io_context io_context;
 
 		udp::resolver resolver(io_context);
@@ -139,7 +141,8 @@ public:
 		udp::socket socket(io_context);
 		socket.open(udp::v4());
 		m_objectDetectionDataSocket = &socket;
-		m_objectDetectionEndpoint = &receiver_endpoint;*/
+		m_objectDetectionEndpoint = &receiver_endpoint;
+		#endif
 	}
 	/*! 
 	* \brief Sets hue min object detection parameter. 
