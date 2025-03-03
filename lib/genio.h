@@ -19,6 +19,8 @@ void ErrorMsg( char const *pszFmt, ... );
 void WarningMsg( char const *pszFmt, ... );
 bool GetYesNo( char const *pszFmt, ... );
 
+void GetNumber( char *pszResp, size_t sMaxRep, char const *pszPrompt, char const *pszFmt, ... );
+
 void PrintAt( int nRow, int nCol, char const *psz, ... );
 
 #ifdef __cplusplus

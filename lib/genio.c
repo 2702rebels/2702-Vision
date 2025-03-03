@@ -219,3 +219,91 @@ bool GetYesNo( char const *pszFmt, ... )
     refresh();
     return (ch == 'Y') ? true : false;
 } /* GetYesNo */
+
+#if 0
+void GetString( char *pszResp, size_t sMaxRep, char const *pszPrompt, char const *pszFmt, ... )
+{
+    WINDOW  *pErrWin;
+    WINDOW  *pTxtWin;
+    int     ch;
+    va_list va;
+
+    pErrWin = newwin( 10, 50, (stdscr->_maxy - 10) / 2,
+                      (stdscr->_maxx - 50) / 2 );
+    pTxtWin = subwin( pErrWin, 5, 46, 3 + pErrWin->_begy, 2 + pErrWin->_begx );
+    wattrset( pErrWin, A_NORMAL );
+    wclear( pErrWin );
+    wattrset( pTxtWin, A_NORMAL );
+    wclear( pTxtWin );
+    box( pErrWin, '*', '*' );
+    mvwaddstr( pErrWin, 1, 18, "Error Message" );
+    va_start( va, pszFmt );
+    vsprintf( szMessageLine, pszFmt, va );
+    mvwaddstr( pTxtWin, 0, 0, szMessageLine );
+//    mvwaddstr( pErrWin, 8, 12, "Press Y or N to continue." );
+    wrefresh( pErrWin );
+
+	size_t sIdx = 0;
+	pszResp[sIdx] = '\0';
+    nodelay( stdscr, 0 );
+    do {
+        ch = getch();
+		switch (ch) {
+		case '\r':
+		case '\n':
+			break;
+		}
+    } while( sIdx < sMaxRep - 1 && ch != '\r' && ch != '\n' );
+    nodelay( stdscr, 1 );
+
+}
+#endif
+#if 1
+void GetNumber( char *pszResp, size_t sMaxRep, char const *pszPrompt, char const *pszFmt, ... )
+{
+    WINDOW  *pErrWin;
+    WINDOW  *pTxtWin;
+    int     ch;
+    va_list va;
+
+    pErrWin = newwin( 10, 50, (stdscr->_maxy - 10) / 2,
+                      (stdscr->_maxx - 50) / 2 );
+    pTxtWin = subwin( pErrWin, 5, 46, 3 + pErrWin->_begy, 2 + pErrWin->_begx );
+    wattrset( pErrWin, A_NORMAL );
+    wclear( pErrWin );
+    wattrset( pTxtWin, A_NORMAL );
+    wclear( pTxtWin );
+    box( pErrWin, '*', '*' );
+    mvwaddstr( pErrWin, 1, 18, pszPrompt );
+    va_start( va, pszFmt );
+    vsprintf( szMessageLine, pszFmt, va );
+    mvwaddstr( pTxtWin, 0, 0, szMessageLine );
+//	mvwaddstr( pTxtWin, 0, 0, pszPrompt );
+//    mvwaddstr( pErrWin, 8, 12, "Press Y or N to continue." );
+    wrefresh( pErrWin );
+
+	size_t sIdx = 0;
+	pszResp[sIdx] = '\0';
+    nodelay( stdscr, 0 );
+    do {
+        ch = getch();
+		if ((ch >= '0' && ch <= '9') || ch == '.') {
+			pszResp[sIdx++] = ch;
+			pszResp[sIdx] = '\0';
+		}
+		else if (ch == 0x7e && sIdx ) {
+			pszResp[sIdx--] = '\0';
+		}
+		mvwaddstr( pTxtWin, 1, 0, pszResp );
+		wclrtoeol( pTxtWin );
+		wrefresh( pTxtWin );
+    } while( (sIdx < sMaxRep - 1) && ch != '\r' && ch != '\n' );
+    nodelay( stdscr, 1 );
+
+    werase( pErrWin );
+    delwin( pTxtWin );
+    delwin( pErrWin );
+    touchwin( stdscr );
+    refresh();
+}
+#endif

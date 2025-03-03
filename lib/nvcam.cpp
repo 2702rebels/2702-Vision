@@ -159,6 +159,29 @@ uint64_t nvCamera::u64GetExposure()
 	return ctrl.value64;
 }
 
+bool nvCamera::bSetGain( uint32_t uGain )
+{
+	v4l2_ext_control ctrl;
+	v4l2_ext_controls ctrls;
+
+	memset( &ctrl, 0, sizeof(ctrl) );
+	memset( &ctrls, 0, sizeof(ctrls) );
+	ctrl.id = 0x009a2009;
+	ctrl.value64 = uGain;
+	printf( "Setting Gain to %u\n", uGain );
+
+	ctrls.count = 1;
+	ctrls.controls = &ctrl;
+
+	if( ioctl( m_fd, VIDIOC_S_EXT_CTRLS, &ctrls ) ) {
+		char szTmp[1024];
+		sprintf( szTmp, "bSetGain(%u) failed: %d\n", uGain, errno );
+		throw invalid_argument( szTmp );
+	}
+
+	return true;
+}
+
 void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
 {
 	if( u64Exposure > m_u64MaxExp )
