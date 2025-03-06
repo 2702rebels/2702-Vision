@@ -9,6 +9,10 @@ using namespace std;
 #include <opencv2/imgcodecs.hpp>
 #include "VisLog.h"
 
+VisionLog::VisionLog()
+{
+	m_bWrite = false;
+}
 
 VisionLog::VisionLog( char const *psz, bool bWrite ) 
 {
@@ -20,6 +24,14 @@ VisionLog::VisionLog( char const *psz, bool bWrite )
 
 VisionLog::~VisionLog() 
 {
+}
+
+void VisionLog::vOpen( char const *psz, bool bWrite )
+{
+	m_bWrite = bWrite;
+	m_fs.open( psz, bWrite ? fstream::out : fstream::in );
+	if (!m_fs.is_open())
+		throw runtime_error( "VisionLog::vOpen() - file not open" );
 }
 
 int32_t VisionLog::i32ReadVal()
@@ -131,4 +143,12 @@ bool VisionLog::bWritePNG( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp 
 	return m_fs.failbit ? false : true;
 }
 
+bool VisionLog::bIsOpen()
+{
+	return m_fs.is_open();
+}
 
+void VisionLog::vClose()
+{
+	m_fs.close();
+}

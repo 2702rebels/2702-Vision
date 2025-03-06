@@ -245,6 +245,7 @@ public:
 };
 
 Field g_field;
+#define LOG_DIR		"/data/logs"
 
 class imgProc : public nvFrmProcessor
 {
@@ -259,6 +260,13 @@ class imgProc : public nvFrmProcessor
 
 	MailBox<ATFrame *>	&m_mb;
 
+	std::mutex		m_mtxLog;
+	VisionLog		m_vl;
+
+	bool			m_bIsLogging = false;
+	bool			m_bLoggingDone = false;
+	time_t			m_tmLogEnd;
+
 public:
 	imgProc( MailBox<ATFrame *> &mb ) :
 		m_mb( mb )
@@ -266,6 +274,10 @@ public:
 	}
 	virtual ~imgProc()
 	{
+	}
+	void vStartLogging()
+	{
+		m_bIsLogging = true;
 	}
 	virtual void ProcessFrame( nvCamera *pCam,  const nvFrame *pcf )
 	{
@@ -278,6 +290,43 @@ public:
 		pCam->bSetExposure( u64Exp );
 #endif
 		if (pcf->u32Sequence() % 2) {
+			if (m_mtxLog.try_lock()) {
+				if (m_bLoggingDone) {
+				}
+				else if( m_vl.bIsOpen()) {
+					m_vl.bWriteRaw( frame, pcf->u32Sequence(), pcf->u32Exposure() );
+					if (time(0) > m_tmLogEnd) {
+						m_vl.vClose();
+						m_bLoggingDone = true;
+						printf( "Finished Logging\n" );
+					}
+				}
+				else {
+					bool bStart = m_bIsLogging;
+	//				printf( "Logging = %d\n", bStart);
+	//				bool bStart = false;
+
+					if( bStart ) {
+						try {
+							char szTmp[128];
+							for (int i = 0; ; i++ )
+							{
+								snprintf( szTmp, sizeof(szTmp), "%s/cam%d-%04d.log", LOG_DIR, pCam->nCam(), i );
+								if (access( szTmp, F_OK ) == -1) 
+									break;
+							}
+							printf( "Opening log file at %s\n", szTmp );
+							m_vl.vOpen( szTmp, true );
+							m_tmLogEnd = time(0) + 160;
+						}
+						catch( exception &e ) {
+							m_bLoggingDone = true;
+							printf( "Unable to start logging: %s\n", e.what() );
+						}
+					}
+				}		
+				m_mtxLog.unlock();
+			}
 			if (m_mtxCS.try_lock()) { 
 				if (m_bFirstVid) {
 					char szTmp[64];
@@ -372,6 +421,10 @@ Rebels::Point3d g_p3dCam0( -13.125, 0.00, 8.75 );
 
 int main( int argc, char **argv )
 {
+	nt::BooleanPublisher			bpLogging;
+	nt::BooleanSubscriber			bsIsLogging;
+	bool bLogStarted = false;
+
 	bool bNetTableServer = false;
 
 	signal( SIGINT, sighandler );
@@ -419,6 +472,27 @@ int main( int argc, char **argv )
 			std::this_thread::sleep_for( std::chrono::milliseconds(1000) );
 		}
 	}
+
+	nt::PubSubOptions pso = 
+	{
+		.structSize = sizeof(nt::PubSubOptions),
+		.pollStorage = 0,
+		.periodic = 0.1,
+		.excludePublisher = 0,
+		.sendAll = true,
+		.topicsOnly = false,
+		.keepDuplicates = true,
+		.prefixMatch = false,
+		.disableRemote = false,
+		.disableLocal = false,
+		.excludeSelf = false
+//		.hidden = false
+	};
+
+
+	bpLogging = ntinst.GetBooleanTopic("/Vision/PiIsLogging").Publish( pso );
+	bsIsLogging = ntinst.GetBooleanTopic("/Vision/IsLogging").Subscribe(false);
+	bpLogging.Set( false );
 
 	try {
 		CUDPSender udpSend;
@@ -540,6 +614,14 @@ int main( int argc, char **argv )
 							}
 						}
 					}
+				}
+				if (!bLogStarted) {
+					auto bLog = bsIsLogging.Get();
+					if (bLog) {
+						bLogStarted = true;
+//						proc0.vStartLogging();
+//						proc1.vStartLogging();
+					}							
 				}
 			}
 			
