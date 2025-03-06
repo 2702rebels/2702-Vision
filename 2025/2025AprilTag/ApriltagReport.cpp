@@ -106,6 +106,15 @@ ApriltagReport::~ApriltagReport()
 {
 }
 
+void ApriltagReport::vSetPose( uint8_t u8Mask, double dX, double dY, double dTheta, double dQuality )
+{
+	m_u8Mask = u8Mask;
+	m_dX = dX;
+	m_dY = dY;
+	m_dTheta = dTheta;
+	m_dQuality = dQuality;
+}
+
 void ApriltagReport::vAddData( ApriltagData const &ad )
 {
 	switch( m_u8Tags ) {

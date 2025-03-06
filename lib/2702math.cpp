@@ -246,8 +246,25 @@ Quaternion::Quaternion(Point3d const &rvec) {
 	double dX = rvec.x();
 	double dY = rvec.y();
 	double dZ = rvec.z();
-	double fTheta = sqrt( dX * dX + dY * dY + dZ * dZ );
-	::Quaternion( fTheta, rvec );
+
+	double fMag = sqrt( dX * dX + dY * dY + dZ * dZ );
+
+	if (fMag == 0.) {
+		m_fQ0 = 1.0F;
+		m_fX = 0.F;
+		m_fY = 0.F;
+		m_fZ = 0.F;
+	}
+	else {
+		double fTheta2 = fMag / 2.f;
+		double fSinTheta2 = sin(fTheta2);
+		double fFac = fSinTheta2 / fMag;
+
+		m_fQ0 = cos(fTheta2);
+		m_fX = dX * fFac;
+		m_fY = dY * fFac;
+		m_fZ = dZ * fFac;
+	}
 }
 
 Quaternion &Quaternion::operator=(RotationMatrix const &rm) {
@@ -330,7 +347,7 @@ Point3d Quaternion::operator*(Point3d const &pt) const {
 }
 
 void Quaternion::Inverse() {
-	m_fQ0 = -m_Q0;
+	m_fQ0 = -m_fQ0;
 }
 
 Point2d::Point2d() : m_fU(0.F), m_fV(0.F) {}

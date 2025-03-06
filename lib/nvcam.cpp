@@ -199,7 +199,15 @@ bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 	int nIdx = buf.index;
 	m_pFrames[nIdx].m_u32Seq = buf.sequence;
 	m_pFrames[nIdx].m_u32Exp = m_u64NextExp; // thf get actual exposure
+#if 0
 	m_pFrames[nIdx].m_ts = buf.timestamp;
+#else
+	struct timespec tsCur;
+
+	// Get current time since power on
+	clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
+	TIMESPEC_TO_TIMEVAL( &m_pFrames[nIdx].m_ts, &tsCur );
+#endif
 	m_pFrames[nIdx].m_pu8Img = (uint8_t *)m_grBuffers[nIdx].m_pMem;
 
 #if !AUTO_GAIN

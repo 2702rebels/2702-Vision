@@ -44,6 +44,7 @@ struct ApriltagReport
 	ApriltagReport( uint8_t u8Mask, uint64_t u64NetTime, double dX = 0., double dY = 0., double dTheta = 0., double dQuality = 0. );
 	~ApriltagReport();
 
+	void vSetPose( uint8_t u8Mask, double dX, double dY, double dTheta, double dQuality = 0. );
 	void vAddData( ApriltagData const &ad );
 };
 
