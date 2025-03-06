@@ -482,7 +482,7 @@ for( int i = 0; i < 4; i++ ) {
 							if (solvePnP( objPoints, imgPoints, camMatrix( 0 ), camDistortion( 0 ), rvec, tvec )) {
 								std::cout << "rvec: " << rvec << "\n";
 								std::cout << "tvec: " << tvec << "\n";
-//								printf( "%.3f  %.3f  %.3f\n", tvec[0], tvec[1], tvec[2] );
+
 								cv::Mat rot;
 								cv::Rodrigues( rvec, rot );
 

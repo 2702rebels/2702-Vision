@@ -136,13 +136,16 @@ class Quaternion {
   Quaternion(Quaternion const &src) { *this = src; }
   Quaternion(RotationMatrix const &rm);
   ~Quaternion() {}
-  Quaternion(float fTheta, Point3d const &axis);
+  Quaternion(float fTheta, Point3d const &axis); //theta in radians
+  Quaternion(Point3d const &rvec);
   void Normalize();
   Quaternion &operator=(RotationMatrix const &rm);
   Quaternion &operator=(Quaternion const &src);
 
   Quaternion operator*(const Quaternion &other);
   Quaternion operator*=(const Quaternion &other);
+
+  void Inverse();
 
   Point3d operator*(const Point3d &other) const;
 
