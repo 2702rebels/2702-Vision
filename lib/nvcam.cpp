@@ -206,8 +206,14 @@ bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 
 	// Get current time since power on
 	clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
+//clock_gettime(CLOCK_MONOTONIC, &tsCur );
 	TIMESPEC_TO_TIMEVAL( &m_pFrames[nIdx].m_ts, &tsCur );
 #endif
+timeval tv;
+//printf( "Have Frame %d:%u : %ld.%06ld\n", nCam(), buf.sequence, buf.timestamp.tv_sec, buf.timestamp.tv_usec );
+//printf( "                   %ld.%06ld\n", m_pFrames[nIdx].m_ts.tv_sec, m_pFrames[nIdx].m_ts.tv_usec );
+//printf( "                   %ld\n", buf.timestamp.tv_sec - m_pFrames[nIdx].m_ts.tv_sec );
+
 	m_pFrames[nIdx].m_pu8Img = (uint8_t *)m_grBuffers[nIdx].m_pMem;
 
 #if !AUTO_GAIN

@@ -27,6 +27,7 @@
 #include <cameraserver/CameraServer.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/BooleanTopic.h>
+#include <networktables/NetworkTableListener.h>
 #include <drm/drm_fourcc.h>
 
 using namespace std;
@@ -416,8 +417,101 @@ void Usage()
 }
 
 Rebels::Point3d g_p3dCam0( -13.125, 0.00, 8.75 );
+Rebels::Point3d g_p3dCam1(  13.125, 0.00, 8.75 );
 
 #include <ntcore_cpp.h>
+
+int64_t i64TimeOffset = 0;
+
+void tscb( nt::Event const &e )
+{
+	if (e.flags & NT_EVENT_TIMESYNC) {
+		printf( "tscb::: Have TIMESYNC\n" );
+		nt::TimeSyncEventData const *ptsed = e.GetTimeSyncEventData();
+		i64TimeOffset = ptsed->serverTimeOffset;
+		printf( "Got Offset -> %ld\n", ptsed->serverTimeOffset );
+	}
+	else {
+		printf( "tscb::: -> %x\n", e.flags );
+	}
+}
+
+bool bSolvePose( int nCam, cv::Mat &objPoints, cv::Mat &imgPoints, CUDPSender &udpSend, timeval const &ts  )
+{
+	bool bHaveSolution = false;
+
+	cv::Mat rvec( 3, 1, CV_64F );
+	cv::Mat tvec( 3, 1, CV_64F );
+
+	if (solvePnP( objPoints, imgPoints, camMatrix( nCam ), camDistortion( nCam ), rvec, tvec )) {
+#if 1
+		cv::Mat reprojectPoints( objPoints.rows, 1, CV_32FC2);
+//		vector<cv::Point2f> reprojectPoints;
+		cv::projectPoints(objPoints, rvec, tvec, camMatrix(nCam), camDistortion(nCam), reprojectPoints);
+
+		float sum = 0.;
+		sum = cv::norm(reprojectPoints, imgPoints);
+//								printf( "Sum: %.3f\n", sum );
+
+		if (sum < 10. && (objPoints.rows > 4 || rvec.at<double>(2) < 30.) ) 
+#endif
+		{
+			Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
+			Rebels::Point3d p3Tvec( tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2) );
+
+			if (nCam == 0) {
+				p3Tvec += g_p3dCam0;
+			}
+			else {
+				p3Tvec += g_p3dCam1;
+			}
+
+			Rebels::Quaternion qRot( p3Rvec );
+if (objPoints.rows == 4) {
+//	printf( "%.4f  %.4f  %.4f  %.4f\n", qRot.q0(), qRot.x(), qRot.y(), qRot.z() );
+}
+			qRot.Inverse();
+
+			Rebels::Point3d p3dField = qRot * p3Tvec;
+			p3dField *= -1.;
+			
+			Rebels::Point3d p3dV1( 0.0, 0.0, 1.0 );
+			Rebels::Point3d p3dV2 = qRot * p3dV1;
+			Rebels::Point3d p3dX( 1.0, 0.0, 0.0 );
+
+			
+			double fDot = p3dX.DotProduct( p3dV2 );
+
+			struct timespec tsCur;
+			struct timeval tvCur;
+			struct timeval tvDelta;
+
+				// Get current time since power on
+			clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
+			TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
+			// Calculate delta between when frame was catured and now.
+			timersub( &tvCur, &ts, &tvDelta );
+//							auto serverOffset = nt::GetServerTimeOffset( nt::GetDefaultInstance() );
+//							if (serverOffset) {
+//								i64TimeOffset = serverOffset.value();
+//							}
+			int64_t time = nt::Now() + i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+
+			ApriltagReport ar( 0, time );
+
+			ar.vSetPose( 1, p3dField.x(), p3dField.y(), atan2( p3dV2.y(), p3dV2.x() ), 0. );
+
+			uint8_t gru8Packet[ApriltagReportStructType::GetSize()];
+			std::span<uint8_t> sPacket(gru8Packet, sizeof(gru8Packet));
+			ApriltagReportStructType::Pack(sPacket, ar );
+			udpSend.bSend( sPacket );
+//printf( "Cam %d -> sending solution %.3f %.3f %.3f\n", nCam, p3dField.x(), p3dField.y(), atan2( p3dV2.y(), p3dV2.x() ) * 180 / 3.14159 );
+			bHaveSolution = true;
+		}
+	}
+
+	return bHaveSolution;
+}
 
 int main( int argc, char **argv )
 {
@@ -473,6 +567,7 @@ int main( int argc, char **argv )
 		}
 	}
 
+	nt::NetworkTableListener	ntl = nt::NetworkTableListener::CreateTimeSyncListener( ntinst, true, tscb );
 	nt::PubSubOptions pso = 
 	{
 		.structSize = sizeof(nt::PubSubOptions),
@@ -511,7 +606,6 @@ int main( int argc, char **argv )
 //		mycam0.bSetGain( 1000 );
 //		mycam1.bSetGain( 1000 );
 
-		int64_t i64TimeOffset = 0;
 		printinfo( mycam0 );
 		ATFrame *grpFrms[2] = { 0, 0 };
 		while( !bStop ) {
@@ -525,96 +619,58 @@ int main( int argc, char **argv )
 
 				if (grpFrms[0] && grpFrms[1]) {
 					if( grpFrms[0]->u32Seq() == grpFrms[1]->u32Seq()) {
-						int nTags = grpFrms[0]->sTags();
-						if (nTags >= 2) {
-							struct timespec tsCur;
-							struct timeval tvCur;
-							struct timeval tvDelta;
+						bool bHaveSolution = false;
+						for (int nCam = 0; !bHaveSolution && nCam < 2; nCam++) {
+							int nTags = grpFrms[nCam]->sTags();
+							if (nTags >= 2) {
+								cv::Mat objPoints(4 * nTags, 1, CV_32FC3);
+								cv::Mat imgPoints(4 * nTags, 1, CV_32FC2);
 
-							// Get current time since power on
-							clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
-							TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
-							// Calculate delta between when frame was catured and now.
-							timersub( &tvCur, &grpFrms[0]->ts(), &tvDelta );
-							auto serverOffset = nt::GetServerTimeOffset( nt::GetDefaultInstance() );
-							if (serverOffset) {
-								i64TimeOffset = serverOffset.value();
-							}
-							int64_t time = nt::Now() + i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
-
-							ApriltagReport ar( 0, time );
-
-							cv::Mat objPoints(4 * nTags, 1, CV_32FC3);
-							cv::Mat imgPoints(4 * nTags, 1, CV_32FC2);
-
-							int idx = 0;
-							for (size_t t = 0; t < grpFrms[0]->sTags(); t++ )
-							{
-								ATDetection const &d = (*grpFrms[0])[t];
-								Xfrm const &xfm = g_field[d.uId() - 1];
-								Rebels::Point3d const &pt = xfm;
-								Rebels::Quaternion const &q = xfm;
-								for (int c = 0; c < 4; c++, idx++ ) {
-									Rebels::Point3d pn = q * grCorners[c] + pt;
-//									Rebels::Point3d pn = grCorners[c];
-									objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
-									imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
-								}
-							}
-
-#if 0
-							cout << "V: " << objPoints << "\n";
-							cout << "I: " << imgPoints << "\n";
-							cout << "c: " << camMatrix( 0 ) << "\n";
-							cout << "d: " << camDistortion( 0 ) << "\n";
-#endif
-
-							cv::Mat rvec( 3, 1, CV_64F );
-							cv::Mat tvec( 3, 1, CV_64F );
-
-							if (solvePnP( objPoints, imgPoints, camMatrix( 0 ), camDistortion( 0 ), rvec, tvec )) {
-#if 1
-								cv::Mat reprojectPoints(4 *nTags, 1, CV_32FC2);
-//								vector<cv::Point2f> reprojectPoints;
-								cv::projectPoints(objPoints, rvec, tvec, camMatrix(0), camDistortion(0), reprojectPoints);
-
-								float sum = 0.;
-								sum = cv::norm(reprojectPoints, imgPoints);
-//								printf( "Sum: %.3f\n", sum );
-								if (sum < 10.) 
-#endif
+								int idx = 0;
+								for (size_t t = 0; t < grpFrms[nCam]->sTags(); t++ )
 								{
-									Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
-									Rebels::Point3d p3Tvec( tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2) );
-									p3Tvec += g_p3dCam0;
-
-									Rebels::Quaternion qRot( p3Rvec );
-									qRot.Inverse();
-
-									Rebels::Point3d p3dField = qRot * p3Tvec;
-									p3dField *= -1.;
-									
-									Rebels::Point3d p3dV1( 0.0, 0.0, 1.0 );
-									Rebels::Point3d p3dV2 = qRot * p3dV1;
-									Rebels::Point3d p3dX( 1.0, 0.0, 0.0 );
-
-	//								printf( "2702 Pos = %.3f  %.3f  %.3f\n", p3dField.x(), p3dField.y(), p3dField.z() );
-	//								printf( "           %.3f  %.3f  %.3f\n", p3dV2.x(), p3dV2.y(), p3dV2.z() );
-									
-									double fDot = p3dX.DotProduct( p3dV2 );
-	//								printf( "    -> %.3f\n", fDot );
-	//								printf( "    -> %.3f\n", atan2( p3dV2.y(), p3dV2.x() ) * 180 / 3.14159 );
-									ar.vSetPose( 1, p3dField.x(), p3dField.y(), atan2( p3dV2.y(), p3dV2.x() ), 0. );
-
-									uint8_t gru8Packet[ApriltagReportStructType::GetSize()];
-									std::span<uint8_t> sPacket(gru8Packet, sizeof(gru8Packet));
-									ApriltagReportStructType::Pack(sPacket, ar );
-									udpSend.bSend( sPacket );
+									ATDetection const &d = (*grpFrms[nCam])[t];
+									Xfrm const &xfm = g_field[d.uId() - 1];
+									Rebels::Point3d const &pt = xfm;
+									Rebels::Quaternion const &q = xfm;
+									for (int c = 0; c < 4; c++, idx++ ) {
+										Rebels::Point3d pn = q * grCorners[c] + pt;
+	//									Rebels::Point3d pn = grCorners[c];
+										objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
+										imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
+									}
 								}
+
+								bHaveSolution = bSolvePose( nCam, objPoints, imgPoints, udpSend, grpFrms[nCam]->ts() );
+							}
+						}
+						for (int nCam = 0; !bHaveSolution && nCam < 2; nCam++) {
+							int nTags = grpFrms[nCam]->sTags();
+							if (nTags >= 1) {
+								cv::Mat objPoints(4 * nTags, 1, CV_32FC3);
+								cv::Mat imgPoints(4 * nTags, 1, CV_32FC2);
+
+								int idx = 0;
+								for (size_t t = 0; t < grpFrms[nCam]->sTags(); t++ )
+								{
+									ATDetection const &d = (*grpFrms[nCam])[t];
+									Xfrm const &xfm = g_field[d.uId() - 1];
+									Rebels::Point3d const &pt = xfm;
+									Rebels::Quaternion const &q = xfm;
+									for (int c = 0; c < 4; c++, idx++ ) {
+										Rebels::Point3d pn = q * grCorners[c] + pt;
+	//									Rebels::Point3d pn = grCorners[c];
+										objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
+										imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
+									}
+								}
+
+								bHaveSolution = bSolvePose( nCam, objPoints, imgPoints, udpSend, grpFrms[nCam]->ts() );
 							}
 						}
 					}
 				}
+
 				if (!bLogStarted) {
 					auto bLog = bsIsLogging.Get();
 					if (bLog) {
