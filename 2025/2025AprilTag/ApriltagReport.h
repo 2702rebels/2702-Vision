@@ -41,7 +41,6 @@ struct ApriltagReport
 	ApriltagData	m_ad5;
 	ApriltagData	m_ad6;
 
-	ApriltagReport();
 	ApriltagReport( uint8_t u8Mask, uint64_t u64NetTime, double dX = 0., double dY = 0., double dTheta = 0., double dQuality = 0. );
 	~ApriltagReport();
 

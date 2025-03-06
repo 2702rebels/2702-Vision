@@ -97,7 +97,8 @@ ApriltagReport::ApriltagReport( uint8_t u8Mask, uint64_t u64NetTime, double dX, 
 	m_dX( dX ),
 	m_dY( dY ),
 	m_dTheta( dTheta ),
-	m_dQuality( dQuality )
+	m_dQuality( dQuality ),
+	m_u8Tags( 0 )
 {
 }
 
@@ -153,6 +154,7 @@ ApriltagReport ApriltagReportStructType::Unpack(std::span<const uint8_t> data)
 
 	ApriltagReport ar( u8Mask, u64NetTime, dFldX, dFldY, dFldTheta, dQuality );
 
+	ar.m_u8Tags = u8Count;
 	ar.m_ad1 = wpi::UnpackStruct<ApriltagData, offTag1>(data);
 	ar.m_ad2 = wpi::UnpackStruct<ApriltagData, offTag2>(data);
 	ar.m_ad3 = wpi::UnpackStruct<ApriltagData, offTag3>(data);
@@ -184,3 +186,19 @@ void ApriltagReportStructType::Pack(std::span<uint8_t> data, const ApriltagRepor
 	wpi::PackStruct<offTag5>(data, value.m_ad5);
 	wpi::PackStruct<offTag6>(data, value.m_ad6);
 }
+
+#if 0
+int main( int argc, char **argv )
+{
+	ApriltagReport ar( 1, 0x12345678, 100., 200., 1.0, 1.0 );
+	ApriltagData ad( 10, 20, 30 );
+	ar.vAddData( ad );
+
+	uint8_t gru8Packet[ApriltagReportStructType::GetSize()];
+	std::span<uint8_t> sPacket(gru8Packet, sizeof(gru8Packet));
+	ApriltagReportStructType::Pack(sPacket, ar );
+
+	ApriltagReport ar1 = ApriltagReportStructType::Unpack( sPacket );
+	return 0;
+}
+#endif
