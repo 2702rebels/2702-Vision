@@ -1,133 +1,104 @@
 /*!
-* \brief This file defines the serialization and deserialization functions for the UDP packet data structures found in ObjectDetectionStruct.h
-* The code in this file can be tested using udppacketstest.cpp
+* \brief Defines the structure of the UDP object detection packets that will be sent to the roborio. The serialization and deserialization
+*       functions are location in ObjectDetectionStruct.cpp. The code in this file can be tested by using udppacketstest.cpp
 */
-
-#include "ObjectDetectionStruct.h"
+#pragma once
 #include <string>
 #include <span>
 #include <wpi/struct/Struct.h>
 #include <iostream>
 #include <vector>
 
-namespace
+
+struct ApriltagData
 {
-    /*! \brief byte offset of mask byte */
-    constexpr size_t offMsk = 0;
-     /*! \brief byte offset of network timestamp */
-    constexpr size_t offNetTime = offMsk + 1;
-     /*! \brief byte offset of Field X pos */
-    constexpr size_t offFieldX = offNetTime + 8;
-    /*! \brief byte offset of Field Y pos */
-    constexpr size_t offFieldY = offFieldX + 8;
-	/*! \brief byte offset of Field Rot */
-	constexpr size_t offFieldR = offFieldY + 8;
-	/*! \brief byte offset of Quality value */
-	constexpr size_t offFieldQ = offFieldR + 8;
-	/*! \brief byte offset of TagCount */
-	constexpr size_t offTagCnt = offFieldQ + 8;
-	/*! \brief byte offset of Tags data */
-	constexpr size_t offTagData = offTagCnt + 1;
+	uint8_t		m_u8Id;
+	double		m_dX;
+	double		m_dY;
 
-	/*! \brief byte offset of Tag Id */
-	constexpr size_t offTagId = 0;
-	/*! \brief byte offset of Tag X */
-	constexpr size_t offTagX = offTagId + 1;
-	/*! \brief byte offset of Tag Y */
-	constexpr size_t offTagY = offTagX + 8;
-	/*! \brief byte Total size of Tag data */
-	constexpr size_t offTagMax = offTaxY + 8;
-}
+	ApriltagData();
+	ApriltagData( uint8_t u8Id, double dX, double dY );
+	ApriltagData( ApriltagData const &src );
+	~ApriltagData();
 
-ApriltagData::ApriltagData()
-	m_u8Id( 0 ),
-	m_dX( 0. ),
-	m_dY( 0. )
+	ApriltagData &operator=( ApriltagData const &src );
+};
+
+struct ApriltagReport
 {
-}
+	uint8_t			m_u8Mask;
+	uint64_t		m_u64NetTime;
+	double			m_dX;
+	double			m_dY;
+	double			m_dTheta;
+	double			m_dQuality;
 
-ApriltagData::ApriltagData( uint8_t u8Id, double dX, double dY ) :
-	m_u8Id( u8Id ),
-	m_dX( dX ),
-	m_dY( dY )
-{
-}
+	uint8_t			m_u8Tags;	
+	ApriltagData	m_ad1;
+	ApriltagData	m_ad2;
+	ApriltagData	m_ad3;
+	ApriltagData	m_ad4;
+	ApriltagData	m_ad5;
+	ApriltagData	m_ad6;
 
-using ApriltagDataStructType = wpi::Struct<ApriltagData>; // Importing the structure that will contain the serialization and deserialization functions for the ApriltagData
+	ApriltagReport();
+	ApriltagReport( uint8_t u8Mask, uint64_t u64NetTime, double dX = 0., double dY = 0., double dTheta = 0., double dQuality = 0. );
+	~ApriltagReport();
 
-ApriltagData ApriltagDataStructType::Unpack(std::span<const uint8_t> data)
-{
-    // Unpack the data into the span using the type and the offsets found at the top of this file
-    uint8_t u8Id = wpi::UnpackStruct<uint8_t, offTagId>(data);
-    double dX = wpi::UnpackStruct<double, offTagX>(data);
-    double dY = wpi::UnpackStruct<double, offTagY>(data);
-    return ApriltagData( u8Id, dX, dY );
-}
+	void vAddData( ApriltagData const &ad );
+};
 
-void ApriltagDataStructType::Pack(std::span<uint8_t> data, const ApriltagData &value)
-{
-    // Pack the data into the span using the offsets found at the top of this file, detects the type automatically from the inputted value
-    wpi::PackStruct<typeOff>(data, value.m_u8id);
-    wpi::PackStruct<distOff>(data, value.m_dX);
-    wpi::PackStruct<angleOff>(data, value.m_dY);
-}
 
-/*!
-* \brief Initializes an empty ObjectDetectionPacket 
+template <>
+/*! \brief Structure defining how an object detection should be serialized 
 */
-ApriltagReport::ApriltagReport( uint64_t u64NetTime ) :
-	m_u8Mask( 0 ),
-	m_u64NetTime( 0 ),
-	m_dX( 0. ),
-	m_dY( 0. ),
-	m_dTheta( 0. ),
-	m_dQuality( 0. ),
-	m_u8Count( 0 )
+struct wpi::Struct<ApriltagData>
 {
-}
+    /*! \brief Returns the name of the class that represents the data in the packet as a string */
+    static constexpr std::string_view GetTypeName() { return "ApriltagData"; }
+    /*! \brief Returns the size of the packet in bytes. This is a constant value */
+    static constexpr size_t GetSize() { return 17; }
+    /*! \brief Returns the schema detailing the format of the packet as a string */
+    static constexpr std::string_view GetSchema()
+    {
+        return "uint8 id;double x;double y";
+    }
 
-ApriltagReport::ApriltagReport( uint64_t u64NetTime, double dX, double dY, double dTheta, double dQuality ) :
-	m_u8Mask( 1 ),
-	m_u64NetTime( u8NetTime ),
-	m_dX( dX ),
-	m_dY( dY ),
-	m_dTheta( dTheta ),
-	m_dQuality( dQuality )
-	m_u8Count( 0 )
+    static ApriltagData Unpack(std::span<const uint8_t> data);
+    static void Pack(std::span<uint8_t> data, const ApriltagData &value);
+};
+
+static_assert(wpi::StructSerializable<ApriltagData>); // Ensure that the ObjectDetection is serializable
+
+template <>
+/*! \brief Structure defining how an ObjectDetectionPacket should be serialized. */
+struct wpi::Struct<ApriltagReport>
 {
-}
+    /*! \brief  Returns the name of the class that represents the data in this packet as a string.  */
+    static constexpr std::string_view GetTypeName() { return "ApriltagReport"; }
+    /*! \brief Returns the size of the packet in bytes. This is a constant value. */
+    static constexpr size_t GetSize() { return 1 + 8 + 8 * 4 + 1 + 17 * 6; }
+    /*! \brief Returns the schema of the packet detailing its format as a string. */
+    static constexpr std::string_view GetSchema()
+    {
+        return "int mask;long timestamp;double X;double Y;double theta;double qualilty;uint8 count;ApriltagData objects[6]";
+    }
 
-using ApriltagReportStructType = wpi::Struct<ApriltagReport>; // Structure class that will contain the serialization and deserialization functions for the object detection packet
+    static ApriltagReport Unpack(std::span<const uint8_t> data);
+    static void Pack(std::span<uint8_t> data, const ApriltagReport &value);
+    /*! \brief WPIlib thing, if any additional classes are added to the packet, please list them here. */
+    static void ForEachNested(
+        std::invocable<std::string_view, std::string_view> auto fn)
+    {
+        wpi::ForEachStructSchema<ApriltagData>(fn);
+        wpi::ForEachStructSchema<ApriltagData>(fn);
+        wpi::ForEachStructSchema<ApriltagData>(fn);
+        wpi::ForEachStructSchema<ApriltagData>(fn);
+        wpi::ForEachStructSchema<ApriltagData>(fn);
+        wpi::ForEachStructSchema<ApriltagData>(fn);
+    }
+};
 
-/*! \brief Deserializes an ObjectDetectionPacket from a byte span. Returns the data in a \ref ObjectDetectionPacket class instance. 
-*/
-ApriltagReport ApriltagReportStructType::Unpack(std::span<const uint8_t> data)
-{
-    int key = wpi::UnpackStruct<int, keyOff>(data);
-    int versionNumber = wpi::UnpackStruct<int, versionOff>(data);
-    long time = wpi::UnpackStruct<long, timeOff>(data);
-    uint8_t count = wpi::UnpackStruct<uint8_t, countOff>(data);
-    ApriltagData ad1 = wpi::UnpackStruct<ObjectDetectionInfo, coral1Off>(data);
-    APriltagData ad2 = wpi::UnpackStruct<ObjectDetectionInfo, coral2Off>(data);
-    APriltagData ad3 = wpi::UnpackStruct<ObjectDetectionInfo, coral3Off>(data);
-    APriltagData ad4 = wpi::UnpackStruct<ObjectDetectionInfo, coral4Off>(data);
-    APriltagData ad4 = wpi::UnpackStruct<ObjectDetectionInfo, coral4Off>(data);
-    APriltagData ad4 = wpi::UnpackStruct<ObjectDetectionInfo, coral4Off>(data);
-    return ObjectDetectionPacket(key, versionNumber, time, count, coral1, coral2, coral3, coral4);
-}
+static_assert(wpi::StructSerializable<ApriltagReport>); // Checks that the object detection packet is serializable
+static_assert(wpi::HasNestedStruct<ApriltagReport>);
 
-/*! \brief Serializes an ObjectDetectionPacket into the provided byte span.
-* \param data - Byte span that must be large enough to hold the ObjectDetectionPacket(see \ref ObjectDetectionPacketStructType::GetSize() ).
-* \param value - ObjectDetectionPacket to be serialized.
-*/
-void ApriltagReportStructType::Pack(std::span<uint8_t> data, const ApriltagReport &value)
-{
-    wpi::PackStruct<keyOff>(data, value.m_key);
-    wpi::PackStruct<versionOff>(data, value.m_versionNumber);
-    wpi::PackStruct<timeOff>(data, value.m_time);
-    wpi::PackStruct<countOff>(data, value.m_count);
-    wpi::PackStruct<coral1Off>(data, value.m_coral1);
-    wpi::PackStruct<coral2Off>(data, value.m_coral2);
-    wpi::PackStruct<coral3Off>(data, value.m_coral3);
-    wpi::PackStruct<coral4Off>(data, value.m_coral4);
-}
