@@ -1,3 +1,4 @@
+#include <iostream>
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/stat.h>
@@ -13,6 +14,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/highgui.hpp>
 #include <thread>
 #include <vector>
@@ -24,6 +26,7 @@
 
 #include <cameraserver/CameraServer.h>
 #include <networktables/NetworkTableInstance.h>
+#include <networktables/BooleanTopic.h>
 #include <drm/drm_fourcc.h>
 
 using namespace std;
@@ -35,6 +38,8 @@ using namespace std;
 #include "mbox.h"
 
 #include <signal.h>
+
+#include "field.h"
 
 #define MAX_EXP	0x18000
 
@@ -59,19 +64,70 @@ void sighandler( int nSig )
 #include "tag36h11.h"
 //#include "third_party/apriltag/apriltag.h"
 //#include "third_party/apriltag/tag36h11.h"
-frc971::apriltag::CameraMatrix create_camera_matrix() {
-  return frc971::apriltag::CameraMatrix{
-      1,
-      1,
-      1,
-      1,
-  };
+frc971::apriltag::CameraMatrix create_camera_matrix( int nCam ) {
+	if (nCam == 0) {
+		return frc971::apriltag::CameraMatrix{ 1139.15, 628.77, 1137.01, 338.60 };
+	}
+	else {
+		return frc971::apriltag::CameraMatrix{ 1114.92, 655.70, 1112.39, 331.96 };
+	}
 }
 
-frc971::apriltag::DistCoeffs create_distortion_coefficients() {
-  return frc971::apriltag::DistCoeffs{
-      0, 0, 0, 0, 0,
-  };
+frc971::apriltag::DistCoeffs create_distortion_coefficients( int nCam ) {
+	if (nCam == 0) {
+		return frc971::apriltag::DistCoeffs{ -0.453151, 0.209991, -0.000833, 0.000511, 0 };
+	}
+	else {
+		return frc971::apriltag::DistCoeffs{ -0.437922, 0.204096, 0.001379, 0.001860, 0 };
+	}
+}
+
+cv::Mat camMatrix( int nCam )
+{
+	cv::Mat m( 3, 3, CV_32F );
+	if (nCam == 0) {
+		float grfMat[3][3] = {
+			{ 1139.15, 0.00, 628.77 },
+			{ 0.00, 1137.01, 338.60 },
+			{ 0, 0, 1 }
+		};
+		for (int r = 0; r < 3; r++ ) {
+			for (int c = 0; c < 3; c++ ) {
+				m.at<float>( r, c ) = grfMat[r][c];
+			}
+		}
+	}
+	else {
+		float grfMat[3][3] = {
+			{ 1114.92,    0.00, 655.70 },
+			{    0.00, 1112.39, 331.96 },
+			{    0.00,    0.00,   1 }
+		};
+		for (int r = 0; r < 3; r++ ) {
+			for (int c = 0; c < 3; c++ ) {
+				m.at<float>( r, c ) = grfMat[r][c];
+			}
+		}
+	}
+	return m;
+}
+
+cv::Mat camDistortion( int nCam )
+{
+	cv::Mat md( 4, 1, CV_64F );
+	if (nCam == 0) {
+		double grdMat[] = { -0.453151, 0.209991, -0.000833, 0.000511 };
+
+		for (int i = 0; i < 4; i++ )
+			md.at<double>(i) = grdMat[i];
+	}
+	else {
+		double grdMat[] = { -0.437922, 0.204096,  0.001379, 0.001860 };
+		for (int i = 0; i < 4; i++ )
+			md.at<double>(i) = grdMat[i];
+	}
+
+	return md;
 }
 
 // makes a tag detector.
@@ -98,14 +154,14 @@ struct detectorstruct {
 class ATDetection
 {
 	unsigned			m_uId;
-	vector<cv::Point>	m_vxCorners;
+	vector<cv::Point2f>	m_vxCorners;
 public:
 	ATDetection( unsigned uId, double grCrnrs[4][2] )
 	{
 		m_uId = uId;
 		for( int i = 0; i < 4; i++ )
 		{
-			m_vxCorners.push_back( cv::Point( grCrnrs[i][0], grCrnrs[i][1] ) );
+			m_vxCorners.push_back( cv::Point2f( grCrnrs[i][0], grCrnrs[i][1] ) );
 		}
 	}
 	ATDetection( const ATDetection &src ) :
@@ -129,7 +185,7 @@ public:
 		return *this;
 	}
 
-	cv::Point const &operator[](int n) const
+	cv::Point2f const &operator[](int n) const
 	{
 		return m_vxCorners[n];
 	}
@@ -183,6 +239,8 @@ public:
 		m_vxTags.push_back( atd );
 	}
 };
+
+Field g_field;
 
 class imgProc : public nvFrmProcessor
 {
@@ -239,8 +297,8 @@ public:
 			if (m_bFirstAT) {
 				pCam->bSetExposure( 10000 );
 				pCam->bSetGain( 250 );
-				detector.camera_matrix = create_camera_matrix();
-				detector.dist_coeffs = create_distortion_coefficients();
+				detector.camera_matrix = create_camera_matrix( pCam->nCam() );
+				detector.dist_coeffs = create_distortion_coefficients( pCam->nCam() );
 				detector.apriltag_detector_ = maketagdetector(tag36h11_create());
 				detector.gpu_detector_ = 
 					new frc971::apriltag::GpuDetector(pcf->nCols(), pcf->nRows(), 
@@ -259,6 +317,9 @@ public:
 				apriltag_detection_t *gpu_detection;
 				zarray_get(detections, i, &gpu_detection);
 //				std::cout << "tag: " << gpu_detection->id << " at " << gpu_detection->c[0] << "," << gpu_detection->c[1] << std::endl;
+//				for (int i = 0; i < 4; i++) {
+//					printf( "%.2f %.2f\n", gpu_detection->p[i][0], gpu_detection->p[i][1] );
+//				}
 				ATDetection atd( gpu_detection->id, gpu_detection->p );
 				patf->vAddDetection( atd );
 			}
@@ -273,22 +334,83 @@ public:
 	}
 };
 
+#if 0
+Rebels::Point3d grCorners[] =
+{
+	{ -3.25,  3.25, 0. },
+	{  3.25,  3.25, 0. },
+	{  3.25, -3.25, 0. },
+	{ -3.25, -3.25, 0. }
+};
+#else
+Rebels::Point3d grCorners[] =
+{
+	{ 0., -3.25, -3.25 },
+	{ 0.,  3.25, -3.25 },
+	{ 0.,  3.25,  3.25 },
+	{ 0., -3.25,  3.25 }
+};
+#endif
+
+void Usage()
+{
+	printf( "Usage: 2025AprilTag [-s]\n" );
+	printf( "    -s            run as NetTables Server\n" );
+	exit(1);
+}
+
 int main( int argc, char **argv )
 {
+	bool bNetTableServer = false;
+
 	signal( SIGINT, sighandler );
+
+	for (int n = 1; n < argc; n++) {
+		if (argv[n][0] == '-') {
+			switch (argv[n][1]) {
+			case 's':
+				bNetTableServer = true;
+				break;
+			default:
+				Usage();
+				break;
+			}
+		}
+	}
 
 	MailBox<ATFrame *>	mbFrame;
 
-#if 0
-	char szImgName[100];
-	sprintf( szImgName, "Testing" );
-	cv::namedWindow( szImgName, cv::WINDOW_AUTOSIZE );
-	cv::Mat img = cv::imread("img.png", cv::IMREAD_COLOR);
-	printf( "img size: %d x %d\n", img.rows, img.cols );
-	cv::imshow( szImgName, img );
-	cv::waitKey(0);
-#endif
+	g_field = Field( "2025-reefscape-welded.json" );
+	for( int i = 0; i < g_field.nTags(); i++ ) {
+		Rebels::Point3d const &p3d = g_field[i];
+		printf( "%d: %f\n", int(g_field[i]), p3d.x() );
+	}
+
+	// start NetworkTables
+	auto ntinst = nt::NetworkTableInstance::GetDefault();
+	if (bNetTableServer) {
+    	ntinst.StartServer();
+		ntinst.SetServerTeam(2702);
+	}
+	else {
+		fmt::print("Setting up NetworkTables client for team 2702\n");
+		ntinst.StartClient4("2702Vision");
+		ntinst.SetServerTeam(2702);
+		ntinst.StartDSClient();
+
+		printf( "Waiting for Network Tables to connect\n" );
+		int nCount = 0;
+		while( !ntinst.IsConnected() && !bStop ) {
+			if (nCount++ >2) {
+				exit(1);
+			}
+			printf( "." ); fflush( stdout );
+			std::this_thread::sleep_for( std::chrono::milliseconds(1000) );
+		}
+	}
+
 	try {
+
 	//	auto ntinst = nt::NetworkTableInstance::GetDefault();
 	//	ntinst.StartClientTeam( 2702 );
 	//	ntinst.StartServer();
@@ -316,7 +438,62 @@ int main( int argc, char **argv )
 
 				if (grpFrms[0] && grpFrms[1]) {
 					if( grpFrms[0]->u32Seq() == grpFrms[1]->u32Seq()) {
-						printf( "Have Matching Frames at %u\n", patf->u32Seq() );
+						int nTags = grpFrms[0]->sTags();
+						if (nTags) {
+							cv::Mat objPoints(4 * nTags, 1, CV_32FC3);
+							cv::Mat imgPoints(4 * nTags, 1, CV_32FC2);
+
+							int idx = 0;
+							for (size_t t = 0; t < grpFrms[0]->sTags(); t++ )
+							{
+								ATDetection const &d = (*grpFrms[0])[t];
+								Xfrm const &xfm = g_field[d.uId() - 1];
+printf( "Det %d\n", d.uId() );
+for( int i = 0; i < 4; i++ ) {
+	cv::Point2f const &p3 = d[i];
+	printf( "%.2f  %.2f\n", p3.x, p3.y );
+}
+								Rebels::Point3d const &pt = xfm;
+								Rebels::Quaternion const &q = xfm;
+								for (int c = 0; c < 4; c++, idx++ ) {
+									Rebels::Point3d pn = q * grCorners[c] + pt;
+//									Rebels::Point3d pn = grCorners[c];
+									objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
+									imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
+								}
+							}
+
+#if 0
+							for (int idx = 0; idx < t * 4; id++ ) {
+								cv::Vec3f &v = objPoints.ptr<cv::Vec3f>(idx);
+								cv::Point &p = imgPoints.ptr<cv::Point>(idx);
+								printf( "%.3f  %.3f  %.3f  ->  %.3f  %.3f\n", v[0], v[1], v[2], p[0], p[1] );
+							}
+#else
+							cout << "V: " << objPoints << "\n";
+							cout << "I: " << imgPoints << "\n";
+							cout << "c: " << camMatrix( 0 ) << "\n";
+							cout << "d: " << camDistortion( 0 ) << "\n";
+#endif
+
+							cv::Mat rvec( 3, 1, CV_64F );
+							cv::Mat tvec( 3, 1, CV_64F );
+
+							if (solvePnP( objPoints, imgPoints, camMatrix( 0 ), camDistortion( 0 ), rvec, tvec )) {
+								std::cout << "rvec: " << rvec << "\n";
+								std::cout << "tvec: " << tvec << "\n";
+//								printf( "%.3f  %.3f  %.3f\n", tvec[0], tvec[1], tvec[2] );
+								cv::Mat rot;
+								cv::Rodrigues( rvec, rot );
+
+								cv::Mat rInv;
+								transpose( rot, rInv );
+								
+								cv::Mat cpos;
+								cpos = -rInv * tvec;
+								cout << "pos: " << cpos << "\n";
+							}
+						}
 					}
 				}
 			}
