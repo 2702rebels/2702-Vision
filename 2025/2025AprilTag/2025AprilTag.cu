@@ -444,21 +444,36 @@ bool bSolvePose( int nCam, cv::Mat &objPoints, cv::Mat &imgPoints, CUDPSender &u
 	cv::Mat tvec( 3, 1, CV_64F );
 
 	if (solvePnP( objPoints, imgPoints, camMatrix( nCam ), camDistortion( nCam ), rvec, tvec )) {
-#if 1
 		cv::Mat reprojectPoints( objPoints.rows, 1, CV_32FC2);
-//		vector<cv::Point2f> reprojectPoints;
 		cv::projectPoints(objPoints, rvec, tvec, camMatrix(nCam), camDistortion(nCam), reprojectPoints);
 
 		float sum = 0.;
 		sum = cv::norm(reprojectPoints, imgPoints);
-//								printf( "Sum: %.3f\n", sum );
 
-		if (sum < 10. && (objPoints.rows > 4 || rvec.at<double>(2) < 30.) ) 
-#endif
+		Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
+		Rebels::Point3d p3Tvec( tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2) );
+		Rebels::Quaternion qRot( p3Rvec );
+
+		bool bUseSolve = sum < 10.;
+
+		// If there are only 4 object points or 1 AprilTag we want to make sure we're only using it
+		// if it is within 60 inches of the camera...
+		if ( bUseSolve && objPoints.rows == 4) {
+			// Run through the list of objectPoints and transform them into Camera Coordinate system.
+			// Make sure they all have a value less than 60 inches
+			for (int i = 0; i < 4; i++) {
+				Rebels::Point3d p3Crnr( objPoints.at<float>(i * 3), objPoints.at<float>(i * 3 + 1), objPoints.at<float>(i * 3 + 2) );
+				p3Crnr = qRot * p3Crnr + p3Tvec;
+
+//printf( "%.3f  %.3f  %.3f\n", p3Crnr.x(), p3Crnr.y(), p3Crnr.z() );
+				if (p3Crnr.z() > 60.F) {
+					bUseSolve = false;
+				}
+			}
+		}
+
+		if (bUseSolve)
 		{
-			Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
-			Rebels::Point3d p3Tvec( tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2) );
-
 			if (nCam == 0) {
 				p3Tvec += g_p3dCam0;
 			}
@@ -466,10 +481,6 @@ bool bSolvePose( int nCam, cv::Mat &objPoints, cv::Mat &imgPoints, CUDPSender &u
 				p3Tvec += g_p3dCam1;
 			}
 
-			Rebels::Quaternion qRot( p3Rvec );
-if (objPoints.rows == 4) {
-//	printf( "%.4f  %.4f  %.4f  %.4f\n", qRot.q0(), qRot.x(), qRot.y(), qRot.z() );
-}
 			qRot.Inverse();
 
 			Rebels::Point3d p3dField = qRot * p3Tvec;
