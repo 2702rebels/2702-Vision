@@ -42,6 +42,13 @@ public:
         }
         return false;
     }
+
+    bool operator<(const ObjectDetectionInfo& other){
+        if(m_distance < other.m_distance){
+            return true;
+        }
+        return false;
+    }
 };
 
 template <>

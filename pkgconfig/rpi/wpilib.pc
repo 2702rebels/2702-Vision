@@ -6,6 +6,6 @@ includedir=${prefix}/include
 Name: wpilib
 Description: FRC wpilib library
 Version: 2025
-Libs: -L${exec_prefix}/lib -lntcore -lcscore -lcameraserver -lwpiutil
+Libs: -L${exec_prefix}/lib -lntcore -lcscore -lcameraserver -lwpiutil -lwpimath
 #Libs.private: -ldl -lm -lpthread -lrt
 Cflags: -I${includedir}/apriltag -I${includedir}/cameraserver -I${includedir}/cscore -I${includedir}/hal -I${includedir}/ntcore -I${includedir}/romiVendordep -I${includedir}/wpilibc -I${includedir}/wpilibNewCommands -I${includedir}/wpimath -I${includedir}/wpinet -I${includedir}/wpiutil -I${includedir}/xrpVendordep

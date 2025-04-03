@@ -373,3 +373,54 @@ Point2d &Point2d::operator=(Point2d const &src) {
   m_fV = src.m_fV;
   return *this;
 }
+
+double Point2d::length() {
+  return sqrt(m_fU * m_fU + m_fV * m_fV);
+}
+
+LinearSlope::LinearSlope(){
+  m_slope = 0;
+  m_yIntercept = 0;
+}
+
+LinearSlope::LinearSlope(double slope, double yIntercept){
+  m_slope = slope;
+  m_yIntercept = yIntercept;
+}
+
+LinearSlope::LinearSlope(double x1, double y1, double x2, double y2){
+  m_slope = (x1 - x2) / (y1 - y2);
+  m_yIntercept = y2 - (m_slope * x2);
+}
+
+double LinearSlope::CalculateY(double x){
+  return x * m_slope + m_yIntercept;
+}
+
+double LinearSlope::CalculateX(double y){
+  return (y - m_yIntercept) / m_slope;
+}
+
+bool LinearSlope::IsPointAboveLine(double x, double y){
+  return y > CalculateY(x);
+}
+
+bool LinearSlope::IsPointBelowLine(double x, double y){
+  return y < CalculateY(x);
+}
+
+double LinearSlope::getSlope(){
+  return m_slope;
+}
+
+double LinearSlope::getYIntercept(){
+  return m_yIntercept;
+}
+
+void LinearSlope::setSlope(double slope){
+  m_slope = slope;
+}
+
+void LinearSlope::setYIntercept(double yIntercept){
+  m_yIntercept = yIntercept;
+}

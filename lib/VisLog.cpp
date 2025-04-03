@@ -9,10 +9,11 @@ using namespace std;
 #include <opencv2/imgcodecs.hpp>
 #include "VisLog.h"
 
-/*! \brief Creates a VisionLog from a logfile path and write spec. 
-* \param psz - The path of the logfile to load or write to. 
-* \param bWrite - Whether we are writing or loading the logfile. 
-*/
+VisionLog::VisionLog()
+{
+	m_bWrite = false;
+}
+
 VisionLog::VisionLog( char const *psz, bool bWrite ) 
 {
 	m_bWrite = bWrite;
@@ -25,6 +26,14 @@ VisionLog::~VisionLog()
 {
 }
 
+void VisionLog::vOpen( char const *psz, bool bWrite )
+{
+	m_bWrite = bWrite;
+	m_fs.open( psz, bWrite ? fstream::out : fstream::in );
+	if (!m_fs.is_open())
+		throw runtime_error( "VisionLog::vOpen() - file not open" );
+}
+
 int32_t VisionLog::i32ReadVal()
 {
 	string str;
@@ -34,7 +43,7 @@ int32_t VisionLog::i32ReadVal()
 	return atoi( str.c_str() );
 }
 
-/*! \brief Returns the sequence number of the frame. */
+// returns sequence #
 int32_t VisionLog::i32ReadNext( cv::Mat &img, int &nExp )
 {
 	if( m_bWrite )
@@ -78,6 +87,20 @@ int32_t VisionLog::i32ReadNext( cv::Mat &img, int &nExp )
 		img = matIn;
 		return nSeq;
 	}
+	else if(!str.compare("<<FRMRGB>>")){
+		int nSeq = i32ReadVal();
+		nExp = i32ReadVal();
+		int nRows = i32ReadVal();
+		int nCols = i32ReadVal();
+
+		cv::Mat matIn( nRows, nCols, CV_8UC3 );
+
+		if( !m_fs.read( (char *)matIn.ptr(), nRows * nCols * 3 ) ) 
+			throw runtime_error( string( "VisionLog::bReadNext() - failed reading frame" ) );
+
+		img = matIn;
+		return nSeq;
+	}
 	else {
 		if( m_fs.eof() )
 			return -1;
@@ -87,9 +110,6 @@ int32_t VisionLog::i32ReadNext( cv::Mat &img, int &nExp )
 	return -1;
 }
 
-/*! \brief Rewinds the video playback to the start. 
-* \returns true if successful, false if not. 
-*/
 bool VisionLog::bRewind()
 {
 	m_fs.clear();
@@ -113,11 +133,7 @@ static std::string strPrintf( char const *psz, ... )
 	return std::string(szTmp);
 }
 
-/*! \brief Writes a frame to the logfile in raw format. 
-* \param img - The openCV material containing the frames. 
-* \param u32Seq - The sequence number of the frame to write. 
-* \param u32Exp - The exposure used to process the frame. 
-*/
+
 bool VisionLog::bWriteRaw( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp )
 {
 	std::unique_lock<std::mutex> l( m_mtx );
@@ -128,12 +144,15 @@ bool VisionLog::bWriteRaw( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp 
 	return m_fs.failbit ? false : true;
 }
 
-/*! \brief Writes a frame to the logfile in png format.
-* \param img - The openCV material containing the frames.
-* \param u32Seq - The frame number of the frame to write.
-* \param u32Exp - The exposure used to process the frame.
-* \returns true if successful, false if not.
-*/
+bool VisionLog::bWriteRGB( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp ){
+	std::unique_lock<std::mutex> l( m_mtx );
+	m_fs << strPrintf( "<<FRMRGB>>\n%u\n%u\n", u32Seq, u32Exp );
+	m_fs << strPrintf( "%d\n%d\n", img.rows, img.cols );
+	m_fs.write( (char *)img.data, img.rows * img.cols * 3 );
+
+	return m_fs.failbit ? false : true;
+}
+
 bool VisionLog::bWritePNG( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp )
 {
 	std::unique_lock<std::mutex> l( m_mtx );
@@ -147,4 +166,12 @@ bool VisionLog::bWritePNG( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp 
 	return m_fs.failbit ? false : true;
 }
 
+bool VisionLog::bIsOpen()
+{
+	return m_fs.is_open();
+}
 
+void VisionLog::vClose()
+{
+	m_fs.close();
+}

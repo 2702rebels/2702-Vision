@@ -15,13 +15,19 @@ class VisionLog
 	int32_t i32ReadVal();
 
 public:
+	VisionLog();
 	VisionLog( char const *pszFile, bool bWrite = false );
 	virtual ~VisionLog();
 
-	int32_t i32ReadNext( cv::Mat &mat, int &nExp );
+	void vOpen( char const *pszFile, bool bWrite = false );
+	void vClose();
 	bool bRewind();
+	bool bIsOpen();
+
+	int32_t i32ReadNext( cv::Mat &mat, int &nExp );
 
 	bool bWriteRaw( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp );
 	bool bWritePNG( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp );
+	bool bWriteRGB( cv::Mat const &img, uint32_t u32Seq, uint32_t u32Exp );
 };
 

@@ -34,6 +34,7 @@ class Point2d {
   inline float u() const { return m_fU; }
   /*! \brief Returns vertical component of point. */
   inline float v() const { return m_fV; };
+  double length();
 };
 
 class Point3d;
@@ -173,4 +174,22 @@ class Quaternion {
   inline float z() const { return m_fZ; }
 };
 
-};  // namespace Rebels
+class LinearSlope {
+  double m_slope;
+  double m_yIntercept;
+
+  public:
+    LinearSlope();
+    LinearSlope(double slope, double yIntercept);
+    LinearSlope(double x1, double y1, double x2, double y2);
+    double getSlope();
+    double getYIntercept();
+    void setSlope(double slope);
+    void setYIntercept(double yIntercept);
+    bool IsPointAboveLine(double x, double y);
+    bool IsPointBelowLine(double x, double y);
+    double CalculateY(double x);
+    double CalculateX(double y);
+}; 
+
+};// namespace Rebels

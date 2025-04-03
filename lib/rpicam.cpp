@@ -49,6 +49,8 @@ class RPIFrame : public CameraFrame
 	uint32_t	m_u32Exposure;
 	int			m_nRows = 0;
 	int			m_nCols = 0;
+	int			m_fixedExposure = -1;
+	double			m_fixedGain = -1;
 	struct timeval m_ts;
 
 	uint8_t	*m_pu8Img;
@@ -147,13 +149,15 @@ public:
 	}
 	
 };
-
-RPICamera::RPICamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, FrmProcessor &nfp ) :
+// If fixed exposure not set, use default auto-adjust exposure
+RPICamera::RPICamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, FrmProcessor &nfp, int fixedExposure = -1, double fixedGain = -1) :
 	m_bShutdown( false ),
 	m_nCam( nCam ),
 	m_nWorkersRunning( 0 ),
 	m_nWorkersWaiting( 0 ),
-	m_nfp( nfp )
+	m_nfp( nfp ),
+	m_fixedExposure(fixedExposure),
+	m_fixedGain(fixedGain)
 {
 	/* SPDX-License-Identifier: GPL-2.0-or-later */
 	/*
@@ -418,7 +422,7 @@ bool RPICamera::bProcessFrame( v4l2_buffer &buf )
 	return QueueWork( buf );
 }
 #endif
-
+// Use fixed exposure if it is set
 bool RPICamera::bStart()
 {
 	/*
@@ -461,7 +465,16 @@ bool RPICamera::bStart()
 	 * For each delivered frame, the Slot connected to the
 	 * Camera::requestCompleted Signal is called.
 	 */
-	m_cam->start();
+	if(m_fixedExposure != -1){
+		libcamera::ControlList controls = libcamera::ControlList();
+		controls.set(libcamera::controls::AeEnable, false);
+		controls.set(libcamera::controls::ExposureTime, m_fixedExposure);
+		controls.set(libcamera::controls::AnalogueGain, m_fixedGain);
+		m_cam->start(&controls);
+	}
+	else{
+		m_cam->start();
+	}
 	for (std::unique_ptr<libcamera::Request> &request : m_vreq) {
 		m_cam->queueRequest(request.get());
 	}
@@ -633,4 +646,5 @@ void RPICamera::workerThreadFn()
 	m_nWorkersRunning--;
 	l.unlock();
 }
+
 

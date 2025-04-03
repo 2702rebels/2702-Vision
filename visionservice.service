@@ -1,0 +1,16 @@
+[Unit]
+Description=Running object detection.
+
+[Service]
+Type=simple
+WorkingDirectory=/home/Vision/2702-Vision/2025/Object/
+ExecStart=/bin/bash /usr/bin/visionservice.sh
+Restart=always
+RestartSec=1
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=object
+
+
+[Install]
+WantedBy=multi-user.target

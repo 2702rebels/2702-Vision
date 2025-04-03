@@ -45,6 +45,8 @@ class RPICamera : public CamBase
 	bool			m_bShutdown;
 	int				m_nCam;
 	int				m_nWorkersRunning;
+	int				m_fixedExposure;
+	double				m_fixedGain;
 	volatile int	m_nWorkersWaiting;
 
 #if DISPLAY
@@ -79,11 +81,12 @@ class RPICamera : public CamBase
 	RPIFrame 	*waitForWork();
 	void workerThreadFn();
 public:
-	RPICamera( char const *pszVid, int nCam, int nRows, int nCols, uint32_t u32PixFmt, FrmProcessor &nfp );
+	RPICamera( char const *pszVid, int nCam, int nRows, int nCols, uint32_t u32PixFmt, FrmProcessor &nfp, int fixedExposure, double fixedGain);
 	virtual ~RPICamera();
 	virtual bool bStart();
 	virtual bool bStop();
 
 	virtual void FrameComplete( RPIFrame *pFrame );
 };
+
 

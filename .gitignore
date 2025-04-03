@@ -14,3 +14,11 @@ allwpilib/
 .vs/
 *.jpg
 *.png
+*.txt
+calibrate
+logtostdvideo
+nettableserver
+replay
+testudpserver
+udppacketstest
+object

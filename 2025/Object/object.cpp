@@ -1,12 +1,12 @@
 /*! \brief Main for object detection. Cannot be run in a desktop testing environment. Uses NetworkTables to update object detection config at runtime.
-* Depends on: 
-*  - opencv
-*  - rpicam
-*  - wpilib ntcore
-*  - asio(UDP client library)
-*  - object.h
-*  - config.h
-*/
+ * Depends on:
+ *  - opencv
+ *  - rpicam
+ *  - wpilib ntcore
+ *  - asio(UDP client library)
+ *  - object.h
+ *  - config.h
+ */
 
 #include <unistd.h>
 #include <stdint.h>
@@ -17,9 +17,9 @@
 #include <fcntl.h>
 #include <errno.h>
 
-//#include <X11/Xlib.h>
-//#include <cameraserver/CameraServer.h>
-//#include <networktables/NetworkTableInstance.h>
+// #include <X11/Xlib.h>
+// #include <cameraserver/CameraServer.h>
+// #include <networktables/NetworkTableInstance.h>
 #include <drm/drm_fourcc.h>
 
 #include <linux/videodev2.h>
@@ -54,19 +54,26 @@ bool bStop = false;
 #include "config.h"
 
 #define USE_NETWORK_TABLES 1
-#define IS_ROBOT 0
+#define IS_ROBOT 1
+/*! \brief Fixed exposure time in us that is fed to rpicam. */
+#define FIXED_EXPOSURE_TIME 75000
+// waterloo comp #define FIXED_GAIN_VALUE 1.4
+#define FIXED_GAIN_VALUE 5 // practice field 2025
+
+#define RESOLUTION_WIDTH 640
+#define RESOLUTION_HEIGHT 480
 
 /*! \brief Handles Ctrl+C interrupts.
  * \param nSig - Should always be equal to \ref SIGINT.*/
-void sighandler( int nSig )
+void sighandler(int nSig)
 {
-	printf( "Received Signal %d\n", nSig );
+	printf("Received Signal %d\n", nSig);
 	bStop = true;
 }
 
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
-	signal( SIGINT, sighandler );
+	signal(SIGINT, sighandler);
 #if 0
 	char szImgName[100];
 	sprintf( szImgName, "Testing" );
@@ -76,32 +83,17 @@ int main( int argc, char **argv )
 	cv::imshow( szImgName, img );
 	cv::waitKey(0);
 #endif
-	try {
-		#if USE_NETWORK_TABLES
-		auto networkTableManager = nt::NetworkTableInstance::GetDefault();
-		std::mt19937 randomNumberGen = std::mt19937();
-		std::uniform_int_distribution<uint32_t> networkTableRandomRange = std::uniform_int_distribution<uint32_t>(0,20);
-		auto objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
-		nt::IntegerSubscriber hueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMin").Subscribe(0);
-		nt::IntegerSubscriber hueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMax").Subscribe(0);
-		nt::IntegerSubscriber saturationMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMin").Subscribe(0);
-		nt::IntegerSubscriber saturationMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMax").Subscribe(0);
-		nt::IntegerSubscriber valueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMin").Subscribe(0);
-		nt::IntegerSubscriber valueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMax").Subscribe(0);
-		networkTableManager.StartClient4("networkTableClient");
-		networkTableManager.SetServerTeam(2702);
-		#if IS_ROBOT
-		networkTableManager.StartDSClient(); // Should only be run on actual robot
-		#endif
-		#endif
+	try
+	{
 		imgProc proc;
-//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
-		RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
-	//	nvCamera mycam1( "/dev/video1", 4, 1 );
+		//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
+		RPICamera mycam0("/dev/video0", 0, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, DRM_FORMAT_RGB888, proc, FIXED_EXPOSURE_TIME, FIXED_GAIN_VALUE);
+		//	nvCamera mycam1( "/dev/video1", 4, 1 );
 
-	//	printinfo( mycam0 );
-	ConfigUtils::triggerConfigLoad(proc);
-		while( !bStop ) {
+		//	printinfo( mycam0 );
+		ConfigUtils::triggerConfigLoad(proc);
+		while (!bStop)
+		{
 			if (ConfigUtils::configHasChanged(proc))
 			{
 				ConfigUtils::triggerConfigSave(proc);
@@ -110,9 +102,26 @@ int main( int argc, char **argv )
 			{
 				ConfigUtils::triggerConfigLoad(proc);
 			}
-			#if USE_NETWORK_TABLES
+#if USE_NETWORK_TABLES
+			auto networkTableManager = nt::NetworkTableInstance::GetDefault();
+			auto objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
+			auto visionTable = networkTableManager.GetTable("Vision");
+			nt::IntegerSubscriber hueMinTopic = objectDetectionTable->GetIntegerTopic("HueMin").Subscribe(proc.getPVHueMin());
+			nt::IntegerSubscriber hueMaxTopic = objectDetectionTable->GetIntegerTopic("HueMax").Subscribe(proc.getPVHueMax());
+			nt::IntegerSubscriber saturationMinTopic = objectDetectionTable->GetIntegerTopic("SaturationMin").Subscribe(proc.getSaturationMin());
+			nt::IntegerSubscriber saturationMaxTopic = objectDetectionTable->GetIntegerTopic("SaturationMax").Subscribe(proc.getSaturationMax());
+			nt::IntegerSubscriber valueMinTopic = objectDetectionTable->GetIntegerTopic("ValueMin").Subscribe(proc.getValueMin());
+			nt::IntegerSubscriber valueMaxTopic = objectDetectionTable->GetIntegerTopic("ValueMax").Subscribe(proc.getValueMax());
+			nt::BooleanSubscriber isLoggingTopic = visionTable->GetBooleanTopic("IsLogging").Subscribe(false);
+			bool bLogStarted = false;
+			networkTableManager.StartClient4("networkTableClient");
+			networkTableManager.SetServerTeam(2702);
+#if IS_ROBOT
+			networkTableManager.StartDSClient();
+#endif
 			std::cout << "NetworkTables are " << (networkTableManager.IsConnected() ? "Connected" : "Not Connected") << "\n";
-			if(networkTableManager.IsConnected() && networkTableRandomRange(randomNumberGen) == 1){
+			if (networkTableManager.IsConnected())
+			{
 				std::cout << "Updated configs from network table\n";
 				proc.setPVHueMin(hueMinTopic.GetAtomic().value);
 				proc.setPVHueMax(hueMaxTopic.GetAtomic().value);
@@ -120,14 +129,24 @@ int main( int argc, char **argv )
 				proc.setSaturationMax(saturationMaxTopic.GetAtomic().value);
 				proc.setValueMin(valueMinTopic.GetAtomic().value);
 				proc.setValueMax(valueMaxTopic.GetAtomic().value);
+				if (!bLogStarted)
+				{
+					if (isLoggingTopic.Get())
+					{
+						proc.vStartLogging();
+						bLogStarted = true;
+					}
+				}
 			}
-			#endif
-			std::this_thread::sleep_for( std::chrono::milliseconds(200) );
+#endif
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		}
 	}
-	catch (std::exception &e) {
-		printf( "Exception: %s\n", e.what() );
+	catch (std::exception &e)
+	{
+		printf("Exception: %s\n", e.what());
 	}
 
 	return 0;
 }
+

@@ -15,7 +15,7 @@ LDFLAGS+=-L../../lib
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
 LIBS+=$(shell pkg-config -libs opencv4)
-all: object replay nettableserver testnetworktablesclient udppacketstest calibrate testudpserver
+all: object replay nettableserver testnetworktablesclient udppacketstest calibrate testudpserver logtostdvideo
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui $(LIBS)
@@ -39,10 +39,14 @@ calibrate: calibrate.o ../../lib/lib2702.a
 testudpserver: testudpserver.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testudpserver testudpserver.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
 
-object.o: object.cpp object.h config.h ObjectDetectionStruct.cpp ObjectDetectionStruct.h
-replay.o: replay.cpp object.h config.h
-nettableserver.o: nettableserver.cpp
-testnetworktablesclient.o: testnetworktablesclient.cpp
-udppacketstest.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp udppacketstest.cpp
-calibrate.o: calibrate.cpp
-testudpserver.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp testudpserver.cpp
+logtostdvideo: logtostdvideo.o ../../lib/lib2702.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o logtostdvideo logtostdvideo.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+
+object.o: object.cpp object.h config.h ObjectDetectionStruct.cpp ObjectDetectionStruct.h udpsender.h
+replay.o: replay.cpp object.h config.h udpsender.h
+nettableserver.o: nettableserver.cpp udpsender.h
+testnetworktablesclient.o: testnetworktablesclient.cpp udpsender.h
+udppacketstest.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp udppacketstest.cpp udpsender.h
+calibrate.o: calibrate.cpp udpsender.h
+testudpserver.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp testudpserver.cpp udpsender.h
+logtostdvideo.o: object.h config.h logtostdvideo.h logtostdvideo.cpp udpsender.h

@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <span>
+#include <iostream>
+#include <sstream>
 
 //#include <X11/Xlib.h>
 #include <linux/videodev2.h>
@@ -31,7 +33,9 @@
 using namespace std;
 
 #include <signal.h>
-
+#define DEFAULT_EXPOSURE 75000
+// waterloo comp #define FIXED_GAIN_VALUE 1.4
+#define DEFAULT_GAIN 5 // practice field 2025
 #if 0
 void printinfo( v4lcam &cam )
 {
@@ -122,7 +126,20 @@ int main( int argc, char **argv )
 		ntinst.StartServer();
 		imgProc proc( szLog );
 //		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
-		RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
+		if(argc != 3) {
+			RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc, DEFAULT_EXPOSURE, DEFAULT_GAIN);
+		}
+		else {
+			stringstream strFixedExposure;
+			strFixedExposure << argv[1];
+			int fixedExposure;
+			strFixedExposure >> fixedExposure;
+			stringstream strFixedGain;
+			strFixedGain << argv[2];
+			double fixedGain;
+			strFixedGain >> fixedGain;
+			RPICamera mycam0("/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc, fixedExposure, fixedGain);
+		}
 
 		while( !bStop ) {
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );

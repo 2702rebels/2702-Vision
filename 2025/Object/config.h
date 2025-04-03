@@ -153,6 +153,13 @@ public:
 			m_npreviousSaturationMax = config.saturationMax;
 			m_npreviousValueMin = config.valueMin;
 			m_npreviousValueMax = config.valueMax;
+			std::cout << "Loaded the following config from disk:\n";
+			std::cout << "hue min: " << config.hueMin << "\n";
+			std::cout << "hue max: " << config.hueMax << "\n";
+			std::cout << "sat min: " << config.saturationMin << "\n";
+			std::cout << "sat max: " << config.saturationMax << "\n";
+			std::cout << "value min: " << config.valueMin << "\n";
+			std::cout << "value max: " << config.valueMax << "\n";
 		}
 	}
 	/*!  
