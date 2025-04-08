@@ -9,6 +9,13 @@ Depends on:
 #define SETTING_SATURATION_MAX "satMax"
 #define SETTING_VALUE_MIN "valMin"
 #define SETTING_VALUE_MAX "valMax"
+#define SETTING_MIN_PIXEL_WIDTH "minPixelWidth"
+#define SETTING_MAX_PIXEL_WIDTH "maxPixelWidth"
+#define SETTING_MIN_PIXEL_HEIGHT "minPixelHeight"
+#define SETTING_MAX_PIXEL_HEIGHT "maxPixelHeight"
+#define SETTING_MIN_PIXEL_AREA "minPixelArea"
+#define SETTING_MAX_PIXEL_AREA "maxPixelArea"
+#define SETTING_MIN_PERCENT_FILL "minPercentFill"
 #define SETTINGS_FILE_PATH "./processorSettings.txt"
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -25,6 +32,13 @@ public:
 	int saturationMax;
 	int valueMin;
 	int valueMax;
+	int minPixelWidth;
+	int maxPixelWidth;
+	int minPixelHeight;
+	int maxPixelHeight;
+	int minPixelArea;
+	int maxPixelArea;
+	double minPercentFill;
  
 	/*!  
 	* \brief Fetches the object detection settings from json 
@@ -39,6 +53,13 @@ public:
 		this->saturationMax = filterSettings[SETTING_SATURATION_MAX];
 		this->valueMin = filterSettings[SETTING_VALUE_MIN];
 		this->valueMax = filterSettings[SETTING_VALUE_MAX];
+		this->minPixelWidth = filterSettings[SETTING_MIN_PIXEL_WIDTH];
+		this->maxPixelWidth = filterSettings[SETTING_MAX_PIXEL_WIDTH];
+		this->minPixelHeight = filterSettings[SETTING_MIN_PIXEL_HEIGHT];
+		this->maxPixelHeight = filterSettings[SETTING_MAX_PIXEL_HEIGHT];
+		this->minPixelArea = filterSettings[SETTING_MIN_PIXEL_AREA];
+		this->maxPixelArea = filterSettings[SETTING_MAX_PIXEL_AREA];
+		this->minPercentFill = filterSettings[SETTING_MIN_PERCENT_FILL];
 	}
 
 	/*!  
@@ -50,7 +71,8 @@ public:
 	* \param  valueMin - integer representing the valueMin parameter
 	* \param  valueMax - integer representing the valueMax parameter
 	*/
-	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax)
+	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax,
+	int minPixelWidth, int maxPixelWidth, int minPixelHeight, int maxPixelHeight, int minPixelArea, int maxPixelArea, double minPercentFill)
 	{
 		this->hueMin = hueMin;
 		this->hueMax = hueMax;
@@ -58,6 +80,13 @@ public:
 		this->saturationMax = saturationMax;
 		this->valueMin = valueMin;
 		this->valueMax = valueMax;
+		this->minPixelWidth = minPixelWidth;
+		this->maxPixelWidth = maxPixelWidth;
+		this->minPixelHeight = minPixelHeight;
+		this->maxPixelHeight = maxPixelHeight;
+		this->minPixelArea = minPixelArea;
+		this->maxPixelArea = maxPixelArea;
+		this->minPercentFill = minPercentFill;
 	}
 
 	/*!  
@@ -74,6 +103,13 @@ public:
 		settingsdata[SETTING_SATURATION_MAX] = saturationMax;
 		settingsdata[SETTING_VALUE_MIN] = valueMin;
 		settingsdata[SETTING_VALUE_MAX] = valueMax;
+		settingsdata[SETTING_MIN_PIXEL_WIDTH] = minPixelWidth;
+		settingsdata[SETTING_MIN_PIXEL_HEIGHT] = minPixelHeight;
+		settingsdata[SETTING_MAX_PIXEL_WIDTH] = maxPixelWidth;
+		settingsdata[SETTING_MAX_PIXEL_HEIGHT] = maxPixelHeight;
+		settingsdata[SETTING_MIN_PIXEL_AREA] = minPixelArea;
+		settingsdata[SETTING_MAX_PIXEL_AREA] = maxPixelArea;
+		settingsdata[SETTING_MIN_PERCENT_FILL] = minPercentFill;
 		const std::string jsonStr = settingsdata.dump().c_str();
 		settingsfile.write(jsonStr.c_str(), jsonStr.length());
 		settingsfile.close();
@@ -93,6 +129,13 @@ public:
 	static int m_npreviousSaturationMax;
 	static int m_npreviousValueMin;
 	static int m_npreviousValueMax;
+	static int m_previousMinPixelWidth;
+	static int m_previousMaxPixelWidth;
+	static int m_previousMinPixelHeight;
+	static int m_previousMaxPixelHeight;
+	static int m_previousMinPixelArea;
+	static int m_previousMaxPixelArea;
+	static double m_previousMinPercentFill;
 	/*!  
 	* \brief Returns true if image processor's configuration is different from what is currently written to the config file. 
 	* \brief Otherwise returns false.
@@ -124,6 +167,34 @@ public:
 		{
 			return true;
 		}
+		if (m_previousMinPixelWidth != imageProcessor.getMinPixelWidth())
+		{
+			return true;
+		}
+		if (m_previousMinPixelHeight != imageProcessor.getMinPixelHeight())
+		{
+			return true;
+		}
+		if (m_previousMinPixelArea != imageProcessor.getMinPixelArea())
+		{
+			return true;
+		}
+		if (m_previousMaxPixelWidth != imageProcessor.getMaxPixelWidth())
+		{
+			return true;
+		}
+		if(m_previousMaxPixelHeight != imageProcessor.getMaxPixelHeight())
+		{
+			return true;
+		}
+		if(m_previousMaxPixelArea != imageProcessor.getMaxPixelArea())
+		{
+			return true;
+		}
+		if(m_previousMinPercentFill != imageProcessor.getMinPercentFill())
+		{
+			return true;
+		}
 		return false;
 	}
 	/*!  
@@ -147,12 +218,26 @@ public:
 			imageProcessor.setSaturationMax(config.saturationMax);
 			imageProcessor.setValueMin(config.valueMin);
 			imageProcessor.setValueMax(config.valueMax);
+			imageProcessor.setMinPixelWidth(config.minPixelWidth);
+			imageProcessor.setMinPixelHeight(config.minPixelHeight);
+			imageProcessor.setMinPixelArea(config.minPixelArea);
+			imageProcessor.setMaxPixelWidth(config.maxPixelWidth);
+			imageProcessor.setMaxPixelHeight(config.maxPixelHeight);
+			imageProcessor.setMaxPixelArea(config.maxPixelArea);
+			imageProcessor.setMinPercentFill(config.minPercentFill);
 			m_npreviousHueMin = config.hueMin;
 			m_npreviousHueMax = config.hueMax;
 			m_npreviousSaturationMin = config.saturationMin;
 			m_npreviousSaturationMax = config.saturationMax;
 			m_npreviousValueMin = config.valueMin;
 			m_npreviousValueMax = config.valueMax;
+			m_previousMinPixelWidth = config.minPixelWidth;
+			m_previousMinPixelHeight = config.minPixelHeight;
+			m_previousMinPixelArea = config.minPixelArea;
+			m_previousMaxPixelWidth = config.maxPixelWidth;
+			m_previousMaxPixelHeight = config.maxPixelHeight;
+			m_previousMaxPixelArea = config.maxPixelArea;
+			m_previousMinPercentFill = config.minPercentFill;
 			std::cout << "Loaded the following config from disk:\n";
 			std::cout << "hue min: " << config.hueMin << "\n";
 			std::cout << "hue max: " << config.hueMax << "\n";
@@ -160,6 +245,13 @@ public:
 			std::cout << "sat max: " << config.saturationMax << "\n";
 			std::cout << "value min: " << config.valueMin << "\n";
 			std::cout << "value max: " << config.valueMax << "\n";
+			std::cout << "min pixel width: " << config.minPixelWidth << "\n";
+			std::cout << "min pixel height: " << config.minPixelHeight << "\n";
+			std::cout << "min pixel area: " << config.minPixelArea << "\n";
+			std::cout << "max pixel width: " << config.maxPixelWidth << "\n";
+			std::cout << "max pixel height: " << config.maxPixelHeight << "\n";
+			std::cout << "max pixel area: " << config.maxPixelArea << "\n";
+			std::cout << "min pixel width: " << config.minPercentFill << "\n";
 		}
 	}
 	/*!  
@@ -169,7 +261,9 @@ public:
 	static void triggerConfigSave(imgProc &imageProcessor)
 	{
 		imageProcessingFilterSettings config = imageProcessingFilterSettings(imageProcessor.getPVHueMin(), imageProcessor.getPVHueMax(),
-																			 imageProcessor.getSaturationMin(), imageProcessor.getSaturationMax(), imageProcessor.getValueMin(), imageProcessor.getValueMax());
+																			 imageProcessor.getSaturationMin(), imageProcessor.getSaturationMax(), imageProcessor.getValueMin(), imageProcessor.getValueMax(),
+																			imageProcessor.getMinPixelWidth(), imageProcessor.getMaxPixelWidth(), imageProcessor.getMinPixelHeight(), imageProcessor.getMaxPixelHeight(),
+																		imageProcessor.getMinPixelArea(), imageProcessor.getMaxPixelArea(), imageProcessor.getMinPercentFill());
 		config.writeSettings();
 		m_npreviousHueMin = config.hueMin;
 		m_npreviousHueMax = config.hueMax;
@@ -177,6 +271,13 @@ public:
 		m_npreviousSaturationMax = config.saturationMax;
 		m_npreviousValueMin = config.valueMin;
 		m_npreviousValueMax = config.valueMax;
+		m_previousMinPixelWidth = config.minPixelWidth;
+		m_previousMinPixelHeight = config.minPixelHeight;
+		m_previousMinPixelArea = config.minPixelArea;
+		m_previousMaxPixelWidth = config.maxPixelWidth;
+		m_previousMaxPixelHeight = config.maxPixelHeight;
+		m_previousMaxPixelArea = config.maxPixelArea;
+		m_previousMinPercentFill = config.minPercentFill;
 	}
 };
 // Instantiate the static values
@@ -186,3 +287,10 @@ int ConfigUtils::m_npreviousSaturationMin;
 int ConfigUtils::m_npreviousSaturationMax;
 int ConfigUtils::m_npreviousValueMin;
 int ConfigUtils::m_npreviousValueMax;
+int ConfigUtils::m_previousMinPixelWidth;
+int ConfigUtils::m_previousMaxPixelWidth;
+int ConfigUtils::m_previousMinPixelHeight;
+int ConfigUtils::m_previousMaxPixelHeight;
+int ConfigUtils::m_previousMinPixelArea;
+int ConfigUtils::m_previousMaxPixelArea;
+double ConfigUtils::m_previousMinPercentFill;

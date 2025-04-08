@@ -99,24 +99,8 @@
 * 26 deg in radians.
 */
 #define CAMERA_ANGLE (M_PI / 180) * 26
-/*! \brief Minimum height of ellipse contour in pixels for detection. */
-#define MIN_PIXEL_HEIGHT_FOR_DETECTION 25
-/*! \brief Minimum width of ellipse contour in pixels for detection. */
-#define MIN_PIXEL_WIDTH_FOR_DETECTION 20
-/*! \brief Maximum width of ellipse contour in pixels for detection. */
-#define MAX_PIXEL_WIDTH_FOR_DETECTION 500
-/*! \brief Maximum height of ellipse contour in pixels for detection. */
-#define MAX_PIXEL_HEIGHT_FOR_DETECTION 350
-/*! \brief Maximum area of ellipse contour in pixels for detection*/
-#define MAX_PIXEL_AREA_FOR_DETECTION 115000
 /*! \brief Directory where to log files to. */
 #define LOG_DIR "/data/logs/"
-/*! \brief If the area of the detection is smaller than this, throw out the detection. */
-#define MIN_PIXEL_AREA_FOR_DETECTION 4500
-/*! \brief If the % fill of an object is smaller than this, the detection will not be valid. 
-* Write as a % from 0-1, eg 0.5 = 50%
-*/
-#define PERCENT_FILL_FOR_DETECTION 0.2
 
 #ifndef RESOLUTION_WIDTH
 #define RESOLUTION_WIDTH 640
@@ -143,6 +127,20 @@ class imgProc : public FrmProcessor
 	int			m_nSHigh = 20;
 	/*! \brief Value max object detection parameter. */
 	int			m_nVHigh = 255;
+	/*! \brief Minimum pixel width of an object required for detection. */
+	int			m_minPixelWidth = 20;
+	/*! \brief Minimum pixel height of an object required for detection. */
+	int			m_minPixelHeight = 25;
+	/*! \brief Maximum pixel width of an object for detection. */
+	int			m_maxPixelWidth = 500;
+	/*! \brief Maximum pixel height of an object for detection. */
+	int			m_maxPixelHeight = 350;
+	/*! \brief Minimum pixel area of an object for detection. */
+	int			m_minPixelArea = 4500;
+	/*! \brief Maximum pixel area of an object for detection. */
+	int			m_maxPixelArea = 115000;
+	/*! \brief Minimum percentage of pixels that have to be valid inside of a detection for it to be valid. */
+	double		m_minPercentFill = 0.2;
 
 	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
 	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralDistance").Publish();
@@ -311,6 +309,62 @@ public:
 		#endif
 	}
 	/*! 
+	* \brief Sets min pixel width object detection parameter.
+	* \param  newValue - integer representing the new min pixel width
+	*/
+	virtual void setMinPixelWidth(int newValue)
+	{
+		m_minPixelWidth = newValue;
+	}
+	/*! 
+	* \brief Sets min pixel height object detection parameter.
+	* \param  newValue - integer representing the new min pixel height
+	*/
+	virtual void setMinPixelHeight(int newValue)
+	{
+		m_minPixelHeight = newValue;
+	}
+	/*! 
+	* \brief Sets min pixel area object detection parameter.
+	* \param  newValue - integer representing the new min pixel area
+	*/
+	virtual void setMinPixelArea(int newValue)
+	{
+		m_minPixelArea = newValue;
+	}
+	/*! 
+	* \brief Sets max pixel width object detection parameter.
+	* \param  newValue - integer representing the new max pixel width
+	*/
+	virtual void setMaxPixelWidth(int newValue)
+	{
+		m_maxPixelWidth = newValue;
+	}
+	/*! 
+	* \brief Sets max pixel height object detection parameter.
+	* \param  newValue - integer representing the new max pixel height
+	*/
+	virtual void setMaxPixelHeight(int newValue)
+	{
+		m_maxPixelHeight = newValue;
+	}
+	/*! 
+	* \brief Sets max pixel area object detection parameter.
+	* \param  newValue - integer representing the new max pixel area
+	*/
+	virtual void setMaxPixelArea(int newValue)
+	{
+		m_maxPixelArea = newValue;
+	}
+	/*! 
+	* \brief Sets min percent fill object detection parameter.
+	* \param  newValue - integer representing the new min percent fill
+	*/
+	virtual void setMinPercentFill(double newValue)
+	{
+		m_minPercentFill = newValue;
+	}
+	/*! 
 	* \brief Returns the hue min object detection parameter. 
 	*/
 	virtual int getPVHueMin() const
@@ -351,6 +405,55 @@ public:
 	virtual int getValueMax() const
 	{
 		return m_nVHigh;
+	}
+	/*! 
+	* \brief Returns the min pixel width object detection parameter. 
+	*/
+	virtual int getMinPixelWidth() const
+	{
+		return m_minPixelWidth;
+	}
+	/*! 
+	* \brief Returns the min pixel height object detection parameter. 
+	*/
+	virtual int getMinPixelHeight() const
+	{
+		return m_minPixelHeight;
+	}
+	/*! 
+	* \brief Returns the max pixel width object detection parameter. 
+	*/
+	virtual int getMaxPixelWidth() const
+	{
+		return m_maxPixelWidth;
+	}
+	/*! 
+	* \brief Returns the max pixel height object detection parameter. 
+	*/
+	virtual int getMaxPixelHeight() const
+	{
+		return m_maxPixelHeight;
+	}
+	/*! 
+	* \brief Returns the min pixel area object detection parameter. 
+	*/
+	virtual int getMinPixelArea() const
+	{
+		return m_minPixelArea;
+	}
+	/*! 
+	* \brief Returns the max pixel area object detection parameter. 
+	*/
+	virtual int getMaxPixelArea() const
+	{
+		return m_maxPixelArea;
+	}
+	/*! 
+	* \brief Returns the min percent fill object detection parameter. 
+	*/
+	virtual double getMinPercentFill() const
+	{
+		return m_minPercentFill;
 	}
 	virtual ~imgProc()
 	{
@@ -470,16 +573,16 @@ public:
 		ellipse.points(points);
 		cv::Point center = (rect.br() + rect.tl()) * 0.5;
 		float majorAxisLength = std::max(rect.width, rect.height);
-		if(majorAxisLength < MIN_PIXEL_WIDTH_FOR_DETECTION || majorAxisLength > MAX_PIXEL_WIDTH_FOR_DETECTION)
+		if(majorAxisLength < m_minPixelWidth || majorAxisLength > m_maxPixelWidth)
 		{
 			return { {}, {} };
 		}
 		float minorAxisLength = std::min(rect.width, rect.height);
-		if(minorAxisLength < MIN_PIXEL_HEIGHT_FOR_DETECTION || minorAxisLength > MAX_PIXEL_HEIGHT_FOR_DETECTION){
+		if(minorAxisLength < m_minPixelHeight || minorAxisLength > m_maxPixelHeight){
 			return { {}, {} };
 		}
 		double area = rect.width * rect.height;
-		if(area < MIN_PIXEL_AREA_FOR_DETECTION || area > MAX_PIXEL_AREA_FOR_DETECTION){
+		if(area < m_minPixelArea || area > m_maxPixelArea){
 			return { {}, {} };
 		}
 		/*Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // bottom left to top left
@@ -520,7 +623,7 @@ public:
 		}
 		double detectpercent = (double)validPixels / (double)pixels;
 		printf("detectpercent: %f\n", detectpercent);
-		if(detectpercent < PERCENT_FILL_FOR_DETECTION){
+		if(detectpercent < m_minPercentFill){
 			return { {}, {} };
 		}*/
 		std::vector<cv::Point> hull;
