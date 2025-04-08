@@ -137,6 +137,13 @@ int main(int argc, char **argv)
 				proc.setSaturationMax(saturationMaxTopic.GetAtomic().value);
 				proc.setValueMin(valueMinTopic.GetAtomic().value);
 				proc.setValueMax(valueMaxTopic.GetAtomic().value);
+				proc.setMinPixelWidth(minPixelWidthTopic.GetAtomic().value);
+				proc.setMinPixelHeight(minPixelHeightTopic.GetAtomic().value);
+				proc.setMinPixelArea(minPixelAreaTopic.GetAtomic().value);
+				proc.setMaxPixelWidth(maxPixelWidthTopic.GetAtomic().value);
+				proc.setMaxPixelHeight(maxPixelHeightTopic.GetAtomic().value);
+				proc.setMaxPixelArea(maxPixelAreaTopic.GetAtomic().value);
+				proc.setMinPercentFill(minPercentFillTopic.GetAtomic().value);
 				if (!bLogStarted)
 				{
 					if (isLoggingTopic.Get())
