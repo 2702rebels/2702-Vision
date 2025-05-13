@@ -16,9 +16,14 @@ Depends on:
 #define SETTING_MIN_PIXEL_AREA "minPixelArea"
 #define SETTING_MAX_PIXEL_AREA "maxPixelArea"
 #define SETTING_MIN_PERCENT_FILL "minPercentFill"
+#define SETTING_CAM_OFFSET_X "camOffsetX"
+#define SETTING_CAM_OFFSET_Y "camOffsetY"
+#define SETTING_CAM_HEIGHT "camHeight"
+#define SETTING_CAM_ANGLE "camAngle"
 #define SETTINGS_FILE_PATH "./processorSettings.txt"
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include "object.h"
  
 using json = nlohmann::json;
 
@@ -39,6 +44,10 @@ public:
 	int minPixelArea;
 	int maxPixelArea;
 	double minPercentFill;
+	double camOffsetX;
+	double camOffsetY;
+	double camHeight;
+	double camAngle;
  
 	/*!  
 	* \brief Fetches the object detection settings from json 
@@ -60,6 +69,10 @@ public:
 		this->minPixelArea = filterSettings[SETTING_MIN_PIXEL_AREA];
 		this->maxPixelArea = filterSettings[SETTING_MAX_PIXEL_AREA];
 		this->minPercentFill = filterSettings[SETTING_MIN_PERCENT_FILL];
+		this->camOffsetX = filterSettings[SETTING_CAM_OFFSET_X];
+		this->camOffsetY = filterSettings[SETTING_CAM_OFFSET_Y];
+		this->camHeight = filterSettings[SETTING_CAM_HEIGHT];
+		this->camAngle = filterSettings[SETTING_CAM_ANGLE];
 	}
 
 	/*!  
@@ -72,7 +85,8 @@ public:
 	* \param  valueMax - integer representing the valueMax parameter
 	*/
 	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax,
-	int minPixelWidth, int maxPixelWidth, int minPixelHeight, int maxPixelHeight, int minPixelArea, int maxPixelArea, double minPercentFill)
+	int minPixelWidth, int maxPixelWidth, int minPixelHeight, int maxPixelHeight, int minPixelArea, int maxPixelArea, double minPercentFill,
+	double camOffsetX, double camOffsetY, double camHeight, double camAngle)
 	{
 		this->hueMin = hueMin;
 		this->hueMax = hueMax;
@@ -87,6 +101,10 @@ public:
 		this->minPixelArea = minPixelArea;
 		this->maxPixelArea = maxPixelArea;
 		this->minPercentFill = minPercentFill;
+		this->camOffsetX = camOffsetX;
+		this->camOffsetY = camOffsetY;
+		this->camHeight = camHeight;
+		this->camAngle = camAngle;
 	}
 
 	/*!  
@@ -110,6 +128,10 @@ public:
 		settingsdata[SETTING_MIN_PIXEL_AREA] = minPixelArea;
 		settingsdata[SETTING_MAX_PIXEL_AREA] = maxPixelArea;
 		settingsdata[SETTING_MIN_PERCENT_FILL] = minPercentFill;
+		settingsdata[SETTING_CAM_OFFSET_X] = camOffsetX;
+		settingsdata[SETTING_CAM_OFFSET_Y] = camOffsetY;
+		settingsdata[SETTING_CAM_HEIGHT] = camHeight;
+		settingsdata[SETTING_CAM_ANGLE] = camAngle;
 		const std::string jsonStr = settingsdata.dump().c_str();
 		settingsfile.write(jsonStr.c_str(), jsonStr.length());
 		settingsfile.close();
@@ -136,6 +158,10 @@ public:
 	static int m_previousMinPixelArea;
 	static int m_previousMaxPixelArea;
 	static double m_previousMinPercentFill;
+	static double m_previousCamOffsetX;
+	static double m_previousCamOffsetY;
+	static double m_previousCamHeight;
+	static double m_previousCamAngle;
 	/*!  
 	* \brief Returns true if image processor's configuration is different from what is currently written to the config file. 
 	* \brief Otherwise returns false.
@@ -195,6 +221,22 @@ public:
 		{
 			return true;
 		}
+		if(m_previousCamOffsetX != imageProcessor.getCamOffsetX())
+		{
+			return true;
+		}
+		if(m_previousCamOffsetY != imageProcessor.getCamOffsetY())
+		{
+			return true;
+		}
+		if(m_previousCamHeight != imageProcessor.getCamHeight())
+		{
+			return true;
+		}
+		if(m_previousCamAngle != imageProcessor.getCamAngle())
+		{
+			return true;
+		}
 		return false;
 	}
 	/*!  
@@ -225,6 +267,10 @@ public:
 			imageProcessor.setMaxPixelHeight(config.maxPixelHeight);
 			imageProcessor.setMaxPixelArea(config.maxPixelArea);
 			imageProcessor.setMinPercentFill(config.minPercentFill);
+			imageProcessor.setCamOffsetX(config.camOffsetX);
+			imageProcessor.setCamOffsetY(config.camOffsetY);
+			imageProcessor.setCamHeight(config.camHeight);
+			imageProcessor.setCamAngle(config.camAngle);
 			m_npreviousHueMin = config.hueMin;
 			m_npreviousHueMax = config.hueMax;
 			m_npreviousSaturationMin = config.saturationMin;
@@ -238,6 +284,10 @@ public:
 			m_previousMaxPixelHeight = config.maxPixelHeight;
 			m_previousMaxPixelArea = config.maxPixelArea;
 			m_previousMinPercentFill = config.minPercentFill;
+			m_previousCamOffsetX = config.camOffsetX;
+			m_previousCamOffsetY = config.camOffsetY;
+			m_previousCamHeight = config.camHeight;
+			m_previousCamAngle = config.camAngle;
 			std::cout << "Loaded the following config from disk:\n";
 			std::cout << "hue min: " << config.hueMin << "\n";
 			std::cout << "hue max: " << config.hueMax << "\n";
@@ -252,6 +302,10 @@ public:
 			std::cout << "max pixel height: " << config.maxPixelHeight << "\n";
 			std::cout << "max pixel area: " << config.maxPixelArea << "\n";
 			std::cout << "min pixel width: " << config.minPercentFill << "\n";
+			std::cout << "cam offset x: " << config.camOffsetX << "\n";
+			std::cout << "cam offset y: " << config.camOffsetY << "\n";
+			std::cout << "cam height: " << config.camHeight << "\n";
+			std::cout << "cam angle: " << config.camAngle << "\n";
 		}
 	}
 	/*!  
@@ -263,7 +317,8 @@ public:
 		imageProcessingFilterSettings config = imageProcessingFilterSettings(imageProcessor.getPVHueMin(), imageProcessor.getPVHueMax(),
 																			 imageProcessor.getSaturationMin(), imageProcessor.getSaturationMax(), imageProcessor.getValueMin(), imageProcessor.getValueMax(),
 																			imageProcessor.getMinPixelWidth(), imageProcessor.getMaxPixelWidth(), imageProcessor.getMinPixelHeight(), imageProcessor.getMaxPixelHeight(),
-																		imageProcessor.getMinPixelArea(), imageProcessor.getMaxPixelArea(), imageProcessor.getMinPercentFill());
+																		imageProcessor.getMinPixelArea(), imageProcessor.getMaxPixelArea(), imageProcessor.getMinPercentFill(),
+																	imageProcessor.getCamOffsetX(), imageProcessor.getCamOffsetY(), imageProcessor.getCamHeight(), imageProcessor.getCamAngle());
 		config.writeSettings();
 		m_npreviousHueMin = config.hueMin;
 		m_npreviousHueMax = config.hueMax;
@@ -278,6 +333,10 @@ public:
 		m_previousMaxPixelHeight = config.maxPixelHeight;
 		m_previousMaxPixelArea = config.maxPixelArea;
 		m_previousMinPercentFill = config.minPercentFill;
+		m_previousCamOffsetX = config.camOffsetX;
+		m_previousCamOffsetY = config.camOffsetY;
+		m_previousCamHeight = config.camHeight;
+		m_previousCamAngle = config.camAngle;
 	}
 };
 // Instantiate the static values
@@ -294,3 +353,7 @@ int ConfigUtils::m_previousMaxPixelHeight;
 int ConfigUtils::m_previousMinPixelArea;
 int ConfigUtils::m_previousMaxPixelArea;
 double ConfigUtils::m_previousMinPercentFill;
+double ConfigUtils::m_previousCamOffsetX;
+double ConfigUtils::m_previousCamOffsetY;
+double ConfigUtils::m_previousCamHeight;
+double ConfigUtils::m_previousCamAngle;

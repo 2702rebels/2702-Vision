@@ -120,6 +120,10 @@ int main(int argc, char **argv)
 			nt::IntegerSubscriber maxPixelHeightTopic = objectDetectionTable->GetIntegerTopic("MaxPixelHeight").Subscribe(proc.getMaxPixelHeight());
 			nt::IntegerSubscriber maxPixelAreaTopic = objectDetectionTable->GetIntegerTopic("MaxPixelArea").Subscribe(proc.getMaxPixelArea());
 			nt::DoubleSubscriber  minPercentFillTopic = objectDetectionTable->GetDoubleTopic("MinPercentFill").Subscribe(proc.getMinPercentFill());
+			nt::DoubleSubscriber  camOffsetXTopic = objectDetectionTable->GetDoubleTopic("CamOffsetX").Subscribe(proc.getCamOffsetX());
+			nt::DoubleSubscriber  camOffsetYTopic = objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(proc.getCamOffsetY());
+			nt::DoubleSubscriber  camHeightTopic = objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(proc.getCamHeight());
+			nt::DoubleSubscriber  camAngleTopic = objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(proc.getCamAngle());
 			nt::BooleanSubscriber isLoggingTopic = visionTable->GetBooleanTopic("IsLogging").Subscribe(false);
 			bool bLogStarted = false;
 			networkTableManager.StartClient4("networkTableClient");
@@ -144,6 +148,10 @@ int main(int argc, char **argv)
 				proc.setMaxPixelHeight(maxPixelHeightTopic.GetAtomic().value);
 				proc.setMaxPixelArea(maxPixelAreaTopic.GetAtomic().value);
 				proc.setMinPercentFill(minPercentFillTopic.GetAtomic().value);
+				proc.setCamOffsetX(camOffsetXTopic.GetAtomic().value);
+				proc.setCamOffsetY(camOffsetYTopic.GetAtomic().value);
+				proc.setCamHeight(camHeightTopic.GetAtomic().value);
+				proc.setCamAngle(camAngleTopic.GetAtomic().value);
 				if (!bLogStarted)
 				{
 					if (isLoggingTopic.Get())

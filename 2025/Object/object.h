@@ -83,30 +83,16 @@
 #define USE_OUTPUT_FILTERING 1
 /*! \brief Whether or not the camera should detect multiple objects. */
 #define NO_MULTIPLE_OBJECT_DETECTION 0
-/*! \brief Used to adjust distances to the robot's frame of reference. 
- * 8.75 inches in meters
-*/
-#define CAMERA_X_OFFSET 0.22225
-/*! \brief Used to adjust distances to the robot's frame of reference. 
-13.25 inches in meters
-*/
-#define CAMERA_Y_OFFSET 0.33655
-/*! \brief Camera's height relative to the floor or bellypan of the robot. 
- * 21 inches in meters
-*/
-#define CAMERA_HEIGHT 0.5334
-/*! \brief Camera angle on robot in radians. 
-* 26 deg in radians.
-*/
-#define CAMERA_ANGLE (M_PI / 180) * 26
 /*! \brief Directory where to log files to. */
 #define LOG_DIR "/data/logs/"
 
 #ifndef RESOLUTION_WIDTH
+/*! \brief Width of the image taken. */
 #define RESOLUTION_WIDTH 640
 #endif
 
 #ifndef RESOLUTION_HEIGHT
+/*! \brief Width of the image taken. */
 #define RESOLUTION_HEIGHT 480
 #endif
 // Structure classes where the serialization / deserialization functions are defined
@@ -141,6 +127,14 @@ class imgProc : public FrmProcessor
 	int			m_maxPixelArea = 115000;
 	/*! \brief Minimum percentage of pixels that have to be valid inside of a detection for it to be valid. */
 	double		m_minPercentFill = 0.2;
+	/*! \brief X adjustment in meters from center of camera to center of robot. */
+	double		m_camOffsetX = 0.22225;
+	/*! \brief Y adjustment in meters from center of camera to center of robot. */
+	double		m_camOffsetY = 0.33655;
+	/*! \brief Center of camera to center of robot height adjustment in meters. */
+	double		m_camHeight = 0.5334;
+	/*! \brief Angle of camera below the horizontal in radians. */
+	double		m_camAngle = 26 * M_PI / 180;
 
 	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
 	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralDistance").Publish();
@@ -212,7 +206,7 @@ public:
 	imgProc() :
 		FrmProcessor(),
    		CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
-		m_p3dCam2Robot(CAMERA_X_OFFSET, CAMERA_Y_OFFSET, CAMERA_HEIGHT)
+		m_p3dCam2Robot(m_camOffsetX, m_camOffsetY, m_camHeight)
 	{
 		m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
@@ -364,6 +358,25 @@ public:
 	{
 		m_minPercentFill = newValue;
 	}
+	virtual void setCamOffsetX(double newValue)
+	{
+		m_camOffsetX = newValue;
+		m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
+	}
+	virtual void setCamOffsetY(double newValue)
+	{
+		m_camOffsetY = newValue;
+		m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
+	}
+	virtual void setCamHeight(double newValue)
+	{
+		m_camHeight = newValue;
+		m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
+	}
+	virtual void setCamAngle(double newValue)
+	{
+		m_camAngle = newValue;
+	}
 	/*! 
 	* \brief Returns the hue min object detection parameter. 
 	*/
@@ -455,6 +468,34 @@ public:
 	{
 		return m_minPercentFill;
 	}
+	/*!
+	* \brief Returns the x offset of the camera center relative to the center of the robot in meters.
+	*/
+	virtual double getCamOffsetX() const
+	{
+		return m_camOffsetX;
+	}
+	/*!
+	* \brief Returns the y offset of the camera center relative to the center of the robot in meters.
+	*/
+	virtual double getCamOffsetY() const
+	{
+		return m_camOffsetY;
+	}
+	/*!
+	* \brief Returns the height offset of the camera center relative to the center of the robot in meters.
+	*/
+	virtual double getCamHeight() const
+	{
+		return m_camHeight;
+	}
+	/*!
+	* \brief Returns the angle below the horizontal of the camera in radians.
+	*/
+	virtual double getCamAngle() const
+	{
+		return m_camAngle;
+	}
 	virtual ~imgProc()
 	{
 
@@ -543,7 +584,7 @@ public:
 
         // The Camera is tiled down, so rotate the vector
         // to "Robot Space"
-		Rebels::Quaternion qCamTilt(26 * M_PI / 180, Rebels::Point3d(0., 1., 0.));
+		Rebels::Quaternion qCamTilt(m_camAngle, Rebels::Point3d(0., 1., 0.));
         Rebels::Point3d vRot = qCamTilt * v;
 
         // Find the Z intercept -- the point where the vector touches the floor
