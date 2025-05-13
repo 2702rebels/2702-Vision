@@ -8,39 +8,52 @@ CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
 CXXFLAGS+=-Ofast
-CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
-CXXFLAGS+=$(shell pkg-config --cflags libcamera )
-CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
+CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/opencv4.pc)
+CXXFLAGS+=-I$(shell pwd)/../../vcpkg_installed/$(shell ../../findtriplet.sh)/include/ntcore
+CXXFLAGS+=-I$(shell pwd)/../../vcpkg_installed/$(shell ../../findtriplet.sh)/include/wpiutil
+CXXFLAGS+=-I$(shell pwd)/../../vcpkg_installed/$(shell ../../findtriplet.sh)/include/cameraserver
+CXXFLAGS+=-I$(shell pwd)/../../vcpkg_installed/$(shell ../../findtriplet.sh)/include/cscore
+CXXFLAGS+=-I$(shell pwd)/../../vcpkg_installed/$(shell ../../findtriplet.sh)/include/wpimath
+CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libcamera.pc)
+CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/gtk+-x11-3.0.pc)
+CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libxml-2.0.pc)
+CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
 LDFLAGS+=-L../../lib
-LIBS+=$(shell pkg-config -libs libcamera)
-LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
-LIBS+=$(shell pkg-config -libs opencv4)
+LDFLAGS+=-L$(shell pwd)/../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib
+LIBS+=-lprotobuf
+LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libcamera.pc)
+LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/opencv4.pc)
+LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/gtk+-x11-3.0.pc)
+LIBS+=-lxml2 -lexpat
+LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
+LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
+LIBS+=-luv -lfmt
 all: object replay nettableserver testnetworktablesclient udppacketstest calibrate testudpserver logtostdvideo
 
 object: $(OBJS) ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 $(LIBS)
 
 replay: replay.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o replay replay.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o replay replay.o -l2702 $(LIBS)
 
 #	$(CXX) $(CXXFLAGS) -o rpi-sample $(OBJS) -l2702 -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_calib3d -lpthread -lntcore -lcscore -lcameraserver -lwpiutil -lapriltag -lwpimath
 nettableserver: nettableserver.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o nettableserver nettableserver.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o nettableserver nettableserver.o -l2702 $(LIBS)
 
 testnetworktablesclient: testnetworktablesclient.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testnetworktablesclient testnetworktablesclient.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testnetworktablesclient testnetworktablesclient.o -l2702 $(LIBS)
 
 udppacketstest: udppacketstest.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o udppacketstest udppacketstest.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o udppacketstest udppacketstest.o -l2702 $(LIBS)
 
 calibrate: calibrate.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o calibrate calibrate.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o calibrate calibrate.o -l2702 $(LIBS)
 
 testudpserver: testudpserver.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testudpserver testudpserver.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testudpserver testudpserver.o -l2702 $(LIBS)
 
 logtostdvideo: logtostdvideo.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o logtostdvideo logtostdvideo.o -l2702 -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o logtostdvideo logtostdvideo.o -l2702 $(LIBS)
 
 object.o: object.cpp object.h config.h ObjectDetectionStruct.cpp ObjectDetectionStruct.h udpsender.h
 replay.o: replay.cpp object.h config.h udpsender.h

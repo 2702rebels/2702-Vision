@@ -15,10 +15,5 @@ allwpilib/
 *.jpg
 *.png
 *.txt
-calibrate
-logtostdvideo
-nettableserver
-replay
-testudpserver
-udppacketstest
-object
+vcpkg/
+vcpkg_installed/
