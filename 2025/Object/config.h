@@ -9,9 +9,22 @@ Depends on:
 #define SETTING_SATURATION_MAX "satMax"
 #define SETTING_VALUE_MIN "valMin"
 #define SETTING_VALUE_MAX "valMax"
+#define SETTING_MIN_PIXEL_WIDTH "minPixelWidth"
+#define SETTING_MAX_PIXEL_WIDTH "maxPixelWidth"
+#define SETTING_MIN_PIXEL_HEIGHT "minPixelHeight"
+#define SETTING_MAX_PIXEL_HEIGHT "maxPixelHeight"
+#define SETTING_MIN_PIXEL_AREA "minPixelArea"
+#define SETTING_MAX_PIXEL_AREA "maxPixelArea"
+#define SETTING_MIN_PERCENT_FILL "minPercentFill"
+#define SETTING_CAM_OFFSET_X "camOffsetX"
+#define SETTING_CAM_OFFSET_Y "camOffsetY"
+#define SETTING_CAM_HEIGHT "camHeight"
+#define SETTING_CAM_ANGLE "camAngle"
+#define SETTING_FILTER_WINDOW "filterWindow"
 #define SETTINGS_FILE_PATH "./processorSettings.txt"
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include "object.h"
  
 using json = nlohmann::json;
 
@@ -25,6 +38,18 @@ public:
 	int saturationMax;
 	int valueMin;
 	int valueMax;
+	int minPixelWidth;
+	int maxPixelWidth;
+	int minPixelHeight;
+	int maxPixelHeight;
+	int minPixelArea;
+	int maxPixelArea;
+	double minPercentFill;
+	double camOffsetX;
+	double camOffsetY;
+	double camHeight;
+	double camAngle;
+	int filterWindow;
  
 	/*!  
 	* \brief Fetches the object detection settings from json 
@@ -39,6 +64,18 @@ public:
 		this->saturationMax = filterSettings[SETTING_SATURATION_MAX];
 		this->valueMin = filterSettings[SETTING_VALUE_MIN];
 		this->valueMax = filterSettings[SETTING_VALUE_MAX];
+		this->minPixelWidth = filterSettings[SETTING_MIN_PIXEL_WIDTH];
+		this->maxPixelWidth = filterSettings[SETTING_MAX_PIXEL_WIDTH];
+		this->minPixelHeight = filterSettings[SETTING_MIN_PIXEL_HEIGHT];
+		this->maxPixelHeight = filterSettings[SETTING_MAX_PIXEL_HEIGHT];
+		this->minPixelArea = filterSettings[SETTING_MIN_PIXEL_AREA];
+		this->maxPixelArea = filterSettings[SETTING_MAX_PIXEL_AREA];
+		this->minPercentFill = filterSettings[SETTING_MIN_PERCENT_FILL];
+		this->camOffsetX = filterSettings[SETTING_CAM_OFFSET_X];
+		this->camOffsetY = filterSettings[SETTING_CAM_OFFSET_Y];
+		this->camHeight = filterSettings[SETTING_CAM_HEIGHT];
+		this->camAngle = filterSettings[SETTING_CAM_ANGLE];
+		this->filterWindow = filterSettings[SETTING_FILTER_WINDOW];
 	}
 
 	/*!  
@@ -49,8 +86,22 @@ public:
 	* \param  saturationMax - integer representing the satuartionMax parameter
 	* \param  valueMin - integer representing the valueMin parameter
 	* \param  valueMax - integer representing the valueMax parameter
+	* \param  minPixelWidth - integer representing the minimum pixel width of a detection for it to be valid
+	* \param  maxPixelWidth - integer representing the maximum pixel width of a detection for it to be valid
+	* \param  minPixelHeight - integer representing the minimum pixel height of a detection for it to be valid
+	* \param  maxPixelHeight - integer representing the maximum pixel height of a detection for it to be valid
+	* \param  minPixelArea - integer representing the minimum pixel area of a detection for it to be valid
+	* \param  maxPixelArea - integer representing the maximum pixel area of a detection for it to be valid
+	* \param  minPercentFill - percent(eg 0.8) representing the minimum % of pixels in a detection that have to be valid for the detection to be valid
+	* \param  camOffsetX - X Distance between camera center and center of robot in meters
+	* \param  camOffsetY - Y Distance between camera center and center of robot in meters
+	* \param  camHeight - vertical distance between camera center and center of robot in meters
+	* \param  camAngle - Angle below the horizontal of camera in radians
+	* \param filterWindow - Number of packets over which the median is taken for angle/distance values
 	*/
-	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax)
+	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax,
+	int minPixelWidth, int maxPixelWidth, int minPixelHeight, int maxPixelHeight, int minPixelArea, int maxPixelArea, double minPercentFill,
+	double camOffsetX, double camOffsetY, double camHeight, double camAngle, int filterWindow)
 	{
 		this->hueMin = hueMin;
 		this->hueMax = hueMax;
@@ -58,6 +109,18 @@ public:
 		this->saturationMax = saturationMax;
 		this->valueMin = valueMin;
 		this->valueMax = valueMax;
+		this->minPixelWidth = minPixelWidth;
+		this->maxPixelWidth = maxPixelWidth;
+		this->minPixelHeight = minPixelHeight;
+		this->maxPixelHeight = maxPixelHeight;
+		this->minPixelArea = minPixelArea;
+		this->maxPixelArea = maxPixelArea;
+		this->minPercentFill = minPercentFill;
+		this->camOffsetX = camOffsetX;
+		this->camOffsetY = camOffsetY;
+		this->camHeight = camHeight;
+		this->camAngle = camAngle;
+		this->filterWindow = filterWindow;
 	}
 
 	/*!  
@@ -74,6 +137,18 @@ public:
 		settingsdata[SETTING_SATURATION_MAX] = saturationMax;
 		settingsdata[SETTING_VALUE_MIN] = valueMin;
 		settingsdata[SETTING_VALUE_MAX] = valueMax;
+		settingsdata[SETTING_MIN_PIXEL_WIDTH] = minPixelWidth;
+		settingsdata[SETTING_MIN_PIXEL_HEIGHT] = minPixelHeight;
+		settingsdata[SETTING_MAX_PIXEL_WIDTH] = maxPixelWidth;
+		settingsdata[SETTING_MAX_PIXEL_HEIGHT] = maxPixelHeight;
+		settingsdata[SETTING_MIN_PIXEL_AREA] = minPixelArea;
+		settingsdata[SETTING_MAX_PIXEL_AREA] = maxPixelArea;
+		settingsdata[SETTING_MIN_PERCENT_FILL] = minPercentFill;
+		settingsdata[SETTING_CAM_OFFSET_X] = camOffsetX;
+		settingsdata[SETTING_CAM_OFFSET_Y] = camOffsetY;
+		settingsdata[SETTING_CAM_HEIGHT] = camHeight;
+		settingsdata[SETTING_CAM_ANGLE] = camAngle;
+		settingsdata[SETTING_FILTER_WINDOW] = filterWindow;
 		const std::string jsonStr = settingsdata.dump().c_str();
 		settingsfile.write(jsonStr.c_str(), jsonStr.length());
 		settingsfile.close();
@@ -93,6 +168,18 @@ public:
 	static int m_npreviousSaturationMax;
 	static int m_npreviousValueMin;
 	static int m_npreviousValueMax;
+	static int m_previousMinPixelWidth;
+	static int m_previousMaxPixelWidth;
+	static int m_previousMinPixelHeight;
+	static int m_previousMaxPixelHeight;
+	static int m_previousMinPixelArea;
+	static int m_previousMaxPixelArea;
+	static double m_previousMinPercentFill;
+	static double m_previousCamOffsetX;
+	static double m_previousCamOffsetY;
+	static double m_previousCamHeight;
+	static double m_previousCamAngle;
+	static int m_previousFilterWindow;
 	/*!  
 	* \brief Returns true if image processor's configuration is different from what is currently written to the config file. 
 	* \brief Otherwise returns false.
@@ -124,6 +211,54 @@ public:
 		{
 			return true;
 		}
+		if (m_previousMinPixelWidth != imageProcessor.getMinPixelWidth())
+		{
+			return true;
+		}
+		if (m_previousMinPixelHeight != imageProcessor.getMinPixelHeight())
+		{
+			return true;
+		}
+		if (m_previousMinPixelArea != imageProcessor.getMinPixelArea())
+		{
+			return true;
+		}
+		if (m_previousMaxPixelWidth != imageProcessor.getMaxPixelWidth())
+		{
+			return true;
+		}
+		if(m_previousMaxPixelHeight != imageProcessor.getMaxPixelHeight())
+		{
+			return true;
+		}
+		if(m_previousMaxPixelArea != imageProcessor.getMaxPixelArea())
+		{
+			return true;
+		}
+		if(m_previousMinPercentFill != imageProcessor.getMinPercentFill())
+		{
+			return true;
+		}
+		if(m_previousCamOffsetX != imageProcessor.getCamOffsetX())
+		{
+			return true;
+		}
+		if(m_previousCamOffsetY != imageProcessor.getCamOffsetY())
+		{
+			return true;
+		}
+		if(m_previousCamHeight != imageProcessor.getCamHeight())
+		{
+			return true;
+		}
+		if(m_previousCamAngle != imageProcessor.getCamAngle())
+		{
+			return true;
+		}
+		if(m_previousFilterWindow != imageProcessor.getFilterWindow())
+		{
+			return true;
+		}
 		return false;
 	}
 	/*!  
@@ -147,12 +282,36 @@ public:
 			imageProcessor.setSaturationMax(config.saturationMax);
 			imageProcessor.setValueMin(config.valueMin);
 			imageProcessor.setValueMax(config.valueMax);
+			imageProcessor.setMinPixelWidth(config.minPixelWidth);
+			imageProcessor.setMinPixelHeight(config.minPixelHeight);
+			imageProcessor.setMinPixelArea(config.minPixelArea);
+			imageProcessor.setMaxPixelWidth(config.maxPixelWidth);
+			imageProcessor.setMaxPixelHeight(config.maxPixelHeight);
+			imageProcessor.setMaxPixelArea(config.maxPixelArea);
+			imageProcessor.setMinPercentFill(config.minPercentFill);
+			imageProcessor.setCamOffsetX(config.camOffsetX);
+			imageProcessor.setCamOffsetY(config.camOffsetY);
+			imageProcessor.setCamHeight(config.camHeight);
+			imageProcessor.setCamAngle(config.camAngle);
+			imageProcessor.setFilterWindow(config.filterWindow);
 			m_npreviousHueMin = config.hueMin;
 			m_npreviousHueMax = config.hueMax;
 			m_npreviousSaturationMin = config.saturationMin;
 			m_npreviousSaturationMax = config.saturationMax;
 			m_npreviousValueMin = config.valueMin;
 			m_npreviousValueMax = config.valueMax;
+			m_previousMinPixelWidth = config.minPixelWidth;
+			m_previousMinPixelHeight = config.minPixelHeight;
+			m_previousMinPixelArea = config.minPixelArea;
+			m_previousMaxPixelWidth = config.maxPixelWidth;
+			m_previousMaxPixelHeight = config.maxPixelHeight;
+			m_previousMaxPixelArea = config.maxPixelArea;
+			m_previousMinPercentFill = config.minPercentFill;
+			m_previousCamOffsetX = config.camOffsetX;
+			m_previousCamOffsetY = config.camOffsetY;
+			m_previousCamHeight = config.camHeight;
+			m_previousCamAngle = config.camAngle;
+			m_previousFilterWindow = config.filterWindow;
 			std::cout << "Loaded the following config from disk:\n";
 			std::cout << "hue min: " << config.hueMin << "\n";
 			std::cout << "hue max: " << config.hueMax << "\n";
@@ -160,6 +319,18 @@ public:
 			std::cout << "sat max: " << config.saturationMax << "\n";
 			std::cout << "value min: " << config.valueMin << "\n";
 			std::cout << "value max: " << config.valueMax << "\n";
+			std::cout << "min pixel width: " << config.minPixelWidth << "\n";
+			std::cout << "min pixel height: " << config.minPixelHeight << "\n";
+			std::cout << "min pixel area: " << config.minPixelArea << "\n";
+			std::cout << "max pixel width: " << config.maxPixelWidth << "\n";
+			std::cout << "max pixel height: " << config.maxPixelHeight << "\n";
+			std::cout << "max pixel area: " << config.maxPixelArea << "\n";
+			std::cout << "min pixel width: " << config.minPercentFill << "\n";
+			std::cout << "cam offset x: " << config.camOffsetX << "\n";
+			std::cout << "cam offset y: " << config.camOffsetY << "\n";
+			std::cout << "cam height: " << config.camHeight << "\n";
+			std::cout << "cam angle: " << config.camAngle << "\n";
+			std::cout << "filter window: " << config.filterWindow << "\n";
 		}
 	}
 	/*!  
@@ -169,7 +340,11 @@ public:
 	static void triggerConfigSave(imgProc &imageProcessor)
 	{
 		imageProcessingFilterSettings config = imageProcessingFilterSettings(imageProcessor.getPVHueMin(), imageProcessor.getPVHueMax(),
-																			 imageProcessor.getSaturationMin(), imageProcessor.getSaturationMax(), imageProcessor.getValueMin(), imageProcessor.getValueMax());
+																			 imageProcessor.getSaturationMin(), imageProcessor.getSaturationMax(), imageProcessor.getValueMin(), imageProcessor.getValueMax(),
+																			imageProcessor.getMinPixelWidth(), imageProcessor.getMaxPixelWidth(), imageProcessor.getMinPixelHeight(), imageProcessor.getMaxPixelHeight(),
+																		imageProcessor.getMinPixelArea(), imageProcessor.getMaxPixelArea(), imageProcessor.getMinPercentFill(),
+																	imageProcessor.getCamOffsetX(), imageProcessor.getCamOffsetY(), imageProcessor.getCamHeight(), imageProcessor.getCamAngle(),
+																imageProcessor.getFilterWindow());
 		config.writeSettings();
 		m_npreviousHueMin = config.hueMin;
 		m_npreviousHueMax = config.hueMax;
@@ -177,6 +352,18 @@ public:
 		m_npreviousSaturationMax = config.saturationMax;
 		m_npreviousValueMin = config.valueMin;
 		m_npreviousValueMax = config.valueMax;
+		m_previousMinPixelWidth = config.minPixelWidth;
+		m_previousMinPixelHeight = config.minPixelHeight;
+		m_previousMinPixelArea = config.minPixelArea;
+		m_previousMaxPixelWidth = config.maxPixelWidth;
+		m_previousMaxPixelHeight = config.maxPixelHeight;
+		m_previousMaxPixelArea = config.maxPixelArea;
+		m_previousMinPercentFill = config.minPercentFill;
+		m_previousCamOffsetX = config.camOffsetX;
+		m_previousCamOffsetY = config.camOffsetY;
+		m_previousCamHeight = config.camHeight;
+		m_previousCamAngle = config.camAngle;
+		m_previousFilterWindow = config.filterWindow;
 	}
 };
 // Instantiate the static values
@@ -186,3 +373,15 @@ int ConfigUtils::m_npreviousSaturationMin;
 int ConfigUtils::m_npreviousSaturationMax;
 int ConfigUtils::m_npreviousValueMin;
 int ConfigUtils::m_npreviousValueMax;
+int ConfigUtils::m_previousMinPixelWidth;
+int ConfigUtils::m_previousMaxPixelWidth;
+int ConfigUtils::m_previousMinPixelHeight;
+int ConfigUtils::m_previousMaxPixelHeight;
+int ConfigUtils::m_previousMinPixelArea;
+int ConfigUtils::m_previousMaxPixelArea;
+double ConfigUtils::m_previousMinPercentFill;
+double ConfigUtils::m_previousCamOffsetX;
+double ConfigUtils::m_previousCamOffsetY;
+double ConfigUtils::m_previousCamHeight;
+double ConfigUtils::m_previousCamAngle;
+int ConfigUtils::m_previousFilterWindow;

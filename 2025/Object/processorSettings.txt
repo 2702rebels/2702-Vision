@@ -1,1 +1,1 @@
-{"hueMax":30,"hueMin":0,"satMax":30,"satMin":0,"valMax":255,"valMin":185}
+{"hueMax":30,"hueMin":0,"satMax":30,"satMin":0,"valMax":255,"valMin":185,"minPixelWidth":20,"maxPixelWidth":500,"minPixelHeight":25,"maxPixelHeight":350,"minPixelArea":4500,"maxPixelArea":115000,"minPercentFill":0.2,"camOffsetX":0.22225,"camOffsetY":0.33655,"camHeight":0.5334,"camAngle":0.45378560551852569000015959980704,"filterWindow":8}

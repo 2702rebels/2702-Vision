@@ -29,6 +29,18 @@ nt::IntegerSubscriber valueMinTopic;
 nt::IntegerSubscriber valueMaxTopic;
 nt::DoublePublisher coralDistanceTopic;
 nt::DoublePublisher coralAngleTopic;
+nt::IntegerSubscriber minWidthTopic;
+nt::IntegerSubscriber maxWidthTopic;
+nt::IntegerSubscriber minHeightTopic;
+nt::IntegerSubscriber maxHeightTopic;
+nt::IntegerSubscriber minAreaTopic;
+nt::IntegerSubscriber maxAreaTopic;
+nt::DoubleSubscriber  minPercentFillTopic;
+nt::DoubleSubscriber  camOffsetXTopic;
+nt::DoubleSubscriber  camOffsetYTopic;
+nt::DoubleSubscriber  camHeightTopic;
+nt::DoubleSubscriber camAngleTopic;
+nt::IntegerSubscriber filterWindowTopic;
 
 /*! \brief Handle Ctrl+C interrupts */
 void sighandler(int nSig){
@@ -38,8 +50,8 @@ void sighandler(int nSig){
 
 /*! \brief Print the list of commands to the console */
 void showHelp(){
-    std::cout << "Valid commands are: \n" << "print - logs all current topic values\n" << "pushdist - push a new distance value\n"
-    << "pushangle - push a new angle value\n" << "stop - shuts the client down\n" << "help - displays this text\n";
+    std::cout << "Valid commands are: \n" << "print - logs all current topic values\n" << "pushdist - push a new distance value" 
+    << "pushangle - push a new angle value" << "stop - shuts the server down\n" << "help - displays this text\n";
 }
 
 /*! \brief Shuts down the client. Note that this is not an immediate effect, program will run for another tick before exiting. */
@@ -57,6 +69,17 @@ void printNetworkTableValues(){
     printf("satmax: %ld\n", saturationMaxTopic.GetAtomic(0.0f).value);
     printf("valmin: %ld\n", valueMinTopic.GetAtomic(0.0f).value);
     printf("valmax: %ld\n", valueMaxTopic.GetAtomic(0.0f).value);
+    printf("minwidth: %ld\n", minWidthTopic.GetAtomic(0).value);
+    printf("maxwidth: %ld\n", maxWidthTopic.GetAtomic(0).value);
+    printf("minheight: %ld\n", minHeightTopic.GetAtomic(0).value);
+    printf("maxheight: %ld\n", maxHeightTopic.GetAtomic(0).value);
+    printf("minarea: %ld\n", minAreaTopic.GetAtomic(0).value);
+    printf("maxarea: %ld\n", maxAreaTopic.GetAtomic(0).value);
+    printf("minpercentfill: %lf\n", minPercentFillTopic.GetAtomic(0.0f).value);
+    printf("offsetx: %lf\n", camOffsetXTopic.GetAtomic(0.0f).value);
+    printf("offsety: %lf\n", camOffsetYTopic.GetAtomic(0.0f).value);
+    printf("camheight: %lf\n", camHeightTopic.GetAtomic(0.0f).value);
+    printf("camangle: %lf\n", camAngleTopic.GetAtomic(0.0f).value);
 }
 
 /*! \brief Pushes a new coral distance value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
@@ -88,14 +111,26 @@ int main( int argc, char **argv ){
     netTableManager.SetServer("localhost", 5810U);
     auto objectDetectionTable = netTableManager.GetTable("ObjectDetection");
     // Initialize the topics
-    hueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMin").Subscribe(0);
-    hueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/HueMax").Subscribe(0);
-    saturationMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMin").Subscribe(0);
-    saturationMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/SaturationMax").Subscribe(0);
-    valueMinTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMin").Subscribe(0);
-    valueMaxTopic = objectDetectionTable->GetIntegerTopic("ObjectDetection/ValueMax").Subscribe(0);
-    coralDistanceTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/CoralDistance").Publish();
-    coralAngleTopic = objectDetectionTable->GetDoubleTopic("ObjectDetection/CoralAngle").Publish();
+    hueMinTopic = objectDetectionTable->GetIntegerTopic("HueMin").Subscribe(0);
+    hueMaxTopic = objectDetectionTable->GetIntegerTopic("HueMax").Subscribe(0);
+    saturationMinTopic = objectDetectionTable->GetIntegerTopic("SaturationMin").Subscribe(0);
+    saturationMaxTopic = objectDetectionTable->GetIntegerTopic("SaturationMax").Subscribe(0);
+    valueMinTopic = objectDetectionTable->GetIntegerTopic("ValueMin").Subscribe(0);
+    valueMaxTopic = objectDetectionTable->GetIntegerTopic("ValueMax").Subscribe(0);
+    coralDistanceTopic = objectDetectionTable->GetDoubleTopic("CoralDistance").Publish();
+    coralAngleTopic = objectDetectionTable->GetDoubleTopic("CoralAngle").Publish();
+    minWidthTopic = objectDetectionTable->GetIntegerTopic("MinPixelWidth").Subscribe(0);
+    maxWidthTopic = objectDetectionTable->GetIntegerTopic("MaxPixelWidth").Subscribe(0);
+    minHeightTopic = objectDetectionTable->GetIntegerTopic("MinPixelHeight").Subscribe(0);
+    maxHeightTopic = objectDetectionTable->GetIntegerTopic("MaxPixelHeight").Subscribe(0);
+    minAreaTopic = objectDetectionTable->GetIntegerTopic("MinPixelArea").Subscribe(0);
+    maxAreaTopic = objectDetectionTable->GetIntegerTopic("MaxPixelArea").Subscribe(0);
+    minPercentFillTopic = objectDetectionTable->GetDoubleTopic("MinPercentFill").Subscribe(0.0f);
+    camOffsetXTopic = objectDetectionTable->GetDoubleTopic("CamOffsetX").Subscribe(0.0f);
+    camOffsetYTopic = objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(0.0f);
+    camAngleTopic = objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(0.0f);
+    camHeightTopic = objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(0.0f);
+    filterWindowTopic = objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Subscribe(0);
     showHelp(); // Print the available commands to the console
     auto commandInputThread = std::async(std::launch::async, [] {
         std::string input = ""s;
