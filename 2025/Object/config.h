@@ -20,6 +20,7 @@ Depends on:
 #define SETTING_CAM_OFFSET_Y "camOffsetY"
 #define SETTING_CAM_HEIGHT "camHeight"
 #define SETTING_CAM_ANGLE "camAngle"
+#define SETTING_FILTER_WINDOW "filterWindow"
 #define SETTINGS_FILE_PATH "./processorSettings.txt"
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -48,6 +49,7 @@ public:
 	double camOffsetY;
 	double camHeight;
 	double camAngle;
+	int filterWindow;
  
 	/*!  
 	* \brief Fetches the object detection settings from json 
@@ -73,6 +75,7 @@ public:
 		this->camOffsetY = filterSettings[SETTING_CAM_OFFSET_Y];
 		this->camHeight = filterSettings[SETTING_CAM_HEIGHT];
 		this->camAngle = filterSettings[SETTING_CAM_ANGLE];
+		this->filterWindow = filterSettings[SETTING_FILTER_WINDOW];
 	}
 
 	/*!  
@@ -83,10 +86,22 @@ public:
 	* \param  saturationMax - integer representing the satuartionMax parameter
 	* \param  valueMin - integer representing the valueMin parameter
 	* \param  valueMax - integer representing the valueMax parameter
+	* \param  minPixelWidth - integer representing the minimum pixel width of a detection for it to be valid
+	* \param  maxPixelWidth - integer representing the maximum pixel width of a detection for it to be valid
+	* \param  minPixelHeight - integer representing the minimum pixel height of a detection for it to be valid
+	* \param  maxPixelHeight - integer representing the maximum pixel height of a detection for it to be valid
+	* \param  minPixelArea - integer representing the minimum pixel area of a detection for it to be valid
+	* \param  maxPixelArea - integer representing the maximum pixel area of a detection for it to be valid
+	* \param  minPercentFill - percent(eg 0.8) representing the minimum % of pixels in a detection that have to be valid for the detection to be valid
+	* \param  camOffsetX - X Distance between camera center and center of robot in meters
+	* \param  camOffsetY - Y Distance between camera center and center of robot in meters
+	* \param  camHeight - vertical distance between camera center and center of robot in meters
+	* \param  camAngle - Angle below the horizontal of camera in radians
+	* \param filterWindow - Number of packets over which the median is taken for angle/distance values
 	*/
 	imageProcessingFilterSettings(int hueMin, int hueMax, int saturationMin, int saturationMax, int valueMin, int valueMax,
 	int minPixelWidth, int maxPixelWidth, int minPixelHeight, int maxPixelHeight, int minPixelArea, int maxPixelArea, double minPercentFill,
-	double camOffsetX, double camOffsetY, double camHeight, double camAngle)
+	double camOffsetX, double camOffsetY, double camHeight, double camAngle, int filterWindow)
 	{
 		this->hueMin = hueMin;
 		this->hueMax = hueMax;
@@ -105,6 +120,7 @@ public:
 		this->camOffsetY = camOffsetY;
 		this->camHeight = camHeight;
 		this->camAngle = camAngle;
+		this->filterWindow = filterWindow;
 	}
 
 	/*!  
@@ -132,6 +148,7 @@ public:
 		settingsdata[SETTING_CAM_OFFSET_Y] = camOffsetY;
 		settingsdata[SETTING_CAM_HEIGHT] = camHeight;
 		settingsdata[SETTING_CAM_ANGLE] = camAngle;
+		settingsdata[SETTING_FILTER_WINDOW] = filterWindow;
 		const std::string jsonStr = settingsdata.dump().c_str();
 		settingsfile.write(jsonStr.c_str(), jsonStr.length());
 		settingsfile.close();
@@ -162,6 +179,7 @@ public:
 	static double m_previousCamOffsetY;
 	static double m_previousCamHeight;
 	static double m_previousCamAngle;
+	static int m_previousFilterWindow;
 	/*!  
 	* \brief Returns true if image processor's configuration is different from what is currently written to the config file. 
 	* \brief Otherwise returns false.
@@ -237,6 +255,10 @@ public:
 		{
 			return true;
 		}
+		if(m_previousFilterWindow != imageProcessor.getFilterWindow())
+		{
+			return true;
+		}
 		return false;
 	}
 	/*!  
@@ -271,6 +293,7 @@ public:
 			imageProcessor.setCamOffsetY(config.camOffsetY);
 			imageProcessor.setCamHeight(config.camHeight);
 			imageProcessor.setCamAngle(config.camAngle);
+			imageProcessor.setFilterWindow(config.filterWindow);
 			m_npreviousHueMin = config.hueMin;
 			m_npreviousHueMax = config.hueMax;
 			m_npreviousSaturationMin = config.saturationMin;
@@ -288,6 +311,7 @@ public:
 			m_previousCamOffsetY = config.camOffsetY;
 			m_previousCamHeight = config.camHeight;
 			m_previousCamAngle = config.camAngle;
+			m_previousFilterWindow = config.filterWindow;
 			std::cout << "Loaded the following config from disk:\n";
 			std::cout << "hue min: " << config.hueMin << "\n";
 			std::cout << "hue max: " << config.hueMax << "\n";
@@ -306,6 +330,7 @@ public:
 			std::cout << "cam offset y: " << config.camOffsetY << "\n";
 			std::cout << "cam height: " << config.camHeight << "\n";
 			std::cout << "cam angle: " << config.camAngle << "\n";
+			std::cout << "filter window: " << config.filterWindow << "\n";
 		}
 	}
 	/*!  
@@ -318,7 +343,8 @@ public:
 																			 imageProcessor.getSaturationMin(), imageProcessor.getSaturationMax(), imageProcessor.getValueMin(), imageProcessor.getValueMax(),
 																			imageProcessor.getMinPixelWidth(), imageProcessor.getMaxPixelWidth(), imageProcessor.getMinPixelHeight(), imageProcessor.getMaxPixelHeight(),
 																		imageProcessor.getMinPixelArea(), imageProcessor.getMaxPixelArea(), imageProcessor.getMinPercentFill(),
-																	imageProcessor.getCamOffsetX(), imageProcessor.getCamOffsetY(), imageProcessor.getCamHeight(), imageProcessor.getCamAngle());
+																	imageProcessor.getCamOffsetX(), imageProcessor.getCamOffsetY(), imageProcessor.getCamHeight(), imageProcessor.getCamAngle(),
+																imageProcessor.getFilterWindow());
 		config.writeSettings();
 		m_npreviousHueMin = config.hueMin;
 		m_npreviousHueMax = config.hueMax;
@@ -337,6 +363,7 @@ public:
 		m_previousCamOffsetY = config.camOffsetY;
 		m_previousCamHeight = config.camHeight;
 		m_previousCamAngle = config.camAngle;
+		m_previousFilterWindow = config.filterWindow;
 	}
 };
 // Instantiate the static values
@@ -357,3 +384,4 @@ double ConfigUtils::m_previousCamOffsetX;
 double ConfigUtils::m_previousCamOffsetY;
 double ConfigUtils::m_previousCamHeight;
 double ConfigUtils::m_previousCamAngle;
+int ConfigUtils::m_previousFilterWindow;

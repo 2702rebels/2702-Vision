@@ -124,6 +124,7 @@ int main(int argc, char **argv)
 			nt::DoubleSubscriber  camOffsetYTopic = objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(proc.getCamOffsetY());
 			nt::DoubleSubscriber  camHeightTopic = objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(proc.getCamHeight());
 			nt::DoubleSubscriber  camAngleTopic = objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(proc.getCamAngle());
+			nt::IntegerSubscriber filterPacketWindowTopic = objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Subscribe(proc.getFilterWindow());
 			nt::BooleanSubscriber isLoggingTopic = visionTable->GetBooleanTopic("IsLogging").Subscribe(false);
 			bool bLogStarted = false;
 			networkTableManager.StartClient4("networkTableClient");
@@ -152,6 +153,7 @@ int main(int argc, char **argv)
 				proc.setCamOffsetY(camOffsetYTopic.GetAtomic().value);
 				proc.setCamHeight(camHeightTopic.GetAtomic().value);
 				proc.setCamAngle(camAngleTopic.GetAtomic().value);
+				proc.setFilterWindow(filterPacketWindowTopic.GetAtomic().value);
 				if (!bLogStarted)
 				{
 					if (isLoggingTopic.Get())

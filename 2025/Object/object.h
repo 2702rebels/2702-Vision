@@ -77,8 +77,6 @@
 #ifndef PRODUCTION
 #define PRODUCTION 0
 #endif
-/*! \brief The number of packets that the median filter considers in its calculations. */
-#define FILTER_PACKET_WINDOW 8
 /*! \brief Whether or not to use median filtering for the output distance and angle values. */
 #define USE_OUTPUT_FILTERING 1
 /*! \brief Whether or not the camera should detect multiple objects. */
@@ -135,6 +133,8 @@ class imgProc : public FrmProcessor
 	double		m_camHeight = 0.5334;
 	/*! \brief Angle of camera below the horizontal in radians. */
 	double		m_camAngle = 26 * M_PI / 180;
+	/*! \brief Number of packets over which the median is taken for the distance / angle measurements. */
+	int			m_filterPacketWindow = 8;
 
 	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
 	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralDistance").Publish();
@@ -161,8 +161,8 @@ class imgProc : public FrmProcessor
    	cv::Point2d CAMERA_CENTER;
 	Rebels::Point3d m_p3dCam2Robot;
 
-	frc::MedianFilter<double> m_distanceFilter{FILTER_PACKET_WINDOW};
-	frc::MedianFilter<double> m_angleFilter{FILTER_PACKET_WINDOW};
+	frc::MedianFilter<double> m_distanceFilter{m_filterPacketWindow};
+	frc::MedianFilter<double> m_angleFilter{m_filterPacketWindow};
 	
 	#if SEND_PACKETS || PRODUCTION
 	/*! \brief UDP packet sender. */
@@ -358,24 +358,55 @@ public:
 	{
 		m_minPercentFill = newValue;
 	}
+	/*!
+	* \brief Sets the X distance between the center of the camera and the center of the robot frame. 
+	* \param newValue - new distance in meters
+	*/
 	virtual void setCamOffsetX(double newValue)
 	{
 		m_camOffsetX = newValue;
 		m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
 	}
+	/*!
+	* \brief Sets the Y distance between the center of the camera and the center of the robot frame.
+	* \param newValue - new distance in meters
+	*/
 	virtual void setCamOffsetY(double newValue)
 	{
 		m_camOffsetY = newValue;
 		m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
 	}
+	/*!
+	* \brief Sets the vertical distance between the center of the camera and the center of the robot frame.
+	* \param newValue - new distance in meters
+	*/
 	virtual void setCamHeight(double newValue)
 	{
 		m_camHeight = newValue;
 		m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
 	}
+	/*!
+	* \brief Sets the angle below the horizontal of the camera
+	* \param newValue - new angle value in radians
+	*/
 	virtual void setCamAngle(double newValue)
 	{
 		m_camAngle = newValue;
+	}
+	/*!
+	* \brief Sets the number of packets over which the median is taken for distance / angle measurements.
+	* Calling this function resets the median.
+	* \param newValue - the new number of packets
+	*/
+	virtual void setFilterWindow(int newValue)
+	{
+		if(newValue == m_filterPacketWindow){
+			// Avoid unnecessary filtering resets.
+			return;
+		}
+		m_filterPacketWindow = newValue;
+		frc::MedianFilter<double> m_distanceFilter = frc::MedianFilter<double>(m_filterPacketWindow);
+		frc::MedianFilter<double> m_angleFilter = frc::MedianFilter<double>(m_filterPacketWindow);
 	}
 	/*! 
 	* \brief Returns the hue min object detection parameter. 
@@ -495,6 +526,13 @@ public:
 	virtual double getCamAngle() const
 	{
 		return m_camAngle;
+	}
+	/*!
+	* \brief Returns the number of packets over which the median is taken for distance / angle measurements.
+	*/
+	virtual int getFilterWindow() const
+	{
+		return m_filterPacketWindow;
 	}
 	virtual ~imgProc()
 	{
