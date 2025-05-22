@@ -8,9 +8,6 @@ if [ $(./findtriplet.sh) = "x64-linux" ]; then
 else 
     echo "set(VCPKG_BUILD_TYPE release)" >> vcpkg/triplets/community/$(./findtriplet.sh).cmake
 fi
-vcpkg/vcpkg install
-rm -rf vcpkg/buildtrees # vcpkg has a ton of logs... 70gb of them in my case
-rm -rf vcpkg/downloads
-rm -rf vcpkg/packages # everything useful is copied to the vcpkg_installed dir so this can be deleted as well
+vcpkg/vcpkg install --clean-after-build
 echo $(pwd)/vcpkg_installed/$(./findtriplet.sh)/lib | sudo tee -a /etc/ld.so.conf.d/vcpkglibs.conf
 sudo ldconfig
