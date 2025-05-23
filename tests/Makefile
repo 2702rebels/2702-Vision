@@ -1,6 +1,9 @@
+MAKEFLAGS := --jobs=$(shell nproc)
+#MAKEFLAGS +=--output-sync=target
+
+OBJS=test.o
 CXXFLAGS+=--std=c++20
 CXXFLAGS+=-I../lib
-CXXFLAGS+=-I../2025/Object
 CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
@@ -27,10 +30,9 @@ LIBS+=-lxml2 -lexpat
 LIBS+=$(shell pkg-config -libs ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 LIBS+=-luv -lfmt
-
 all: test
 
-test: test.o ../lib/lib2702.a
-	$(CXX) test.o $(CXXFLAGS) $(LDFLAGS) -o test -l2702 $(LIBS)
+test: $(OBJS) ../lib/lib2702.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o test $(OBJS) -l2702 $(LIBS)
 
 test.o: main.cpp SerializationTest.cpp
