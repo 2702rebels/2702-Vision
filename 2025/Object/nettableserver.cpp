@@ -276,14 +276,16 @@ int main( int argc, char **argv ){
     showHelp();
     // Start an async thread to handle user input, this allows the server to keep responding to requests while waiting for input
     auto commandInputThread = std::async(std::launch::async, [] {
-        std::string input = ""s;
-        if(std::cin >> input) return input;
+        std::string input;
+        std::cin >> input;
+        return input;
     });
     while(!bStop){
         if(readyForNewCmdThread){
             commandInputThread = std::async(std::launch::async, [] {
-                std::string input = ""s;
-                if(std::cin >> input) return input;
+                std::string input;
+                std::cin >> input;
+                return input;
             });
             readyForNewCmdThread = false;
         }

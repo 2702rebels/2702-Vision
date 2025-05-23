@@ -133,8 +133,9 @@ int main( int argc, char **argv ){
     filterWindowTopic = objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Subscribe(0);
     showHelp(); // Print the available commands to the console
     auto commandInputThread = std::async(std::launch::async, [] {
-        std::string input = ""s;
-        if(std::cin >> input) return input;
+        std::string input;
+        std::cin >> input;
+        return input;
     });
     while(!bStop){
         // Print connection status
@@ -142,8 +143,9 @@ int main( int argc, char **argv ){
         if(readyForNewCmdThread){
             // Launch an async thread to take user input so client can respond to any server requests while waiting for input
             commandInputThread = std::async(std::launch::async, [] {
-                std::string input = ""s;
-                if(std::cin >> input) return input;
+                std::string input;
+                std::cin >> input;
+                return input;
             });
             readyForNewCmdThread = false;
         }
