@@ -1,5 +1,6 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include "../2025/Object/ObjectDetectionStruct.h"
+
 namespace {
     TEST(SerializationTest, ObjectDetectionInfoSerialize) {
         ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 0);
