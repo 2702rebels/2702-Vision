@@ -8,6 +8,8 @@ CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
 CXXFLAGS+=-Ofast
+CXXFLAGS+=-I$(shell pwd)/../2025/Object
+CXXFLAGS+=-I$(shell pwd)/../lib
 CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/gtest.pc)
 CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/opencv4.pc)
 CXXFLAGS+=-I$(shell pwd)/../vcpkg_installed/$(shell ../findtriplet.sh)/include/ntcore
