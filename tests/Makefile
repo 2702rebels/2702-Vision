@@ -27,9 +27,10 @@ LIBS+=-lxml2 -lexpat
 LIBS+=$(shell pkg-config -libs ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 LIBS+=-luv -lfmt
+
 all: test
 
-test: $(OBJS) ../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o test $(OBJS) -l2702 $(LIBS)
+test: test.o ../lib/lib2702.a
+	$(CXX) test.o $(CXXFLAGS) $(LDFLAGS) -o test -l2702 $(LIBS)
 
-test.o: SerializationTest.cpp main.cpp
+test.o: main.cpp SerializationTest.cpp
