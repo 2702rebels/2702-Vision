@@ -28,7 +28,8 @@ LIBS+=-lxml2 -lexpat
 LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 LIBS+=-luv -lfmt
-all: object replay nettableserver testnetworktablesclient udppacketstest calibrate testudpserver logtostdvideo
+all: object replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
+norpicam: replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 $(LIBS)
