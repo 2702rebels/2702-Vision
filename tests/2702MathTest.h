@@ -11,7 +11,7 @@ TEST(Point2d, Point2dSet) {
 }
 
 TEST(Point2d, Point2dEq) {
-    EXPECT_EQ(Point2d(1, 1.5), Point2d(1, 1.5));
+    EXPECT_EQ(Rebels::Point2d(1, 1.5), Rebels::Point2d(1, 1.5));
 }
 
 TEST(Point2d, Point2dFromExisting) {
