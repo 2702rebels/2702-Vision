@@ -161,8 +161,8 @@ class imgProc : public FrmProcessor
    	cv::Point2d CAMERA_CENTER;
 	Rebels::Point3d m_p3dCam2Robot;
 
-	frc::MedianFilter<double> m_distanceFilter{m_filterPacketWindow};
-	frc::MedianFilter<double> m_angleFilter{m_filterPacketWindow};
+	frc::MedianFilter<double> m_distanceFilter;
+	frc::MedianFilter<double> m_angleFilter;
 	
 	#if SEND_PACKETS || PRODUCTION
 	/*! \brief UDP packet sender. */
@@ -206,7 +206,9 @@ public:
 	imgProc() :
 		FrmProcessor(),
    		CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
-		m_p3dCam2Robot(m_camOffsetX, m_camOffsetY, m_camHeight)
+		m_p3dCam2Robot(m_camOffsetX, m_camOffsetY, m_camHeight),
+		m_distanceFilter(m_filterPacketWindow),
+		m_angleFilter(m_filterPacketWindow)
 	{
 		m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
