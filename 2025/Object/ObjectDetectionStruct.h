@@ -43,7 +43,7 @@ public:
         return false;
     }
 
-    bool operator<(const ObjectDetectionInfo& other){
+    constexpr bool operator<(const ObjectDetectionInfo& other) const {
         if(m_distance < other.m_distance){
             return true;
         }
