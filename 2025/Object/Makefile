@@ -43,9 +43,6 @@ nettableserver: nettableserver.o ../../lib/lib2702.a
 testnetworktablesclient: testnetworktablesclient.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testnetworktablesclient testnetworktablesclient.o -l2702 $(LIBS)
 
-udppacketstest: udppacketstest.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o udppacketstest udppacketstest.o -l2702 $(LIBS)
-
 calibrate: calibrate.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o calibrate calibrate.o -l2702 $(LIBS)
 
@@ -59,7 +56,6 @@ object.o: object.cpp object.h config.h ObjectDetectionStruct.cpp ObjectDetection
 replay.o: replay.cpp object.h config.h udpsender.h
 nettableserver.o: nettableserver.cpp udpsender.h
 testnetworktablesclient.o: testnetworktablesclient.cpp udpsender.h
-udppacketstest.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp udppacketstest.cpp udpsender.h
 calibrate.o: calibrate.cpp udpsender.h
 testudpserver.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp testudpserver.cpp udpsender.h
 logtostdvideo.o: object.h config.h logtostdvideo.h logtostdvideo.cpp udpsender.h
