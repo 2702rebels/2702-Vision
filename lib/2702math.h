@@ -21,6 +21,9 @@ class Point2d {
   Point2d(Point2d const &src);
 
   Point2d &operator=(Point2d const &src);
+  constexpr bool operator==(const Point2d& other) const {
+    return other.m_fU == m_fU && other.m_fV == m_fV;
+  }
 
   /*! \brief Assign new values to point coordinates. 
   * \param fU - new horizontal component of point.
