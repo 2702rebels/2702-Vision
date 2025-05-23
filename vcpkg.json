@@ -3,6 +3,12 @@
   "name": "2702vision",
   "description": "The 2702 Vision object detection / apriltag system.",
   "dependencies": [
+    "asio",
+    "gtest",
+    {
+      "name": "libcamera",
+      "platform": "linux"
+    },
     "nlohmann-json",
     {
       "name": "opencv4",
@@ -10,13 +16,14 @@
         "ade",
         "aravis",
         "calib3d",
-	      "contrib",
+        "contrib",
         "eigen",
         "ffmpeg",
         "freetype",
         "fs",
         "gapi",
         "gstreamer",
+        "gtk",
         "gtk",
         "highgui",
         "intrinsics",
@@ -33,7 +40,6 @@
         "quirc",
         "thread",
         "tiff",
-        "gtk",
         "vulkan",
         "webp"
       ]
@@ -44,11 +50,6 @@
         "cscore",
         "protobuf"
       ]
-    },
-    {
-      "name": "libcamera",
-      "platform": "linux"
-    },
-    "asio"
+    }
   ]
 }
