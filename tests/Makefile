@@ -37,4 +37,4 @@ all: test
 test: $(OBJS) ../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o test $(OBJS) -l2702 $(LIBS)
 
-test.o: test.cpp
+test.o: test.cpp SerializationTest.h
