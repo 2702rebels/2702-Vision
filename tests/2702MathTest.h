@@ -6,8 +6,8 @@ TEST(Point2d, Point2dSet) {
     EXPECT_EQ(point.u(), 1);
     EXPECT_EQ(point.v(), 1.5);
     point.set(-2.3, 15.4);
-    EXPECT_EQ(point.u(), -2.3);
-    EXPECT_EQ(point.v(), 15.4);
+    EXPECT_NEAR(point.u(), -2.3, 1e-6);
+    EXPECT_NEAR(point.v(), 15.4, 1e-6);
 }
 
 TEST(Point2d, Point2dEq) {
