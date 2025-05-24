@@ -69,6 +69,9 @@ class Point3d {
   Point3d &operator/=(float const scalar);
   Point3d &operator+=(Point3d const &other);
   Point3d &operator-=(Point3d const &other);
+  constexpr bool operator==(const Point3d& other) const {
+    return other.m_fX == m_fX && other.m_fY == m_fY && other.m_fZ == m_fZ;
+  }
 
   Point3d CrossProduct(Point3d const &v2) const;
   float DotProduct(Point3d const &v2) const;
