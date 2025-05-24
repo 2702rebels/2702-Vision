@@ -107,3 +107,43 @@ TEST(Point3d, Normalize){
     point2.Normalize();
     EXPECT_EQ(point2, Rebels::Point3d(0.5, 0, 0.5));
 }
+
+TEST(LinearSlope, InitMxB){
+    Rebels::LinearSlope slope(0.5, 2);
+    EXPECT_FLOAT_EQ(slope.getSlope(), 0.5);
+    EXPECT_FLOAT_EQ(slope.getYIntercept(), 2);
+}
+
+TEST(LinearSlope, InitPoints){
+    Rebels::LinearSlope slope(0, 4, 2, 8);
+    EXPECT_FLOAT_EQ(slope.getSlope(), 2);
+    EXPECT_FLOAT_EQ(slope.getYIntercept(), 4);
+}
+
+TEST(LinearSlope, SetMethods){
+    Rebels::LinearSlope slope(0, 0);
+    slope.setSlope(8);
+    slope.setYIntercept(10);
+    EXPECT_FLOAT_EQ(slope.getSlope(), 8);
+    EXPECT_FLOAT_EQ(slope.getYIntercept(), 10);
+}
+
+TEST(LinearSlope, GetY){
+    Rebels::LinearSlope slope(2, 4);
+    EXPECT_FLOAT_EQ(slope.CalculateY(-2), 0);
+    EXPECT_FLOAT_EQ(slope.CalculateY(0), 4);
+}
+
+TEST(LinearSlope, GetX){
+    Rebels::LinearSlope(2, 4);
+    EXPECT_FLOAT_EQ(slope.CalculateX(4), 0);
+    EXPECT_FLOAT_EQ(slope.CalculateX(0), -2);
+}
+
+TEST(LinearSlope, PointTest){
+    Rebels::LinearSlope slope(2, 4);
+    EXPECT_TRUE(slope.IsPointAboveLine(4, 15));
+    EXPECT_FALSE(slope.IsPointBelowLine(4, 15));
+    EXPECT_TRUE(slope.IsPointBelowLine(-5, -7));
+    EXPECT_FALSE(slope.IsPointAboveLine(-5, -7));
+}
