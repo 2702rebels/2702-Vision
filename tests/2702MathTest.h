@@ -210,3 +210,14 @@ TEST(Quaternion, RotatePoint){
     EXPECT_FLOAT_EQ(rotatedPt.y(), 3);
     EXPECT_FLOAT_EQ(rotatedPt.z(), -5);
 }
+
+TEST(RotationMatrix, RotatePoint){
+    Rebels::Point3d pt(3, 4, 5);
+    // x = 180, y = 0, z = -90 in euler angles
+    Rebels::Quaternion rot(0.7071068, 0.7071068, 0, 0);
+    Rebels::RotationMatrix matrix(rot);
+    Rebels::Point3d rotatedPt = matrix * pt;
+    EXPECT_FLOAT_EQ(rotatedPt.x(), 4);
+    EXPECT_FLOAT_EQ(rotatedPt.y(), 3);
+    EXPECT_FLOAT_EQ(rotatedPt.z(), -5);
+}
