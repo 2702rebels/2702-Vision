@@ -170,6 +170,10 @@ class Quaternion {
 
   Point3d operator*(const Point3d &other) const;
 
+  constexpr bool operator==(const Quaternion& other) const {
+    return other.m_fQ0 == m_fQ0 && other.m_fX == m_fX && other.m_fY == m_fY && other.m_fZ == m_fZ;
+  }
+
   /*! \brief Returns q component of rotation. */
   inline float q0() const { return m_fQ0; }
   /*! \brief Returns x component of rotation. */
