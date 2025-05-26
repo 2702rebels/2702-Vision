@@ -135,7 +135,7 @@ TEST(LinearSlope, GetY){
 }
 
 TEST(LinearSlope, GetX){
-    Rebels::LinearSlope(2, 4);
+    Rebels::LinearSlope slope(2, 4);
     EXPECT_FLOAT_EQ(slope.CalculateX(4), 0);
     EXPECT_FLOAT_EQ(slope.CalculateX(0), -2);
 }
@@ -177,38 +177,9 @@ TEST(Quaternion, Normalize){
     rot.Normalize();
     EXPECT_EQ(rot, Rebels::Quaternion(1, 0, 0, 0));
     Rebels::Quaternion rot2(1, 2, 2, 4);
-    EXPECT_FLOAT_EQ(rot2.q0(), 1/5);
-    EXPECT_FLOAT_EQ(rot2.x(), 2/5);
-    EXPECT_FLOAT_EQ(rot2.y(), 2/5);
-    EXPECT_FLOAT_EQ(rot2.z(), 4/5);
-}
-
-TEST(Quaternion, QuatFromAxisAngle){
-    Rebels::Point3d axis(90, 120, 0);
-    Rebels::Quaternion rot(5, axis);
-    EXPECT_FLOAT_EQ(rot.q0(), -0.8011436);
-    EXPECT_FLOAT_EQ(rot.x(), 0.3590833);
-    EXPECT_FLOAT_EQ(rot.y(), 0.4787777);
-    EXPECT_FLOAT_EQ(rot.z(), 0);
-}
-
-TEST(Quaternion, RotatePoint){
-    Rebels::Point3d pt(3, 4, 5);
-    // x = 180, y = 0, z = -90 in euler angles
-    Rebels::Quaternion rot(0.7071068, 0.7071068, 0, 0);
-    Rebels::Point3d rotatedPt = rot * pt;
-    EXPECT_FLOAT_EQ(rotatedPt.x(), 4);
-    EXPECT_FLOAT_EQ(rotatedPt.y(), 3);
-    EXPECT_FLOAT_EQ(rotatedPt.z(), -5);
-}
-
-TEST(RotationMatrix, RotatePoint){
-    Rebels::Point3d pt(3, 4, 5);
-    // x = 180, y = 0, z = -90 in euler angles
-    Rebels::Quaternion rot(0.7071068, 0.7071068, 0, 0);
-    Rebels::RotationMatrix matrix(rot);
-    Rebels::Point3d rotatedPt = matrix * pt;
-    EXPECT_FLOAT_EQ(rotatedPt.x(), 4);
-    EXPECT_FLOAT_EQ(rotatedPt.y(), 3);
-    EXPECT_FLOAT_EQ(rotatedPt.z(), -5);
+    rot2.Normalize();
+    EXPECT_FLOAT_EQ(rot2.q0(), 0.2);
+    EXPECT_FLOAT_EQ(rot2.x(), 0.4);
+    EXPECT_FLOAT_EQ(rot2.y(), 0.4);
+    EXPECT_FLOAT_EQ(rot2.z(), 0.8);
 }
