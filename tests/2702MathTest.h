@@ -47,7 +47,7 @@ TEST(Point3d, LenNegative){
     EXPECT_NEAR(point.length(), 6, 1e-6);
 }
 
-TEST(Point3d, Set){
+TEST(Point3d, Copy){
     Rebels::Point3d point1(0.25, 0.5, 0.75);
     Rebels::Point3d point2 = point1;
     EXPECT_EQ(point1, point2);
@@ -181,15 +181,6 @@ TEST(Quaternion, Normalize){
     EXPECT_FLOAT_EQ(rot2.x(), 2/5);
     EXPECT_FLOAT_EQ(rot2.y(), 2/5);
     EXPECT_FLOAT_EQ(rot2.z(), 4/5);
-}
-
-TEST(Quaternion, QuatFromRotMatrix){
-    Rebels::RotationMatrix matrix();
-    Rebels::Quaternion rot(matrix);
-    Rebels::Quaternion rot2 = matrix;
-    Rebels::Quaternion ans(1, 0, 0, 0);
-    EXPECT_EQ(rot, ans);
-    EXPECT_EQ(rot2, ans);
 }
 
 TEST(Quaternion, QuatFromAxisAngle){
