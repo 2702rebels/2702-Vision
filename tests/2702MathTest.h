@@ -27,9 +27,9 @@ TEST(Point2d, Len) {
 
 TEST(Point3d, Set) {
     Rebels::Point3d point(0.75, 0.2, 0.5);
-    EXPECT_EQ(point.x(), 0.75);
-    EXPECT_EQ(point.y(), 0.2);
-    EXPECT_EQ(point.z(), 0.5);
+    EXPECT_FLOAT_EQ(point.x(), 0.75);
+    EXPECT_FLOAT_EQ(point.y(), 0.2);
+    EXPECT_FLOAT_EQ(point.z(), 0.5);
 }
 
 TEST(Point3d, EqOp) {
@@ -80,9 +80,9 @@ TEST(Point3d, OpMul){
 }
 
 TEST(Point3d, OpDiv){
-    Rebels::Point3d point(9, 4.5, 0);
-    Rebels::Point3d ans(3, 4.5 / 3, 0);
-    EXPECT_EQ(point / 3, ans);
+    Rebels::Point3d point(18, 9, 0);
+    Rebels::Point3d ans(6, 3, 0);
+    EXPECT_EQ((point / 3), ans);
     point /= 3;
     EXPECT_EQ(point, ans);
 }
