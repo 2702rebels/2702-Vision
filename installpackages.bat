@@ -1,5 +1,6 @@
-CALL git clone https://github.com/Microsoft/vcpkg.git
+CALL git clone https://github.com/OhmV-IR/vcpkg.git
 cd vcpkg
+CALL git checkout fmt-update
 CALL bootstrap-vcpkg.bat
 cd triplets
 CALL echo "set(VCPKG_BUILD_TYPE release)" >> x86-windows.cmake
