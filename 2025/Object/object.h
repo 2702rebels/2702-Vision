@@ -686,10 +686,10 @@ public:
 			yMin = yMax;
 			yMax = buf;
 		}
-		for(int x= xMin; i < xMax; i++){
-			for(int j = yMin; j < yMax; j++){
-				if(line1.IsPointBelowLine(i, j) && line2.IsPointAboveLine(i, j) && line3.IsPointAboveLine(i, j) && line4.IsPointBelowLine(i, j)){
-					if(mask.at<uchar>(i, j) > 0){
+		for(int x = xMin; x < xMax; x++){
+			for(int y = yMin; y < yMax; y++){
+				if(line1.IsPointBelowLine(x, y) && line2.IsPointAboveLine(x, y) && line3.IsPointAboveLine(x, y) && line4.IsPointBelowLine(x, y)){
+					if(mask.at<uchar>(x, y) > 0){
 						validPixels++;
 					}
 					pixels++;
