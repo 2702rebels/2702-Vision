@@ -388,7 +388,7 @@ LinearSlope::LinearSlope(double slope, double yIntercept){
 }
 
 LinearSlope::LinearSlope(double x1, double y1, double x2, double y2){
-  m_slope = (x1 - x2) / (y1 - y2);
+  m_slope = (y2 - y1) / (x2 - x1);
   m_yIntercept = y2 - (m_slope * x2);
 }
 
