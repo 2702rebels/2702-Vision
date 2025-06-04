@@ -82,9 +82,14 @@ TEST(Point3d, OpMul){
 TEST(Point3d, OpDiv){
     Rebels::Point3d point(18, 9, 0);
     Rebels::Point3d ans(6, 3, 0);
-    EXPECT_EQ((point / 3), ans);
+    Rebels::Point3d divd = point / 3;
+    EXPECT_FLOAT_EQ(divd.x(), ans.x());
+    EXPECT_FLOAT_EQ(divd.y(), ans.y());
+    EXPECT_FLOAT_EQ(divd.z(), ans.z());
     point /= 3;
-    EXPECT_EQ(point, ans);
+    EXPECT_FLOAT_EQ(point.x(), ans.x());
+    EXPECT_FLOAT_EQ(point.y(), ans.y());
+    EXPECT_FLOAT_EQ(point.z(), ans.z());
 }
 
 TEST(Point3d, CrossProduct){
@@ -102,10 +107,14 @@ TEST(Point3d, DotProduct){
 TEST(Point3d, Normalize){
     Rebels::Point3d point1(0, 1, 0);
     point1.Normalize();
-    EXPECT_EQ(point1, Rebels::Point3d(0, 1, 0));
+    EXPECT_FLOAT_EQ(point1.x(), 0);
+    EXPECT_FLOAT_EQ(point1.y(), 1);
+    EXPECT_FLOAT_EQ(point1.z(), 0);
     Rebels::Point3d point2(1, 0, 1);
     point2.Normalize();
-    EXPECT_EQ(point2, Rebels::Point3d(0.5f, 0, 0.5f));
+    EXPECT_FLOAT_EQ(point2.x(), 0.5f);
+    EXPECT_FLOAT_EQ(point2.y(), 0);
+    EXPECT_FLOAT_EQ(point2.z(), 0.5f);
 }
 
 TEST(LinearSlope, InitMxB){
