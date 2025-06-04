@@ -692,7 +692,6 @@ public:
 		ellipse.points(points);
 		points = OrderPointArray(points);
 		// Sort points to get top-left in right spot
-		std::sort(points, points + 4, [](cv::Point2f a, cv::Point2f b){ return a.y < b.y; });
 		cv::Point center = (rect.br() + rect.tl()) * 0.5;
 		float majorAxisLength = std::max(rect.width, rect.height);
 		if(majorAxisLength < m_minPixelWidth || majorAxisLength > m_maxPixelWidth)
