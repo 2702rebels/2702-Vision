@@ -667,13 +667,9 @@ public:
 			return { {}, {} };
 		}
 		Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // bottom left to top left
-		printf("l1 slope: %f\nl1 yintercept: %f\n", line1.getSlope(), line1.getYIntercept());
 		Rebels::LinearSlope line2(points[1].x, points[1].y, points[2].x, points[2].y); // top left to top right
-		printf("l2 slope: %f\nl2 yintercept: %f\n", line2.getSlope(), line2.getYIntercept());
 		Rebels::LinearSlope line3(points[2].x, points[2].y, points[3].x, points[3].y); // top right to bottom right
-		printf("l3 slope: %f\nl3 yintercept: %f\n", line3.getSlope(), line3.getYIntercept());
 		Rebels::LinearSlope line4(points[3].x, points[3].y, points[0].x, points[0].y); // bottom right to bottom left
-		printf("l4 slope: %f\nl4 yintercept: %f\n", line4.getSlope(), line4.getYIntercept());
 		int pixels = 0;
 		int validPixels = 0;
 		int x = 0;
@@ -704,6 +700,8 @@ public:
 		}
 		double detectpercent = (double)validPixels / (double)pixels;
 		printf("detectpercent: %f\n", detectpercent);
+		printf("npixels: %d\n", pixels);
+		printf("validpixels: %d\n", validPixels);
 		if(detectpercent < m_minPercentFill){
 			return { {}, {} };
 		}
