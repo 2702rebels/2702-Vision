@@ -652,6 +652,8 @@ public:
 		cv::Rect rect = ellipse.boundingRect();
 		cv::Point2f points[4];
 		ellipse.points(points);
+		// Sort points to get top-left in right spot
+		std::sort(points, points + 4, [](cv::Point2f a, cv::Point2f b){ return a.y < b.y; });
 		cv::Point center = (rect.br() + rect.tl()) * 0.5;
 		float majorAxisLength = std::max(rect.width, rect.height);
 		if(majorAxisLength < m_minPixelWidth || majorAxisLength > m_maxPixelWidth)
@@ -666,10 +668,11 @@ public:
 		if(area < m_minPixelArea || area > m_maxPixelArea){
 			return { {}, {} };
 		}
-		Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // bottom left to top left
-		Rebels::LinearSlope line2(points[1].x, points[1].y, points[2].x, points[2].y); // top left to top right
-		Rebels::LinearSlope line3(points[2].x, points[2].y, points[3].x, points[3].y); // top right to bottom right
-		Rebels::LinearSlope line4(points[3].x, points[3].y, points[0].x, points[0].y); // bottom right to bottom left
+		// suspicious... the lines are coming out wrong the points must be goofed
+		Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // top
+		Rebels::LinearSlope line2(points[1].x, points[1].y, points[2].x, points[2].y); // right
+		Rebels::LinearSlope line3(points[2].x, points[2].y, points[3].x, points[3].y); // bot
+		Rebels::LinearSlope line4(points[3].x, points[3].y, points[0].x, points[0].y); // left
 		int pixels = 0;
 		int validPixels = 0;
 		int xMin = std::max(rect.x, 0);
@@ -688,7 +691,7 @@ public:
 		}
 		for(int x = xMin; x < xMax; x++){
 			for(int y = yMin; y < yMax; y++){
-				if(line1.IsPointBelowLine(x, y) && line2.IsPointAboveLine(x, y) && line3.IsPointAboveLine(x, y) && line4.IsPointBelowLine(x, y)){
+				if(line1.IsPointBelowLine(x, y) && line2.IsPointBelowLine(x, y) && line3.IsPointAboveLine(x, y) && line4.IsPointBelowLine(x, y)){
 					if(mask.at<uchar>(x, y) > 0){
 						validPixels++;
 					}
