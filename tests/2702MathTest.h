@@ -2,20 +2,20 @@
 #include <2702math.h>
 
 TEST(Point2d, Set) {
-    Rebels::Point2d point(1, 1.5);
+    Rebels::Point2d point(1, 1.5f);
     EXPECT_EQ(point.u(), 1);
-    EXPECT_EQ(point.v(), 1.5);
-    point.set(-2.3, 15.4);
-    EXPECT_NEAR(point.u(), -2.3, 1e-6);
-    EXPECT_NEAR(point.v(), 15.4, 1e-6);
+    EXPECT_EQ(point.v(), 1.5f);
+    point.set(-2.3f, 15.4f);
+    EXPECT_NEAR(point.u(), -2.3f, 1e-6);
+    EXPECT_NEAR(point.v(), 15.4f, 1e-6);
 }
 
 TEST(Point2d, EqOp) {
-    EXPECT_EQ(Rebels::Point2d(1, 1.5), Rebels::Point2d(1, 1.5));
+    EXPECT_EQ(Rebels::Point2d(1, 1.5f), Rebels::Point2d(1, 1.5f));
 }
 
 TEST(Point2d, FromExisting) {
-    Rebels::Point2d point1(1.5, 2.5);
+    Rebels::Point2d point1(1.5f, 2.5f);
     Rebels::Point2d point2(point1);
     EXPECT_EQ(point1, point2);
 }
