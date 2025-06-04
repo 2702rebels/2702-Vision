@@ -672,24 +672,22 @@ public:
 		Rebels::LinearSlope line4(points[3].x, points[3].y, points[0].x, points[0].y); // bottom right to bottom left
 		int pixels = 0;
 		int validPixels = 0;
-		int x = 0;
-		if(rect.x > 0){
-			x = rect.x;
+		int xMin = std::max(rect.x, 0);
+		int yMin = std::max(rect.y, 0);
+		int xMax = std::min(rect.width + rect.x, RESOLUTION_WIDTH - 1);
+		int yMax = std::min(rect.height + rect.y, RESOLUTION_HEIGHT - 1);
+		if(xMin > xMax){
+			int buf = xMin;
+			xMin = xMax;
+			xMax = buf;
 		}
-		int y = 0;
-		if(rect.y > 0){
-			y = rect.y;
+		if(yMin > yMax){
+			int buf = yMin;
+			yMin = yMax;
+			yMax = buf;
 		}
-		int xMax = rect.width + rect.x;
-		if(xMax > RESOLUTION_WIDTH){
-			xMax = RESOLUTION_WIDTH - 1;
-		}
-		int yMax = rect.height + rect.y;
-		if(yMax > RESOLUTION_HEIGHT){
-			yMax = RESOLUTION_HEIGHT - 1;
-		}
-		for(int i = x; i < xMax; i++){
-			for(int j = y; j < yMax; j++){
+		for(int x= xMin; i < xMax; i++){
+			for(int j = yMin; j < yMax; j++){
 				if(line1.IsPointBelowLine(i, j) && line2.IsPointAboveLine(i, j) && line3.IsPointAboveLine(i, j) && line4.IsPointBelowLine(i, j)){
 					if(mask.at<uchar>(i, j) > 0){
 						validPixels++;
