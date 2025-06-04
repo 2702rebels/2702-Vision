@@ -666,7 +666,7 @@ public:
 		if(area < m_minPixelArea || area > m_maxPixelArea){
 			return { {}, {} };
 		}
-		/*Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // bottom left to top left
+		Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // bottom left to top left
 		printf("l1 slope: %f\nl1 yintercept: %f\n", line1.getSlope(), line1.getYIntercept());
 		Rebels::LinearSlope line2(points[1].x, points[1].y, points[2].x, points[2].y); // top left to top right
 		printf("l2 slope: %f\nl2 yintercept: %f\n", line2.getSlope(), line2.getYIntercept());
@@ -706,7 +706,7 @@ public:
 		printf("detectpercent: %f\n", detectpercent);
 		if(detectpercent < m_minPercentFill){
 			return { {}, {} };
-		}*/
+		}
 		std::vector<cv::Point> hull;
 		cv::convexHull(contour, hull);
 		float angle = ellipse.angle;
