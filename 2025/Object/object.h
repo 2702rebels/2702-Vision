@@ -636,6 +636,44 @@ public:
 	}
 
 	/*!
+	* \brief Takes a C-style array of 4 points and orders them starting from top-left going clockwise. 
+	* \param points - C-style array of 4 points unsorted
+	* \returns A new C-style array of 4 points with the top-left point first then going clockwise. 
+	*/
+	static cv::Point2f OrderPointArray(cv::Point2f points){
+		int highestIndex = 0;
+		int max = 0;
+		int lowestIndex = 0;
+		int min = INFINITY;
+		// Find top-right point
+		for(int i = 0; i < 4; i++){
+			if(points[i].x + points[i].y > max){
+				highestIndex = i;
+				max = points[i].x + points[i].y;
+			}
+			if(points[i].x + points[i].y < min){
+				lowestIndex = i;
+				min = points[i].x + points[i].y;
+			}
+		}
+		cv::Point2f pointsSorted[4];
+		pointsSorted[1] = points[highestIndex];
+		pointsSorted[3] = points[lowestIndex];
+		std::vector<int> indexes = {0,1,2,3};
+		indexes.erase(std::remove(indexes.begin(), indexes.end(), highestIndex), indexes.end());
+		indexes.erase(std::remove(indexes.begin(), indexes.end(), lowestIndex), indexes.end());
+		if(points[indexes[0]].x > points[indexes[1]].x){
+			pointsSorted[2] = points[indexes[0]];
+			pointsSorted[0] = points[indexes[1]];
+		}
+		else{
+			pointsSorted[2] = points[indexes[1]];
+			pointsSorted[0] = points[indexes[0]];
+		}
+		return pointsSorted;
+	}
+
+	/*!
 	* \brief Fits the contour provided to a cylinder shape.
 	* \param contour - The input contour, as provided by \ref cv::findContours.
 	* \param mask - The binary image where white is a valid part of a detection and black where it is not.
@@ -652,6 +690,7 @@ public:
 		cv::Rect rect = ellipse.boundingRect();
 		cv::Point2f points[4];
 		ellipse.points(points);
+		points = OrderPointArray(points);
 		// Sort points to get top-left in right spot
 		std::sort(points, points + 4, [](cv::Point2f a, cv::Point2f b){ return a.y < b.y; });
 		cv::Point center = (rect.br() + rect.tl()) * 0.5;

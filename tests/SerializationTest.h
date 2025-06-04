@@ -4,7 +4,7 @@
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
-TEST(SerializationTest, ObjectDetectionInfoSerialize) {
+TEST(Serialization, ObjectDetectionInfoSerialize) {
     ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 0);
     std::vector<uint8_t> coralBytesVec(1000);
     std::span<uint8_t> coralBytes(coralBytesVec.data(), coralBytesVec.size());
@@ -13,7 +13,7 @@ TEST(SerializationTest, ObjectDetectionInfoSerialize) {
     EXPECT_EQ(coral1, unpackedCoral);
 }
 
-TEST(SerializationTest, ObjectDetectionPacketSerialize) {
+TEST(Serialization, ObjectDetectionPacketSerialize) {
     // This will also fail if ObjectDetectionInfo serialize fails
     ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 0);
     ObjectDetectionInfo coral2 = ObjectDetectionInfo(50.2f, 24.3f, 15, 0);
