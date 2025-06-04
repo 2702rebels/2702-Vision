@@ -112,9 +112,9 @@ TEST(Point3d, Normalize){
     EXPECT_FLOAT_EQ(point1.z(), 0);
     Rebels::Point3d point2(1, 0, 1);
     point2.Normalize();
-    EXPECT_FLOAT_EQ(point2.x(), 0.5f);
+    EXPECT_FLOAT_EQ(point2.x(), 1/sqrt(2));
     EXPECT_FLOAT_EQ(point2.y(), 0);
-    EXPECT_FLOAT_EQ(point2.z(), 0.5f);
+    EXPECT_FLOAT_EQ(point2.z(), 1/sqrt(2));
 }
 
 TEST(LinearSlope, InitMxB){
