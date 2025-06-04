@@ -28,7 +28,8 @@ LIBS+=-lxml2 -lexpat
 LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 LIBS+=-luv -lfmt
-all: object replay nettableserver testnetworktablesclient udppacketstest calibrate testudpserver logtostdvideo
+all: object replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
+norpicam: replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 $(LIBS)
@@ -43,9 +44,6 @@ nettableserver: nettableserver.o ../../lib/lib2702.a
 testnetworktablesclient: testnetworktablesclient.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testnetworktablesclient testnetworktablesclient.o -l2702 $(LIBS)
 
-udppacketstest: udppacketstest.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o udppacketstest udppacketstest.o -l2702 $(LIBS)
-
 calibrate: calibrate.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o calibrate calibrate.o -l2702 $(LIBS)
 
@@ -59,7 +57,6 @@ object.o: object.cpp object.h config.h ObjectDetectionStruct.cpp ObjectDetection
 replay.o: replay.cpp object.h config.h udpsender.h
 nettableserver.o: nettableserver.cpp udpsender.h
 testnetworktablesclient.o: testnetworktablesclient.cpp udpsender.h
-udppacketstest.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp udppacketstest.cpp udpsender.h
 calibrate.o: calibrate.cpp udpsender.h
 testudpserver.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp testudpserver.cpp udpsender.h
 logtostdvideo.o: object.h config.h logtostdvideo.h logtostdvideo.cpp udpsender.h

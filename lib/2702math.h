@@ -21,6 +21,9 @@ class Point2d {
   Point2d(Point2d const &src);
 
   Point2d &operator=(Point2d const &src);
+  constexpr bool operator==(const Point2d& other) const {
+    return other.m_fU == m_fU && other.m_fV == m_fV;
+  }
 
   /*! \brief Assign new values to point coordinates. 
   * \param fU - new horizontal component of point.
@@ -66,6 +69,9 @@ class Point3d {
   Point3d &operator/=(float const scalar);
   Point3d &operator+=(Point3d const &other);
   Point3d &operator-=(Point3d const &other);
+  constexpr bool operator==(const Point3d& other) const {
+    return other.m_fX == m_fX && other.m_fY == m_fY && other.m_fZ == m_fZ;
+  }
 
   Point3d CrossProduct(Point3d const &v2) const;
   float DotProduct(Point3d const &v2) const;
@@ -163,6 +169,10 @@ class Quaternion {
   Quaternion operator*=(const Quaternion &other);
 
   Point3d operator*(const Point3d &other) const;
+
+  constexpr bool operator==(const Quaternion& other) const {
+    return other.m_fQ0 == m_fQ0 && other.m_fX == m_fX && other.m_fY == m_fY && other.m_fZ == m_fZ;
+  }
 
   /*! \brief Returns q component of rotation. */
   inline float q0() const { return m_fQ0; }

@@ -87,7 +87,6 @@ Point3d &Point3d::operator*=(float const scalar) {
 /*! \brief Divides a \ref Point3d by a scalar.
 * \param scalar - The value to divide the coordinates by.
 * \returns A new \ref Point3d with the values divided by the scalar. 
-* \bug Will crash if is divided by 0.
 */
 Point3d Point3d::operator/(float const scalar) const {
   Point3d ret(m_fX / scalar, m_fY / scalar, m_fZ / scalar);
@@ -389,7 +388,7 @@ LinearSlope::LinearSlope(double slope, double yIntercept){
 }
 
 LinearSlope::LinearSlope(double x1, double y1, double x2, double y2){
-  m_slope = (x1 - x2) / (y1 - y2);
+  m_slope = (y2 - y1) / (x2 - x1);
   m_yIntercept = y2 - (m_slope * x2);
 }
 
