@@ -31,6 +31,7 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <array>
 
 #include <string>
 #include <stdexcept>
@@ -640,7 +641,7 @@ public:
 	* \param points - C-style array of 4 points unsorted
 	* \returns A new C-style array of 4 points with the top-left point first then going clockwise. 
 	*/
-	static std::array<Point2f, 4> OrderPointArray(cv::Point2f *points){
+	static std::array<cv::Point2f, 4> OrderPointArray(cv::Point2f *points){
 		int highestIndex = 0;
 		int max = 0;
 		int lowestIndex = 0;
