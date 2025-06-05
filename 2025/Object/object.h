@@ -742,7 +742,8 @@ public:
 		printf("detectpercent: %f\n", detectpercent);
 		printf("npixels: %d\n", pixels);
 		printf("validpixels: %d\n", validPixels);
-		if(detectpercent < m_minPercentFill){
+		// If % detection is nan or less than min fill
+		if(detectpercent < m_minPercentFill || detectpercent != detectpercent){
 			return { {}, {} };
 		}
 		std::vector<cv::Point> hull;
