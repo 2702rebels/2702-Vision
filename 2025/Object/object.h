@@ -125,7 +125,7 @@ class imgProc : public FrmProcessor
 	/*! \brief Maximum pixel area of an object for detection. */
 	int			m_maxPixelArea = 115000;
 	/*! \brief Minimum percentage of pixels that have to be valid inside of a detection for it to be valid. */
-	double		m_minPercentFill = 0.2;
+	double		m_minPercentFill = 0.45;
 	/*! \brief X adjustment in meters from center of camera to center of robot. */
 	double		m_camOffsetX = 0.22225;
 	/*! \brief Y adjustment in meters from center of camera to center of robot. */
