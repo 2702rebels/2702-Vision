@@ -708,10 +708,10 @@ public:
 			return { {}, {} };
 		}
 		// suspicious... the lines are coming out wrong the points must be goofed
-		Rebels::LinearSlope line1(pointsSorted[3].x, pointsSorted[3].y, pointsSorted[2].x, pointsSorted[2].y); // top
-		Rebels::LinearSlope line2(pointsSorted[2].x, pointsSorted[2].y, pointsSorted[0].x, pointsSorted[0].y); // right
-		Rebels::LinearSlope line3(pointsSorted[0].x, pointsSorted[0].y, pointsSorted[1].x, pointsSorted[1].y); // bot
-		Rebels::LinearSlope line4(pointsSorted[1].x, pointsSorted[1].y, pointsSorted[3].x, pointsSorted[3].y); // left
+		Rebels::LinearSlope line1(pointsSorted[0].x, pointsSorted[0].y, pointsSorted[1].x, pointsSorted[1].y); // top
+		Rebels::LinearSlope line2(pointsSorted[1].x, pointsSorted[1].y, pointsSorted[2].x, pointsSorted[2].y); // right
+		Rebels::LinearSlope line3(pointsSorted[2].x, pointsSorted[2].y, pointsSorted[3].x, pointsSorted[3].y); // bot
+		Rebels::LinearSlope line4(pointsSorted[3].x, pointsSorted[3].y, pointsSorted[0].x, pointsSorted[0].y); // left
 		int pixels = 0;
 		int validPixels = 0;
 		int xMin = std::max(rect.x, 0);
