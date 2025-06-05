@@ -640,7 +640,7 @@ public:
 	* \param points - C-style array of 4 points unsorted
 	* \returns A new C-style array of 4 points with the top-left point first then going clockwise. 
 	*/
-	static cv::Point2f OrderPointArray(cv::Point2f points){
+	static std::array<Point2f, 4> OrderPointArray(cv::Point2f *points){
 		int highestIndex = 0;
 		int max = 0;
 		int lowestIndex = 0;
@@ -656,7 +656,7 @@ public:
 				min = points[i].x + points[i].y;
 			}
 		}
-		cv::Point2f pointsSorted[4];
+		std::array<cv::Point2f, 4> pointsSorted;
 		pointsSorted[1] = points[highestIndex];
 		pointsSorted[3] = points[lowestIndex];
 		std::vector<int> indexes = {0,1,2,3};
@@ -690,7 +690,7 @@ public:
 		cv::Rect rect = ellipse.boundingRect();
 		cv::Point2f points[4];
 		ellipse.points(points);
-		points = OrderPointArray(points);
+		std::array<cv::Point2f, 4> pointsSorted = OrderPointArray(points);
 		// Sort points to get top-left in right spot
 		cv::Point center = (rect.br() + rect.tl()) * 0.5;
 		float majorAxisLength = std::max(rect.width, rect.height);
@@ -707,10 +707,10 @@ public:
 			return { {}, {} };
 		}
 		// suspicious... the lines are coming out wrong the points must be goofed
-		Rebels::LinearSlope line1(points[3].x, points[3].y, points[2].x, points[2].y); // top
-		Rebels::LinearSlope line2(points[2].x, points[2].y, points[0].x, points[0].y); // right
-		Rebels::LinearSlope line3(points[0].x, points[0].y, points[1].x, points[1].y); // bot
-		Rebels::LinearSlope line4(points[1].x, points[1].y, points[3].x, points[3].y); // left
+		Rebels::LinearSlope line1(pointsSorted[3].x, pointsSorted[3].y, pointsSorted[2].x, pointsSorted[2].y); // top
+		Rebels::LinearSlope line2(pointsSorted[2].x, pointsSorted[2].y, pointsSorted[0].x, pointsSorted[0].y); // right
+		Rebels::LinearSlope line3(pointsSorted[0].x, pointsSorted[0].y, pointsSorted[1].x, pointsSorted[1].y); // bot
+		Rebels::LinearSlope line4(pointsSorted[1].x, pointsSorted[1].y, pointsSorted[3].x, pointsSorted[3].y); // left
 		int pixels = 0;
 		int validPixels = 0;
 		int xMin = std::max(rect.x, 0);
