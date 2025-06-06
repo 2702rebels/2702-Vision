@@ -32,6 +32,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <array>
+#include <cmath>
 
 #include <string>
 #include <stdexcept>
@@ -743,7 +744,7 @@ public:
 		printf("npixels: %d\n", pixels);
 		printf("validpixels: %d\n", validPixels);
 		// If % detection is nan or less than min fill
-		if(detectpercent < m_minPercentFill || detectpercent != detectpercent){
+		if(detectpercent < m_minPercentFill || std::isnan(detectpercent)){
 			return { {}, {} };
 		}
 		std::vector<cv::Point> hull;
