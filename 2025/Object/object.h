@@ -33,6 +33,7 @@
 #include <condition_variable>
 #include <array>
 #include <cmath>
+#include <limits>
 
 #include <string>
 #include <stdexcept>
@@ -646,7 +647,7 @@ public:
 		int highestIndex = 0;
 		int max = 0;
 		int lowestIndex = 0;
-		int min = INFINITY;
+		int min = std::numeric_limits<int>::max();
 		// Find top-right point
 		for(int i = 0; i < 4; i++){
 			if(points[i].x + points[i].y > max){
