@@ -24,5 +24,11 @@ LIBS+=-lavcodec -lavdevice -lavfilter -lavformat -lavutil -lswresample -lm -lz
 
 OBJS=logffmpeg.o
 
+all: logffmpeg
+
+clean:
+    rm -f *.o
+	rm -f logffmpeg
+
 logffmpeg: $(OBJS)
 	$(CXX) -o logffmpeg $(LDFLAGS) $(OBJS) $(LIBS) -lavcodec -lavutil

@@ -28,6 +28,12 @@ LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.s
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 LIBS+=-luv -lfmt
 
+all: vid
+
+clean:
+    rm -f *.o
+	rm -f vid
+
 vid: $(OBJS)
 	$(CXX) $(LDFLAGS) -o vid $(OBJS) -l2702 -lopencv_core
 #	$(CXX) $(CXXFLAGS) -o vid $(OBJS) -l2702 -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_calib3d -lpthread -lntcore -lcscore -lcameraserver -lwpiutil -lapriltag -lwpimath

@@ -34,6 +34,10 @@ LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore 
 LIBS+=-luv -lfmt
 all: test
 
+clean:
+    rm -f *.o
+	rm -f test
+
 test: $(OBJS) ../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o test $(OBJS) -l2702 $(LIBS)
 
