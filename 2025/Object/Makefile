@@ -31,14 +31,14 @@ LIBS+=-luv -lfmt
 all: object replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
 norpicam: replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
 clean:
-  rm -f *.o
-  rm -f object
-  rm -f replay
-  rm -f nettableserver
-  rm -f testnetworktablesclient
-  rm -f calibrate
-  rm -f testudpserver
-  rm -f logtostdvideo
+	rm -f *.o
+	rm -f object
+	rm -f replay
+	rm -f nettableserver
+	rm -f testnetworktablesclient
+	rm -f calibrate
+	rm -f testudpserver
+	rm -f logtostdvideo
 
 object: $(OBJS) ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 $(LIBS)
