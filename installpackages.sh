@@ -15,3 +15,4 @@ fi
 vcpkg/vcpkg install --clean-after-build
 echo $(pwd)/vcpkg_installed/$(./findtriplet.sh)/lib | sudo tee -a /etc/ld.so.conf.d/vcpkglibs.conf
 sudo ldconfig
+sudo ln -s $(pwd)/vcpkg_installed/$(./findtriplet.sh)/installed/bin/ffmpeg /usr/local/bin/ffmpeg
