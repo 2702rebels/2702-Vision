@@ -10,6 +10,8 @@ CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtr
 CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/gtk+-x11-3.0.pc)
 CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libxml-2.0.pc)
 CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
+CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libavutil.pc)
+CXXFLAGS+=$(shell pkg-config --cflags ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libavcodec.pc)
 
 LDFLAGS+=-L../../lib
 LIBS+=-l2702
@@ -20,9 +22,17 @@ LIBS+=-lxml2 -lexpat
 LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 LIBS+=-luv -lfmt
-LIBS+=-lavcodec -lavdevice -lavfilter -lavformat -lavutil -lswresample -lm -lz
+LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libavutil.pc)
+LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libavcodec.pc)
+LIBS+=-lavdevice -lavfilter -lavformat -lswresample -lm -lz
 
 OBJS=logffmpeg.o
 
+all: logffmpeg
+
+clean:
+	rm -f *.o
+	rm -f logffmpeg
+
 logffmpeg: $(OBJS)
-	$(CXX) -o logffmpeg $(LDFLAGS) $(OBJS) $(LIBS) -lavcodec -lavutil
+	$(CXX) -o logffmpeg $(LDFLAGS) $(OBJS) $(LIBS)

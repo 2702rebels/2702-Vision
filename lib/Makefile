@@ -18,6 +18,12 @@ endif
 
 #OBJS=VisLog.o Bayer2RGB.o 2702camera.o 2702math.o genio.o Bayer2Grey.o cammgr.o
 
+all: $(OBJS) lib2702.a
+
+clean:
+	rm -f *.o
+	rm -f *.a
+
 lib2702.a: $(OBJS)
 	ar -r lib2702.a $(OBJS)
 
