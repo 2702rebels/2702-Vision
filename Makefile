@@ -6,7 +6,8 @@ all:
 	make -C Utilities/logffmpeg
 	make -C Utilities/vid-sample
 	make -C tests
-	@if command -v rpicam-vid &> /dev/null; then \
+	@command -v rpicam-vid; \
+	if [ $$? -eq 0 ]; then \
 	    make -C Utilities/rpi-sample; \
 		make -C 2025/Object; \
 	else \
@@ -19,7 +20,8 @@ notest:
 	make -C Utilities/log2mjpeg
 	make -C Utilities/logffmpeg
 	make -C Utilities/vid-sample
-	@if command -v rpicam-vid &> /dev/null; then \
+	@command -v rpicam-vid; \
+	if [ $$? -eq 0 ]; then \
 	    make -C Utilities/rpi-sample; \
 		make -C 2025/Object; \
 	else \
