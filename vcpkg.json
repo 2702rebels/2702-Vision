@@ -4,6 +4,7 @@
   "description": "The 2702 Vision object detection / apriltag system.",
   "dependencies": [
     "asio",
+    "ffmpeg",
     "gtest",
     {
       "name": "libcamera",
@@ -46,6 +47,7 @@
         "webp"
       ]
     },
+    "pthread",
     {
       "name": "wpilib",
       "features": [
