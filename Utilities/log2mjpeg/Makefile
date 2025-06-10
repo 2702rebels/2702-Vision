@@ -24,7 +24,7 @@ LIBS+=-luv -lfmt
 all: log2mjpeg
 
 clean:
-    rm -f *.o
+	rm -f *.o
 	rm log2mjpeg
 
 log2mjpeg: $(OBJS)

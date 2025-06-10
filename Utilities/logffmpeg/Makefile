@@ -27,7 +27,7 @@ OBJS=logffmpeg.o
 all: logffmpeg
 
 clean:
-    rm -f *.o
+	rm -f *.o
 	rm -f logffmpeg
 
 logffmpeg: $(OBJS)

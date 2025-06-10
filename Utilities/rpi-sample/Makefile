@@ -31,7 +31,7 @@ LIBS+=-luv -lfmt
 all: rpi-sample
 
 clean:
-    rm -f *.o
+	rm -f *.o
 	rm -f rpi-sample
 
 rpi-sample: $(OBJS) ../../lib/lib2702.a

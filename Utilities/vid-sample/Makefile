@@ -31,7 +31,7 @@ LIBS+=-luv -lfmt
 all: vid
 
 clean:
-    rm -f *.o
+	rm -f *.o
 	rm -f vid
 
 vid: $(OBJS)
