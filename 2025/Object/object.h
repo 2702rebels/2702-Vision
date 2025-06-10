@@ -107,11 +107,11 @@ class imgProc : public FrmProcessor
 	/*! \brief Saturation min object detection parameter. */
 	int			m_nSLow = 0;
 	/*! \brief Value min object detection parameter. */
-	int			m_nVLow = 200;
+	int			m_nVLow = 215;
 	/*! \brief Hue max object detection parameter. */
-	int			m_nHHigh = 20;
+	int			m_nHHigh = 30;
 	/*! \brief Saturation max object detection parameter. */
-	int			m_nSHigh = 20;
+	int			m_nSHigh = 30;
 	/*! \brief Value max object detection parameter. */
 	int			m_nVHigh = 255;
 	/*! \brief Minimum pixel width of an object required for detection. */
