@@ -31,6 +31,9 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <array>
+#include <cmath>
+#include <limits>
 
 #include <string>
 #include <stdexcept>
@@ -124,7 +127,7 @@ class imgProc : public FrmProcessor
 	/*! \brief Maximum pixel area of an object for detection. */
 	int			m_maxPixelArea = 115000;
 	/*! \brief Minimum percentage of pixels that have to be valid inside of a detection for it to be valid. */
-	double		m_minPercentFill = 0.2;
+	double		m_minPercentFill = 0.45;
 	/*! \brief X adjustment in meters from center of camera to center of robot. */
 	double		m_camOffsetX = 0.22225;
 	/*! \brief Y adjustment in meters from center of camera to center of robot. */
@@ -636,6 +639,44 @@ public:
 	}
 
 	/*!
+	* \brief Takes a C-style array of 4 points and orders them starting from top-left going clockwise. 
+	* \param points - C-style array of 4 points unsorted
+	* \returns A new C-style array of 4 points with the top-left point first then going clockwise. 
+	*/
+	static std::array<cv::Point2f, 4> OrderPointArray(cv::Point2f *points){
+		int highestIndex = 0;
+		int max = 0;
+		int lowestIndex = 0;
+		int min = std::numeric_limits<int>::max();
+		// Find top-right point
+		for(int i = 0; i < 4; i++){
+			if(points[i].x + points[i].y > max){
+				highestIndex = i;
+				max = points[i].x + points[i].y;
+			}
+			if(points[i].x + points[i].y < min){
+				lowestIndex = i;
+				min = points[i].x + points[i].y;
+			}
+		}
+		std::array<cv::Point2f, 4> pointsSorted;
+		pointsSorted[1] = points[highestIndex];
+		pointsSorted[3] = points[lowestIndex];
+		std::vector<int> indexes = {0,1,2,3};
+		indexes.erase(std::remove(indexes.begin(), indexes.end(), highestIndex), indexes.end());
+		indexes.erase(std::remove(indexes.begin(), indexes.end(), lowestIndex), indexes.end());
+		if(points[indexes[0]].x > points[indexes[1]].x){
+			pointsSorted[2] = points[indexes[0]];
+			pointsSorted[0] = points[indexes[1]];
+		}
+		else{
+			pointsSorted[2] = points[indexes[1]];
+			pointsSorted[0] = points[indexes[0]];
+		}
+		return pointsSorted;
+	}
+
+	/*!
 	* \brief Fits the contour provided to a cylinder shape.
 	* \param contour - The input contour, as provided by \ref cv::findContours.
 	* \param mask - The binary image where white is a valid part of a detection and black where it is not.
@@ -652,6 +693,8 @@ public:
 		cv::Rect rect = ellipse.boundingRect();
 		cv::Point2f points[4];
 		ellipse.points(points);
+		std::array<cv::Point2f, 4> pointsSorted = OrderPointArray(points);
+		// Sort points to get top-left in right spot
 		cv::Point center = (rect.br() + rect.tl()) * 0.5;
 		float majorAxisLength = std::max(rect.width, rect.height);
 		if(majorAxisLength < m_minPixelWidth || majorAxisLength > m_maxPixelWidth)
@@ -666,36 +709,31 @@ public:
 		if(area < m_minPixelArea || area > m_maxPixelArea){
 			return { {}, {} };
 		}
-		/*Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // bottom left to top left
-		printf("l1 slope: %f\nl1 yintercept: %f\n", line1.getSlope(), line1.getYIntercept());
-		Rebels::LinearSlope line2(points[1].x, points[1].y, points[2].x, points[2].y); // top left to top right
-		printf("l2 slope: %f\nl2 yintercept: %f\n", line2.getSlope(), line2.getYIntercept());
-		Rebels::LinearSlope line3(points[2].x, points[2].y, points[3].x, points[3].y); // top right to bottom right
-		printf("l3 slope: %f\nl3 yintercept: %f\n", line3.getSlope(), line3.getYIntercept());
-		Rebels::LinearSlope line4(points[3].x, points[3].y, points[0].x, points[0].y); // bottom right to bottom left
-		printf("l4 slope: %f\nl4 yintercept: %f\n", line4.getSlope(), line4.getYIntercept());
+		// suspicious... the lines are coming out wrong the points must be goofed
+		Rebels::LinearSlope line1(pointsSorted[0].x, pointsSorted[0].y, pointsSorted[1].x, pointsSorted[1].y); // top
+		Rebels::LinearSlope line2(pointsSorted[1].x, pointsSorted[1].y, pointsSorted[2].x, pointsSorted[2].y); // right
+		Rebels::LinearSlope line3(pointsSorted[2].x, pointsSorted[2].y, pointsSorted[3].x, pointsSorted[3].y); // bot
+		Rebels::LinearSlope line4(pointsSorted[3].x, pointsSorted[3].y, pointsSorted[0].x, pointsSorted[0].y); // left
 		int pixels = 0;
 		int validPixels = 0;
-		int x = 0;
-		if(rect.x > 0){
-			x = rect.x;
+		int xMin = std::max(rect.x, 0);
+		int yMin = std::max(rect.y, 0);
+		int xMax = std::min(rect.width + rect.x, RESOLUTION_WIDTH - 1);
+		int yMax = std::min(rect.height + rect.y, RESOLUTION_HEIGHT - 1);
+		if(xMin > xMax){
+			int buf = xMin;
+			xMin = xMax;
+			xMax = buf;
 		}
-		int y = 0;
-		if(rect.y > 0){
-			y = rect.y;
+		if(yMin > yMax){
+			int buf = yMin;
+			yMin = yMax;
+			yMax = buf;
 		}
-		int xMax = rect.width + rect.x;
-		if(xMax > RESOLUTION_WIDTH){
-			xMax = RESOLUTION_WIDTH - 1;
-		}
-		int yMax = rect.height + rect.y;
-		if(yMax > RESOLUTION_HEIGHT){
-			yMax = RESOLUTION_HEIGHT - 1;
-		}
-		for(int i = x; i < xMax; i++){
-			for(int j = y; j < yMax; j++){
-				if(line1.IsPointBelowLine(i, j) && line2.IsPointAboveLine(i, j) && line3.IsPointAboveLine(i, j) && line4.IsPointBelowLine(i, j)){
-					if(mask.at<uchar>(i, j) > 0){
+		for(int x = xMin; x < xMax; x++){
+			for(int y = yMin; y < yMax; y++){
+				if(line1.IsPointBelowLine(x, y) && line2.IsPointBelowLine(x, y) && line3.IsPointAboveLine(x, y) && line4.IsPointBelowLine(x, y)){
+					if(mask.at<uchar>(x, y) > 0){
 						validPixels++;
 					}
 					pixels++;
@@ -704,9 +742,12 @@ public:
 		}
 		double detectpercent = (double)validPixels / (double)pixels;
 		printf("detectpercent: %f\n", detectpercent);
-		if(detectpercent < m_minPercentFill){
+		printf("npixels: %d\n", pixels);
+		printf("validpixels: %d\n", validPixels);
+		// If % detection is nan or less than min fill
+		if(detectpercent < m_minPercentFill || std::isnan(detectpercent)){
 			return { {}, {} };
-		}*/
+		}
 		std::vector<cv::Point> hull;
 		cv::convexHull(contour, hull);
 		float angle = ellipse.angle;
