@@ -35,7 +35,7 @@ LIBS+=-luv -lfmt
 all: test
 
 clean:
-    rm -f *.o
+	rm -f *.o
 	rm -f test
 
 test: $(OBJS) ../lib/lib2702.a
