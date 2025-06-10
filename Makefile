@@ -16,7 +16,6 @@ all:
 
 notest:
 	make -C lib
-	make -C 2025/Object
 	make -C Utilities/log2mjpeg
 	make -C Utilities/logffmpeg
 	make -C Utilities/vid-sample
