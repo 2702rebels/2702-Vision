@@ -24,7 +24,7 @@ LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore 
 LIBS+=-luv -lfmt
 LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libavutil.pc)
 LIBS+=$(shell pkg-config -libs ../../vcpkg_installed/$(shell ../../findtriplet.sh)/lib/pkgconfig/libavcodec.pc)
-LIBS+= -lavdevice -lavfilter -lavformat -lswresample -lm -lz
+LIBS+=-lavdevice -lavfilter -lavformat -lswresample -lm -lz
 
 OBJS=logffmpeg.o
 
