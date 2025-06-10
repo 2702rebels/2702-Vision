@@ -2,13 +2,15 @@ MAKEFLAGS := --jobs=$(shell nproc)
 
 all:
 	make -C lib
-	make -C 2025/Object
 	make -C Utilities/log2mjpeg
 	make -C Utilities/logffmpeg
 	make -C Utilities/vid-sample
 	make -C tests
 	@if command -v rpicam-vid &> /dev/null; then \
 	    make -C Utilities/rpi-sample \
+		make -C 2025/Object \
+	else \
+		make -C 2025/Object norpicam \
 	fi
 
 notest:
@@ -19,6 +21,9 @@ notest:
 	make -C Utilities/vid-sample
 	@if command -v rpicam-vid &> /dev/null; then \
 	    make -C Utilities/rpi-sample \
+		make -C 2025/Object \
+	else \
+		make -C 2025/Object norpicam \
 	fi
 
 test:
