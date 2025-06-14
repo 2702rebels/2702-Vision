@@ -1,4 +1,4 @@
-sudo apt install -y curl autoconf autoconf-archive python3 python3.12-venv automake libtool pkg-config libltdl-dev libudev-dev libx11-dev libxft-dev libxext-dev libxi-dev libxtst-dev libxrandr-dev git build-essential bzip2 '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev
+sudo apt install -y curl autoconf autoconf-archive python3 python3.12-venv automake libtool pkg-config libltdl-dev libudev-dev libx11-dev libxft-dev libxext-dev libxi-dev libxtst-dev libxrandr-dev git build-essential bzip2 '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev doxygen zip
 sudo apt-get update
 sudo apt-get install -y bison nasm flex
 # Will switch back to microsoft master when latest wpilib is merged there

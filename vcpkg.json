@@ -36,7 +36,6 @@
         },
         "highgui",
         "intrinsics",
-        "ipp",
         "jpeg",
         "jpegxl",
         "nonfree",
