@@ -1,10 +1,5 @@
 set -e
 set -o pipefail
-if [ -d $(pwd)/vcpkg_installed ]; then
-    echo "deps installed"
-else
-    ./installpackages.sh
-fi
 cd lib
 make
 cd ..

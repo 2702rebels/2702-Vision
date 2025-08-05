@@ -10,28 +10,13 @@ CXXFLAGS+=-g
 CXXFLAGS+=-Ofast
 CXXFLAGS+=-I$(shell pwd)/../2025/Object
 CXXFLAGS+=-I$(shell pwd)/../lib
-CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/gtest.pc)
-CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/opencv4.pc)
-CXXFLAGS+=-I$(shell pwd)/../vcpkg_installed/$(shell ../findtriplet.sh)/include/ntcore
-CXXFLAGS+=-I$(shell pwd)/../vcpkg_installed/$(shell ../findtriplet.sh)/include/wpiutil
-CXXFLAGS+=-I$(shell pwd)/../vcpkg_installed/$(shell ../findtriplet.sh)/include/cameraserver
-CXXFLAGS+=-I$(shell pwd)/../vcpkg_installed/$(shell ../findtriplet.sh)/include/cscore
-CXXFLAGS+=-I$(shell pwd)/../vcpkg_installed/$(shell ../findtriplet.sh)/include/wpimath
-CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/libcamera.pc)
-CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/gtk+-x11-3.0.pc)
-CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/libxml-2.0.pc)
-CXXFLAGS+=$(shell pkg-config --cflags ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
-LDFLAGS+=-L../lib
-LDFLAGS+=-L$(shell pwd)/../vcpkg_installed/$(shell ../findtriplet.sh)/lib
-LIBS+=$(shell pkg-config -libs ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/gtest.pc)
-LIBS+=-lprotobuf
-LIBS+=$(shell pkg-config -libs ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/libcamera.pc)
-LIBS+=$(shell pkg-config -libs ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/opencv4.pc)
-LIBS+=$(shell pkg-config -libs ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/gtk+-x11-3.0.pc)
-LIBS+=-lxml2 -lexpat
-LIBS+=$(shell pkg-config -libs ../vcpkg_installed/$(shell ../findtriplet.sh)/lib/pkgconfig/bzip2.pc)
-LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
-LIBS+=-luv -lfmt
+CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
+CXXFLAGS+=$(shell pkg-config --cflags libcamera )
+CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
+LDFLAGS+=-L../../lib
+LIBS+=$(shell pkg-config -libs libcamera)
+LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
+LIBS+=$(shell pkg-config -libs opencv4)
 all: test
 
 clean:
