@@ -9,14 +9,15 @@ CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-g
 CXXFLAGS+=-Ofast
 CXXFLAGS+=-I$(shell pwd)/../2025/Object
-CXXFLAGS+=-I$(shell pwd)/../lib
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
 CXXFLAGS+=$(shell pkg-config --cflags libcamera )
 CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 LDFLAGS+=-L../../lib
+LDFLAGS+=-L/usr/local/lib
+LIBS+=-lgtest
 LIBS+=$(shell pkg-config -libs libcamera)
-LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
 LIBS+=$(shell pkg-config -libs opencv4)
+LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 all: test
 
 clean:
