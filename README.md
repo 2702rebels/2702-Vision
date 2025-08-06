@@ -12,20 +12,9 @@ The main binary, contains object(production binary), replay, logtostdvideo and m
 Helper binaries that only use lib, such as rpisample which records a video and saves it in a .log file
 
 ### Installing dependencies
-**Windows**
-1. Run ```installpackages.bat```
 **Linux**
-1. Run ```chmod +x findtriplet.sh```
 2. Run ```chmod +x installpackages.sh```
 3. Run ```./installpackages.sh```
-
-### Updating to new versions of dependencies
-**Windows(in cmd)**
-1. ```cd vcpkg```
-2. ```vcpkg upgrade```
-**Linux**
-1. ```cd vcpkg```
-2. ```./vcpkg upgrade```
 
 
 ### Building the program
@@ -55,10 +44,8 @@ Currently only supported on linux
 8. Google, you usually aren't the first person and won't be the last
 ## Include / Link errors
 1. Read the error to find out which package is having a problem.
-2. Is the dependency correctly installed? Use ```find . -name "yourheadername.h"``` to check, if no results appear then you definitely haven't. To install new dependencies, modify vcpkg.json and then run vcpkg install, a list of available dependencies is available at https://vcpkg.io/en/packages?query=
 3. Have you included the path of the header in the Makefile? Check for a .pc file for the package though first and prefer using that over manually including the directory
-4. Is the -L path correct? It should point to vcpkg_installed/triplet-name(such as x64-linux)/lib
-5. Are the names of your -l flags correct? -ltest123 will search for libtest123.a, but prefer using a .pc file from the library over manually including the .a files with -l flags, to find .a files for your library try ```find . -name "*yourlibname*.a"```, also you can run vcpkg install to get the usage text for every library installed
+5. Are the names of your -l flags correct? -ltest123 will search for libtest123.a, but prefer using a .pc file from the library over manually including the .a files with -l flags, to find .a files for your library try ```find . -name "*yourlibname*.a"```
 6. Is the order of your -l flags correct? Libraries should be linked from the top out, meaning the library which has the most dependencies should be linked first, so for example if b depends on a, b should be linked first.
 
 ### Standard logic debugging loop / troubleshooting tips

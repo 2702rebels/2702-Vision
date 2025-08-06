@@ -40,7 +40,3 @@ clean:
 	make -C Utilities/rpi-sample clean
 	make -C Utilities/vid-sample clean
 	make -C tests clean
-
-cleandeps:
-	rm -rf vcpkg
-	rm -rf vcpkg_installed

@@ -72,7 +72,7 @@ void sighandler(int nSig)
 	bStop = true;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
 	signal(SIGINT, sighandler);
 #if 0
