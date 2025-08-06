@@ -5,4 +5,4 @@ if [ ! -f "$LIBFILE" ]; then
     ./installpackages.sh
 fi
 make
-test/test
+tests/test
