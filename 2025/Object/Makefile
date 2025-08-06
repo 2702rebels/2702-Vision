@@ -28,7 +28,7 @@ clean:
 	rm -f logtostdvideo
 
 object: object.o ../../lib/lib2702.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object $(OBJS) -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object object.o -l2702 $(LIBS)
 
 replay: replay.o ../../lib/lib2702.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o replay replay.o -l2702 $(LIBS)
