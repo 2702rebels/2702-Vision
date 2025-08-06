@@ -5,12 +5,13 @@ CXXFLAGS+=-std=c++20 -Wno-psabi -Wno-deprecated-enum-enum-conversion -I../../lib
 CXXFLAGS+=-g
 CXXFLAGS+=-Ofast
 CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
+CXXFLAGS+=$(shell pkg-config --cflags libcamera )
 CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
-#CXXFLAGS+=-O2
 LDFLAGS+=-L../../lib
-LIBS+=-l2702
-LDFLAGS+=$(shell pkg-config --libs-only-L opencv4)
-LIBS+=$(shell pkg-config -libs ../../pkgconfig/ubuntu/wpilib.pc)
+LDFLAGS+=-L/usr/local/lib
+LIBS+=$(shell pkg-config -libs libcamera)
+LIBS+=$(shell pkg-config -libs opencv4)
+LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 all: log2mjpeg
 
 clean:

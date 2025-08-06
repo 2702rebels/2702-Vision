@@ -1,10 +1,13 @@
 CXXFLAGS+=-I../../lib
 CXXFLAGS+=-Ofast
-CXXFLAGS+=$(shell pkg-config --cflags opencv4)
+CXXFLAGS+=$(shell pkg-config --cflags opencv4 )
+CXXFLAGS+=$(shell pkg-config --cflags libcamera )
+CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 LDFLAGS+=-L../../lib
-LDFLAGS+=$(shell pkg-config --libs-only-L opencv4)
-LIBS+=-l2702
-LIBS+=$(shell pkg-config --libs-only-l opencv4)
+LDFLAGS+=-L/usr/local/lib
+LIBS+=$(shell pkg-config -libs libcamera)
+LIBS+=$(shell pkg-config -libs opencv4)
+LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 OBJS=logffmpeg.o
 
 all: logffmpeg
@@ -14,4 +17,4 @@ clean:
 	rm -f logffmpeg
 
 logffmpeg: $(OBJS)
-	$(CXX) -o logffmpeg $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CXXFLAGS) -o logffmpeg $(LDFLAGS) $(OBJS) $(LIBS)
