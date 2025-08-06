@@ -1,9 +1,9 @@
-sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev cmake build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler
+sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev cmake build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev
 git clone https://github.com/wpilibsuite/allwpilib.git
 cd allwpilib
 cmake . --preset default -DBUILD_SHARED_LIBS=OFF -DWITH_GUI=OFF -DWITH_SIMULATION_MODULES=OFF -DWITH_TESTS=OFF
 cd build-cmake
-cmake --build . --target install --parallel $(nproc)
+sudo cmake --build . --target install --parallel $(nproc)
 cd ..
 cd ..
 rm -rf allwpilib
