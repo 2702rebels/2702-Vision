@@ -3,7 +3,6 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/logger.h>
-#include <>
 
 std::string GetCurTimeStr() {
 	auto now = std::chrono::system_clock::now();
@@ -22,16 +21,14 @@ void SetupTextLogger() {
 	console_sink->set_pattern("[%T] [%^%l%$] %v");
 	console_sink->set_pattern("[%Y-%m-%d %T] [%l] %v");
 	std::vector<sink_ptr> sinks{ console_sink, file_sink };
-	textLogsOutput = std::make_unique(create_async(("ObjDetection", sinks.begin(), sinks.end()));
+	textLogsOutput = create_async(("ObjDetection", sinks.begin(), sinks.end());
 	register_logger(textLogsOutput);
 	set_default_logger(textLogsOutput);
 }
 
-std::unique_ptr<logger> SetupFrameLogger(const char* name) {
-	auto logger = std::make_unique(
-		spdlog::create_async<sinks::basic_file_sink_mt>(
-			name, "Logs/" + GetCurTimeStr() + "_" + name + ".log"
-		)
+std::shared_ptr<logger> SetupFrameLogger(const char* name) {
+	auto logger = spdlog::create_async<sinks::basic_file_sink_mt>(
+		name, "Logs/" + GetCurTimeStr() + "_" + name + ".log"
 	);
 	register_logger(logger);
 	return logger;
