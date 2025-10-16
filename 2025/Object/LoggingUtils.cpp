@@ -21,7 +21,7 @@ void SetupTextLogger() {
 	console_sink->set_pattern("[%T] [%^%l%$] %v");
 	console_sink->set_pattern("[%Y-%m-%d %T] [%l] %v");
 	std::vector<sink_ptr> sinks{ console_sink, file_sink };
-	textLogsOutput = create_async(("ObjDetection", sinks.begin(), sinks.end());
+	textLogsOutput = create_async(("ObjDetection", sinks.begin(), sinks.end()));
 	register_logger(textLogsOutput);
 	set_default_logger(textLogsOutput);
 }
