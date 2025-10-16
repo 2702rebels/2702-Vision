@@ -1,3 +1,4 @@
+#include "LoggingUtils.h"
 /*! \brief Class for loading / saving configs from disk. 
 Depends on: 
 - nlohmannjson */
@@ -312,25 +313,25 @@ public:
 			m_previousCamHeight = config.camHeight;
 			m_previousCamAngle = config.camAngle;
 			m_previousFilterWindow = config.filterWindow;
-			std::cout << "Loaded the following config from disk:\n";
-			std::cout << "hue min: " << config.hueMin << "\n";
-			std::cout << "hue max: " << config.hueMax << "\n";
-			std::cout << "sat min: " << config.saturationMin << "\n";
-			std::cout << "sat max: " << config.saturationMax << "\n";
-			std::cout << "value min: " << config.valueMin << "\n";
-			std::cout << "value max: " << config.valueMax << "\n";
-			std::cout << "min pixel width: " << config.minPixelWidth << "\n";
-			std::cout << "min pixel height: " << config.minPixelHeight << "\n";
-			std::cout << "min pixel area: " << config.minPixelArea << "\n";
-			std::cout << "max pixel width: " << config.maxPixelWidth << "\n";
-			std::cout << "max pixel height: " << config.maxPixelHeight << "\n";
-			std::cout << "max pixel area: " << config.maxPixelArea << "\n";
-			std::cout << "min pixel width: " << config.minPercentFill << "\n";
-			std::cout << "cam offset x: " << config.camOffsetX << "\n";
-			std::cout << "cam offset y: " << config.camOffsetY << "\n";
-			std::cout << "cam height: " << config.camHeight << "\n";
-			std::cout << "cam angle: " << config.camAngle << "\n";
-			std::cout << "filter window: " << config.filterWindow << "\n";
+			info("Loaded the following config from disk:\n";
+			info("hue min: %dconfig.hueMin\n");
+			info("hue max: %dconfig.hueMax\n");
+			info("sat min: %dconfig.saturationMin\n");
+			info("sat max: %dconfig.saturationMax\n");
+			info("value min: %dconfig.valueMin\n");
+			info("value max: %dconfig.valueMax\n");
+			info("min pixel width: %dconfig.minPixelWidth\n");
+			info("min pixel height: %dconfig.minPixelHeight\n");
+			info("min pixel area: %dconfig.minPixelArea\n");
+			info("max pixel width: %dconfig.maxPixelWidth\n");
+			info("max pixel height: %dconfig.maxPixelHeight\n");
+			info("max pixel area: %dconfig.maxPixelArea\n");
+			info("min pixel width: %dconfig.minPercentFill\n");
+			info("cam offset x: %dconfig.camOffsetX\n");
+			info("cam offset y: %dconfig.camOffsetY\n");
+			info("cam height: %dconfig.camHeight\n");
+			info("cam angle: %dconfig.camAngle\n");
+			info("filter window: %dconfig.filterWindow\n");
 		}
 	}
 	/*!  

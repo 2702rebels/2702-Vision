@@ -35,6 +35,7 @@
 #include <stdexcept>
 
 #include "rpicam.h"
+#include "LoggingUtils.h"
 
 using namespace std;
 
@@ -52,7 +53,7 @@ bool bStop = false;
 int main( int argc, char **argv )
 {
 	if (argc != 2) {
-		fprintf( stderr, "Usage: %s inputfile\n", argv[0] );
+		error("Usage: %s inputfile\n", argv[0] );
 		return 1;
 	}
 	
@@ -64,7 +65,7 @@ int main( int argc, char **argv )
 			ConfigUtils::triggerConfigSave(ip);
 		}
 		if (!lp.bNextFrame()) {
-			printf( "About to rewind\n" );
+			info( "About to rewind\n" );
 			lp.vRewind();
 		}
 		sleep( 1 );

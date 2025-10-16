@@ -17,6 +17,7 @@ LDFLAGS+=-L/usr/local/lib
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=$(shell pkg-config -libs opencv4)
 LIBS+=$(shell pkg-config -libs spdlog)
+LIBS+=-l2702
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
 LIBS+=-llog
 all: object replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
@@ -61,5 +62,6 @@ calibrate.o: calibrate.cpp udpsender.h
 testudpserver.o: ObjectDetectionStruct.h ObjectDetectionStruct.cpp testudpserver.cpp udpsender.h
 logtostdvideo.o: object.h config.h logtostdvideo.h logtostdvideo.cpp udpsender.h
 log.o: LoggingUtils.cpp LoggingUtils.h
+	$(CXX) -c LoggingUtils.cpp -o log.o $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 liblog.a: log.o
-	ar -r liblog.a log.o
+	ar rcs liblog.a log.o
