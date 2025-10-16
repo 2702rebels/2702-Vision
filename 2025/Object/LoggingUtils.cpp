@@ -15,13 +15,22 @@ std::string GetCurTimeStr() {
 }
 
 void SetupTextLogger() {
-	// Set up cout log
+	// allow for 16384 messages in async queue, 2 async logging threads
+	spdlog::init_thread_pool(16384, 2);
 	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("Logs/" + GetCurTimeStr() + "_" + "stdout.log", true);
 	console_sink->set_pattern("[%T] [%^%l%$] %v");
 	console_sink->set_pattern("[%Y-%m-%d %T] [%l] %v");
 	std::vector<sink_ptr> sinks{ console_sink, file_sink };
-	textLogsOutput = create_async(("ObjDetection", sinks.begin(), sinks.end()));
+	textLogsOutput = std::make_shared<logger>(
+		"ObjDetection",
+		sinks.begin(),
+		sinks.end(),
+		spdlog::thread_pool(),
+		spdlog::async_overflow_policy::block
+		// if async queue does get overloaded, we should probably just increase the size of it, we're less constricted on ram than cpu
+		// but data integrity is paramount, so block if it does somehow happen.
+	);
 	register_logger(textLogsOutput);
 	set_default_logger(textLogsOutput);
 }

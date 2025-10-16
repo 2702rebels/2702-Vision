@@ -75,6 +75,7 @@ void sighandler(int nSig)
 
 int main(int argc, char* argv[])
 {
+	SetupTextLogger();
 	signal(SIGINT, sighandler);
 	try
 	{
