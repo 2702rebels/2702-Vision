@@ -16,6 +16,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include "LoggingUtils.h"
 
 // #include <X11/Xlib.h>
 // #include <cameraserver/CameraServer.h>
@@ -68,7 +69,7 @@ bool bStop = false;
  * \param nSig - Should always be equal to \ref SIGINT.*/
 void sighandler(int nSig)
 {
-	printf("Received Signal %d\n", nSig);
+	info("Received Signal %d\n", nSig);
 	bStop = true;
 }
 

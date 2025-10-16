@@ -1,4 +1,4 @@
-sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev cmake build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev
+sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev cmake build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev libspdlog-dev
 echo "Downloading and compiling wpilib..."
 git clone https://github.com/wpilibsuite/allwpilib.git
 cd allwpilib
