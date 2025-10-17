@@ -2,6 +2,7 @@
 #include "object.h"
 #include <string>
 #include "config.h"
+#include "LoggingUtils.h"
 
 class StdVideoLogProc : public FrmProcessor {
     imgProc imageProcessor;
@@ -43,7 +44,7 @@ class StdVideoLogProc : public FrmProcessor {
         fwrite(static_cast<const void*>(frame.data), 1, frame.total() * frame.elemSize(), ffmpegRaw);
         cv::Mat filteredFrame = imageProcessor.ProcessFrameWithRet(nCam, pcf);
         fwrite(static_cast<const void*>(filteredFrame.data), 1, filteredFrame.total() * filteredFrame.elemSize(), ffmpegFiltered);
-        printf("Finished writing frame %u\n", pcf->u32Sequence());
+        info("Finished writing frame {}", pcf->u32Sequence());
     }
 
     virtual void LogEnd(){

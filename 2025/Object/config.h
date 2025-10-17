@@ -313,25 +313,25 @@ public:
 			m_previousCamHeight = config.camHeight;
 			m_previousCamAngle = config.camAngle;
 			m_previousFilterWindow = config.filterWindow;
-			info("Loaded the following config from disk:\n";
-			info("hue min: %dconfig.hueMin\n");
-			info("hue max: %dconfig.hueMax\n");
-			info("sat min: %dconfig.saturationMin\n");
-			info("sat max: %dconfig.saturationMax\n");
-			info("value min: %dconfig.valueMin\n");
-			info("value max: %dconfig.valueMax\n");
-			info("min pixel width: %dconfig.minPixelWidth\n");
-			info("min pixel height: %dconfig.minPixelHeight\n");
-			info("min pixel area: %dconfig.minPixelArea\n");
-			info("max pixel width: %dconfig.maxPixelWidth\n");
-			info("max pixel height: %dconfig.maxPixelHeight\n");
-			info("max pixel area: %dconfig.maxPixelArea\n");
-			info("min pixel width: %dconfig.minPercentFill\n");
-			info("cam offset x: %dconfig.camOffsetX\n");
-			info("cam offset y: %dconfig.camOffsetY\n");
-			info("cam height: %dconfig.camHeight\n");
-			info("cam angle: %dconfig.camAngle\n");
-			info("filter window: %dconfig.filterWindow\n");
+			info("Loaded the following config from disk:";
+			info("hue min: {}", config.hueMin);
+			info("hue max: {}", config.hueMax);
+			info("sat min: {}", config.saturationMin);
+			info("sat max: {}", config.saturationMax);
+			info("value min: {}", config.valueMin);
+			info("value max: {}", config.valueMax);
+			info("min pixel width: {}", config.minPixelWidth);
+			info("min pixel height: {}", config.minPixelHeight);
+			info("min pixel area: {}", config.minPixelArea);
+			info("max pixel width: {}", config.maxPixelWidth);
+			info("max pixel height: {}", config.maxPixelHeight);
+			info("max pixel area: {}", config.maxPixelArea);
+			info("min pixel width: {}", config.minPercentFill);
+			info("cam offset x: {}", config.camOffsetX);
+			info("cam offset y: {}", config.camOffsetY);
+			info("cam height: {}", config.camHeight);
+			info("cam angle: {}", config.camAngle);
+			info("filter window: {}", config.filterWindow);
 		}
 	}
 	/*!  

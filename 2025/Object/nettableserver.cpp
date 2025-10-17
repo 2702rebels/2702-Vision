@@ -15,6 +15,7 @@
 #include <thread>
 #include <future>
 #include <map>
+#include "LoggingUtils.h"
 
 using namespace std::literals;
 

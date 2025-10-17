@@ -14,6 +14,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include "LoggingUtils.h"
 
 // #include <X11/Xlib.h>
 // #include <cameraserver/CameraServer.h>
@@ -65,19 +66,20 @@ namespace fs = std::filesystem;
  */
 void sighandler(int nSig)
 {
-	printf("Received Signal: %d\n", nSig);
+	info("Received Signal: {}", nSig);
 	bStop = true;
 }
 
 int main(int argc, char **argv)
 {
+	SetupTextLogger();
 	if (argc != 2)
 	{
-		fprintf(stderr, "Usage: %s inputdir|inputfile\n", argv[0]);
+		error("Usage: {} inputdir|inputfile", argv[0]);
 		return 1;
 	}
 	if(fs::is_directory(argv[1])){
-		std::cout << "Provided directory, using dirmode\n";
+		info("Provided directory, using dirmode");
 		for (const auto &entry : fs::directory_iterator(argv[1]))
 		{
 			if (entry.is_regular_file())
@@ -93,7 +95,7 @@ int main(int argc, char **argv)
 					}
 					if (!lp.bNextFrame())
 					{
-						printf("Succesfully translated file!");
+						info("Succesfully translated file!");
 						videoLogProc.LogEnd();
 						break;
 					}
@@ -103,7 +105,7 @@ int main(int argc, char **argv)
 		}
 	}
 	else if(fs::is_regular_file(argv[1])){
-		std::cout << "Provided file, using filemode\n";
+		info("Provided file, using filemode");
 		StdVideoLogProc videoLogProc = StdVideoLogProc((fs::path(argv[1]).parent_path() / (fs::path(argv[1]).filename().string() + "raw.mp4")).string(), (fs::path(argv[1]).parent_path() / ((fs::path(argv[1]).filename().string() + "filtered.mp4"))).string(), WIDTH, HEIGHT, FRAME_RATE);
 		LogPlayer lp(argv[1], videoLogProc);
 		while (true)
@@ -115,7 +117,7 @@ int main(int argc, char **argv)
 			}
 			if (!lp.bNextFrame())
 			{
-				printf("Succesfully translated file!");
+				info("Succesfully translated file!");
 				videoLogProc.LogEnd();
 				break;
 			}
@@ -123,7 +125,7 @@ int main(int argc, char **argv)
 		}
 	}
 	else{
-		fprintf(stderr, "Usage: %s inputdir|inputfile\n", argv[0]);
+		error("Usage: {} inputdir|inputfile", argv[0]);
 		return 1;
 	}
 	return 0;

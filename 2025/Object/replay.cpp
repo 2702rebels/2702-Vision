@@ -53,7 +53,7 @@ bool bStop = false;
 int main( int argc, char **argv )
 {
 	if (argc != 2) {
-		error("Usage: %s inputfile\n", argv[0] );
+		error("Usage: {} inputfile", argv[0] );
 		return 1;
 	}
 	
@@ -65,7 +65,7 @@ int main( int argc, char **argv )
 			ConfigUtils::triggerConfigSave(ip);
 		}
 		if (!lp.bNextFrame()) {
-			info( "About to rewind\n" );
+			info( "About to rewind" );
 			lp.vRewind();
 		}
 		sleep( 1 );

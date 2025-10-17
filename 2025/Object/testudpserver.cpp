@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iomanip>
 #include <asio.hpp> // Include asio
+#include "LoggingUtils.h"
 using asio::ip::udp;
 
 #define SERVER_PORT 27021
@@ -25,19 +26,20 @@ std::vector<long> timestamps;
 bool bStop = false;
 
 void signalhandler(int nSig){
-    std::cout << "Got exit signal: " << nSig << "\n";
+    info("Got exit signal: {}", nSig);
     for(int i = 0; i < timestamps.size(); i++){
-        std::cout << timestamps[i] << "\n";
+        info("{}", timestamp[i]);
     }
     bStop = true;
 }
 
 int main()
 {
+    SetupTextLogger();
     signal(SIGINT, signalhandler);
     asio::io_context io_context;
     udp::socket socket(io_context, udp::endpoint(udp::v4(), SERVER_PORT));
-    std::cout << "program booted" << "\n";
+    info("program booted");
 
     while(!bStop)
     {
@@ -48,30 +50,30 @@ int main()
         std::vector<uint8_t> packetVec(OBJECT_DETECTION_PACKET_SIZE);
         std::memcpy(packetVec.data(), bytesBuf, OBJECT_DETECTION_PACKET_SIZE);
         std::span<uint8_t> packetSpan(packetVec.data(), packetVec.size());
-        std::cout << "Got packet" << "\n";
-        std::cout << "packet len: " << packetVec.size() << "\n";
+        info("Got packet");
+        info("packet len: {}", packetVec.size());
         ObjectDetectionPacket unpackedPacket = StructTypeObjectDetectionPacket::Unpack(packetSpan);
-        std::cout << "unpacked properties:" << "\n";
-        std::cout << "key: " << unpackedPacket.m_key << "\n";
-        std::cout << "version: " << unpackedPacket.m_versionNumber << "\n";
-        std::cout << "time: " << unpackedPacket.m_time << "\n";
-        std::cout << "count: " << unpackedPacket.m_count << "\n";
-        std::cout << "distance1: " << unpackedPacket.m_coral1.m_distance << "\n";
-        std::cout << "angle1: " << unpackedPacket.m_coral1.m_angle << "\n";
-        std::cout << "quality1: " << unpackedPacket.m_coral1.m_quality << "\n";
-        std::cout << "type1: " << unpackedPacket.m_coral1.m_type << "\n";
-        std::cout << "distance2: " << unpackedPacket.m_coral2.m_distance << "\n";
-        std::cout << "angle2: " << unpackedPacket.m_coral2.m_angle << "\n";
-        std::cout << "quality2: " << unpackedPacket.m_coral2.m_quality << "\n";
-        std::cout << "type2: " << unpackedPacket.m_coral2.m_type << "\n";
-        std::cout << "distance: " << unpackedPacket.m_coral3.m_distance << "\n";
-        std::cout << "angle3: " << unpackedPacket.m_coral3.m_angle << "\n";
-        std::cout << "quality3: " << unpackedPacket.m_coral3.m_quality << "\n";
-        std::cout << "type3: " << unpackedPacket.m_coral3.m_type << "\n";
-        std::cout << "distance4: " << unpackedPacket.m_coral4.m_distance << "\n";
-        std::cout << "angle4: " << unpackedPacket.m_coral4.m_angle << "\n";
-        std::cout << "quality4: " << unpackedPacket.m_coral4.m_quality << "\n";
-        std::cout << "type4: " << unpackedPacket.m_coral4.m_type << "\n";
+        info("unpacked properties:");
+        info("key: {}", unpackedPacket.m_key);
+        info("version: {}", unpackedPacket.m_versionNumber);
+        info("time: {}", unpackedPacket.m_time);
+        info("count: {}", unpackedPacket.m_count);
+        info("distance1: {}", unpackedPacket.m_coral1.m_distance);
+        info("angle1: {}", unpackedPacket.m_coral1.m_angle);
+        info("quality1: {}", unpackedPacket.m_coral1.m_quality);
+        info("type1: {}", unpackedPacket.m_coral1.m_type);
+        info("distance2: {}", unpackedPacket.m_coral2.m_distance);
+        info("angle2: {}", unpackedPacket.m_coral2.m_angle);
+        info("quality2: {}", unpackedPacket.m_coral2.m_quality);
+        info("type2: {}", unpackedPacket.m_coral2.m_type);
+        info("distance: {}", unpackedPacket.m_coral3.m_distance);
+        info("angle3: {}", unpackedPacket.m_coral3.m_angle);
+        info("quality3: {}", unpackedPacket.m_coral3.m_quality);
+        info("type3: {}", unpackedPacket.m_coral3.m_type);
+        info("distance4: {}", unpackedPacket.m_coral4.m_distance);
+        info("angle4: {}", unpackedPacket.m_coral4.m_angle);
+        info("quality4: {}", unpackedPacket.m_coral4.m_quality);
+        info("type4: {}", unpackedPacket.m_coral4.m_type);
         timestamps.push_back(unpackedPacket.m_time);
     }
     return 0;

@@ -13,6 +13,7 @@
 #include <thread>
 #include <future>
 #include <map>
+#include "LoggingUtils.h"
 
 using namespace std::literals;
 
@@ -44,14 +45,13 @@ nt::IntegerSubscriber filterWindowTopic;
 
 /*! \brief Handle Ctrl+C interrupts */
 void sighandler(int nSig){
-    printf("Received Signal: %d\n", nSig);
-    std::cout << "Can't use Ctrl+C to exit, use stop command\n";
+    info("Received Signal: {}", nSig);
+    info("Can't use Ctrl+C to exit, use stop command");
 }
 
 /*! \brief Print the list of commands to the console */
 void showHelp(){
-    std::cout << "Valid commands are: \n" << "print - logs all current topic values\n" << "pushdist - push a new distance value" 
-    << "pushangle - push a new angle value" << "stop - shuts the server down\n" << "help - displays this text\n";
+    info("Valid commands are: \nprint - logs all current topic values\npushdist - push a new distance value\npushangle - push a new angle value\nstop - shuts the server down\nhelp - displays this text";
 }
 
 /*! \brief Shuts down the client. Note that this is not an immediate effect, program will run for another tick before exiting. */
@@ -63,29 +63,29 @@ void shutdown(){
 This function does not automatically update as new topics are added and will need to be modified if new topics are added
 */
 void printNetworkTableValues(){
-    printf("huemin: %ld\n", hueMinTopic.GetAtomic(0.0f).value);
-    printf("huemax: %ld\n", hueMaxTopic.GetAtomic(0.0f).value);
-    printf("satmin: %ld\n", saturationMinTopic.GetAtomic(0.0f).value);
-    printf("satmax: %ld\n", saturationMaxTopic.GetAtomic(0.0f).value);
-    printf("valmin: %ld\n", valueMinTopic.GetAtomic(0.0f).value);
-    printf("valmax: %ld\n", valueMaxTopic.GetAtomic(0.0f).value);
-    printf("minwidth: %ld\n", minWidthTopic.GetAtomic(0).value);
-    printf("maxwidth: %ld\n", maxWidthTopic.GetAtomic(0).value);
-    printf("minheight: %ld\n", minHeightTopic.GetAtomic(0).value);
-    printf("maxheight: %ld\n", maxHeightTopic.GetAtomic(0).value);
-    printf("minarea: %ld\n", minAreaTopic.GetAtomic(0).value);
-    printf("maxarea: %ld\n", maxAreaTopic.GetAtomic(0).value);
-    printf("minpercentfill: %lf\n", minPercentFillTopic.GetAtomic(0.0f).value);
-    printf("offsetx: %lf\n", camOffsetXTopic.GetAtomic(0.0f).value);
-    printf("offsety: %lf\n", camOffsetYTopic.GetAtomic(0.0f).value);
-    printf("camheight: %lf\n", camHeightTopic.GetAtomic(0.0f).value);
-    printf("camangle: %lf\n", camAngleTopic.GetAtomic(0.0f).value);
+    info("huemin: {}", hueMinTopic.GetAtomic(0.0f).value);
+    info("huemax: {}", hueMaxTopic.GetAtomic(0.0f).value);
+    info("satmin: {}", saturationMinTopic.GetAtomic(0.0f).value);
+    info("satmax: {}", saturationMaxTopic.GetAtomic(0.0f).value);
+    info("valmin: {}", valueMinTopic.GetAtomic(0.0f).value);
+    info("valmax: {}", valueMaxTopic.GetAtomic(0.0f).value);
+    info("minwidth: {}", minWidthTopic.GetAtomic(0).value);
+    info("maxwidth: {}", maxWidthTopic.GetAtomic(0).value);
+    info("minheight: {}", minHeightTopic.GetAtomic(0).value);
+    info("maxheight: {}", maxHeightTopic.GetAtomic(0).value);
+    info("minarea: {}", minAreaTopic.GetAtomic(0).value);
+    info("maxarea: {}", maxAreaTopic.GetAtomic(0).value);
+    info("minpercentfill: {}", minPercentFillTopic.GetAtomic(0.0f).value);
+    info("offsetx: {}", camOffsetXTopic.GetAtomic(0.0f).value);
+    info("offsety: {}", camOffsetYTopic.GetAtomic(0.0f).value);
+    info("camheight: {}", camHeightTopic.GetAtomic(0.0f).value);
+    info("camangle: {}", camAngleTopic.GetAtomic(0.0f).value);
 }
 
 /*! \brief Pushes a new coral distance value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
 void pushDistanceValue(){
     std::string value;
-    std::cout << "Please enter a value: ";
+    info("Please enter a value: ");
     std::cin >> value;
     coralDistanceTopic.SetDefault(stof(value));
 }
@@ -93,12 +93,13 @@ void pushDistanceValue(){
 /*! \brief Pushes a new coral angle value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
 void pushAngleValue(){
     std::string value;
-    std::cout << "Please enter a value: ";
+    info("Please enter a value: ");
     std::cin >> value;
     coralAngleTopic.SetDefault(stof(value));
 }
 
 int main( int argc, char **argv ){
+    SetupTextLogger();
     signal(SIGINT, sighandler); // Handles Ctrl+C interrupts
     // Initialize the commands
     commandMap["help"] = showHelp;
@@ -139,7 +140,7 @@ int main( int argc, char **argv ){
     });
     while(!bStop){
         // Print connection status
-        std::cout << "NetworkTables are " << (netTableManager.IsConnected() ? "Connected" : "Not Connected") << "\n";
+        info("Connection status of networktables: {}", netTableManager.IsConnected());
         if(readyForNewCmdThread){
             // Launch an async thread to take user input so client can respond to any server requests while waiting for input
             commandInputThread = std::async(std::launch::async, [] {
@@ -156,13 +157,13 @@ int main( int argc, char **argv ){
                 commandMap[commandInput]();
             }
             else{
-                std::cout << "Command not recognized\n";
+                info("Command not recognized");
             }
             readyForNewCmdThread = true;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(800));
     }
-    std::cout << "Exiting...\n";
+    info("Exiting...");
     netTableManager.StopClient();
     return 0;
 }
