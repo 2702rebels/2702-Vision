@@ -51,7 +51,7 @@ void sighandler(int nSig){
 
 /*! \brief Print the list of commands to the console */
 void showHelp(){
-    info("Valid commands are: \nprint - logs all current topic values\npushdist - push a new distance value\npushangle - push a new angle value\nstop - shuts the server down\nhelp - displays this text";
+    info("Valid commands are: \nprint - logs all current topic values\npushdist - push a new distance value\npushangle - push a new angle value\nstop - shuts the server down\nhelp - displays this text");
 }
 
 /*! \brief Shuts down the client. Note that this is not an immediate effect, program will run for another tick before exiting. */
