@@ -20,12 +20,13 @@ void SetupTextLogger() {
 	console_sink->set_pattern("[%T] [%^%l%$] %v");
 	console_sink->set_pattern("[%Y-%m-%d %T] [%l] %v");
 	std::vector<sink_ptr> sinks{ console_sink, file_sink };
+	auto threadpool = std::make_shared<details::thread_pool>(16384, 1);
 	textLogsOutput = std::make_shared<async_logger>(
 		"ObjDetection",
 		sinks.begin(),
 		sinks.end(),
 		// allow for 16384 messages in async queue, 1 async logging thread
-		details::thread_pool(16384, 1);
+		std::weak_ptr<details::thread_pool>(threadpool),
 		spdlog::async_overflow_policy::block
 		// if async queue does get overloaded, we should probably just increase the size of it, we're less constricted on ram than cpu
 		// but data integrity is paramount, so block if it does somehow happen.
