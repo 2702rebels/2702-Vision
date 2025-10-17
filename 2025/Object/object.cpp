@@ -69,7 +69,7 @@ bool bStop = false;
  * \param nSig - Should always be equal to \ref SIGINT.*/
 void sighandler(int nSig)
 {
-	info("Received Signal %d\n", nSig);
+	info("Received Signal {}", nSig);
 	bStop = true;
 }
 
@@ -125,10 +125,10 @@ int main(int argc, char* argv[])
 			{
 				ConfigUtils::triggerConfigLoad(proc);
 			}
-			info("NetworkTables are " << (networkTableManager.IsConnected() ? "Connected" : "Not Connected") << "\n");
+			info("Connection status of NetworkTables: {}", networkTableManager.IsConnected());
 			if (networkTableManager.IsConnected())
 			{
-				info("Updated configs from network table\n");
+				info("Updated configs from network table");
 				proc.setPVHueMin(hueMinTopic.GetAtomic().value);
 				proc.setPVHueMax(hueMaxTopic.GetAtomic().value);
 				proc.setSaturationMin(saturationMinTopic.GetAtomic().value);
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 	}
 	catch (std::exception& e)
 	{
-		printf("Exception: %s\n", e.what());
+		printf("Exception: {}", e.what());
 	}
 
 	return 0;
