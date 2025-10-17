@@ -75,12 +75,12 @@ int main(int argc, char** argv) {
 
 	// Print the camera parameters
 	info("Camera Matrix: {}, {}, {},\n{}, {}, {},\n{}, {}, {}",
-		cameraMatrix.at(0, 0), cameraMatrix.at(0, 1), cameraMatrix.at(0, 2),
-		cameraMatrix.at(1, 0), cameraMatrix.at(1, 1), cameraMatrix.at(1, 2),
-		cameraMatrix.at(2, 0), cameraMatrix.at(2, 1), cameraMatrix.at(2, 2)
+		cameraMatrix.at<float>(0, 0), cameraMatrix.at<float>(0, 1), cameraMatrix.at<float>(0, 2),
+		cameraMatrix.at<float>(1, 0), cameraMatrix.at<float>(1, 1), cameraMatrix.at<float>(1, 2),
+		cameraMatrix.at<float>(2, 0), cameraMatrix.at<float>(2, 1), cameraMatrix.at<float>(2, 2)
 	);
 	info("Distortion Coefficients : {}, {}, {}, {}, {}", 
-		distCoeffs.at(0, 0), distCoeffs.at(0, 1), distCoeffs.at(0, 2), distCoeffs.at(0, 3), distCoeffs.at(0, 4)
+		distCoeffs.at<float>(0, 0), distCoeffs.at<float>(0, 1), distCoeffs.at<float>(0, 2), distCoeffs.at<float>(0, 3), distCoeffs.at<float>(0, 4)
 	);
 	return 0;
 }

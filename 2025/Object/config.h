@@ -313,7 +313,7 @@ public:
 			m_previousCamHeight = config.camHeight;
 			m_previousCamAngle = config.camAngle;
 			m_previousFilterWindow = config.filterWindow;
-			info("Loaded the following config from disk:";
+			info("Loaded the following config from disk:");
 			info("hue min: {}", config.hueMin);
 			info("hue max: {}", config.hueMax);
 			info("sat min: {}", config.saturationMin);

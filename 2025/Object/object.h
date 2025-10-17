@@ -217,9 +217,9 @@ public:
 		m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
 		info("Camera Matrix: {} {} {}\n{} {} {}\n{} {} {}", 
-			mtx.at(0,0), mtx.at(0,1), mtx.at(0,2),
-			mtx.at(1,0), mtx.at(1,1), mtx.at(1,2), 
-			mtx.at(2,0), mtx.at(2,1), mtx.at(2,2));
+			mtx.at<float>(0,0), mtx.at<float>(0,1), mtx.at<float>(0,2),
+			mtx.at<float>(1,0), mtx.at<float>(1,1), mtx.at<float>(1,2), 
+			mtx.at<float>(2,0), mtx.at<float>(2,1), mtx.at<float>(2,2));
 		info("Focal Length Coefficients: {}, {}", mtx.at<float>(0, 0), mtx.at<float>(1, 2));
 		info("Focal Length: {}", m_focalLen);
 #if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
