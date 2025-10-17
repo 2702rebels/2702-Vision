@@ -11,16 +11,16 @@
 #include <signal.h>
 #include <chrono>
 #include <thread>
+#include <functional>
 #include <future>
 #include <map>
 #include "LoggingUtils.h"
 
 using namespace std::literals;
 
-
+std::map<std::string, std::function<void()>> commandMap;
 bool bStop = false;
 bool readyForNewCmdThread = false;
-std::map<std::string, std::function<void()>> commandMap;
 
 nt::IntegerSubscriber hueMinTopic;
 nt::IntegerSubscriber hueMaxTopic;

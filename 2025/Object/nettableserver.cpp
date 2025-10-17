@@ -19,10 +19,6 @@
 
 using namespace std::literals;
 
-
-bool bStop = false;
-bool readyForNewCmdThread = false;
-
 /*! \brief This is where all the commands are stored, in order to add a command, set a key(string) value to a void function like this:
  void testcommand(){
     do your thing here
@@ -30,6 +26,8 @@ bool readyForNewCmdThread = false;
  commandMap["yourtestcommand"] = testcommand;
 */
 std::map<std::string, std::function<void()>> commandMap;
+bool bStop = false;
+bool readyForNewCmdThread = false;
 
 nt::IntegerPublisher hueMinTopic;
 nt::IntegerPublisher hueMaxTopic;
