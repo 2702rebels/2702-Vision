@@ -17,3 +17,7 @@ allwpilib/
 *.txt
 vcpkg/
 vcpkg_installed/
+*~
+/tests/test
+/Utilities/log2mjpeg/log2mjpeg
+/Utilities/vid-sample/vid

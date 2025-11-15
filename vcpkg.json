@@ -58,8 +58,8 @@
     {
       "name": "wpilib",
       "features": [
-        "cscore",
-        "protobuf"
+	      "allwpilib",
+	      "cameraserver"
       ]
     }
   ]

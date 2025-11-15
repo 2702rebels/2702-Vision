@@ -7,7 +7,7 @@ cd build-cmake
 sudo cmake --build . --target install --parallel $(nproc)
 cd ..
 cd ..
-rm -rf allwpilib
+sudo rm -rf allwpilib
 echo "Downloading and compiling gtest"
 git clone https://github.com/google/googletest.git
 cd googletest
@@ -18,7 +18,7 @@ make
 sudo make install
 cd ..
 cd ..
-rm -rf googletest
+sudo rm -rf googletest
 echo "Downloading and compiling spdlog"
 git clone https://github.com/gabime/spdlog.git
 cd spdlog
@@ -28,5 +28,5 @@ cmake .. -DSPDLOG_USE_STD_FORMAT=ON -DSPDLOG_INSTALL=ON -DSPDLOG_BUILD_TESTS=OFF
 sudo cmake --build . --target install --parallel $(nproc)
 cd ..
 cd ..
-rm -rf spdlog
+sudo rm -rf spdlog
 echo "Finished installing dependencies"
