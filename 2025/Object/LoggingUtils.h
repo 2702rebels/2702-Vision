@@ -1,5 +1,9 @@
 #pragma once
 #include <spdlog/spdlog.h>
+#include "VisLog.h"
+#include "object.h"
+#include <string>
+#include "LoggingUtils.h"
 
 using namespace spdlog;
 
@@ -7,3 +11,15 @@ using namespace spdlog;
 std::shared_ptr<logger> textLogsOutput;
 void SetupTextLogger();
 std::shared_ptr<logger> SetupFrameLogger(const char* name);
+
+class FrameLogger : FrmProcessor {
+private:
+	std::shared_ptr<logger> m_unfilteredLogger;
+	std::shared_ptr<logger> m_maskedLogger;
+	std::shared_ptr<logger> m_annotatedLogger;
+public:
+	FrameLogger(const char* unfilteredName, const char* maskedName, const char* annotatedName);
+	void LogUnfilteredFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
+	void LogMaskedFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
+	void LogAnnotatedFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
+};
