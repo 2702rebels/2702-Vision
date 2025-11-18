@@ -22,6 +22,7 @@
 #include <errno.h>
 #include "LoggingUtils.h"
 #include <span>
+#include <spdlog/spdlog.h>
 
 //#include <X11/Xlib.h>
 #include <linux/videodev2.h>
@@ -216,12 +217,12 @@ public:
 	{
 		m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
-		info("Camera Matrix: {} {} {}\n{} {} {}\n{} {} {}", 
+		spdlog::info("Camera Matrix: {} {} {}\n{} {} {}\n{} {} {}", 
 			mtx.at<float>(0,0), mtx.at<float>(0,1), mtx.at<float>(0,2),
 			mtx.at<float>(1,0), mtx.at<float>(1,1), mtx.at<float>(1,2), 
 			mtx.at<float>(2,0), mtx.at<float>(2,1), mtx.at<float>(2,2));
-		info("Focal Length Coefficients: {}, {}", mtx.at<float>(0, 0), mtx.at<float>(1, 2));
-		info("Focal Length: {}", m_focalLen);
+		spdlog::info("Focal Length Coefficients: {}, {}", mtx.at<float>(0, 0), mtx.at<float>(1, 2));
+		spdlog::info("Focal Length: {}", m_focalLen);
 #if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
 		m_angleFile.open("./angle.txt");
 		m_distFile.open("./dist.txt");
@@ -237,7 +238,7 @@ public:
 		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
 		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
 #endif
-		info("Reached end of FrameProcessor constructor");
+		spdlog::info("Reached end of FrameProcessor constructor");
 	}
 
 	/*! \brief Start logging frames to logfile. */
@@ -554,13 +555,13 @@ public:
 	static void timesynccallback(nt::Event const& e)
 	{
 		if (e.flags & NT_EVENT_TIMESYNC) {
-			info("tscb::: Have TIMESYNC\n");
+			spdlog::info("tscb::: Have TIMESYNC\n");
 			nt::TimeSyncEventData const* ptsed = e.GetTimeSyncEventData();
 			imgProc::m_i64TimeOffset = ptsed->serverTimeOffset;
-			info("Got Offset -> {}", ptsed->serverTimeOffset);
+			spdlog::info("Got Offset -> {}", ptsed->serverTimeOffset);
 		}
 		else {
-			info("tscb::: -> {}", e.flags);
+			spdlog::info("tscb::: -> {}", e.flags);
 		}
 	}
 
@@ -576,7 +577,7 @@ public:
 			udpSender.bSend(bytes);
 		}
 		catch (std::exception& e) {
-			error("Failed to send packet with an exception: {}", e.what());
+			spdlog::error("Failed to send packet with an exception: {}", e.what());
 		}
 #endif
 	}
@@ -745,9 +746,9 @@ public:
 			}
 		}
 		double detectpercent = (double)validPixels / (double)pixels;
-		info("detectpercent: {}", detectpercent);
-		info("npixels: {}", pixels);
-		info("validpixels: {}", validPixels);
+		spdlog::info("detectpercent: {}", detectpercent);
+		spdlog::info("npixels: {}", pixels);
+		spdlog::info("validpixels: {}", validPixels);
 		// If % detection is nan or less than min fill
 		if (detectpercent < m_minPercentFill || std::isnan(detectpercent)) {
 			return { {}, {} };
@@ -797,7 +798,7 @@ public:
 	*/
 	cv::Mat ProcessFrameWithRet(int nCam, CameraFrame const* pcf)
 	{
-		info("Have Frame from cam {}:#{} {}x{}", nCam, pcf->u32Sequence(), pcf->nRows(), pcf->nCols());
+		spdlog::info("Have Frame from cam {}:#{} {}x{}", nCam, pcf->u32Sequence(), pcf->nRows(), pcf->nCols());
 		cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
 		int heightPaintAt = 60;
 		if (m_mtxLog.try_lock()) {
@@ -808,7 +809,7 @@ public:
 				if (time(0) > m_tmLogEnd) {
 					m_vl.vClose();
 					m_bLoggingDone = true;
-					info("Finished logging");
+					spdlog::info("Finished logging");
 				}
 			}
 			else {
@@ -821,13 +822,13 @@ public:
 								break;
 							}
 						}
-						info("Opening log file at {}", szTmp);
+						spdlog::info("Opening log file at {}", szTmp);
 						m_vl.vOpen(szTmp, true);
 						m_tmLogEnd = time(0) + 160;
 					}
 					catch (std::exception& e) {
 						m_bLoggingDone = true;
-						error("Unable to start logging: {}", e.what());
+						spdlog::error("Unable to start logging: {}", e.what());
 					}
 				}
 			}
@@ -866,7 +867,7 @@ public:
 					double distance = coralVec.length();
 					// u = x, v = y
 					double angle = std::atan2(coralVec.v(), coralVec.u());
-					info("distance: {}, angle: {}", distance, angle);
+					spdlog::info("distance: {}, angle: {}", distance, angle);
 					// NaN compare operations are always false, so if either is NaN, don't use it.
 					if (distance == distance && angle == angle) {
 #if USE_OUTPUT_FILTERING

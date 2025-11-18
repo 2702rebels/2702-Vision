@@ -50,20 +50,20 @@ FrameLogger::FrameLogger(const char* unfilteredName, const char* maskedName, con
 	m_annotatedLogger = SetupFrameLogger(annotatedName);
 }
 
-void FrameLogger::LogUnfilteredFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
+void FrameLogger::LogUnfilteredFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
 	m_unfilteredLogger->info("<<FRM>>\n{}\n{}", u32Seq, u32Exp);
-	m_unfilteredLogger->info("{}\n{}", img.rows, img.cols);
-	m_unfilteredLogger->info(std::string((char*)img.data, img.rows * img.cols));
+	m_unfilteredLogger->info("{}\n{}", frame.rows, frame.cols);
+	m_unfilteredLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));
 }
 
-void FrameLogger::LogMaskedFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
+void FrameLogger::LogMaskedFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
 	m_maskedLogger->info("<<FRM>>\n{}\n{}", u32Seq, u32Exp);
-	m_maskedLogger->info("{}\n{}", img.rows, img.cols);
-	m_maskedLogger->info(std::string((char*)img.data, img.rows * img.cols));
+	m_maskedLogger->info("{}\n{}", frame.rows, frame.cols);
+	m_maskedLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));
 }
 
 void FrameLogger::LogAnnotatedFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
 	m_annotatedLogger->info("<<FRM>>\n{}\n{}", u32Seq, u32Exp);
-	m_annotatedLogger->info("{}\n{}", img.rows, img.cols);
-	m_annotatedLogger->info(std::string((char*)img.data, img.rows * img.cols));
+	m_annotatedLogger->info("{}\n{}", frame.rows, frame.cols);
+	m_annotatedLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));
 }
