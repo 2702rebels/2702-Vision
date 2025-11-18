@@ -19,7 +19,7 @@ private:
 	std::shared_ptr<logger> m_annotatedLogger;
 public:
 	FrameLogger(const char* unfilteredName, const char* maskedName, const char* annotatedName);
-	void LogUnfilteredFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
-	void LogMaskedFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
-	void LogAnnotatedFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
+	void LogUnfilteredFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
+	void LogMaskedFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
+	void LogAnnotatedFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp);
 };

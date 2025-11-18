@@ -62,7 +62,7 @@ void FrameLogger::LogMaskedFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t
 	m_maskedLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));
 }
 
-void FrameLogger::LogAnnotatedFrame(cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
+void FrameLogger::LogAnnotatedFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
 	m_annotatedLogger->info("<<FRM>>\n{}\n{}", u32Seq, u32Exp);
 	m_annotatedLogger->info("{}\n{}", frame.rows, frame.cols);
 	m_annotatedLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));

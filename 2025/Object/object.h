@@ -141,7 +141,7 @@ class imgProc : public FrmProcessor
 	/*! \brief Number of packets over which the median is taken for the distance / angle measurements. */
 	int			m_filterPacketWindow = 8;
 
-	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
+	std::shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
 	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralDistance").Publish();
 	nt::DoublePublisher m_nLastCoralAngleTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralAngle").Publish();
 
