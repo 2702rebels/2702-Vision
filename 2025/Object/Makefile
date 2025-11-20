@@ -20,6 +20,7 @@ LIBS+=$(shell pkg-config -libs opencv4)
 LIBS+=$(shell pkg-config -libs spdlog)
 LIBS+=-l2702
 LIBS+=-lapriltag -lwpilibNewCommands -lwpilibc -lcameraserver -lcscore -lntcore -lwpinet -lwpimath -lwpiutil
+LIBS+=-lspdlog
 all: object replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
 norpicam: replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
 clean:
