@@ -70,7 +70,7 @@ void showHelp(){
 }
 
 /*! \brief Shuts down the server. Note that this is not immediate, and the program will walk through one more tick before exiting.*/
-void shutdown(){
+void shutdownServer(){
     bStop = true;
 }
 
@@ -228,7 +228,7 @@ int main( int argc, char **argv ){
     signal(SIGINT, sighandler); // Handles Ctrl+C interrupts
     // Assign commands
     commandMap["help"] = showHelp;
-    commandMap["stop"] = shutdown;
+    commandMap["stop"] = shutdownServer;
     commandMap["print"] = printNetworkTableValues;
     commandMap["pushhuemin"] = pushHueMin;
     commandMap["pushhuemax"] = pushHueMax;

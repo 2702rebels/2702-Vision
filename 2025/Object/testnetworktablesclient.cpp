@@ -55,7 +55,7 @@ void showHelp(){
 }
 
 /*! \brief Shuts down the client. Note that this is not an immediate effect, program will run for another tick before exiting. */
-void shutdown(){
+void shutdownClient(){
     bStop = true;
 }
 
@@ -103,7 +103,7 @@ int main( int argc, char **argv ){
     signal(SIGINT, sighandler); // Handles Ctrl+C interrupts
     // Initialize the commands
     commandMap["help"] = showHelp;
-    commandMap["stop"] = shutdown;
+    commandMap["stop"] = shutdownClient;
     commandMap["print"] = printNetworkTableValues;
     commandMap["pushdist"] = pushDistanceValue;
     commandMap["pushangle"] = pushAngleValue;

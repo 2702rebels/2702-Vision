@@ -28,7 +28,7 @@ bool bStop = false;
 void signalhandler(int nSig){
     info("Got exit signal: {}", nSig);
     for(int i = 0; i < timestamps.size(); i++){
-        info("{}", timestamp[i]);
+        info("{}", timestamps[i]);
     }
     bStop = true;
 }
