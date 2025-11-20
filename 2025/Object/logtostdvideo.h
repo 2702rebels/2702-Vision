@@ -1,3 +1,4 @@
+#pragma once
 #include "VisLog.h"
 #include "object.h"
 #include <string>

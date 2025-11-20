@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include "ObjectDetectionStruct.h"
-#include "ObjectDetectionStruct.cpp"
 #include <string>
 #include <sstream>
 #include <iomanip>

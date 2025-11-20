@@ -1,3 +1,4 @@
+#pragma once
 #include "LoggingUtils.h"
 /*! \brief Class for loading / saving configs from disk. 
 Depends on: 

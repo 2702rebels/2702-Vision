@@ -23,6 +23,7 @@ all: object replay nettableserver testnetworktablesclient calibrate testudpserve
 norpicam: replay nettableserver testnetworktablesclient calibrate testudpserver logtostdvideo
 clean:
 	rm -f *.o
+	rm -f *.a
 	rm -f object
 	rm -f replay
 	rm -f nettableserver
@@ -32,26 +33,26 @@ clean:
 	rm -f logtostdvideo
 
 object: object.o $(DEFAULT_ARCHIVES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object object.o -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o object object.o -l2702 $(LIBS) -llog
 
 replay: replay.o $(DEFAULT_ARCHIVES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o replay replay.o -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o replay replay.o -l2702 $(LIBS) -llog
 
 #	$(CXX) $(CXXFLAGS) -o rpi-sample $(OBJS) -l2702 -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_calib3d -lpthread -lntcore -lcscore -lcameraserver -lwpiutil -lapriltag -lwpimath
 nettableserver: nettableserver.o $(DEFAULT_ARCHIVES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o nettableserver nettableserver.o -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o nettableserver nettableserver.o -l2702 $(LIBS) -llog
 
 testnetworktablesclient: testnetworktablesclient.o $(DEFAULT_ARCHIVES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testnetworktablesclient testnetworktablesclient.o -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testnetworktablesclient testnetworktablesclient.o -l2702 $(LIBS) -llog
 
 calibrate: calibrate.o $(DEFAULT_ARCHIVES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o calibrate calibrate.o -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o calibrate calibrate.o -l2702 $(LIBS) -llog
 
 testudpserver: testudpserver.o $(DEFAULT_ARCHIVES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testudpserver testudpserver.o -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o testudpserver testudpserver.o -l2702 $(LIBS) -llog
 
 logtostdvideo: logtostdvideo.o $(DEFAULT_ARCHIVES)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o logtostdvideo logtostdvideo.o -l2702 $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o logtostdvideo logtostdvideo.o -l2702 $(LIBS) -llog
 
 object.o: object.cpp object.h config.h ObjectDetectionStruct.cpp ObjectDetectionStruct.h udpsender.h
 replay.o: replay.cpp object.h config.h udpsender.h
