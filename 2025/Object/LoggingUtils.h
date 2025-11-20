@@ -1,9 +1,6 @@
 #pragma once
 #include <spdlog/spdlog.h>
-#include "VisLog.h"
-#include "object.h"
-#include <string>
-#include "LoggingUtils.h"
+#include <opencv2/imgproc.hpp>
 
 using namespace spdlog;
 

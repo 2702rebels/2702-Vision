@@ -14,6 +14,7 @@ CXXFLAGS+=$(shell pkg-config --cflags ../../pkgconfig/ubuntu/wpilib.pc)
 CXXFLAGS+=$(shell pkg-config --cflags spdlog)
 LDFLAGS+=-L../../lib
 LDFLAGS+=-L/usr/local/lib
+LDFLAGS+=-L.
 LIBS+=$(shell pkg-config -libs libcamera)
 LIBS+=$(shell pkg-config -libs opencv4)
 LIBS+=$(shell pkg-config -libs spdlog)
