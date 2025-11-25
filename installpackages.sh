@@ -1,4 +1,3 @@
-set -euo pipefail
 sudo apt update
 sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev
 echo "Downloading latest CMake"
