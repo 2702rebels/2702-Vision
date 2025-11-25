@@ -2,11 +2,10 @@
 add_library(2702 STATIC)
 
 file(GLOB_RECURSE 2702_SOURCES "implementation/*")
+message(STATUS ${2702_SOURCES})
 if(CMAKE_CUDA_HOST_COMPILER)
     message(STATUS "Building for Jetson")
-    target_include_directories(myapp PRIVATE /usr/local/cuda/include)
-    target_sources(myapp PRIVATE nvcam.o)
-
+    target_include_directories(2702 PRIVATE /usr/local/cuda/include)
 elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     message(STATUS "Building for Desktop")
     list(REMOVE_ITEM 2702_SOURCES "implementation/nvcam.cpp")
@@ -17,6 +16,7 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
 else()
     message(FATAL_ERROR "Unknown platform: ${CMAKE_SYSTEM_PROCESSOR}")
 endif()
+message(STATUS ${2702_SOURCES})
 target_sources(2702 PRIVATE ${2702_SOURCES})
 
 target_include_directories(2702 PUBLIC "include")
