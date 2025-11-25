@@ -4,7 +4,8 @@ find_package(spdlog REQUIRED)
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
 target_include_directories(2702log PRIVATE include)
 
-target_link_libraries(2702log PUBLIC spdlog::spdlog)
+target_include_directories(2702log PUBLIC ${spdlog_INCLUDE_DIRS})
+target_link_libraries(2702log PUBLIC ${spdlog_LIBS})
 
 target_include_directories(2702log PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(2702log PRIVATE ${OpenCV_LIBS})
