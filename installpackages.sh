@@ -21,7 +21,7 @@ cmake . --preset default -DBUILD_SHARED_LIBS=OFF -DWITH_GUI=OFF -DWITH_SIMULATIO
 cd build-cmake
 sudo cmake --build . --target install --parallel $(nproc)
 # remove add_dependency(wpilibj) which is still added even when wpilib wasn't built with wpilibj included.
-sudo sed -i '/add_dependency(wpilibj)/d' /usr/local/share/wpilib/wpilib-config.cmake
+sudo sed -i '/find_dependency(wpilibj)/d' /usr/local/share/wpilib/wpilib-config.cmake
 cd ..
 cd ..
 sudo rm -rf allwpilib
