@@ -9,6 +9,8 @@ target_link_libraries(2702log PUBLIC spdlog::spdlog)
 target_include_directories(2702log PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(2702log PRIVATE ${OpenCV_LIBS})
 
+target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
+
 
 add_executable(calibrate implementation/calibrate.cpp)
 target_include_directories(calibrate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
