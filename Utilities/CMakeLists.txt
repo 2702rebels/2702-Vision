@@ -1,6 +1,5 @@
 find_package(OpenCV REQUIRED)
-find_package(cameraserver CONFIG REQUIRED)
-find_package(ntcore CONFIG REQUIRED)
+find_package(wpilib REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules(AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
 
@@ -29,9 +28,7 @@ target_link_libraries(rpi-sample PRIVATE 2702)
 target_link_libraries(rpi-sample PRIVATE ${OpenCV_LIBS})
 target_include_directories(rpi-sample PRIVATE ${OpenCV_INCLUDE_DIRS})
 
-target_link_libraries(rpi-sample PRIVATE cameraserver::cameraserver)
-
-target_link_libraries(rpi-sample PRIVATE ntcore::ntcore)
+target_link_libraries(rpi-sample PRIVATE cameraserver ntcore cscore wpiutil)
 
 
 add_executable(vid-sample vid-sample/vid.cpp)

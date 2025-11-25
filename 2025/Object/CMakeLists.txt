@@ -1,10 +1,10 @@
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 
-add_library(2702log STATIC LoggingUtils.cpp)
+add_library(2702log STATIC implementation/LoggingUtils.cpp)
 target_link_libraries(2702log PUBLIC spdlog::spdlog)
 
-add_executable(calibrate calibrate.cpp)
+add_executable(calibrate implementation/calibrate.cpp)
 target_include_directories(calibrate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_include_directories(calibrate PRIVATE ${OpenCV_INCLUDE_DIRS})
