@@ -1,13 +1,14 @@
 find_package(OpenCV REQUIRED)
 find_package(cameraserver CONFIG REQUIRED)
 find_package(ntcore CONFIG REQUIRED)
+find_package(PkgConfig)
+pkg_check_modules(AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
 
 add_executable(logffmpeg logffmpeg/logffmpeg.cpp)
 
 target_include_directories(logffmpeg PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 target_link_libraries(logffmpeg PRIVATE 2702)
 
-pkg_check_modules(AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
 target_link_libraries(logffmpeg PRIVATE PkgConfig::AVCODEC)
 
 
