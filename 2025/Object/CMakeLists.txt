@@ -2,6 +2,7 @@ find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
+target_include_directories(2702log PRIVATE include)
 target_link_libraries(2702log PUBLIC spdlog::spdlog)
 
 add_executable(calibrate implementation/calibrate.cpp)
