@@ -4,6 +4,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/logger.h>
 
+std::shared_ptr<spdlog::logger> textLogsOutput;
+
 std::string GetCurTimeStr() {
 	auto now = std::chrono::system_clock::now();
 	std::time_t timeNow = std::chrono::system_clock::to_time_t(now);
