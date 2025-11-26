@@ -27,6 +27,7 @@ sudo rm -rf allwpilib
 echo "Downloading and compiling gtest"
 git clone https://github.com/google/googletest.git
 cd googletest
+git checkout 52eb8108c5bdec04579160ae17225d66034bd723 #v1.17.0
 mkdir build
 cd build
 cmake ..
@@ -37,6 +38,7 @@ sudo rm -rf googletest
 echo "Downloading and compiling spdlog"
 git clone https://github.com/gabime/spdlog.git
 cd spdlog
+git checkout 486b55554f11c9cccc913e11a87085b2a91f706f #v1.16.0
 mkdir build
 cd build
 cmake .. -DSPDLOG_INSTALL=ON -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_TESTS_HO=OFF -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_EXAMPLE_HO=OFF -DSPDLOG_BUILD_BENCH=OFF
