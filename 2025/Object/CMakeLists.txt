@@ -26,7 +26,22 @@ target_link_libraries(calibrate PRIVATE 2702log)
 
 if(IS_RPI)
 	add_executable(object ${CMAKE_CURRENT_SOURCE_DIR}/implementation/object.cpp)
+
 	target_include_directories(object PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+	target_link_libraries(object PRIVATE 2702log)
+
+	target_link_libraries(object PRIVATE objectdetectionstruct)
+
+	target_link_libraries(object PRIVATE 2702)
+	target_include_directories(object PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
+
+	target_include_directories(object PRIVATE ${OpenCV_INCLUDE_DIRS})
+	target_link_libraries(object PRIVATE ${OpenCV_LIBS})
+
+	target_link_libraries(object PRIVATE apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+
+	target_link_libraries(object PRIVATE PkgConfig::libcamera)
 endif()
 
 add_library(objectdetectionstruct STATIC implementation/ObjectDetectionStruct.cpp)
@@ -82,3 +97,21 @@ target_link_libraries(logtostdvideo PRIVATE ${OpenCV_LIBS})
 target_link_libraries(logtostdvideo PRIVATE apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
 target_link_libraries(logtostdvideo PRIVATE PkgConfig::libcamera)
+
+add_executable(replay implementation/replay.cpp)
+
+target_include_directories(replay PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(replay PRIVATE 2702log)
+
+target_link_libraries(replay PRIVATE objectdetectionstruct)
+
+target_link_libraries(replay PRIVATE 2702)
+target_include_directories(replay PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
+
+target_include_directories(replay PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(replay PRIVATE ${OpenCV_LIBS})
+
+target_link_libraries(replay PRIVATE apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+
+target_link_libraries(replay PRIVATE PkgConfig::libcamera)
