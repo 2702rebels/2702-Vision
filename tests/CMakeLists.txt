@@ -18,7 +18,7 @@ target_link_libraries(tests PRIVATE ${OpenCV_LIBS})
 
 target_link_libraries(tests PRIVATE apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
-target_link_libraries(tests PRIVATE gtest_main)
+target_link_libraries(tests PRIVATE gtest gtest_main)
 
 target_link_libraries(tests PRIVATE PkgConfig::libcamera)
 
