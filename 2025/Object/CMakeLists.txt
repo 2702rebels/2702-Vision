@@ -71,6 +71,8 @@ target_include_directories(logtostdvideo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc
 
 target_link_libraries(logtostdvideo PRIVATE 2702log)
 
+target_link_libraries(logtostdvideo PRIVATE objectdetectionstruct)
+
 target_link_libraries(logtostdvideo PRIVATE 2702)
 target_include_directories(logtostdvideo PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
