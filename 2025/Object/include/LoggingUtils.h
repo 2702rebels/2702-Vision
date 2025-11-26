@@ -1,7 +1,6 @@
 #pragma once
 #include <spdlog/spdlog.h>
 #include <opencv2/imgproc.hpp>
-#include <frmprocessor.h>
 
 using namespace spdlog;
 
@@ -10,7 +9,7 @@ extern std::shared_ptr<logger> textLogsOutput;
 void SetupTextLogger();
 std::shared_ptr<logger> SetupFrameLogger(const char* name);
 
-class FrameLogger : FrmProcessor {
+class FrameLogger {
 private:
 	std::shared_ptr<logger> m_unfilteredLogger;
 	std::shared_ptr<logger> m_maskedLogger;
