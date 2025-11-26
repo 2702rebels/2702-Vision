@@ -1,0 +1,744 @@
+/*! \brief Contains the object detection image processing classes. Main is located in object.cpp
+* Depends on:
+* - wpilib ntcore
+* - ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
+*/
+
+#include <networktables/NetworkTableInstance.h>
+#include <networktables/NetworkTable.h>
+#include <networktables/DoubleTopic.h>
+#include <networktables/IntegerTopic.h>
+#include <networktables/BooleanTopic.h>
+#include <sys/time.h>
+#include "ObjectDetectionStruct.h"
+#include "ObjectDetectionStruct.cpp"
+#include <unistd.h>
+#include <stdint.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <span>
+
+//#include <X11/Xlib.h>
+#include <linux/videodev2.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <thread>
+#include <vector>
+#include <mutex>
+#include <condition_variable>
+
+#include <string>
+#include <stdexcept>
+
+#include <cameraserver/CameraServer.h>
+#include <networktables/NetworkTableInstance.h>
+#include <networktables/NetworkTableListener.h>
+#include <drm/drm_fourcc.h>
+#include <frc/filter/MedianFilter.h>
+#include <units/time.h>
+#include <wpimath/MathShared.h>
+#include "rpicam.h"
+#include <future>
+#include <thread>
+#include "VisLog.h"
+#include <math.h>
+#include "2702math.h"
+#include "udpsender.h"
+
+#pragma once
+// Allows us to access M_PI and other constants from math.h
+#define _USE_MATH_DEFINES
+
+#ifndef IMGPROC_GUI
+#define IMGPROC_GUI	0
+#endif
+/*! \brief UDP address to send object detection packets to. */
+#define OBJECT_DETECTION_SERVER_IP "10.27.2.2"
+/*! \brief UDP port to send object detection packets to. */
+#define OBJECT_DETECTION_SERVER_PORT "27021"
+/*! \brief Prints the latency to console. */
+#ifndef DEBUG
+#define DEBUG 1
+#endif
+/*! \brief Performs all the actions of \ref DEBUG plus annotating the video stream and sending it to the camera server for viewing in the browser and writes distance and angle values to .txt files in the directory, does nothing if DEBUG is off*/
+#ifndef DEBUG_VIDEO
+#define DEBUG_VIDEO 1
+#endif
+/*! \brief Enables or disables the sending of UDP packets to the server. Should be disabled when the server is not active. */
+#ifndef SEND_PACKETS
+#define SEND_PACKETS 1
+#endif
+/*! \brief Disables all debug flags and enables all features. */
+#ifndef PRODUCTION
+#define PRODUCTION 0
+#endif
+/*! \brief The number of packets that the median filter considers in its calculations. */
+#define FILTER_PACKET_WINDOW 8
+/*! \brief Whether or not to use median filtering for the output distance and angle values. */
+#define USE_OUTPUT_FILTERING 1
+/*! \brief Whether or not the camera should detect multiple objects. */
+#define NO_MULTIPLE_OBJECT_DETECTION 0
+/*! \brief Used to adjust distances to the robot's frame of reference. 
+ * 8.75 inches in meters
+*/
+#define CAMERA_X_OFFSET 0.22225
+/*! \brief Used to adjust distances to the robot's frame of reference. 
+13.25 inches in meters
+*/
+#define CAMERA_Y_OFFSET 0.33655
+/*! \brief Camera's height relative to the floor or bellypan of the robot. 
+ * 21 inches in meters
+*/
+#define CAMERA_HEIGHT 0.5334
+/*! \brief Camera angle on robot in radians. 
+* 26 deg in radians.
+*/
+#define CAMERA_ANGLE (M_PI / 180) * 26
+/*! \brief Minimum height of ellipse contour in pixels for detection. */
+#define MIN_PIXEL_HEIGHT_FOR_DETECTION 25
+/*! \brief Minimum width of ellipse contour in pixels for detection. */
+#define MIN_PIXEL_WIDTH_FOR_DETECTION 20
+/*! \brief Maximum width of ellipse contour in pixels for detection. */
+#define MAX_PIXEL_WIDTH_FOR_DETECTION 500
+/*! \brief Maximum height of ellipse contour in pixels for detection. */
+#define MAX_PIXEL_HEIGHT_FOR_DETECTION 350
+/*! \brief Maximum area of ellipse contour in pixels for detection*/
+#define MAX_PIXEL_AREA_FOR_DETECTION 115000
+/*! \brief Directory where to log files to. */
+#define LOG_DIR "/data/logs/"
+/*! \brief If the area of the detection is smaller than this, throw out the detection. */
+#define MIN_PIXEL_AREA_FOR_DETECTION 4500
+/*! \brief If the % fill of an object is smaller than this, the detection will not be valid. 
+* Write as a % from 0-1, eg 0.5 = 50%
+*/
+#define PERCENT_FILL_FOR_DETECTION 0.2
+
+#ifndef RESOLUTION_WIDTH
+#define RESOLUTION_WIDTH 640
+#endif
+
+#ifndef RESOLUTION_HEIGHT
+#define RESOLUTION_HEIGHT 480
+#endif
+// Structure classes where the serialization / deserialization functions are defined
+using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
+using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
+
+class imgProc : public FrmProcessor
+{
+	/*! \brief Hue min object detection parameter. */
+	int			m_nHLow = 0;
+	/*! \brief Saturation min object detection parameter. */
+	int			m_nSLow = 0;
+	/*! \brief Value min object detection parameter. */
+	int			m_nVLow = 200;
+	/*! \brief Hue max object detection parameter. */
+	int			m_nHHigh = 20;
+	/*! \brief Saturation max object detection parameter. */
+	int			m_nSHigh = 20;
+	/*! \brief Value max object detection parameter. */
+	int			m_nVHigh = 255;
+
+	shared_ptr<nt::NetworkTable>		m_nObjectDetectionNetTable = nt::NetworkTableInstance::GetDefault().GetTable("ObjectDetection");
+	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralDistance").Publish();
+	nt::DoublePublisher m_nLastCoralAngleTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralAngle").Publish();
+
+	#if DEBUG && !PRODUCTION
+	nt::IntegerPublisher m_nLastLatencyTopic = m_nObjectDetectionNetTable->GetIntegerTopic("Latency").Publish();
+
+	#endif
+
+	double		m_fCDiam = 0.1016;
+
+	double		distance;
+	
+	/*! \brief Camera calibration matrix. */
+	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 601.9259931202599, 0, 321.8862267762323,
+											0, 595.9193354697203, 258.3875534160956,
+											0, 0, 1);
+
+	/*! \brief Camera distortion coefficients. */
+	cv::Mat dist = (cv::Mat_<float>(1, 5) << 0.1002088738641385, -0.1862351027260573, -0.006324181581118907, 0.006180225582097748, 0.1135952943832695);
+	/*! \brief Focal length of camera. */
+	double		 m_focalLen;
+   	cv::Point2d CAMERA_CENTER;
+	Rebels::Point3d m_p3dCam2Robot;
+
+	frc::MedianFilter<double> m_distanceFilter{FILTER_PACKET_WINDOW};
+	frc::MedianFilter<double> m_angleFilter{FILTER_PACKET_WINDOW};
+	
+	#if SEND_PACKETS || PRODUCTION
+	/*! \brief UDP packet sender. */
+	CUDPSender udpSender;
+
+	nt::NetworkTableListener ntl = nt::NetworkTableListener::CreateTimeSyncListener(nt::NetworkTableInstance::GetDefault(), true, timesynccallback);
+	#endif
+
+	#if DEBUG_VIDEO && !PRODUCTION
+	/*! \brief Thread lock for the camera server output. */
+	std::mutex	m_mtxCS;
+	/*! \brief Bool to enable running setup of camera server only on first frame. */
+	bool		m_bFirstVid = true;
+	/*! \brief Camera server output stream for the filtered frame. */
+	cs::CvSource 	m_outputStream;
+	/*! \brief Camera server output stream for the raw frame. */
+	cs::CvSource    m_outputStreamRaw;
+	/*! \brief File that will be written with the processed distances. */
+	std::ofstream m_distFile;
+	/*! \brief File that will be written with the processed angles. */
+	std::ofstream m_angleFile;
+	/*! \brief File that will be written with the latency of each frame. */
+	std::ofstream m_latencyFile;
+	#endif
+	
+	/*! \brief Thread lock for logfile output. */
+	std::mutex		m_mtxLog;
+	/*! \brief Logger for frames. */
+	VisionLog		m_vl;
+
+	/*! \brief Whether or not the incoming frames are being logged to the .log file. */
+	bool			m_bIsLogging = false;
+	/*! \brief Is true when logging is complete, as to not write any more frames to the file. */
+	bool			m_bLoggingDone = false;
+	/*! \brief The time when the \ref m_bLoggingDone was set to true. */
+	time_t			m_tmLogEnd;
+	
+public:
+	static int64_t m_i64TimeOffset;
+	
+	imgProc() :
+		FrmProcessor(),
+   		CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
+		m_p3dCam2Robot(CAMERA_X_OFFSET, CAMERA_Y_OFFSET, CAMERA_HEIGHT)
+	{
+		m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
+
+    std::cout << "Camera Matrix: " << mtx << endl;
+    std::cout << "Focal Length Coefficients: " << mtx.at<float>(0,0) << "    " << mtx.at<float>(1,2) << endl;
+    std::cout << "Focal Length: " << m_focalLen << endl;
+	#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
+	m_angleFile.open("./angle.txt");
+	m_distFile.open("./dist.txt");
+	m_latencyFile.open("./latency.txt");
+#endif
+#if (IMGPROC_GUI && !PRODUCTION)
+		cv::namedWindow("Filtered Video");
+
+		cv::createTrackbar("PV Hue Min", "Filtered Video", &m_nHLow, 360);
+		cv::createTrackbar("PV Hue Max", "Filtered Video", &m_nHHigh, 360);
+		cv::createTrackbar("Sat Min", "Filtered Video", &m_nSLow, 255);
+		cv::createTrackbar("Sat Max", "Filtered Video", &m_nSHigh, 255);
+		cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
+		cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
+#endif
+	std::cout << "Reached end of constructor\n";
+	}
+
+	/*! \brief Start logging frames to logfile. */
+	virtual void vStartLogging(){
+		m_bIsLogging = true;
+	}
+
+	/*! 
+	* \brief Sets hue min object detection parameter. 
+	* \param  newValue - integer representing the new hue min value
+	*/
+	virtual void setPVHueMin(int newValue)
+	{
+		m_nHLow = newValue;
+		#if (IMGPROC_GUI && !PRODUCTION)
+		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
+		#endif
+	}
+	/*! 
+	* \brief Sets hue max object detection parameter.
+	* \param  newValue - integer representing the new hue max value
+	*/
+	virtual void setPVHueMax(int newValue)
+	{
+		m_nHHigh = newValue;
+		#if (IMGPROC_GUI && !PRODUCTION)
+		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
+		#endif
+	}
+	/*! 
+	* \brief Sets saturation min object detection parameter.
+	* \param  newValue - integer representing the new saturation min value
+	*/
+	virtual void setSaturationMin(int newValue)
+	{
+		m_nSLow = newValue;
+		#if (IMGPROC_GUI && !PRODUCTION)
+		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
+		#endif
+	}
+	/*! 
+	* \brief Sets saturation max object detection parameter.
+	* \param  newValue - integer representing the new saturation max value
+	*/
+	virtual void setSaturationMax(int newValue)
+	{
+		m_nSHigh = newValue;
+		#if (IMGPROC_GUI && !PRODUCTION)
+		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
+		#endif
+	}
+	/*! 
+	* \brief Sets value min object detection parameter.
+	* \param  newValue - integer representing the new value min value
+	*/
+	virtual void setValueMin(int newValue)
+	{
+		m_nVLow = newValue;
+		#if (IMGPROC_GUI && !PRODUCTION)
+		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
+		#endif
+	}
+	/*! 
+	* \brief Sets value max object detection parameter.
+	* \param  newValue - integer representing the new value max value
+	*/
+	virtual void setValueMax(int newValue)
+	{
+		m_nVHigh = newValue;
+		#if (IMGPROC_GUI && !PRODUCTION)
+		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
+		#endif
+	}
+	/*! 
+	* \brief Returns the hue min object detection parameter. 
+	*/
+	virtual int getPVHueMin() const
+	{
+		return m_nHLow;
+	}
+	/*! 
+	* \brief Returns the hue max object detection parameter. 
+	*/
+	virtual int getPVHueMax() const
+	{
+		return m_nHHigh;
+	}
+	/*! 
+	* \brief Returns the saturation min object detection parameter. 
+	*/
+	virtual int getSaturationMin() const
+	{
+		return m_nSLow;
+	}
+	/*! 
+	* \brief Returns the saturation max object detection parameter. 
+	*/
+	virtual int getSaturationMax() const
+	{
+		return m_nSHigh;
+	}
+	/*! 
+	* \brief Returns the value min object detection parameter. 
+	*/
+	virtual int getValueMin() const
+	{
+		return m_nVLow;
+	}
+	/*! 
+	* \brief Returns the value max object detection parameter. 
+	*/
+	virtual int getValueMax() const
+	{
+		return m_nVHigh;
+	}
+	virtual ~imgProc()
+	{
+
+	}
+	/*! \brief Handles a time sync event from networkTables. 
+	* \param e - The networktables event.
+	* \returns Nothing.
+	*/
+	static void timesynccallback( nt::Event const &e )
+	{
+		if (e.flags & NT_EVENT_TIMESYNC) {
+			printf( "tscb::: Have TIMESYNC\n" );
+			nt::TimeSyncEventData const *ptsed = e.GetTimeSyncEventData();
+			imgProc::m_i64TimeOffset = ptsed->serverTimeOffset;
+			printf( "Got Offset -> %ld\n", ptsed->serverTimeOffset );
+		}
+		else {
+			printf( "tscb::: -> %x\n", e.flags );
+		}
+	}
+
+	/*! \brief Send an \ref ObjectDetectionPacket .
+	* \param packet - Packet to send.
+	*/
+	void SendObjectDetectionPacket(ObjectDetectionPacket packet){
+		#if SEND_PACKETS || PRODUCTION
+		try{
+		std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
+		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
+		ObjectDetectionPacketStructType::Pack(bytes, packet);
+		udpSender.bSend(bytes);
+		}
+		catch(std::exception &e){
+			std::cerr << "Failed to send packet with an exception: " << e.what() << "\n";
+		}
+		#endif
+	}
+
+	/*!
+	* \brief Filters the image into a mask where each pixel is either able to be part of a valid detection(white) or not(black).
+	* To tune these values, change them in the processorSettings.txt file.
+	* \param frame - The raw input frame from the camera.
+	* \param pv_hue_min - If a pixel's hue is lower than this, it will be not valid.
+	* \param pv_hue_max - If a pixel's hue is higher than this, it will not be valid.
+	* \param saturation_min - If a pixel's saturation is lower than this, it will not be valid.
+	* \param saturation_min - If a pixel's saturation is higher than this, it will not be valid.
+	* \param value_min - If a pixel's brightness is lower than this, it will not be valid.
+	* \param value_max - If a pixel's brightness is lower than this, it will not be valid.
+	* \returns The filtered frame as a \ref cv::Mat.
+	*/
+	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
+	{
+		cv::Mat hsv, mask;
+		cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+
+		auto invert_and_scale_hue = [](int pv_hue) {
+			int inverted_hue = (pv_hue != 0) ? 360 - pv_hue : 0;
+			return inverted_hue / 2;
+		};
+
+		int cv_hue_min = invert_and_scale_hue(pv_hue_min);
+		int cv_hue_max = invert_and_scale_hue(pv_hue_max);
+
+		if (cv_hue_min > cv_hue_max) {
+			std::swap(cv_hue_min, cv_hue_max);
+		}
+
+		cv::Scalar lower_bound(cv_hue_min, saturation_min, value_min);
+		cv::Scalar upper_bound(cv_hue_max, saturation_max, value_max);
+		cv::inRange(hsv, lower_bound, upper_bound, mask);
+		return mask;
+	}
+	
+	/*! 
+	* \brief Returns object distance on the floor to the center of the robot in meters and the top plane angle to the center of the coral from the center of the robot in radians.
+	* \param contour - The cylinder fitted contour as provided by \ref fit_cylinder_contour.
+	* \param focal_length - The focal length of the camera.
+	* \param actual_diamater - The actual diamater of the game piece(in this case the coral).
+	* \param camera_center - The center of the camera as a Point2d, a constant.
+	*/
+	Rebels::Point2d calculate_coral_vector(const std::vector<cv::Point>& contour, double focal_length, double actual_diameter, const cv::Point2d& camera_center)
+	{
+		cv::RotatedRect rect = cv::fitEllipse(contour);
+        // Calculate the vector from the sensor to the object
+        Rebels::Point3d v( 1, -(rect.center.x - mtx.at<float>(0, 2)) / mtx.at<float>(0, 0), -(rect.center.y - mtx.at<float>(1,2)) / mtx.at<float>(1, 1) );
+
+        // The Camera is tiled down, so rotate the vector
+        // to "Robot Space"
+		Rebels::Quaternion qCamTilt(26 * M_PI / 180, Rebels::Point3d(0., 1., 0.));
+        Rebels::Point3d vRot = qCamTilt * v;
+
+        // Find the Z intercept -- the point where the vector touches the floor
+        double fT = -m_p3dCam2Robot.z() / vRot.z();
+
+        // Now compute the location of the point
+        Rebels::Point3d pos = vRot * fT + m_p3dCam2Robot;
+		return Rebels::Point2d(pos.x(), pos.y());
+	}
+
+	/*!
+	* \brief Fits the contour provided to a cylinder shape.
+	* \param contour - The input contour, as provided by \ref cv::findContours.
+	* \param mask - The binary image where white is a valid part of a detection and black where it is not.
+	* \param filteredFrame - The image to print any debugging text to.
+	* \returns Empty pair if invalid contour, or a pair of the contour hull, and another pair of the major and minor axis endpoints(in that order).
+	*/
+	std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask, cv::Mat filteredFrame, int *heightPaintAt)
+	{
+		if (contour.size() < 5) {
+			return { {}, {} };
+		}
+
+		cv::RotatedRect ellipse = cv::fitEllipse(contour);
+		cv::Rect rect = ellipse.boundingRect();
+		cv::Point2f points[4];
+		ellipse.points(points);
+		cv::Point center = (rect.br() + rect.tl()) * 0.5;
+		float majorAxisLength = std::max(rect.width, rect.height);
+		if(majorAxisLength < MIN_PIXEL_WIDTH_FOR_DETECTION || majorAxisLength > MAX_PIXEL_WIDTH_FOR_DETECTION)
+		{
+			return { {}, {} };
+		}
+		float minorAxisLength = std::min(rect.width, rect.height);
+		if(minorAxisLength < MIN_PIXEL_HEIGHT_FOR_DETECTION || minorAxisLength > MAX_PIXEL_HEIGHT_FOR_DETECTION){
+			return { {}, {} };
+		}
+		double area = rect.width * rect.height;
+		if(area < MIN_PIXEL_AREA_FOR_DETECTION || area > MAX_PIXEL_AREA_FOR_DETECTION){
+			return { {}, {} };
+		}
+		/*Rebels::LinearSlope line1(points[0].x, points[0].y, points[1].x, points[1].y); // bottom left to top left
+		printf("l1 slope: %f\nl1 yintercept: %f\n", line1.getSlope(), line1.getYIntercept());
+		Rebels::LinearSlope line2(points[1].x, points[1].y, points[2].x, points[2].y); // top left to top right
+		printf("l2 slope: %f\nl2 yintercept: %f\n", line2.getSlope(), line2.getYIntercept());
+		Rebels::LinearSlope line3(points[2].x, points[2].y, points[3].x, points[3].y); // top right to bottom right
+		printf("l3 slope: %f\nl3 yintercept: %f\n", line3.getSlope(), line3.getYIntercept());
+		Rebels::LinearSlope line4(points[3].x, points[3].y, points[0].x, points[0].y); // bottom right to bottom left
+		printf("l4 slope: %f\nl4 yintercept: %f\n", line4.getSlope(), line4.getYIntercept());
+		int pixels = 0;
+		int validPixels = 0;
+		int x = 0;
+		if(rect.x > 0){
+			x = rect.x;
+		}
+		int y = 0;
+		if(rect.y > 0){
+			y = rect.y;
+		}
+		int xMax = rect.width + rect.x;
+		if(xMax > RESOLUTION_WIDTH){
+			xMax = RESOLUTION_WIDTH - 1;
+		}
+		int yMax = rect.height + rect.y;
+		if(yMax > RESOLUTION_HEIGHT){
+			yMax = RESOLUTION_HEIGHT - 1;
+		}
+		for(int i = x; i < xMax; i++){
+			for(int j = y; j < yMax; j++){
+				if(line1.IsPointBelowLine(i, j) && line2.IsPointAboveLine(i, j) && line3.IsPointAboveLine(i, j) && line4.IsPointBelowLine(i, j)){
+					if(mask.at<uchar>(i, j) > 0){
+						validPixels++;
+					}
+					pixels++;
+				}
+			}
+		}
+		double detectpercent = (double)validPixels / (double)pixels;
+		printf("detectpercent: %f\n", detectpercent);
+		if(detectpercent < PERCENT_FILL_FOR_DETECTION){
+			return { {}, {} };
+		}*/
+		std::vector<cv::Point> hull;
+		cv::convexHull(contour, hull);
+		float angle = ellipse.angle;
+
+		// Convert angle to radians
+		float angleRad = angle * CV_PI / 180.0;
+
+		// Calculate the endpoints of the major axis
+		cv::Point2f majorAxisEndPoint1(
+			center.x + majorAxisLength / 2 * cos(angleRad),
+			center.y + majorAxisLength / 2 * sin(angleRad)
+		);
+
+		cv::Point2f majorAxisEndPoint2(
+			center.x - majorAxisLength / 2 * cos(angleRad),
+			center.y - majorAxisLength / 2 * sin(angleRad)
+		);
+
+		#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
+		std::string uvtext = "(" + std::to_string(ellipse.center.x) + ", " + std::to_string(ellipse.center.y) + ")";
+		cv::putText(filteredFrame, uvtext, cv::Point(10, *heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+		*heightPaintAt = *heightPaintAt + 30;
+		#endif
+
+		return { hull, { majorAxisEndPoint1, majorAxisEndPoint2 } };
+	}
+
+	/*! \brief Processes each frame, logs it to the logfile if \ref m_bIsLogging is set to true, runs the object detection on it, pushes the value to nettables, 
+	* \brief and sends the packet with the data to the roboRIO if \ref SEND_PACKETS or \ref PRODUCTION is true(and there is a valid detection). 
+	* \param nCam - The number of the camera, unused for object detection since it is a single-camera system.
+	* \param pcf - A pointer to the \ref CameraFrame to be processed.
+	* \returns Nothing.
+	*/
+	virtual void ProcessFrame(int nCam, CameraFrame const *pcf){
+		ProcessFrameWithRet(nCam, pcf);
+	}
+
+	/*! \brief Processes each frame, logs it to the logfile if \ref m_bIsLogging is set to true, runs the object detection on it, pushes the value to nettables, 
+	* \brief and sends the packet with the data to the roboRIO if \ref SEND_PACKETS or \ref PRODUCTION is true(and there is a valid detection). 
+	* \param nCam - The number of the camera, unused for object detection since it is a single-camera system.
+	* \param pcf - A pointer to the \ref CameraFrame to be processed.
+	* \returns The filtered frame.
+	*/
+	cv::Mat ProcessFrameWithRet( int nCam, CameraFrame const *pcf )
+	{
+		printf( "Have Frame from %d:%d %dx%d\n", nCam, pcf->u32Sequence(), pcf->nRows(), pcf->nCols() );
+		cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
+		int heightPaintAt = 60;
+		if(m_mtxLog.try_lock()){
+			if(m_bLoggingDone){
+			}
+			else if(m_vl.bIsOpen()){
+				m_vl.bWriteRGB(frame, pcf->u32Sequence(), pcf->u32Exposure());
+				if(time(0) > m_tmLogEnd){
+					m_vl.vClose();
+					m_bLoggingDone = true;
+					printf("Finished logging\n");
+				}
+			}
+			else{
+				if(m_bIsLogging){
+					try{
+						char szTmp[128];
+						for(int i = 0; ; i++){
+							snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", LOG_DIR, i);
+							if(access(szTmp, F_OK) == -1){
+								break;
+							}
+						}
+						printf("Opening log file at %s\n", szTmp);
+						m_vl.vOpen(szTmp, true);
+						m_tmLogEnd = time(0) + 160;
+					}
+					catch(std::exception &e){
+						m_bLoggingDone = true;
+						printf("Unable to start logging: %s\n", e.what());
+					}
+				}
+			}
+			m_mtxLog.unlock();
+		}
+		#if (IMGPROC_GUI && !PRODUCTION)
+		cv::imshow( "Raw", frame );
+#endif
+		// cv::Mat hsv( pcf->nRows(), pcf->nCols(), CV_8UC3);
+
+		// cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
+
+		// cv::Mat thresh;
+		// cv::inRange(hsv, cv::Scalar( m_nHLow, m_nSLow, m_nVLow), cv::Scalar( m_nHHigh, m_nSHigh, m_nVHigh), thresh);
+
+		//frame = cv::undistort_frame(frame, mtx, dist);
+        cv::Mat mask = filter_hsv_inverted(frame, m_nHLow, m_nHHigh, m_nSLow, m_nSHigh, m_nVLow, m_nVHigh);
+        cv::Mat filtered_frame;
+        cv::bitwise_and(frame, frame, filtered_frame, mask);
+        std::vector<std::vector<cv::Point>> contours;
+        cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	std::vector<ObjectDetectionInfo> corals;
+        if (!contours.empty()) {
+			for(int i = 0; i < contours.size(); i++){
+            // Fit a contour and get endpoints
+			#if NO_MULTIPLE_OBJECT_DETECTION
+			auto largest_contour = std::max_element(contours.begin(), contours.end(),
+			[](const std::vector<cv::Point>& a, const std::vector<cv::Point>& b) {
+				return cv::contourArea(a) < cv::contourArea(b);
+			});
+			contours[i] = *largest_contour;
+			#endif
+            auto [fitted_contour, endpoints] = fit_cylinder_contour(contours[i], mask, filtered_frame, &heightPaintAt);
+            if (!fitted_contour.empty()) {
+                Rebels::Point2d coralVec = calculate_coral_vector(contours[i], m_focalLen, m_fCDiam, CAMERA_CENTER);
+				double distance = coralVec.length();
+				// u = x, v = y
+				double angle = std::atan2(coralVec.v(), coralVec.u());
+				printf( "%.3f   %.3f\n", distance, angle );
+				// NaN compare operations are always false, so if either is NaN, don't use it.
+				if(distance == distance && angle == angle){
+				#if USE_OUTPUT_FILTERING
+				distance = m_distanceFilter.Calculate(distance);
+				angle = m_angleFilter.Calculate(angle);
+				#endif
+				m_nLastCoralDistanceTopic.SetDefault(distance);
+				m_nLastCoralAngleTopic.SetDefault(angle);
+				corals.push_back(ObjectDetectionInfo(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL));
+                // Draw the fitted contour
+				#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
+				std::string coral_vec_text = "(" + std::to_string(coralVec.u()) + ", " + std::to_string(coralVec.v()) + ")";
+				std::string distance_text = "Distance: " + std::to_string(distance / 0.0254) + "in";
+				std::string angle_text = "Angle: " + std::to_string(angle * (180/M_PI)) + "deg";
+				m_distFile << distance << "\n";
+				m_angleFile << angle << "\n";
+				cv::putText(filtered_frame, coral_vec_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+				heightPaintAt += 30;
+				cv::putText(filtered_frame, distance_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+				heightPaintAt += 30;
+				cv::putText(filtered_frame, angle_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+				heightPaintAt += 30;
+                cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
+                // Draw the major axis line if endpoints are valid
+                if (endpoints.first.x != 0 || endpoints.first.y != 0 || endpoints.second.x != 0 || endpoints.second.y != 0) {
+                    cv::line(filtered_frame, endpoints.first, endpoints.second, cv::Scalar(255, 0, 0), 2);
+                }
+			#endif
+				}
+			}
+			#if NO_MULTIPLE_OBJECT_DETECTION
+			break;
+			#endif
+		}
+				#if SEND_PACKETS || PRODUCTION
+				struct timespec tsCur;
+				struct timeval tvCur;
+				struct timeval tvDelta;
+			
+				// Get current time since power on
+				clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
+				TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
+				// Calculate delta between when frame was catured and now.
+				timersub( &tvCur, pcf->ts(), &tvDelta );
+				std::sort(corals.begin(), corals.end());
+				int count = corals.size();
+				while(corals.size() < 4){
+					corals.push_back(ObjectDetectionInfo());
+				}
+				long time = nt::Now() + m_i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+				ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, count, corals.at(0), corals.at(1), corals.at(2), corals.at(3));
+				SendObjectDetectionPacket(packet);
+				#endif
+
+	}
+		
+		#if DEBUG && !PRODUCTION
+			struct timespec tsCur;
+			struct timeval tvCur;
+			struct timeval tvDelta;
+
+			clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur);
+			TIMESPEC_TO_TIMEVAL(&tvCur, &tsCur);
+			timersub(&tvCur, pcf->ts(), &tvDelta);
+			m_latencyFile << tvDelta.tv_usec << "\n";
+			m_nLastLatencyTopic.SetDefault(tvDelta.tv_usec);
+		#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
+		// Display distance and angle (only if valid values were calculated)
+			std::string latency_text = "Latency: " + std::to_string(tvDelta.tv_usec) + "us";
+			std::string exposure_text = "Exposure: " + std::to_string(pcf->u32Exposure());
+			cv::putText(filtered_frame, exposure_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);	
+			heightPaintAt += 30;	
+			cv::putText(filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+			heightPaintAt += 30;
+		if (m_mtxCS.try_lock()) { 
+			if (m_bFirstVid) {
+				m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows() );
+				m_outputStreamRaw = frc::CameraServer::PutVideo("VisionRaw", pcf->nCols(), pcf->nRows());
+				m_bFirstVid = false;
+			}
+			m_outputStream.PutFrame(filtered_frame);
+			m_outputStreamRaw.PutFrame(frame);
+			m_mtxCS.unlock();
+		}
+		#endif
+		#endif
+
+
+#if (IMGPROC_GUI && !PRODUCTION)
+		// Display the results
+   		cv::imshow("Filtered Video", filtered_frame);
+        cv::imshow("Mask", mask);
+
+		if (cv::waitKey(1) == 'q') {
+			cv::destroyAllWindows();
+			exit(0);
+		}
+#endif
+		return filtered_frame;
+	}
+};
+
+// Initialize static vars
+int64_t imgProc::m_i64TimeOffset;
