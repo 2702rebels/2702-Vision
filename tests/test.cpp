@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "SerializationTest.h"
-#include "2702MathTest.h"
+#include "SerializationTest.cpp"
+#include "2702MathTest.cpp"
 
 int main(int argc, char **argv){
     ::testing::InitGoogleTest(&argc, argv);
