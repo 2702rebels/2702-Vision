@@ -1,5 +1,7 @@
 find_package(OpenCV REQUIRED)
 find_package(wpilib REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
 
 add_executable(tests)
 
@@ -17,6 +19,8 @@ target_link_libraries(tests PRIVATE ${OpenCV_LIBS})
 target_link_libraries(tests PRIVATE apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
 target_link_libraries(tests PRIVATE gtest_main)
+
+target_link_libraries(tests PRIVATE PkgConfig::libcamera)
 
 enable_testing()
 include(GoogleTest)
