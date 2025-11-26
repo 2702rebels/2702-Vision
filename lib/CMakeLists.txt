@@ -1,4 +1,3 @@
-
 add_library(2702 STATIC)
 
 file(GLOB 2702_SOURCES "implementation/*.cpp")
@@ -12,6 +11,9 @@ endif()
 if(IS_RPI)
     file(GLOB RPI_SOURCES "implementation/rpi/*.cpp")
     list(APPEND 2702_SOURCES ${RPI_SOURCES})
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
+    target_link_libraries(2702 PRIVATE PkgConfig::libcamera)
 endif()
 
 target_sources(2702 PRIVATE ${2702_SOURCES})
