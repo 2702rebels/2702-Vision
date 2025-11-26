@@ -8,8 +8,8 @@ target_include_directories(2702log PRIVATE include)
 target_include_directories(2702log PUBLIC ${spdlog_INCLUDE_DIRS})
 target_link_libraries(2702log PUBLIC ${spdlog_LIBS})
 
-target_include_directories(2702log PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(2702log PRIVATE ${OpenCV_LIBS})
+target_include_directories(2702log PUBLIC ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(2702log PUBLIC ${OpenCV_LIBS})
 
 target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
