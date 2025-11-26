@@ -34,8 +34,6 @@
 #include <string>
 #include <stdexcept>
 
-#include "rpicam.h"
-
 using namespace std;
 
 #include <signal.h>
@@ -51,7 +49,6 @@ using namespace std;
 #include "LogPlayer.h"
 #include "logtostdvideo.h"
 
-#include "object.h"
 #include <thread>
 #include <string>
 #include <signal.h>

@@ -1,6 +1,6 @@
 #pragma once
 #include "VisLog.h"
-#include "object.h"
+#include <frmprocessor.h>
 #include <string>
 #include "config.h"
 #include "LoggingUtils.h"

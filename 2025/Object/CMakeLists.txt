@@ -74,3 +74,5 @@ target_include_directories(logtostdvideo PRIVATE ${CMAKE_SOURCE_DIR}/lib/include
 
 target_include_directories(logtostdvideo PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(logtostdvideo PRIVATE ${OpenCV_LIBS})
+
+target_link_libraries(logtostdvideo PRIVATE ntcore wpinet wpiutil)
