@@ -32,3 +32,21 @@ add_library(objectdetectionstruct STATIC implementation/ObjectDetectionStruct.cp
 target_include_directories(objectdetectionstruct PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(objectdetectionstruct PRIVATE wpiutil)
+
+
+add_executable(nettableserver implementation/nettableserver.cpp)
+
+target_include_directories(nettableserver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(nettableserver PRIVATE ntcore wpinet wpiutil)
+
+target_link_libraries(nettableserver PRIVATE 2702log)
+
+
+add_executable(nettableclient implementation/nettableclient.cpp)
+
+target_include_directories(nettableclient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(nettableclient PRIVATE ntcore wpinet wpiutil)
+
+target_link_libraries(nettableclient PRIVATE 2702log)
