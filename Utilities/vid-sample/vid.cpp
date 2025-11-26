@@ -15,6 +15,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <drm/drm_fourcc.h>
 #include <thread>
 #include <vector>
 #include <mutex>
@@ -81,7 +82,7 @@ int main( int argc, char **argv )
 	//	ntinst.StartClientTeam( 2702 );
 	//	ntinst.StartServer();
 		imgProc proc;
-		CameraManager mycam0( "/dev/video0", 4, 0, proc );
+		CameraManager mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
 	//	nvCamera mycam1( "/dev/video1", 4, 1 );
 
 		printinfo( mycam0 );
