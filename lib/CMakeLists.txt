@@ -2,7 +2,6 @@
 add_library(2702 STATIC)
 
 file(GLOB_RECURSE 2702_SOURCES "implementation/*.cpp")
-target_sources(2702 PRIVATE ${2702_SOURCES})
 
 if(IS_JETSON)
     target_include_directories(2702 PRIVATE /usr/local/cuda/include)
@@ -14,6 +13,8 @@ if(IS_RPI)
     file(GLOB_RECURSE RPI_SOURCES "implementation/*.rpicpp")
     list(APPEND 2702_SOURCES ${RPI_SOURCES})
 endif()
+
+target_sources(2702 PRIVATE ${2702_SOURCES})
 
 target_include_directories(2702 PUBLIC "include")
 
