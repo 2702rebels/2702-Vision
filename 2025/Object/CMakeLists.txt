@@ -31,7 +31,7 @@ add_library(objectdetectionstruct STATIC implementation/ObjectDetectionStruct.cp
 
 target_include_directories(objectdetectionstruct PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(objectdetectionstruct PRIVATE wpiutil)
+target_link_libraries(objectdetectionstruct PUBLIC wpiutil)
 
 
 add_executable(nettableserver implementation/nettableserver.cpp)
