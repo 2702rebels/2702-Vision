@@ -1,14 +1,15 @@
 find_package(OpenCV REQUIRED)
 find_package(wpilib REQUIRED)
 find_package(PkgConfig)
-pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET libavcodec libavutil libavformat)
+pkg_check_modules(ffmpeg REQUIRED IMPORTED_TARGET libavcodec libavutil libavformat)
+pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
 
 add_executable(logffmpeg logffmpeg/logffmpeg.cpp)
 
 target_include_directories(logffmpeg PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 target_link_libraries(logffmpeg PRIVATE 2702)
 
-target_link_libraries(logffmpeg PRIVATE PkgConfig::FFMPEG)
+target_link_libraries(logffmpeg PRIVATE PkgConfig::ffmpeg)
 
 target_link_libraries(logffmpeg PRIVATE ${OpenCV_LIBS})
 target_include_directories(logffmpeg PRIVATE ${OpenCV_INCLUDE_DIRS})
@@ -32,6 +33,8 @@ target_link_libraries(rpi-sample PRIVATE ${OpenCV_LIBS})
 target_include_directories(rpi-sample PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 target_link_libraries(rpi-sample PRIVATE cameraserver ntcore cscore wpiutil)
+
+target_link_libraries(rpi-sample PRIVATE PkgConfig::libcamera)
 
 
 add_executable(vid-sample vid-sample/vid.cpp)
