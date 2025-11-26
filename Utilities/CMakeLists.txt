@@ -2,7 +2,6 @@ find_package(OpenCV REQUIRED)
 find_package(wpilib REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules(ffmpeg REQUIRED IMPORTED_TARGET libavcodec libavutil libavformat)
-pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
 
 add_executable(logffmpeg logffmpeg/logffmpeg.cpp)
 
@@ -23,18 +22,20 @@ target_link_libraries(log2mjpeg PRIVATE 2702)
 target_link_libraries(log2mjpeg PRIVATE ${OpenCV_LIBS})
 target_include_directories(log2mjpeg PRIVATE ${OpenCV_INCLUDE_DIRS})
 
+if(IS_RPI)
+	add_executable(rpi-sample rpi-sample/rpi-sample.cpp)
 
-add_executable(rpi-sample rpi-sample/rpi-sample.cpp)
+	target_include_directories(rpi-sample PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
+	target_link_libraries(rpi-sample PRIVATE 2702)
 
-target_include_directories(rpi-sample PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
-target_link_libraries(rpi-sample PRIVATE 2702)
+	target_link_libraries(rpi-sample PRIVATE ${OpenCV_LIBS})
+	target_include_directories(rpi-sample PRIVATE ${OpenCV_INCLUDE_DIRS})
 
-target_link_libraries(rpi-sample PRIVATE ${OpenCV_LIBS})
-target_include_directories(rpi-sample PRIVATE ${OpenCV_INCLUDE_DIRS})
+	target_link_libraries(rpi-sample PRIVATE cameraserver ntcore cscore wpiutil)
 
-target_link_libraries(rpi-sample PRIVATE cameraserver ntcore cscore wpiutil)
-
-target_link_libraries(rpi-sample PRIVATE PkgConfig::libcamera)
+	pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
+	target_link_libraries(rpi-sample PRIVATE PkgConfig::libcamera)
+endif()
 
 
 add_executable(vid-sample vid-sample/vid.cpp)
