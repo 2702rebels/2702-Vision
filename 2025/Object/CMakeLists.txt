@@ -61,3 +61,16 @@ target_link_libraries(testudpserver PRIVATE 2702log)
 target_link_libraries(testudpserver PRIVATE objectdetectionstruct)
 
 target_include_directories(testudpserver PRIVATE /usr/include/asio)
+
+
+add_executable(logtostdvideo implementation/logtostdvideo.cpp)
+
+target_include_directories(logtostdvideo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(logtostdvideo PRIVATE 2702log)
+
+target_link_libraries(logtostdvideo PRIVATE 2702)
+target_include_directories(logtostdvideo PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
+
+target_include_directories(logtostdvideo PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(logtostdvideo PRIVATE ${OpenCV_LIBS})
