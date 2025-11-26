@@ -2,7 +2,6 @@ sudo apt update
 sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev
 echo "Downloading latest CMake"
 sudo apt remove --purge --auto-remove cmake -y
-sudo apt update
 sudo apt install -y ca-certificates gpg wget
 test -f /usr/share/doc/kitware-archive-keyring/copyright ||
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
@@ -31,8 +30,7 @@ cd googletest
 mkdir build
 cd build
 cmake ..
-make
-sudo make install
+sudo cmake --build . --target install --parallel $(nproc)
 cd ..
 cd ..
 sudo rm -rf googletest

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 4.2)
 project(2702Vision)
 
 if(CMAKE_CUDA_HOST_COMPILER)
