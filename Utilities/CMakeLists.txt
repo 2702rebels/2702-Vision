@@ -10,6 +10,9 @@ target_link_libraries(logffmpeg PRIVATE 2702)
 
 target_link_libraries(logffmpeg PRIVATE PkgConfig::AVCODEC)
 
+target_link_libraries(log2mjpeg PRIVATE ${OpenCV_LIBS})
+target_include_directories(log2mjpeg PRIVATE ${OpenCV_INCLUDE_DIRS})
+
 
 add_executable(log2mjpeg log2mjpeg/log2mjpeg.cpp)
 
