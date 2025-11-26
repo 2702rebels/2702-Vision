@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 	}
 	catch (std::exception& e)
 	{
-		printf("Exception: {}", e.what());
+		error("Exception: {}", e.what());
 	}
 
 	return 0;
