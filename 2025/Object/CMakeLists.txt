@@ -27,6 +27,8 @@ if(IS_RPI)
 	target_include_directories(object PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endif()
 
-add_library(objectdetectionstruct implementation/ObjectDetectionStruct.cpp)
+add_library(objectdetectionstruct STATIC implementation/ObjectDetectionStruct.cpp)
+
+target_include_directories(objectdetectionstruct PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(objectdetectionstruct PRIVATE wpiutil)
