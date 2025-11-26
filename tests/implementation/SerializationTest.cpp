@@ -1,5 +1,5 @@
 #include "ObjectDetectionStruct.h"
-#include "ObjectDetectionStruct.cpp"
+#include <gtest/gtest.h>
 
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;

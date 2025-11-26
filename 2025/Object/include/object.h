@@ -1,7 +1,7 @@
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
 * - wpilib ntcore
-* - ObjectDetectionStruct.h and ObjectDetectionStruct.cpp
+* - opencv4
 */
 
 #include <networktables/NetworkTableInstance.h>
@@ -11,7 +11,6 @@
 #include <networktables/BooleanTopic.h>
 #include <sys/time.h>
 #include "ObjectDetectionStruct.h"
-#include "ObjectDetectionStruct.cpp"
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/stat.h>
@@ -572,9 +571,9 @@ public:
 	void SendObjectDetectionPacket(ObjectDetectionPacket packet) {
 #if SEND_PACKETS || PRODUCTION
 		try {
-			std::vector<uint8_t> bytesVec(ObjectDetectionPacketStructType::GetSize());
+			std::vector<uint8_t> bytesVec(StructTypeObjectDetectionPacket::GetSize());
 			std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
-			ObjectDetectionPacketStructType::Pack(bytes, packet);
+			StructTypeObjectDetectionPacket::Pack(bytes, packet);
 			udpSender.bSend(bytes);
 		}
 		catch (std::exception& e) {
