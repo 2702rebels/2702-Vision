@@ -50,3 +50,14 @@ target_include_directories(nettableclient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/in
 target_link_libraries(nettableclient PRIVATE ntcore wpinet wpiutil)
 
 target_link_libraries(nettableclient PRIVATE 2702log)
+
+
+add_executable(testudpserver implementation/testudpserver.cpp)
+
+target_include_directories(testudpserver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(testudpserver PRIVATE 2702log)
+
+target_link_libraries(testudpserver PRIVATE objectdetectionstruct)
+
+target_include_directories(testudpserver PRIVATE /usr/include/asio)
