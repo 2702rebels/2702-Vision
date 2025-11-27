@@ -32,11 +32,7 @@ int main( int argc, char **argv )
 	int height = stoi(argv[3]);
 	ObjectFrameProcessor ip("/", width, height);
 	LogPlayer lp( argv[1], ip );
-	ConfigUtils::triggerConfigLoad(ip);
 	while (true) {
-		if(ConfigUtils::configHasChanged(ip)){
-			ConfigUtils::triggerConfigSave(ip);
-		}
 		if (!lp.bNextFrame()) {
 			info( "About to rewind" );
 			lp.vRewind();
