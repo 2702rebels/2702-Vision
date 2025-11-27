@@ -6,7 +6,7 @@
  * - rpicam
  */
 
-#include <Loggingutils.h>
+#include <LoggingUtils.h>
 
 using namespace std;
 
