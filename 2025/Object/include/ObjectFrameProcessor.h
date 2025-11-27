@@ -10,6 +10,7 @@
 #include <networktables/IntegerTopic.h>
 #include <opencv2/imgproc.hpp>
 #include <cstdint>
+#include <ObjectDetectionStruct.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cameraserver/CameraServer.h>
 #include <cstdint>
+#include <2702math.h>
 
 // Initialize static vars
 int64_t ObjectFrameProcessor::m_i64TimeOffset;
@@ -484,8 +485,8 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 	int validPixels = 0;
 	int xMin = std::max(rect.x, 0);
 	int yMin = std::max(rect.y, 0);
-	int xMax = std::min(rect.width + rect.x, RESOLUTION_WIDTH - 1);
-	int yMax = std::min(rect.height + rect.y, RESOLUTION_HEIGHT - 1);
+	int xMax = std::min(rect.width + rect.x, m_frameWidth - 1);
+	int yMax = std::min(rect.height + rect.y, m_frameHeight - 1);
 	if (xMin > xMax) {
 		int buf = xMin;
 		xMin = xMax;
