@@ -353,7 +353,7 @@ void ObjectFrameProcessor::timesynccallback(nt::Event const& e)
 	if (e.flags & NT_EVENT_TIMESYNC) {
 		spdlog::info("tscb::: Have TIMESYNC\n");
 		nt::TimeSyncEventData const* ptsed = e.GetTimeSyncEventData();
-		imgProc::m_i64TimeOffset = ptsed->serverTimeOffset;
+		m_i64TimeOffset = ptsed->serverTimeOffset;
 		spdlog::info("Got Offset -> {}", ptsed->serverTimeOffset);
 	}
 	else {
@@ -567,7 +567,7 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 				try {
 					char szTmp[128];
 					for (int i = 0; ; i++) {
-						snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", LOG_DIR, i);
+						snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", m_logDir, i);
 						if (access(szTmp, F_OK) == -1) {
 							break;
 						}
