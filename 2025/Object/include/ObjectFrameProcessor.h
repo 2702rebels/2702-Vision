@@ -3,7 +3,7 @@
 #include <frmprocessor.h>
 #include <string>
 #include <array>
-#include <wpi/Struct.h>
+#include <wpi/struct/Struct.h>
 #include <networktables/NetworkTableInstance.h>
 #include <memory>
 #include <networktables/DoubleTopic.h>
