@@ -35,7 +35,6 @@ target_link_libraries(objectframeprocessor PRIVATE ${OpenCV_LIBS})
 
 target_link_libraries(objectframeprocessor PUBLIC wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
-target_link_libraries(objectframeprocessor PUBLIC PkgConfig::libcamera)
 
 
 add_executable(calibrate implementation/calibrate.cpp)
