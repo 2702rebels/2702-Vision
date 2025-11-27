@@ -47,7 +47,7 @@ void ObjectFrameProcessor::vStartLogging() {
 * \brief Sets hue min object detection parameter.
 * \param  newValue - integer representing the new hue min value
 */
-virtual void ObjectFrameProcessor::setPVHueMin(int newValue)
+void ObjectFrameProcessor::setPVHueMin(int newValue)
 {
 	m_nHLow = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
@@ -58,7 +58,7 @@ virtual void ObjectFrameProcessor::setPVHueMin(int newValue)
 * \brief Sets hue max object detection parameter.
 * \param  newValue - integer representing the new hue max value
 */
-virtual void ObjectFrameProcessor::setPVHueMax(int newValue)
+void ObjectFrameProcessor::setPVHueMax(int newValue)
 {
 	m_nHHigh = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
@@ -69,7 +69,7 @@ virtual void ObjectFrameProcessor::setPVHueMax(int newValue)
 * \brief Sets saturation min object detection parameter.
 * \param  newValue - integer representing the new saturation min value
 */
-virtual void ObjectFrameProcessor::setSaturationMin(int newValue)
+void ObjectFrameProcessor::setSaturationMin(int newValue)
 {
 	m_nSLow = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
@@ -80,7 +80,7 @@ virtual void ObjectFrameProcessor::setSaturationMin(int newValue)
 * \brief Sets saturation max object detection parameter.
 * \param  newValue - integer representing the new saturation max value
 */
-virtual void ObjectFrameProcessor::setSaturationMax(int newValue)
+void ObjectFrameProcessor::setSaturationMax(int newValue)
 {
 	m_nSHigh = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
@@ -91,7 +91,7 @@ virtual void ObjectFrameProcessor::setSaturationMax(int newValue)
 * \brief Sets value min object detection parameter.
 * \param  newValue - integer representing the new value min value
 */
-virtual void ObjectFrameProcessor::setValueMin(int newValue)
+void ObjectFrameProcessor::setValueMin(int newValue)
 {
 	m_nVLow = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
@@ -102,7 +102,7 @@ virtual void ObjectFrameProcessor::setValueMin(int newValue)
 * \brief Sets value max object detection parameter.
 * \param  newValue - integer representing the new value max value
 */
-virtual void ObjectFrameProcessor::setValueMax(int newValue)
+void ObjectFrameProcessor::setValueMax(int newValue)
 {
 	m_nVHigh = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
@@ -113,7 +113,7 @@ virtual void ObjectFrameProcessor::setValueMax(int newValue)
 * \brief Sets min pixel width object detection parameter.
 * \param  newValue - integer representing the new min pixel width
 */
-virtual void ObjectFrameProcessor::setMinPixelWidth(int newValue)
+void ObjectFrameProcessor::setMinPixelWidth(int newValue)
 {
 	m_minPixelWidth = newValue;
 }
@@ -121,7 +121,7 @@ virtual void ObjectFrameProcessor::setMinPixelWidth(int newValue)
 * \brief Sets min pixel height object detection parameter.
 * \param  newValue - integer representing the new min pixel height
 */
-virtual void ObjectFrameProcessor::setMinPixelHeight(int newValue)
+void ObjectFrameProcessor::setMinPixelHeight(int newValue)
 {
 	m_minPixelHeight = newValue;
 }
@@ -129,7 +129,7 @@ virtual void ObjectFrameProcessor::setMinPixelHeight(int newValue)
 * \brief Sets min pixel area object detection parameter.
 * \param  newValue - integer representing the new min pixel area
 */
-virtual void ObjectFrameProcessor::setMinPixelArea(int newValue)
+void ObjectFrameProcessor::setMinPixelArea(int newValue)
 {
 	m_minPixelArea = newValue;
 }
@@ -137,7 +137,7 @@ virtual void ObjectFrameProcessor::setMinPixelArea(int newValue)
 * \brief Sets max pixel width object detection parameter.
 * \param  newValue - integer representing the new max pixel width
 */
-virtual void ObjectFrameProcessor::setMaxPixelWidth(int newValue)
+void ObjectFrameProcessor::setMaxPixelWidth(int newValue)
 {
 	m_maxPixelWidth = newValue;
 }
@@ -145,7 +145,7 @@ virtual void ObjectFrameProcessor::setMaxPixelWidth(int newValue)
 * \brief Sets max pixel height object detection parameter.
 * \param  newValue - integer representing the new max pixel height
 */
-virtual void ObjectFrameProcessor::setMaxPixelHeight(int newValue)
+void ObjectFrameProcessor::setMaxPixelHeight(int newValue)
 {
 	m_maxPixelHeight = newValue;
 }
@@ -153,7 +153,7 @@ virtual void ObjectFrameProcessor::setMaxPixelHeight(int newValue)
 * \brief Sets max pixel area object detection parameter.
 * \param  newValue - integer representing the new max pixel area
 */
-virtual void ObjectFrameProcessor::setMaxPixelArea(int newValue)
+void ObjectFrameProcessor::setMaxPixelArea(int newValue)
 {
 	m_maxPixelArea = newValue;
 }
@@ -161,7 +161,7 @@ virtual void ObjectFrameProcessor::setMaxPixelArea(int newValue)
 * \brief Sets min percent fill object detection parameter.
 * \param  newValue - integer representing the new min percent fill
 */
-virtual void ObjectFrameProcessor::setMinPercentFill(double newValue)
+void ObjectFrameProcessor::setMinPercentFill(double newValue)
 {
 	m_minPercentFill = newValue;
 }
@@ -169,7 +169,7 @@ virtual void ObjectFrameProcessor::setMinPercentFill(double newValue)
 * \brief Sets the X distance between the center of the camera and the center of the robot frame.
 * \param newValue - new distance in meters
 */
-virtual void ObjectFrameProcessor::setCamOffsetX(double newValue)
+void ObjectFrameProcessor::setCamOffsetX(double newValue)
 {
 	m_camOffsetX = newValue;
 	m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
@@ -178,7 +178,7 @@ virtual void ObjectFrameProcessor::setCamOffsetX(double newValue)
 * \brief Sets the Y distance between the center of the camera and the center of the robot frame.
 * \param newValue - new distance in meters
 */
-virtual void ObjectFrameProcessor::setCamOffsetY(double newValue)
+void ObjectFrameProcessor::setCamOffsetY(double newValue)
 {
 	m_camOffsetY = newValue;
 	m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
@@ -187,7 +187,7 @@ virtual void ObjectFrameProcessor::setCamOffsetY(double newValue)
 * \brief Sets the vertical distance between the center of the camera and the center of the robot frame.
 * \param newValue - new distance in meters
 */
-virtual void ObjectFrameProcessor::setCamHeight(double newValue)
+void ObjectFrameProcessor::setCamHeight(double newValue)
 {
 	m_camHeight = newValue;
 	m_p3dCam2Robot = Rebels::Point3d(m_camOffsetX, m_camOffsetY, m_camHeight);
@@ -196,7 +196,7 @@ virtual void ObjectFrameProcessor::setCamHeight(double newValue)
 * \brief Sets the angle below the horizontal of the camera
 * \param newValue - new angle value in radians
 */
-virtual void ObjectFrameProcessor::setCamAngle(double newValue)
+void ObjectFrameProcessor::setCamAngle(double newValue)
 {
 	m_camAngle = newValue;
 }
@@ -205,7 +205,7 @@ virtual void ObjectFrameProcessor::setCamAngle(double newValue)
 * Calling this function resets the median.
 * \param newValue - the new number of packets
 */
-virtual void ObjectFrameProcessor::setFilterWindow(int newValue)
+void ObjectFrameProcessor::setFilterWindow(int newValue)
 {
 	if (newValue == m_filterPacketWindow) {
 		// Avoid unnecessary filtering resets.
@@ -218,131 +218,131 @@ virtual void ObjectFrameProcessor::setFilterWindow(int newValue)
 /*!
 * \brief Returns the hue min object detection parameter.
 */
-virtual int ObjectFrameProcessor::getPVHueMin() const
+int ObjectFrameProcessor::getPVHueMin() const
 {
 	return m_nHLow;
 }
 /*!
 * \brief Returns the hue max object detection parameter.
 */
-virtual int ObjectFrameProcessor::getPVHueMax() const
+int ObjectFrameProcessor::getPVHueMax() const
 {
 	return m_nHHigh;
 }
 /*!
 * \brief Returns the saturation min object detection parameter.
 */
-virtual int ObjectFrameProcessor::getSaturationMin() const
+int ObjectFrameProcessor::getSaturationMin() const
 {
 	return m_nSLow;
 }
 /*!
 * \brief Returns the saturation max object detection parameter.
 */
-virtual int ObjectFrameProcessor::getSaturationMax() const
+int ObjectFrameProcessor::getSaturationMax() const
 {
 	return m_nSHigh;
 }
 /*!
 * \brief Returns the value min object detection parameter.
 */
-virtual int ObjectFrameProcessor::getValueMin() const
+int ObjectFrameProcessor::getValueMin() const
 {
 	return m_nVLow;
 }
 /*!
 * \brief Returns the value max object detection parameter.
 */
-virtual int ObjectFrameProcessor::getValueMax() const
+int ObjectFrameProcessor::getValueMax() const
 {
 	return m_nVHigh;
 }
 /*!
 * \brief Returns the min pixel width object detection parameter.
 */
-virtual int ObjectFrameProcessor::getMinPixelWidth() const
+int ObjectFrameProcessor::getMinPixelWidth() const
 {
 	return m_minPixelWidth;
 }
 /*!
 * \brief Returns the min pixel height object detection parameter.
 */
-virtual int ObjectFrameProcessor::getMinPixelHeight() const
+int ObjectFrameProcessor::getMinPixelHeight() const
 {
 	return m_minPixelHeight;
 }
 /*!
 * \brief Returns the max pixel width object detection parameter.
 */
-virtual int ObjectFrameProcessor::getMaxPixelWidth() const
+int ObjectFrameProcessor::getMaxPixelWidth() const
 {
 	return m_maxPixelWidth;
 }
 /*!
 * \brief Returns the max pixel height object detection parameter.
 */
-virtual int ObjectFrameProcessor::getMaxPixelHeight() const
+int ObjectFrameProcessor::getMaxPixelHeight() const
 {
 	return m_maxPixelHeight;
 }
 /*!
 * \brief Returns the min pixel area object detection parameter.
 */
-virtual int ObjectFrameProcessor::getMinPixelArea() const
+int ObjectFrameProcessor::getMinPixelArea() const
 {
 	return m_minPixelArea;
 }
 /*!
 * \brief Returns the max pixel area object detection parameter.
 */
-virtual int ObjectFrameProcessor::getMaxPixelArea() const
+int ObjectFrameProcessor::getMaxPixelArea() const
 {
 	return m_maxPixelArea;
 }
 /*!
 * \brief Returns the min percent fill object detection parameter.
 */
-virtual double ObjectFrameProcessor::getMinPercentFill() const
+double ObjectFrameProcessor::getMinPercentFill() const
 {
 	return m_minPercentFill;
 }
 /*!
 * \brief Returns the x offset of the camera center relative to the center of the robot in meters.
 */
-virtual double ObjectFrameProcessor::getCamOffsetX() const
+double ObjectFrameProcessor::getCamOffsetX() const
 {
 	return m_camOffsetX;
 }
 /*!
 * \brief Returns the y offset of the camera center relative to the center of the robot in meters.
 */
-virtual double ObjectFrameProcessor::getCamOffsetY() const
+double ObjectFrameProcessor::getCamOffsetY() const
 {
 	return m_camOffsetY;
 }
 /*!
 * \brief Returns the height offset of the camera center relative to the center of the robot in meters.
 */
-virtual double ObjectFrameProcessor::getCamHeight() const
+double ObjectFrameProcessor::getCamHeight() const
 {
 	return m_camHeight;
 }
 /*!
 * \brief Returns the angle below the horizontal of the camera in radians.
 */
-virtual double ObjectFrameProcessor::getCamAngle() const
+double ObjectFrameProcessor::getCamAngle() const
 {
 	return m_camAngle;
 }
 /*!
 * \brief Returns the number of packets over which the median is taken for distance / angle measurements.
 */
-virtual int ObjectFrameProcessor::getFilterWindow() const
+int ObjectFrameProcessor::getFilterWindow() const
 {
 	return m_filterPacketWindow;
 }
 
-virtual ObjectFrameProcessor::~ObjectFrameProcessor() {}
+ObjectFrameProcessor::~ObjectFrameProcessor() {}
 
 void ObjectFrameProcessor::timesynccallback(nt::Event const& e)
 {
@@ -538,7 +538,7 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 	return { hull, { majorAxisEndPoint1, majorAxisEndPoint2 } };
 }
 
-virtual void ObjectFrameProcessor::ProcessFrame(int nCam, CameraFrame const* pcf) {
+void ObjectFrameProcessor::ProcessFrame(int nCam, CameraFrame const* pcf) {
 	ProcessFrameWithRet(nCam, pcf);
 }
 
