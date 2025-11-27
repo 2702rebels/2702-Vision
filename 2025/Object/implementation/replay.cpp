@@ -6,38 +6,10 @@
 * - rpicam
 */
 
-
-#include <unistd.h>
-#include <stdint.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-
-//#include <X11/Xlib.h>
-//#include <cameraserver/CameraServer.h>
-//#include <networktables/NetworkTableInstance.h>
-#include <drm/drm_fourcc.h>
-
-#include <linux/videodev2.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <thread>
-#include <vector>
-#include <mutex>
-#include <condition_variable>
-
 #include <string>
-#include <stdexcept>
 
 #include "rpicam.h"
 #include "LoggingUtils.h"
-
-using namespace std;
 
 #include <signal.h>
 
@@ -48,7 +20,6 @@ bool bStop = false;
 #define IMGPROC_GUI	1
 
 #include "ObjectFrameProcessor.h"
-#include "config.h"
 
 int main( int argc, char **argv )
 {
