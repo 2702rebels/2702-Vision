@@ -11,6 +11,8 @@
 #include <opencv2/imgproc.hpp>
 #include <cstdint>
 #include <ObjectDetectionStruct.h>
+#include <udpsender.h>
+#include <2702math.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
