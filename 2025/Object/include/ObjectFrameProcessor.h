@@ -1,4 +1,13 @@
 #pragma once
+
+#include <FrmProcessor.h>
+#include <string>
+#include <array>
+#include <wpi/Struct.h>
+#include <networktables/NetworkTableInstance.h>
+#include <memory>
+#include <networktables/DoubleTopic.h>
+
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
 * - wpilib ntcore

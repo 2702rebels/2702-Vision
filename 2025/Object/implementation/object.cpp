@@ -24,7 +24,6 @@
 bool bStop = false;
 
 #include "ObjectFrameProcessor.h"
-#include "config.h"
 
 #define USE_NETWORK_TABLES 1
 #define IS_ROBOT 1
@@ -59,7 +58,6 @@ int main(int argc, char* argv[])
 		//	nvCamera mycam1( "/dev/video1", 4, 1 );
 
 		//	printinfo( mycam0 );
-		ConfigUtils::triggerConfigLoad(proc);
 #if USE_NETWORK_TABLES
 		auto networkTableManager = nt::NetworkTableInstance::GetDefault();
 		auto objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
@@ -91,36 +89,10 @@ int main(int argc, char* argv[])
 #endif
 		while (!bStop)
 		{
-			if (ConfigUtils::configHasChanged(proc))
-			{
-				ConfigUtils::triggerConfigSave(proc);
-			}
-			if (cv::waitKey(1) == 'l')
-			{
-				ConfigUtils::triggerConfigLoad(proc);
-			}
 			info("Connection status of NetworkTables: {}", networkTableManager.IsConnected());
 			if (networkTableManager.IsConnected())
 			{
-				info("Updated configs from network table");
-				proc.setPVHueMin(hueMinTopic.GetAtomic().value);
-				proc.setPVHueMax(hueMaxTopic.GetAtomic().value);
-				proc.setSaturationMin(saturationMinTopic.GetAtomic().value);
-				proc.setSaturationMax(saturationMaxTopic.GetAtomic().value);
-				proc.setValueMin(valueMinTopic.GetAtomic().value);
-				proc.setValueMax(valueMaxTopic.GetAtomic().value);
-				proc.setMinPixelWidth(minPixelWidthTopic.GetAtomic().value);
-				proc.setMinPixelHeight(minPixelHeightTopic.GetAtomic().value);
-				proc.setMinPixelArea(minPixelAreaTopic.GetAtomic().value);
-				proc.setMaxPixelWidth(maxPixelWidthTopic.GetAtomic().value);
-				proc.setMaxPixelHeight(maxPixelHeightTopic.GetAtomic().value);
-				proc.setMaxPixelArea(maxPixelAreaTopic.GetAtomic().value);
-				proc.setMinPercentFill(minPercentFillTopic.GetAtomic().value);
-				proc.setCamOffsetX(camOffsetXTopic.GetAtomic().value);
-				proc.setCamOffsetY(camOffsetYTopic.GetAtomic().value);
-				proc.setCamHeight(camHeightTopic.GetAtomic().value);
-				proc.setCamAngle(camAngleTopic.GetAtomic().value);
-				proc.setFilterWindow(filterPacketWindowTopic.GetAtomic().value);
+				info("net tables connected");
 				if (!bLogStarted)
 				{
 					if (isLoggingTopic.Get())
