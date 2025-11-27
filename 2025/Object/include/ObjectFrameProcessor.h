@@ -159,7 +159,7 @@ class ObjectFrameProcessor : public FrmProcessor
 public:
 	static int64_t m_i64TimeOffset;
 
-	ObjectFrameProcessor();
+	ObjectFrameProcessor(std::string logDir, int frameWidth, int frameHeight);
 
 	/*! \brief Start logging frames to logfile. */
 	virtual void vStartLogging();
