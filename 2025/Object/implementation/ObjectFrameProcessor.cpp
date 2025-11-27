@@ -1,4 +1,7 @@
 #include "ObjectFrameProcessor.h"
+#include <fstream>
+#include <cameraserver/cameraserver.h>
+#include <cstdint>
 
 // Initialize static vars
 int64_t ObjectFrameProcessor::m_i64TimeOffset;
