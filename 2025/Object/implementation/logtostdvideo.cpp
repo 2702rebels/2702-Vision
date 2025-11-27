@@ -6,42 +6,12 @@
  * - rpicam
  */
 
-#include <unistd.h>
-#include <stdint.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-#include "LoggingUtils.h"
-
-// #include <X11/Xlib.h>
-// #include <cameraserver/CameraServer.h>
-// #include <networktables/NetworkTableInstance.h>
-#include <drm/drm_fourcc.h>
-
-#include <linux/videodev2.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <thread>
-#include <vector>
-#include <mutex>
-#include <condition_variable>
-
-#include <string>
-#include <stdexcept>
+#include <Loggingutils.h>
 
 using namespace std;
 
 #include <signal.h>
 
-// Flags for object.h
-#define DEBUG_VIDEO 1
-#define DEBUG 1
-#define SEND_PACKETS 0
 #define WIDTH 640
 #define HEIGHT 480
 #define FRAME_RATE 20
@@ -49,7 +19,6 @@ using namespace std;
 #include "LogPlayer.h"
 #include "logtostdvideo.h"
 
-#include <thread>
 #include <string>
 #include <signal.h>
 #include <iostream>

@@ -2,8 +2,8 @@
 #include "VisLog.h"
 #include <frmprocessor.h>
 #include <string>
-#include "config.h"
 #include "LoggingUtils.h"
+#include <spdlog/spdlog.h>
 
 class StdVideoLogProc : public FrmProcessor {
     imgProc imageProcessor;
@@ -34,13 +34,9 @@ class StdVideoLogProc : public FrmProcessor {
         "-qp 0 "
         "-f mp4 " + outputPathFiltered)).c_str(), "w"))
     {
-        ConfigUtils::triggerConfigLoad(imageProcessor);
     };
 
     virtual void ProcessFrame(int nCam, CameraFrame const *pcf){
-        if(ConfigUtils::configHasChanged(imageProcessor)){
-			ConfigUtils::triggerConfigSave(imageProcessor);
-		}
         cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
         fwrite(static_cast<const void*>(frame.data), 1, frame.total() * frame.elemSize(), ffmpegRaw);
         cv::Mat filteredFrame = imageProcessor.ProcessFrameWithRet(nCam, pcf);
