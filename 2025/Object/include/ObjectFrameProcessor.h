@@ -17,6 +17,7 @@
 #include <2702math.h>
 #include <VisLog.h>
 #include <cameraserver/CameraServer.h>
+#include <frc/filter/MedianFilter.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
