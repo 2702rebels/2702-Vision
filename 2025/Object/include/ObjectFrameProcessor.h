@@ -5,6 +5,8 @@
 #include <array>
 #include <wpi/struct/Struct.h>
 #include <networktables/NetworkTableInstance.h>
+#include <networktables/NetworkTableListener.h>
+#include <fstream>
 #include <memory>
 #include <networktables/DoubleTopic.h>
 #include <networktables/IntegerTopic.h>

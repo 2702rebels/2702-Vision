@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <sys/time.h>
 
 class CameraFrame
 {
