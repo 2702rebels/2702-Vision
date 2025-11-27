@@ -1,6 +1,6 @@
 #include "ObjectFrameProcessor.h"
 #include <fstream>
-#include <cameraserver/cameraserver.h>
+#include <cameraserver/CameraServer.h>
 #include <cstdint>
 
 // Initialize static vars
