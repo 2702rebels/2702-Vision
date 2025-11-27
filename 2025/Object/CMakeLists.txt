@@ -1,8 +1,6 @@
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(wpilib REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
 
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
 target_include_directories(2702log PRIVATE include)
@@ -35,7 +33,7 @@ target_include_directories(objectframeprocessor PUBLIC ${CMAKE_SOURCE_DIR}/lib/i
 target_include_directories(objectframeprocessor PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(objectframeprocessor PRIVATE ${OpenCV_LIBS})
 
-target_link_libraries(objectframeprocessor PUBLIC apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+target_link_libraries(objectframeprocessor PUBLIC wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
 target_link_libraries(objectframeprocessor PUBLIC PkgConfig::libcamera)
 
