@@ -3,7 +3,7 @@
 #include <cameraserver/CameraServer.h>
 #include <cstdint>
 #include <spdlog/spdlog.h>
-#include <frc/MedianFilter.h>
+#include <frc/filter/MedianFilter.h>
 
 // Initialize static vars
 int64_t ObjectFrameProcessor::m_i64TimeOffset;
