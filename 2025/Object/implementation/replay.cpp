@@ -8,10 +8,7 @@
 
 #include <string>
 
-#include "rpicam.h"
 #include "LoggingUtils.h"
-
-#include <signal.h>
 
 bool bStop = false;
 
