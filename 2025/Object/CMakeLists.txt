@@ -35,9 +35,9 @@ target_include_directories(objectframeprocessor PUBLIC ${CMAKE_SOURCE_DIR}/lib/i
 target_include_directories(objectframeprocessor PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(objectframeprocessor PRIVATE ${OpenCV_LIBS})
 
-target_link_libraries(objectframeprocessor PRIVATE apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+target_link_libraries(objectframeprocessor PUBLIC apriltag wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
-target_link_libraries(objectframeprocessor PRIVATE PkgConfig::libcamera)
+target_link_libraries(objectframeprocessor PUBLIC PkgConfig::libcamera)
 
 
 add_executable(calibrate implementation/calibrate.cpp)
