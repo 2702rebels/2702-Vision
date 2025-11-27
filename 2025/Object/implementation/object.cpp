@@ -7,14 +7,6 @@
  *  - object.h
  *  - config.h
  */
-
-#include <unistd.h>
-#include <stdint.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <fcntl.h>
 #include <errno.h>
 #include "LoggingUtils.h"
 
@@ -24,35 +16,14 @@
 #include <drm/drm_fourcc.h>
 
 #include <linux/videodev2.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <thread>
-#include <vector>
-#include <mutex>
-#include <condition_variable>
-
-#include <string>
-#include <stdexcept>
 
 #include "rpicam.h"
-#include <networktables/NetworkTableInstance.h>
-#include <networktables/NetworkTable.h>
-#include <networktables/IntegerTopic.h>
-#include <networktables/DoubleTopic.h>
-#include <random>
-#include <cmath>
-#include <asio.hpp>
-using asio::ip::udp;
-
-using namespace std;
 
 #include <signal.h>
 
 bool bStop = false;
 
-#include "object.h"
+#include "ObjectFrameProcessor.h"
 #include "config.h"
 
 #define USE_NETWORK_TABLES 1
@@ -64,6 +35,9 @@ bool bStop = false;
 
 #define RESOLUTION_WIDTH 640
 #define RESOLUTION_HEIGHT 480
+
+/*! \brief Directory where to log files to. */
+#define LOG_DIR "/data/logs/"
 
 /*! \brief Handles Ctrl+C interrupts.
  * \param nSig - Should always be equal to \ref SIGINT.*/
@@ -79,7 +53,7 @@ int main(int argc, char* argv[])
 	signal(SIGINT, sighandler);
 	try
 	{
-		imgProc proc;
+		ObjectFrameProcessor proc(LOG_DIR, RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 		//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
 		RPICamera mycam0("/dev/video0", 0, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, DRM_FORMAT_RGB888, proc, FIXED_EXPOSURE_TIME, FIXED_GAIN_VALUE);
 		//	nvCamera mycam1( "/dev/video1", 4, 1 );

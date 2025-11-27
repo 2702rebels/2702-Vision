@@ -47,20 +47,22 @@ bool bStop = false;
 
 #define IMGPROC_GUI	1
 
-#include "object.h"
+#include "ObjectFrameProcessor.h"
 #include "config.h"
 
 int main( int argc, char **argv )
 {
-	if (argc != 2) {
-		error("Usage: {} inputfile", argv[0] );
+	if (argc != 4) {
+		error("Usage: {} inputfile width height", argv[0] );
+		error("try 640x480 for width and height");
 		return 1;
 	}
-	
-	imgProc ip;
+	int width = stoi(argv[2]);
+	int height = stoi(argv[3]);
+	ObjectFrameProcessor ip("/", width, height);
 	LogPlayer lp( argv[1], ip );
 	ConfigUtils::triggerConfigLoad(ip);
-	while (1) {
+	while (true) {
 		if(ConfigUtils::configHasChanged(ip)){
 			ConfigUtils::triggerConfigSave(ip);
 		}
