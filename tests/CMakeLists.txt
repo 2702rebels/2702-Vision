@@ -25,6 +25,8 @@ target_link_libraries(tests PRIVATE PkgConfig::libcamera)
 
 target_link_libraries(tests PRIVATE objectdetectionstruct)
 
+target_link_libraries(tests PRIVATE objectframeprocessor)
+
 enable_testing()
 include(GoogleTest)
 gtest_discover_tests(tests)
