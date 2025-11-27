@@ -567,7 +567,7 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 				try {
 					char szTmp[128];
 					for (int i = 0; ; i++) {
-						snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", m_logDir, i);
+						snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", m_logDir.c_str(), i);
 						if (access(szTmp, F_OK) == -1) {
 							break;
 						}

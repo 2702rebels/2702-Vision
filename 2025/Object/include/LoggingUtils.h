@@ -1,6 +1,6 @@
 #pragma once
 #include <spdlog/spdlog.h>
-#include <opencv2/imgproc.hpp>
+#include <opencv2/core/mat.hpp>
 
 using namespace spdlog;
 
