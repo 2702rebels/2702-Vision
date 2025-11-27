@@ -7,6 +7,7 @@
 #include <networktables/NetworkTableInstance.h>
 #include <memory>
 #include <networktables/DoubleTopic.h>
+#include <opencv2/imgproc.hpp>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
