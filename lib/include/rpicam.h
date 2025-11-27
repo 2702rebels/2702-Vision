@@ -23,6 +23,9 @@
 #include "cambase.h"
 #include "frmprocessor.h"
 
+#include <thread>
+#include <condition_variable>
+
 // maximum # of managed exposure times.
 #define MAX_EXPOSURES	8
 #define NUM_WORKERS	4
