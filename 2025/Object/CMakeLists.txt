@@ -86,7 +86,9 @@ target_include_directories(testudpserver PRIVATE /usr/include/asio)
 add_executable(logtostdvideo implementation/logtostdvideo.cpp)
 
 target_link_libraries(logtostdvideo PRIVATE objectframeprocessor)
+target_link_libraries(logtostdvideo PRIVATE 2702log)
 
 add_executable(replay implementation/replay.cpp)
 
 target_link_libraries(replay PRIVATE objectframeprocessor)
+target_link_libraries(replay PRIVATE 2702log)
