@@ -15,6 +15,8 @@
 #include <ObjectDetectionStruct.h>
 #include <udpsender.h>
 #include <2702math.h>
+#include <VisionLog.h>
+#include <cameraserver/CameraServer.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
