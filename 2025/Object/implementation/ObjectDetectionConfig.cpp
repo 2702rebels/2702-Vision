@@ -41,7 +41,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 		case pbuf::FieldDescriptor::CPPTYPE_FLOAT: {
 			m_configValues[i] = ObjectDetectionConfigValueGen{
 				ObjectDetectionConfigValue<float>(field, defaultConfigSettings, nullptr, ntTopic)
-			}
+			};
 			break;
 		}
 		default: {
