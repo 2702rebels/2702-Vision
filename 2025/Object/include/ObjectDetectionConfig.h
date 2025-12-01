@@ -1,22 +1,19 @@
 #pragma once
-#include <ObjectDetectionSettings.pb.h>
 #include <functional>
 #include <google/protobuf/descriptor.h>
 #include <networktables/Topic.h>
-#include <networktables/ProtobufTopic.h>
-#include <NetworkTopicPoller.h>
+#include <ObjectDetectionConfigValue.h>
+#include <type_traits>
+#include <vector>
+#include <string>
 
 namespace pbuf = google::protobuf;
 
 template<typename T>
-class ObjectDetectionConfigValue {
+class ObjectDetectionConfig {
+	static_assert(std::is_base_of<pbuf::Message, T>::value, "ObjectDetectionConfig can only be instantiated with protobuf message types");
 private:
-	const pbuf::FieldDescriptor* field;
-	T lastValue;
-	std::function<void(T&)> setterFunction;
-	NetworkTopicPoller<T> ntValueSubscriber;
+	std::vector<ObjectDetectionConfigValue<T>> configValues;
 public:
-	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic);
-	void UpdateFromConfigMessage(const ObjectDetectionSettings& settings);
-	void UpdateValue(const T& newValue);
+	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings);
 };

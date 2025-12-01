@@ -54,7 +54,7 @@ endforeach()
 
 add_custom_target(generate_protos DEPENDS ${GENERATED_PROTO_SRCS} ${GENERATED_PROTO_HDRS})
 
-add_library(objectdetectionconfig STATIC implementation/ObjectDetectionConfig.cpp implementation/NetworkTopicPoller.cpp)
+add_library(objectdetectionconfig STATIC implementation/ObjectDetectionConfigValue.cpp implementation/NetworkTopicPoller.cpp implementation/ObjectDetectionConfig.cpp)
 add_dependencies(objectdetectionconfig generate_protos)
 
 target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

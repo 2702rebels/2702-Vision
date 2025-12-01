@@ -1,3 +1,4 @@
+#pragma once
 #include <networktables/Topic.h>
 #include <networktables/GenericEntry.h>
 
