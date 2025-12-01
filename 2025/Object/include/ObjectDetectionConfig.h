@@ -4,7 +4,7 @@
 #include <google/protobuf/descriptor.h>
 #include <networktables/Topic.h>
 
-using namespace pbuf = google::protobuf;
+namespace pbuf = google::protobuf;
 
 template<typename T>
 class ObjectDetectionConfigValue {
