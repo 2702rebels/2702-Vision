@@ -7,7 +7,7 @@ private:
 	nt::GenericSubscriber m_subscriber;
 	T m_defaultValue;
 public:
-	NetworkTopicPoller(const nt::Topic& topic) = 0;
+	NetworkTopicPoller(const nt::Topic& topic);
 	virtual T GetValue() const = 0;
 	virtual ~NetworkTopicPoller() = default;
 };
