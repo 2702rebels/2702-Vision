@@ -12,14 +12,34 @@ template class ObjectDetectionConfig<ObjectDetectionSettings>;
 
 template<typename T>
 ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string ntConfigSubpath)
-	: m_configPath(configFilePath) 
+	: m_configPath(configFilePath)
 {
 	const pbuf::Descriptor* messageClass = defaultConfigSettings.GetDescriptor();
-	m_configValues = std::vector<ObjectDetectionConfigValue<T>>(messageClass->field_count());
+	m_configValues = std::vector<ObjectDetectionConfigValue<ObjectDetectionConfigValueGen>>(messageClass->field_count());
 	for (int i = 0; i < messageClass->field_count(); i++) {
 		const pbuf::FieldDescriptor* field = messageClass->field(i);
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
-		m_configValues[i] = ObjectDetectionConfigValue(field, defaultConfigSettings, nullptr, ntTopic);
+		switch (field->cpp_type()) {
+		case pbuf::FieldDescriptor::CPPTYPE_INT32: {
+			m_configValues[i] = ObjectDetectionConfigValue<int>(field, defaultConfigSettings, nullptr, ntTopic);
+			break;
+		}
+		case pbuf::FieldDescriptor::CPPTYPE_DOUBLE: {
+			m_configValues[i] = ObjectDetectionConfigValue<double>(field, defaultConfigSettings, nullptr, ntTopic);
+			break;
+		}
+		case pbuf::FieldDescriptor::CPPTYPE_STRING: {
+			m_configValues[i] = ObjectDetectionConfigValue<bool>(field, defaultConfigSettings, nullptr, ntTopic);
+			break;
+		}
+		case pbuf::FieldDescriptor::CPPTYPE_FLOAT: {
+			m_configValues[i] = ObjectDetectionConfigValue<float>(field, defaultConfigSettings, nullptr, ntTopic);
+			break;
+		}
+		default: {
+			spdlog::error("Unsupported field type of field #{} {}", field->index(), field->name());
+		}
+		}
 	}
 }
 
