@@ -4,6 +4,7 @@
 #include <google/protobuf/descriptor.h>
 #include <networktables/Topic.h>
 #include <networktables/ProtobufTopic.h>
+#include <NetworkTopicPoller.h>
 
 namespace pbuf = google::protobuf;
 
