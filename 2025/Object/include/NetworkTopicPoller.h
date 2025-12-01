@@ -8,6 +8,6 @@ private:
 	T m_defaultValue;
 public:
 	NetworkTopicPoller(const nt::Topic& topic);
-	virtual T GetValue() const = 0;
+	virtual T GetValue() const;
 	virtual ~NetworkTopicPoller() = default;
 };
