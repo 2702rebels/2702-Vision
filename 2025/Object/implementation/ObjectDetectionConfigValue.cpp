@@ -12,30 +12,36 @@ template class ObjectDetectionConfigValue<bool>;
 template<typename T>
 ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(T&)>* setter, nt::Topic ntTopic)
 	: field(field),
+	lastValue(GetConfigValueFromMessage(defaultStruct)),
 	setterFunction(setter),
-	ntValueSubscriber(ntTopic, defaultValue) 
+	ntValueSubscriber(ntTopic, lastValue)
 {
 	UpdateFromConfigMessage(defaultStruct);
 }
 
 template<typename T>
 void ObjectDetectionConfigValue<T>::UpdateFromConfigMessage(const pbuf::Message& settings) {
+	lastValue = GetConfigValueFromMessage(settings);
+	UpdateValue(lastValue);
+}
+
+template<typename T>
+T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(nt::Topic topic) {
 	if constexpr (std::is_same_v<T, int>) {
-		lastValue = settings.GetReflection()->GetInt32(settings, field);
+		return settings.GetReflection()->GetInt32(settings, field);
 	}
 	else if constexpr (std::is_same_v<T, double>) {
-		lastValue = settings.GetReflection()->GetDouble(settings, field);
+		return settings.GetReflection()->GetDouble(settings, field);
 	}
 	else if constexpr (std::is_same_v<T, float>) {
-		lastValue = settings.GetReflection()->GetFloat(settings, field);
+		return settings.GetReflection()->GetFloat(settings, field);
 	}
 	else if constexpr (std::is_same_v<T, bool>) {
-		lastValue = settings.GetReflection()->GetBool(settings, field);
+		return settings.GetReflection()->GetBool(settings, field);
 	}
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
 	}
-	UpdateValue(lastValue);
 }
 
 template<typename T>
