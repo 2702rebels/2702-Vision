@@ -7,7 +7,7 @@
 
 namespace pbuf = google::protobuf;
 
-template<typename T, typename M>
+template<typename T>
 class ObjectDetectionConfigValue {
 private:
 	const pbuf::FieldDescriptor* field;
