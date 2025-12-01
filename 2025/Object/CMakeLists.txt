@@ -1,6 +1,8 @@
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(wpilib REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_program(PROTOC_COMPILER protoc REQUIRED)
 
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
 target_include_directories(2702log PRIVATE include)
@@ -12,6 +14,56 @@ target_include_directories(2702log PUBLIC ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(2702log PUBLIC ${OpenCV_LIBS})
 
 target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
+
+set(PROTOBUF_IMPORT_DIRS
+    "${CMAKE_CURRENT_SOURCE_DIR}/proto"
+)
+
+# Convert to -I flags
+set(PROTOBUF_FLAGS "")
+foreach(dir IN LISTS PROTOBUF_IMPORT_DIRS)
+    list(APPEND PROTOBUF_FLAGS "-I${dir}")
+endforeach()
+
+# Collect all .proto files
+file(GLOB_RECURSE PERSISTENCE_PROTOBUF_FILES CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/proto/*.proto")
+
+# Generate output files
+set(GENERATED_PROTO_SRCS "")
+set(GENERATED_PROTO_HDRS "")
+
+foreach(proto_file IN LISTS PACKETS_PROTOBUF_FILES PERSISTENCE_PROTOBUF_FILES)
+    get_filename_component(proto_name ${proto_file} NAME_WE)
+    set(proto_src_abs "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.cc")
+    set(proto_head_abs "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.h")
+    add_custom_command(
+        OUTPUT ${proto_src_abs} ${proto_head_abs}
+        COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+        ARGS
+        ${PROTOBUF_FLAGS}
+        --cpp_out=${CMAKE_CURRENT_BINARY_DIR}
+        ${proto_file}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS ${proto_file}
+        COMMENT "Compiling protobuf file: ${proto_name}.proto"
+    )
+
+    list(APPEND GENERATED_PROTO_SRCS ${proto_src_abs})
+    list(APPEND GENERATED_PROTO_HDRS ${proto_head_abs})
+endforeach()
+
+add_custom_target(generate_protos DEPENDS ${GENERATED_PROTO_SRCS} ${GENERATED_PROTO_HDRS})
+
+add_library(objectdetectionconfig STATIC implementation/ObjectDetectionConfig.cpp)
+add_dependencies(objectdetectionconfig generate_protos)
+
+target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(objectdetectionconfig PRIVATE protobuf::libprotoc protobuf::libprotobuf)
+
+target_sources(objectdetectionconfig PRIVATE ${GENERATED_PROTO_SRCS})
+
+target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(objectdetectionstruct STATIC implementation/ObjectDetectionStruct.cpp)
 

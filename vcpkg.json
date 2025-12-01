@@ -65,6 +65,7 @@
         "protobuf",
         "wpilibc"
       ]
-    }
+    },
+    "protobuf"
   ]
 }
