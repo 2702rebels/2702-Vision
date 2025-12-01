@@ -15,7 +15,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 	: m_configPath(configFilePath)
 {
 	const pbuf::Descriptor* messageClass = defaultConfigSettings.GetDescriptor();
-	m_configValues = std::vector<ObjectDetectionConfigValue<ObjectDetectionConfigValueGen>>(messageClass->field_count());
+	m_configValues = std::vector<ObjectDetectionConfigValueGen>(messageClass->field_count());
 	for (int i = 0; i < messageClass->field_count(); i++) {
 		const pbuf::FieldDescriptor* field = messageClass->field(i);
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
