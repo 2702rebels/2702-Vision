@@ -25,7 +25,7 @@ T NetworkTopicPoller<T>::GetValue() const {
 		return m_subscriber.GetFloat(m_defaultValue);
 	}
 	else if constexpr (std::is_same_v<T, bool>) {
-		lastValue = settings.GetReflection()->GetBool(settings, field);
+		return m_subscriber.GetBoolean(m_defaultValue);
 	}
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
