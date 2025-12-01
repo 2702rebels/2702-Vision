@@ -9,7 +9,7 @@ template class ObjectDetectionConfigValue<bool>;
 template class ObjectDetectionConfigValue<std::string>;
 
 template<typename T>
-ObjectDetectionConfigValue::ObjectDetectionConfigValue(const pbuf::Descriptor* field, T defaultValue, std::function<void, (T&)>& setter, nt::Topic ntTopic)
+ObjectDetectionConfigValue::ObjectDetectionConfigValue(const pbuf::Descriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic)
 	: field(field),
 	lastValue(defaultValue),
 	setterFunction(setter),
