@@ -16,6 +16,7 @@ private:
 	NetworkTopicPoller<T> ntValueSubscriber;
 	T GetConfigValueFromMessage(const pbuf::Message& topic);
 public:
+	ObjectDetectionConfigValue() = default;
 	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(T&)>* setter, nt::Topic ntTopic);
 	void UpdateFromConfigMessage(const pbuf::Message& settings);
 	void UpdateValue(const T& newValue);
