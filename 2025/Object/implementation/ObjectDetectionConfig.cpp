@@ -27,20 +27,20 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_DOUBLE: {
-			m_configValues[i].emplace(
-				ObjectDetectionConfigValue<double>(field, defaultConfigSettings, nullptr, ntTopic)
+			m_configValues[i].emplace<ObjectDetectionConfigValue<double>>(
+				field, defaultConfigSettings, nullptr, ntTopic
 			);
 			break;
 		}
-		case pbuf::FieldDescriptor::CPPTYPE_STRING: {
-			m_configValues[i].emplace(
-				ObjectDetectionConfigValue<bool>(field, defaultConfigSettings, nullptr, ntTopic)
+		case pbuf::FieldDescriptor::CPPTYPE_BOOL: {
+			m_configValues[i].emplace<ObjectDetectionConfigValue<bool>>(
+				field, defaultConfigSettings, nullptr, ntTopic
 			);
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_FLOAT: {
-			m_configValues[i].emplace(
-				ObjectDetectionConfigValue<float>(field, defaultConfigSettings, nullptr, ntTopic)
+			m_configValues[i].emplace<ObjectDetectionConfigValue<float>>(
+				field, defaultConfigSettings, nullptr, ntTopic
 			);
 			break;
 		}
