@@ -15,13 +15,13 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 	: m_configPath(configFilePath)
 {
 	const pbuf::Descriptor* messageClass = defaultConfigSettings.GetDescriptor();
-	m_configValues = std::vector<ObjectDetectionConfigValueGen>(messageClass->field_count());
+	m_configValues.reserve(messageClass->field_count());
 	for (int i = 0; i < messageClass->field_count(); i++) {
 		const pbuf::FieldDescriptor* field = messageClass->field(i);
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
 		switch (field->cpp_type()) {
 		case pbuf::FieldDescriptor::CPPTYPE_INT32: {
-			m_configValues[i].emplace<ObjectDetectionConfigValue<int>>(
+			m_configValues.emplace<ObjectDetectionConfigValue<int>>(
 				field, defaultConfigSettings, nullptr, ntTopic
 			);
 			break;
