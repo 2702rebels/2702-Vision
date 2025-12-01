@@ -61,6 +61,8 @@ target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_SOURCE_
 
 target_link_libraries(objectdetectionconfig PRIVATE PkgConfig::protobuf)
 
+target_link_libraries(objectdetectionconfig PRIVATE ntcore)
+
 target_sources(objectdetectionconfig PRIVATE ${GENERATED_PROTO_SRCS})
 
 target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
