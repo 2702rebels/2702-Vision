@@ -10,7 +10,7 @@ template class ObjectDetectionConfigValue<float>;
 template class ObjectDetectionConfigValue<bool>;
 
 template<typename T>
-ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic)
+ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>* setter, nt::Topic ntTopic)
 	: field(field),
 	lastValue(defaultValue),
 	setterFunction(setter),
