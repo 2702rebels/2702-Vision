@@ -7,7 +7,7 @@ template class NetworkTopicPoller<bool>;
 template class NetworkTopicPoller<float>;
 
 template<typename T>
-NetworkTopicPoller<T>::NetworkTopicPoller(const nt::Topic& topic, T defaultValue) :
+NetworkTopicPoller<T>::NetworkTopicPoller(nt::Topic& topic, T defaultValue) :
 	m_defaultValue(defaultValue) 
 {
 	m_subscriber = topic.GenericSubscribe();
