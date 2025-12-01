@@ -1,5 +1,5 @@
 syntax = "proto3";
 
 message ObjectDetectionSettings {
-	int min = 0;
+	int32 min = 1;
 }
