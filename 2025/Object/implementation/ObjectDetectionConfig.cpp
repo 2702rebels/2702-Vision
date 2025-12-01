@@ -13,7 +13,7 @@ ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescr
 	: field(field),
 	lastValue(defaultValue),
 	setterFunction(setter),
-	ntValueSubscriber(nt::ProtobufTopic<T>(ntTopic).Subscribe(defaultValue)) 
+	ntValueSubscriber(ntTopic, defaultValue) 
 {
 	UpdateValue(defaultValue);
 }
