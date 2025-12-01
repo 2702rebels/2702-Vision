@@ -16,7 +16,7 @@ private:
 	std::function<void(T&)> setterFunction;
 	NetworkTopicPoller<T> ntValueSubscriber;
 public:
-	ObjectDetectionConfigValue(const pbuf::Descriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic);
+	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic);
 	void UpdateFromConfigMessage(const ObjectDetectionSettings& settings);
 	void UpdateValue(const T& newValue);
 };
