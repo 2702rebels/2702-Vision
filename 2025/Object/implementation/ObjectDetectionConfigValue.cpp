@@ -47,6 +47,6 @@ void ObjectDetectionConfigValue<T>::UpdateValue(const T& newValue) {
 }
 
 template<typename T>
-void ObjectDetectionConfigValue<T>::GetValue() const {
+T ObjectDetectionConfigValue<T>::GetValue() const {
 	return lastValue;
 }
