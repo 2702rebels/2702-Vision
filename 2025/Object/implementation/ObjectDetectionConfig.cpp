@@ -6,6 +6,7 @@
 #include <string>
 #include <spdlog/spdlog.h>
 #include <google/protobuf/util/json_util.h>
+#include <networktables/NetworkTableInstance.h>
 
 template class ObjectDetectionConfig<ObjectDetectionSettings>;
 
