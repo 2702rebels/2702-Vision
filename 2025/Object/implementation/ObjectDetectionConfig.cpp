@@ -5,8 +5,8 @@
 
 template class ObjectDetectionConfigValue<int>;
 template class ObjectDetectionConfigValue<double>;
+template class ObjectDetectionConfigValue<float>;
 template class ObjectDetectionConfigValue<bool>;
-template class ObjectDetectionConfigValue<std::string>;
 
 template<typename T>
 ObjectDetectionConfigValue::ObjectDetectionConfigValue(const pbuf::Descriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic)

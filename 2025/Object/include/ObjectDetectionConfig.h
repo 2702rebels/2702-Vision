@@ -13,7 +13,7 @@ private:
 	const pbuf::FieldDescriptor* field;
 	T lastValue;
 	std::function<void(T&)> setterFunction;
-	nt::ProtobufSubscriber<T> ntValueSubscriber;
+	NetworkTopicPoller<T> ntValueSubscriber;
 public:
 	ObjectDetectionConfigValue(const pbuf::Descriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic);
 	void UpdateFromConfigMessage(const ObjectDetectionSettings& settings);
