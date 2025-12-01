@@ -60,9 +60,10 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 		throw;
 	}
 	for (auto& configValue : m_configValues) {
+		// Runs value.UpdateFromConfigMessage if value is any one of the variant types
 		std::visit([&](auto& value) {
 			value.UpdateFromConfigMessage(configMessage);
-			}, configValue);
+		}, configValue);
 	}
 }
 
