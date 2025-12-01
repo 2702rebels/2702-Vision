@@ -12,10 +12,11 @@ class ObjectDetectionConfigValue {
 private:
 	const pbuf::FieldDescriptor* field;
 	T lastValue;
-	std::function<void(T&)> setterFunction;
+	std::function<void(T&)>* setterFunction;
 	NetworkTopicPoller<T> ntValueSubscriber;
 public:
-	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic);
+	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(T&)>* setter, nt::Topic ntTopic);
 	void UpdateFromConfigMessage(const pbuf::Message& settings);
 	void UpdateValue(const T& newValue);
+	T GetValue() const;
 };

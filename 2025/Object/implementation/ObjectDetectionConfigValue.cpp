@@ -36,11 +36,17 @@ void ObjectDetectionConfigValue<T>::UpdateFromConfigMessage(const pbuf::Message&
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
 	}
-	setterFunction(lastValue);
+	UpdateValue(lastValue);
 }
 
 template<typename T>
 void ObjectDetectionConfigValue<T>::UpdateValue(const T& newValue) {
 	lastValue = newValue;
-	setterFunction(lastValue);
+	if (setterFunction == nullptr) return;
+	(*setterFunction)(lastValue);
+}
+
+template<typename T>
+void ObjectDetectionConfigValue<T>::GetValue() const {
+	return lastValue;
 }

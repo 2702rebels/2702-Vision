@@ -13,7 +13,11 @@ template<typename T>
 class ObjectDetectionConfig {
 	static_assert(std::is_base_of<pbuf::Message, T>::value, "ObjectDetectionConfig can only be instantiated with protobuf message types");
 private:
-	std::vector<ObjectDetectionConfigValue<T>> configValues;
+	std::vector<ObjectDetectionConfigValue<?>> m_configValues;
+	std::string m_configPath;
 public:
-	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings);
+	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string ntConfigSubpath);
+	void LoadConfigFromFile();
+	void WriteConfigToFile();
+	T GetConfigStructure();
 };
