@@ -3,6 +3,7 @@
 #include <functional>
 #include <google/protobuf/descriptor.h>
 #include <networktables/Topic.h>
+#include <networktables/ProtobufTopic.h>
 
 namespace pbuf = google::protobuf;
 
