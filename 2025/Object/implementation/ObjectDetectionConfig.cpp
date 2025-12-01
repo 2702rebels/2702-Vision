@@ -59,9 +59,10 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 		spdlog::error("Failed to parse config file at path: {}\nParse error: {}", m_configPath, status.message());
 		throw;
 	}
-	const pbuf::Descriptor* messageClass = configMessage.GetDescriptor();
-	for (int i = 0; i < messageClass->field_count(); i++) {
-		m_configValues[i].UpdateFromConfigMessage(configMessage);
+	for (auto& configValue : m_configValues) {
+		std::visit([&](auto& value) {
+			value.UpdateFromConfigMessage(configMessage);
+			}, config);
 	}
 }
 
