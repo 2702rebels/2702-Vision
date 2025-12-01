@@ -21,19 +21,27 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
 		switch (field->cpp_type()) {
 		case pbuf::FieldDescriptor::CPPTYPE_INT32: {
-			m_configValues[i] = ObjectDetectionConfigValue<int>(field, defaultConfigSettings, nullptr, ntTopic);
+			m_configValues[i] = ObjectDetectionConfigValueGen {
+				ObjectDetectionConfigValue<int>(field, defaultConfigSettings, nullptr, ntTopic)
+			};
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_DOUBLE: {
-			m_configValues[i] = ObjectDetectionConfigValue<double>(field, defaultConfigSettings, nullptr, ntTopic);
+			m_configValues[i] = ObjectDetectionConfigValueGen{
+				ObjectDetectionConfigValue<double>(field, defaultConfigSettings, nullptr, ntTopic)
+			};
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_STRING: {
-			m_configValues[i] = ObjectDetectionConfigValue<bool>(field, defaultConfigSettings, nullptr, ntTopic);
+			m_configValues[i] = ObjectDetectionConfigValueGen{
+				ObjectDetectionConfigValue<bool>(field, defaultConfigSettings, nullptr, ntTopic)
+			};
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_FLOAT: {
-			m_configValues[i] = ObjectDetectionConfigValue<float>(field, defaultConfigSettings, nullptr, ntTopic);
+			m_configValues[i] = ObjectDetectionConfigValueGen{
+				ObjectDetectionConfigValue<float>(field, defaultConfigSettings, nullptr, ntTopic)
+			}
 			break;
 		}
 		default: {
