@@ -28,16 +28,16 @@ void ObjectDetectionConfigValue<T>::UpdateFromConfigMessage(const pbuf::Message&
 template<typename T>
 T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& settingStruct) {
 	if constexpr (std::is_same_v<T, int>) {
-		return settingStruct.GetReflection()->GetInt32(settings, field);
+		return settingStruct.GetReflection()->GetInt32(settingStruct, field);
 	}
 	else if constexpr (std::is_same_v<T, double>) {
-		return settingStruct.GetReflection()->GetDouble(settings, field);
+		return settingStruct.GetReflection()->GetDouble(settingStruct, field);
 	}
 	else if constexpr (std::is_same_v<T, float>) {
-		return settingStruct.GetReflection()->GetFloat(settings, field);
+		return settingStruct.GetReflection()->GetFloat(settingStruct, field);
 	}
 	else if constexpr (std::is_same_v<T, bool>) {
-		return settingStruct.GetReflection()->GetBool(settings, field);
+		return settingStruct.GetReflection()->GetBool(settingStruct, field);
 	}
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
