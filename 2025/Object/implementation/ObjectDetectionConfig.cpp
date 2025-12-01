@@ -21,27 +21,27 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
 		switch (field->cpp_type()) {
 		case pbuf::FieldDescriptor::CPPTYPE_INT32: {
-			m_configValues.emplace_back(ObjectDetectionConfigValue<int>(
+			m_configValues.emplace_back<ObjectDetectionConfigValue<int>>(
 				field, defaultConfigSettings, nullptr, ntTopic
-			));
+			);
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_DOUBLE: {
-			m_configValues.emplace_back(ObjectDetectionConfigValue<double>(
+			m_configValues.emplace_back<ObjectDetectionConfigValue<double>>(
 				field, defaultConfigSettings, nullptr, ntTopic
-			));
+			);
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_BOOL: {
-			m_configValues.emplace_back(ObjectDetectionConfigValue<bool>(
+			m_configValues.emplace_back<ObjectDetectionConfigValue<bool>>(
 				field, defaultConfigSettings, nullptr, ntTopic
-			));
+			);
 			break;
 		}
 		case pbuf::FieldDescriptor::CPPTYPE_FLOAT: {
-			m_configValues.emplace_back(ObjectDetectionConfigValue<float>(
+			m_configValues.emplace_back<ObjectDetectionConfigValue<float>>(
 				field, defaultConfigSettings, nullptr, ntTopic
-			));
+			);
 			break;
 		}
 		default: {
