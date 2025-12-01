@@ -21,7 +21,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
 		switch (field->cpp_type()) {
 		case pbuf::FieldDescriptor::CPPTYPE_INT32: {
-			m_configValues.emplace<ObjectDetectionConfigValue<int>>(
+			m_configValues[i].emplace<ObjectDetectionConfigValue<int>>(
 				field, defaultConfigSettings, nullptr, ntTopic
 			);
 			break;
