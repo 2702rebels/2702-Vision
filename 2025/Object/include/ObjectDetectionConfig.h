@@ -15,6 +15,7 @@ using ObjectDetectionConfigValueGen = std::variant<
 	ObjectDetectionConfigValue<double>,
 	ObjectDetectionConfigValue<float>,
 	ObjectDetectionConfigValue<bool>
+>;
 
 template<typename T>
 class ObjectDetectionConfig {
