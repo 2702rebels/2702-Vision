@@ -9,7 +9,7 @@ template class ObjectDetectionConfigValue<float>;
 template class ObjectDetectionConfigValue<bool>;
 
 template<typename T>
-ObjectDetectionConfigValue::ObjectDetectionConfigValue(const pbuf::Descriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic)
+ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::Descriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic)
 	: field(field),
 	lastValue(defaultValue),
 	setterFunction(setter),
@@ -19,7 +19,7 @@ ObjectDetectionConfigValue::ObjectDetectionConfigValue(const pbuf::Descriptor* f
 }
 
 template<typename T>
-void ObjectDetectionConfigValue::UpdateFromConfigMessage(const ObjectDetectionSettings& settings) {
+void ObjectDetectionConfigValue<T>::UpdateFromConfigMessage(const ObjectDetectionSettings& settings) {
 	if constexpr (std::is_same_v<T, int>) {
 		lastValue = settings.GetReflection()->GetInt32(settings, field);
 	}
@@ -39,7 +39,7 @@ void ObjectDetectionConfigValue::UpdateFromConfigMessage(const ObjectDetectionSe
 }
 
 template<typename T>
-void ObjectDetectionConfigValue::UpdateValue(const T& newValue) {
+void ObjectDetectionConfigValue<T>::UpdateValue(const T& newValue) {
 	lastValue = newValue;
 	setterFunction(lastValue);
 }
