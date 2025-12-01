@@ -5,7 +5,9 @@
 #include <NetworkTopicPoller.h>
 #include <string>
 
-template<typename T, M>
+namespace pbuf = google::protobuf;
+
+template<typename T, typename M>
 class ObjectDetectionConfigValue {
 private:
 	const pbuf::FieldDescriptor* field;
@@ -14,6 +16,6 @@ private:
 	NetworkTopicPoller<T> ntValueSubscriber;
 public:
 	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic);
-	void UpdateFromConfigMessage(const M& settings);
+	void UpdateFromConfigMessage(const pbuf::Message& settings);
 	void UpdateValue(const T& newValue);
 };

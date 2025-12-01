@@ -1,6 +1,7 @@
 #include <ObjectDetectionConfigValue.h>
 #include <string>
 #include <type_traits>
+#include <ObjectDetectionSettings.pb.h>
 
 
 template class ObjectDetectionConfigValue<int>;
@@ -8,8 +9,8 @@ template class ObjectDetectionConfigValue<double>;
 template class ObjectDetectionConfigValue<float>;
 template class ObjectDetectionConfigValue<bool>;
 
-template<typename T,M>
-ObjectDetectionConfigValue<T,M>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic)
+template<typename T>
+ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, T defaultValue, std::function<void(T&)>& setter, nt::Topic ntTopic)
 	: field(field),
 	lastValue(defaultValue),
 	setterFunction(setter),
@@ -18,8 +19,8 @@ ObjectDetectionConfigValue<T,M>::ObjectDetectionConfigValue(const pbuf::FieldDes
 	UpdateValue(defaultValue);
 }
 
-template<typename T,M>
-void ObjectDetectionConfigValue<T,M>::UpdateFromConfigMessage(const M& settings) {
+template<typename T>
+void ObjectDetectionConfigValue<T>::UpdateFromConfigMessage(const pbuf::Message& settings) {
 	if constexpr (std::is_same_v<T, int>) {
 		lastValue = settings.GetReflection()->GetInt32(settings, field);
 	}
@@ -38,8 +39,8 @@ void ObjectDetectionConfigValue<T,M>::UpdateFromConfigMessage(const M& settings)
 	setterFunction(lastValue);
 }
 
-template<typename T,M>
-void ObjectDetectionConfigValue<T,M>::UpdateValue(const T& newValue) {
+template<typename T>
+void ObjectDetectionConfigValue<T>::UpdateValue(const T& newValue) {
 	lastValue = newValue;
 	setterFunction(lastValue);
 }
