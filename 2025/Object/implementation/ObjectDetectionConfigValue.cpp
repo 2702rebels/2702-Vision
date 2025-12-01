@@ -26,7 +26,7 @@ void ObjectDetectionConfigValue<T>::UpdateFromConfigMessage(const pbuf::Message&
 }
 
 template<typename T>
-T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message topic) {
+T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& topic) {
 	if constexpr (std::is_same_v<T, int>) {
 		return settings.GetReflection()->GetInt32(settings, field);
 	}
