@@ -62,7 +62,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 	for (auto& configValue : m_configValues) {
 		std::visit([&](auto& value) {
 			value.UpdateFromConfigMessage(configMessage);
-			}, config);
+			}, configValue);
 	}
 }
 
