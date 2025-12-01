@@ -1,5 +1,5 @@
 sudo apt update
-sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev
+sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev build-essential ffmpeg nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev protobuf-compiler
 echo "Downloading latest CMake"
 sudo apt remove --purge --auto-remove cmake -y
 sudo apt install -y ca-certificates gpg wget

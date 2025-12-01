@@ -1,8 +1,8 @@
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(wpilib REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
-find_program(PROTOC_COMPILER protoc REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(protobuf REQUIRED IMPORTED_TARGET protobuf)
 
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
 target_include_directories(2702log PRIVATE include)
@@ -38,7 +38,7 @@ foreach(proto_file IN LISTS PACKETS_PROTOBUF_FILES PERSISTENCE_PROTOBUF_FILES)
     set(proto_head_abs "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.h")
     add_custom_command(
         OUTPUT ${proto_src_abs} ${proto_head_abs}
-        COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+        COMMAND protoc
         ARGS
         ${PROTOBUF_FLAGS}
         --cpp_out=${CMAKE_CURRENT_BINARY_DIR}
@@ -59,7 +59,7 @@ add_dependencies(objectdetectionconfig generate_protos)
 
 target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(objectdetectionconfig PRIVATE protobuf::libprotoc protobuf::libprotobuf)
+target_link_libraries(objectdetectionconfig PRIVATE PkgConfig::protobuf)
 
 target_sources(objectdetectionconfig PRIVATE ${GENERATED_PROTO_SRCS})
 
