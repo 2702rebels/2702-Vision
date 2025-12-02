@@ -20,6 +20,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 	m_configValues.reserve(messageClass->field_count());
 	for (int i = 0; i < messageClass->field_count(); i++) {
 		const pbuf::FieldDescriptor* field = messageClass->field(i);
+		fieldNamesToIndex[field->name(), i];
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
 		switch (field->cpp_type()) {
 		case pbuf::FieldDescriptor::CPPTYPE_INT32: {
@@ -143,4 +144,43 @@ void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
 			value.UpdateFromNetworkTables();
 		}, configValue);
 	}
+}
+
+template<typename T>
+ObjectDetectionConfigValueGen ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
+	return m_configValues[fieldNamesToIndex[fieldName];
+}
+
+template<typename T>
+ObjectDetectionConfigValueGen ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
+	return m_configValues[fieldIndex];
+}
+
+template<typename T>
+template<typename O>
+ObjectDetectionConfigValue<O> ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
+	return std::get<O>(GetConfigValueStruct(fieldName));
+}
+
+template<typename T>
+template<typename O>
+ObjectDetectionConfigValue<O> ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
+	return std::get<o>(GetConfigValueStruct(fieldIndex));
+}
+
+template<typename T>
+template<typename O>
+void ObjectDetectionConfig<T>::AttachSetterFunction(std::string& fieldName, std::function<void(O&)>* setterFunctionPtr) {
+	AttachSetterFunction<O>(m_configValues[fieldNamesToIndex.at(fieldName)], setterFunctionPtr);
+}
+
+template<typename T>
+template<typename O>
+void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::function<void(O&)>* setterFunctionPtr) {
+	AttachSetterFunction<O>(m_configValues[fieldIndex], setterFunctionPtr);
+}
+
+template<typename O>
+static void AttachSetterFunction(ObjectDetectionConfigValueGen configValue, std::function<void(O&)>* setterFunctionPtr) {
+	std::get<ObjectDetectionConfigValue<O>>(configValue).setterFunction = setterFunctionPtr;
 }
