@@ -34,12 +34,12 @@ public:
 	void UpdateFromNetworkTables();
 	void RefreshConfigStructure();
 	const T& GetConfigStructure();
-	ObjectDetectionConfigValueGen GetConfigValueStruct(std::string& fieldName);
-	ObjectDetectionConfigValueGen GetConfigValueStruct(int valueIndex);
+	ObjectDetectionConfigValueGen& GetConfigValueStruct(std::string& fieldName);
+	ObjectDetectionConfigValueGen& GetConfigValueStruct(int valueIndex);
 	template<typename O>
-	ObjectDetectionConfigValue<O> GetConfigValueStruct(std::string& fieldName);
+	ObjectDetectionConfigValue<O>& GetConfigValueStruct(std::string& fieldName);
 	template<typename O>
-	ObjectDetectionConfigValue<O> GetConfigValueStruct(int valueIndex);
+	ObjectDetectionConfigValue<O>& GetConfigValueStruct(int valueIndex);
 	template<typename O>
 	void AttachSetterFunction(std::string& fieldName, std::function<void(O&)>* setterFunctionPtr);
 	template<typename O>

@@ -147,24 +147,24 @@ void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
 }
 
 template<typename T>
-ObjectDetectionConfigValueGen ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
+ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
 	return m_configValues[fieldNamesToIndex[fieldName]];
 }
 
 template<typename T>
-ObjectDetectionConfigValueGen ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
+ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
 	return m_configValues[fieldIndex];
 }
 
 template<typename T>
 template<typename O>
-ObjectDetectionConfigValue<O> ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
+ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
 	return std::get<O>(GetConfigValueStruct(fieldName));
 }
 
 template<typename T>
 template<typename O>
-ObjectDetectionConfigValue<O> ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
+ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
 	return std::get<O>(GetConfigValueStruct(fieldIndex));
 }
 
