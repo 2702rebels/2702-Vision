@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <variant>
+#include <unordered_map>
 
 namespace pbuf = google::protobuf;
 

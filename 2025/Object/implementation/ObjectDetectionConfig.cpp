@@ -20,7 +20,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 	m_configValues.reserve(messageClass->field_count());
 	for (int i = 0; i < messageClass->field_count(); i++) {
 		const pbuf::FieldDescriptor* field = messageClass->field(i);
-		fieldNamesToIndex[field->name(), i];
+		fieldNamesToIndex[field->name()] = i;
 		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
 		switch (field->cpp_type()) {
 		case pbuf::FieldDescriptor::CPPTYPE_INT32: {

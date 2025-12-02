@@ -10,7 +10,7 @@ namespace pbuf = google::protobuf;
 
 template<typename T>
 class ObjectDetectionConfigValue {
-	friend class ObjectDetectionConfig;
+	template<typename> friend class ObjectDetectionConfig;
 private:
 	const pbuf::FieldDescriptor* field;
 	T lastValue;
