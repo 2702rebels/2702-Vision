@@ -63,8 +63,19 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 			);
 			break;
 		}
+		case pbuf::FieldDescriptor::CPPTYPE_STRING: {
+			m_configValues.emplace_back(
+				std::in_place_type<ObjectDetectionConfigValue<std::string>>,
+				field,
+				defaultConfigSettings,
+				nullptr,
+				ntTopic
+			);
+			break;
+		}
 		default: {
 			spdlog::error("Unsupported field type of field #{} {}", field->index(), field->name());
+			throw;
 		}
 		}
 	}
@@ -111,7 +122,7 @@ void ObjectDetectionConfig<T>::WriteConfigToFile() {
 }
 
 template<typename T>
-const T& ObjectDetectionConfig<T>::GetConfigStructure() {
+const T& ObjectDetectionConfig<T>::Get() {
 	return currentConfigStructure;
 }
 
@@ -144,6 +155,7 @@ void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
 			value.UpdateFromNetworkTables();
 		}, configValue);
 	}
+	RefreshConfigStructure();
 }
 
 template<typename T>
@@ -170,17 +182,17 @@ ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(in
 
 template<typename T>
 template<typename O>
-void ObjectDetectionConfig<T>::AttachSetterFunction(std::string& fieldName, std::function<void(O&)>* setterFunctionPtr) {
+void ObjectDetectionConfig<T>::AttachSetterFunction(std::string& fieldName, std::function<void(const O&)>* setterFunctionPtr) {
 	AttachSetterFunction<O>(m_configValues[fieldNamesToIndex.at(fieldName)], setterFunctionPtr);
 }
 
 template<typename T>
 template<typename O>
-void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::function<void(O&)>* setterFunctionPtr) {
+void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::function<void(const O&)>* setterFunctionPtr) {
 	AttachSetterFunction<O>(m_configValues[fieldIndex], setterFunctionPtr);
 }
 
 template<typename O>
-static void AttachSetterFunction(ObjectDetectionConfigValueGen configValue, std::function<void(O&)>* setterFunctionPtr) {
+static void AttachSetterFunction(ObjectDetectionConfigValueGen configValue, std::function<void(const O&)>* setterFunctionPtr) {
 	std::get<ObjectDetectionConfigValue<O>>(configValue).setterFunction = setterFunctionPtr;
 }

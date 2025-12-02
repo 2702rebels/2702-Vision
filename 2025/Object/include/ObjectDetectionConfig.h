@@ -15,7 +15,8 @@ using ObjectDetectionConfigValueGen = std::variant<
 	ObjectDetectionConfigValue<int>,
 	ObjectDetectionConfigValue<double>,
 	ObjectDetectionConfigValue<float>,
-	ObjectDetectionConfigValue<bool>
+	ObjectDetectionConfigValue<bool>,
+	ObjectDetectionConfigValue<std::string>
 >;
 
 template<typename T>
@@ -33,7 +34,7 @@ public:
 	void WriteConfigToFile();
 	void UpdateFromNetworkTables();
 	void RefreshConfigStructure();
-	const T& GetConfigStructure();
+	const T& Get();
 	ObjectDetectionConfigValueGen& GetConfigValueStruct(std::string& fieldName);
 	ObjectDetectionConfigValueGen& GetConfigValueStruct(int valueIndex);
 	template<typename O>
@@ -41,7 +42,7 @@ public:
 	template<typename O>
 	ObjectDetectionConfigValue<O>& GetConfigValueStruct(int valueIndex);
 	template<typename O>
-	void AttachSetterFunction(std::string& fieldName, std::function<void(O&)>* setterFunctionPtr);
+	void AttachSetterFunction(std::string& fieldName, std::function<void(const O&)>* setterFunctionPtr);
 	template<typename O>
-	void AttachSetterFunction(int valueIndex, std::function<void(O&)>* setterFunctionPtr);
+	void AttachSetterFunction(int valueIndex, std::function<void(const O&)>* setterFunctionPtr);
 };

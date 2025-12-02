@@ -19,7 +19,7 @@
 #include <cameraserver/CameraServer.h>
 #include <frc/filter/MedianFilter.h>
 #include <ObjectDetectionConfig.h>
-#include <ObjectDectionSettings.pb.h>
+#include <ObjectDetectionSettings.pb.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
@@ -143,32 +143,32 @@ public:
 	* \brief Sets hue min object detection parameter.
 	* \param  newValue - integer representing the new hue min value
 	*/
-	virtual void setPVHueMin(int newValue);
+	virtual void setPVHueMin(const int& newValue);
 	/*!
 	* \brief Sets hue max object detection parameter.
 	* \param  newValue - integer representing the new hue max value
 	*/
-	virtual void setPVHueMax(int newValue);
+	virtual void setPVHueMax(const int& newValue);
 	/*!
 	* \brief Sets saturation min object detection parameter.
 	* \param  newValue - integer representing the new saturation min value
 	*/
-	virtual void setSaturationMin(int newValue);
+	virtual void setSaturationMin(const int& newValue);
 	/*!
 	* \brief Sets saturation max object detection parameter.
 	* \param  newValue - integer representing the new saturation max value
 	*/
-	virtual void setSaturationMax(int newValue);
+	virtual void setSaturationMax(const int& newValue);
 	/*!
 	* \brief Sets value min object detection parameter.
 	* \param  newValue - integer representing the new value min value
 	*/
-	virtual void setValueMin(int newValue);
+	virtual void setValueMin(const int& newValue);
 	/*!
 	* \brief Sets value max object detection parameter.
 	* \param  newValue - integer representing the new value max value
 	*/
-	virtual void setValueMax(int newValue);
+	virtual void setValueMax(const int& newValue);
 	
 	virtual ~ObjectFrameProcessor();
 	/*! \brief Handles a time sync event from networkTables.

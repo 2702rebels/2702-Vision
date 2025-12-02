@@ -14,7 +14,7 @@ class ObjectDetectionConfigValue {
 private:
 	const pbuf::FieldDescriptor* field;
 	T lastValue;
-	std::function<void(T&)>* setterFunction;
+	std::function<void(const T&)>* setterFunction;
 	std::unique_ptr<NetworkTopicPoller<T>> ntValueSubscriber;
 	T GetConfigValueFromMessage(const pbuf::Message& topic);
 	void UpdateFromConfigMessage(const pbuf::Message& settings);
@@ -27,7 +27,7 @@ public:
 	// No copying allowed
 	ObjectDetectionConfigValue(const ObjectDetectionConfigValue&) = delete;
 	ObjectDetectionConfigValue& operator=(const ObjectDetectionConfigValue&) = delete;
-	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(T&)>* setter, nt::Topic ntTopic);
+	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(const T&)>* setter, nt::Topic ntTopic);
 	const pbuf::FieldDescriptor* GetFieldDescriptor() const;
 	T GetValue() const;
 };

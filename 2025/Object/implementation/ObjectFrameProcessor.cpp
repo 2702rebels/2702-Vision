@@ -7,13 +7,13 @@
 // Initialize static vars
 int64_t ObjectFrameProcessor::m_i64TimeOffset;
 
-ObjectFrameProcessor::ObjectFrameProcessor(std::string logFilesDirectory, int frameWidth, int frameHeight) :
+ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight, std::shared_ptr<ObjectDetectionConfig<ObjectDetectionSettings>> config) :
 	FrmProcessor(),
 	CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
 	m_p3dCam2Robot(m_camOffsetX, m_camOffsetY, m_camHeight),
 	m_distanceFilter(m_filterPacketWindow),
 	m_angleFilter(m_filterPacketWindow),
-	m_logDir(logFilesDirectory),
+	m_config(config)
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
@@ -33,12 +33,12 @@ ObjectFrameProcessor::ObjectFrameProcessor(std::string logFilesDirectory, int fr
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::namedWindow("Filtered Video");
 
-	cv::createTrackbar("PV Hue Min", "Filtered Video", &m_nHLow, 360);
-	cv::createTrackbar("PV Hue Max", "Filtered Video", &m_nHHigh, 360);
-	cv::createTrackbar("Sat Min", "Filtered Video", &m_nSLow, 255);
-	cv::createTrackbar("Sat Max", "Filtered Video", &m_nSHigh, 255);
-	cv::createTrackbar("Val Min", "Filtered Video", &m_nVLow, 255);
-	cv::createTrackbar("Val Max", "Filtered Video", &m_nVHigh, 255);
+	cv::createTrackbar("PV Hue Min", "Filtered Video", config->Get().huemin(), 360);
+	cv::createTrackbar("PV Hue Max", "Filtered Video", config->Get().huemax(), 360);
+	cv::createTrackbar("Sat Min", "Filtered Video", config->Get().saturationmin(), 255);
+	cv::createTrackbar("Sat Max", "Filtered Video", config->Get().saturationmax(), 255);
+	cv::createTrackbar("Val Min", "Filtered Video", config->Get().valuemin(), 255);
+	cv::createTrackbar("Val Max", "Filtered Video", config->Get().valuemax(), 255);
 #endif
 	spdlog::info("Reached end of FrameProcessor constructor");
 }
@@ -49,66 +49,60 @@ void ObjectFrameProcessor::vStartLogging() {
 
 /*!
 * \brief Sets hue min object detection parameter.
-* \param  newValue - integer representing the new hue min value
+* \param newValue - integer representing the new hue min value
 */
-void ObjectFrameProcessor::setPVHueMin(int newValue)
+void ObjectFrameProcessor::setPVHueMin(const int& newValue)
 {
-	m_nHLow = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
 #endif
 }
 /*!
 * \brief Sets hue max object detection parameter.
-* \param  newValue - integer representing the new hue max value
+* \param newValue - integer representing the new hue max value
 */
-void ObjectFrameProcessor::setPVHueMax(int newValue)
+void ObjectFrameProcessor::setPVHueMax(const int& newValue)
 {
-	m_nHHigh = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
 #endif
 }
 /*!
 * \brief Sets saturation min object detection parameter.
-* \param  newValue - integer representing the new saturation min value
+* \param newValue - integer representing the new saturation min value
 */
-void ObjectFrameProcessor::setSaturationMin(int newValue)
+void ObjectFrameProcessor::setSaturationMin(const int& newValue)
 {
-	m_nSLow = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
 #endif
 }
 /*!
 * \brief Sets saturation max object detection parameter.
-* \param  newValue - integer representing the new saturation max value
+* \param newValue - integer representing the new saturation max value
 */
-void ObjectFrameProcessor::setSaturationMax(int newValue)
+void ObjectFrameProcessor::setSaturationMax(const int& newValue)
 {
-	m_nSHigh = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
 #endif
 }
 /*!
 * \brief Sets value min object detection parameter.
-* \param  newValue - integer representing the new value min value
+* \param newValue - integer representing the new value min value
 */
-void ObjectFrameProcessor::setValueMin(int newValue)
+void ObjectFrameProcessor::setValueMin(const int& newValue)
 {
-	m_nVLow = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
 #endif
 }
 /*!
 * \brief Sets value max object detection parameter.
-* \param  newValue - integer representing the new value max value
+* \param newValue - integer representing the new value max value
 */
-void ObjectFrameProcessor::setValueMax(int newValue)
+void ObjectFrameProcessor::setValueMax(const int& newValue)
 {
-	m_nVHigh = newValue;
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
 #endif
