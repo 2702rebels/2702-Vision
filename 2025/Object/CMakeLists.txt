@@ -57,15 +57,15 @@ add_custom_target(generate_protos DEPENDS ${GENERATED_PROTO_SRCS} ${GENERATED_PR
 add_library(objectdetectionconfig STATIC implementation/ObjectDetectionConfigValue.cpp implementation/NetworkTopicPoller.cpp implementation/ObjectDetectionConfig.cpp)
 add_dependencies(objectdetectionconfig generate_protos)
 
-target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(objectdetectionconfig PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(objectdetectionconfig PRIVATE PkgConfig::protobuf)
+target_link_libraries(objectdetectionconfig PUBLIC PkgConfig::protobuf)
 
-target_link_libraries(objectdetectionconfig PRIVATE ntcore)
+target_link_libraries(objectdetectionconfig PUBLIC ntcore)
 
 target_sources(objectdetectionconfig PRIVATE ${GENERATED_PROTO_SRCS})
 
-target_include_directories(objectdetectionconfig PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(objectdetectionconfig PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(objectdetectionstruct STATIC implementation/ObjectDetectionStruct.cpp)
 
@@ -80,6 +80,8 @@ target_include_directories(objectframeprocessor PUBLIC ${CMAKE_CURRENT_SOURCE_DI
 target_link_libraries(objectframeprocessor PRIVATE 2702log)
 
 target_link_libraries(objectframeprocessor PRIVATE objectdetectionstruct)
+
+target_link_libraries(objectframeprocessor PRIVATE objectdetectionconfig)
 
 target_link_libraries(objectframeprocessor PRIVATE 2702)
 target_include_directories(objectframeprocessor PUBLIC ${CMAKE_SOURCE_DIR}/lib/include)
