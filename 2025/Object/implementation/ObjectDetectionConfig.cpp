@@ -165,7 +165,7 @@ ObjectDetectionConfigValue<O> ObjectDetectionConfig<T>::GetConfigValueStruct(std
 template<typename T>
 template<typename O>
 ObjectDetectionConfigValue<O> ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
-	return std::get<o>(GetConfigValueStruct(fieldIndex));
+	return std::get<O>(GetConfigValueStruct(fieldIndex));
 }
 
 template<typename T>
