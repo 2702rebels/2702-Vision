@@ -14,7 +14,7 @@ ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescr
 	: field(field),
 	lastValue(GetConfigValueFromMessage(defaultStruct)),
 	setterFunction(setter),
-	ntValueSubscriber(ntTopic, lastValue)
+	ntValueSubscriber(std::make_unique<NetworkTopicPoller<T>>(ntTopic, lastValue))
 {
 	UpdateFromConfigMessage(defaultStruct);
 }
