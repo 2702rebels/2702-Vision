@@ -8,6 +8,7 @@
 #include <google/protobuf/util/json_util.h>
 #include <networktables/NetworkTableInstance.h>
 #include <type_traits>
+#include <google/protobuf/message.h>
 
 template class ObjectDetectionConfig<ObjectDetectionSettings>;
 
@@ -112,7 +113,7 @@ void ObjectDetectionConfig<T>::WriteConfigToFile() {
 template<typename T>
 T ObjectDetectionConfig<T>::GetConfigStructure() {
 	T configMessage;
-	const pbuf::Message::Reflection* reflection = configMessage.GetReflection();
+	const pbuf::Reflection* reflection = configMessage.GetReflection();
 	for(auto& configValue : m_configValues) {
 		std::visit([&](auto& value) {
 			const pbuf::FieldDescriptor* field = value.field;
