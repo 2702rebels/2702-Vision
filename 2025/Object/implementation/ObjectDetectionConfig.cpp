@@ -7,6 +7,7 @@
 #include <spdlog/spdlog.h>
 #include <google/protobuf/util/json_util.h>
 #include <networktables/NetworkTableInstance.h>
+#include <type_traits>
 
 template class ObjectDetectionConfig<ObjectDetectionSettings>;
 
@@ -93,10 +94,46 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 
 template<typename T>
 void ObjectDetectionConfig<T>::WriteConfigToFile() {
-	T configMessage;
-	const pbuf::Descriptor* messageClass = configMessage.GetDescriptor();
-	const pbuf::Reflection* messageReflection = configMessage.GetReflection();
-	for (int i = 0; i < messageClass->field_count(); i++) {
-
+	T configMessage = GetConfigStructure();
+	std::ofstream configFile(m_configPath, std::ios::out | std::ios::trunc);
+	if (!configFile.is_open()) {
+		spdlog::error("Failed to open config file for writing at path: {}", m_configPath);
+		throw;
 	}
+	std::string configJson;
+	auto status = pbuf::util::MessageToJsonString(configMessage, &configJson);
+	if (!status.ok()) {
+		spdlog::error("Failed to serialize config to JSON: {}", status.message());
+		throw;
+	}
+	configFile << configJson;
+}
+
+template<typename T>
+T ObjectDetectionConfig<T>::GetConfigStructure() {
+	T configMessage;
+	const pbuf::Message::Reflection* reflection = configMessage.GetReflection();
+	for(auto& configValue : m_configValues) {
+		std::visit([&](auto& value) {
+			const pbuf::FieldDescriptor* field = value.field;
+			using ValueType = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<int>>) {
+				reflection->SetInt32(&configMessage, field, value.GetValue());
+			}
+			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<double>>) {
+				reflection->SetDouble(&configMessage, field, value.GetValue());
+			}
+			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<float>>) {
+				reflection->SetFloat(&configMessage, field, value.GetValue());
+			}
+			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<bool>>) {
+				reflection->SetBool(&configMessage, field, value.GetValue());
+			}
+		}, configValue);
+	}
+	return configMessage;
+}
+
+template<typename T>
+void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
 }

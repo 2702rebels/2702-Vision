@@ -27,5 +27,6 @@ public:
 	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string ntConfigSubpath);
 	void LoadConfigFromFile();
 	void WriteConfigToFile();
+	void UpdateFromNetworkTables();
 	T GetConfigStructure();
 };

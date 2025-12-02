@@ -17,6 +17,7 @@ private:
 	std::unique_ptr<NetworkTopicPoller<T>> ntValueSubscriber;
 	T GetConfigValueFromMessage(const pbuf::Message& topic);
 public:
+	// Explicit move constructors
 	ObjectDetectionConfigValue(ObjectDetectionConfigValue&&) noexcept = default;
 	ObjectDetectionConfigValue& operator=(ObjectDetectionConfigValue&&) noexcept = default;
 	// No copying allowed
