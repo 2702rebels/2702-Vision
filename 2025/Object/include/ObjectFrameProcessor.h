@@ -18,6 +18,8 @@
 #include <VisLog.h>
 #include <cameraserver/CameraServer.h>
 #include <frc/filter/MedianFilter.h>
+#include <ObjectDetectionConfig.h>
+#include <ObjectDectionSettings.pb.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
@@ -61,45 +63,7 @@ using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 class ObjectFrameProcessor : public FrmProcessor
 {
-	/*! \brief Hue min object detection parameter. */
-	int			m_nHLow = 0;
-	/*! \brief Saturation min object detection parameter. */
-	int			m_nSLow = 0;
-	/*! \brief Value min object detection parameter. */
-	int			m_nVLow = 215;
-	/*! \brief Hue max object detection parameter. */
-	int			m_nHHigh = 30;
-	/*! \brief Saturation max object detection parameter. */
-	int			m_nSHigh = 30;
-	/*! \brief Value max object detection parameter. */
-	int			m_nVHigh = 255;
-	/*! \brief Minimum pixel width of an object required for detection. */
-	int			m_minPixelWidth = 20;
-	/*! \brief Minimum pixel height of an object required for detection. */
-	int			m_minPixelHeight = 25;
-	/*! \brief Maximum pixel width of an object for detection. */
-	int			m_maxPixelWidth = 500;
-	/*! \brief Maximum pixel height of an object for detection. */
-	int			m_maxPixelHeight = 350;
-	/*! \brief Minimum pixel area of an object for detection. */
-	int			m_minPixelArea = 4500;
-	/*! \brief Maximum pixel area of an object for detection. */
-	int			m_maxPixelArea = 115000;
-	/*! \brief Minimum percentage of pixels that have to be valid inside of a detection for it to be valid. */
-	double		m_minPercentFill = 0.45;
-	/*! \brief X adjustment in meters from center of camera to center of robot. */
-	double		m_camOffsetX = 0.22225;
-	/*! \brief Y adjustment in meters from center of camera to center of robot. */
-	double		m_camOffsetY = 0.33655;
-	/*! \brief Center of camera to center of robot height adjustment in meters. */
-	double		m_camHeight = 0.5334;
-	/*! \brief Angle of camera below the horizontal in radians. */
-	double		m_camAngle = 26 * M_PI / 180;
-	/*! \brief Number of packets over which the median is taken for the distance / angle measurements. */
-	int			m_filterPacketWindow = 8;
-
-	std::string m_logDir;
-
+	std::shared_ptr<ObjectDetectionConfig<ObjectDetectionSettings>> m_config;
 	int			m_frameWidth;
 	int			m_frameHeight;
 
@@ -205,139 +169,7 @@ public:
 	* \param  newValue - integer representing the new value max value
 	*/
 	virtual void setValueMax(int newValue);
-	/*!
-	* \brief Sets min pixel width object detection parameter.
-	* \param  newValue - integer representing the new min pixel width
-	*/
-	virtual void setMinPixelWidth(int newValue);
-	/*!
-	* \brief Sets min pixel height object detection parameter.
-	* \param  newValue - integer representing the new min pixel height
-	*/
-	virtual void setMinPixelHeight(int newValue);
-	/*!
-	* \brief Sets min pixel area object detection parameter.
-	* \param  newValue - integer representing the new min pixel area
-	*/
-	virtual void setMinPixelArea(int newValue);
-	/*!
-	* \brief Sets max pixel width object detection parameter.
-	* \param  newValue - integer representing the new max pixel width
-	*/
-	virtual void setMaxPixelWidth(int newValue);
-	/*!
-	* \brief Sets max pixel height object detection parameter.
-	* \param  newValue - integer representing the new max pixel height
-	*/
-	virtual void setMaxPixelHeight(int newValue);
-	/*!
-	* \brief Sets max pixel area object detection parameter.
-	* \param  newValue - integer representing the new max pixel area
-	*/
-	virtual void setMaxPixelArea(int newValue);
-	/*!
-	* \brief Sets min percent fill object detection parameter.
-	* \param  newValue - integer representing the new min percent fill
-	*/
-	virtual void setMinPercentFill(double newValue);
-	/*!
-	* \brief Sets the X distance between the center of the camera and the center of the robot frame.
-	* \param newValue - new distance in meters
-	*/
-	virtual void setCamOffsetX(double newValue);
-	/*!
-	* \brief Sets the Y distance between the center of the camera and the center of the robot frame.
-	* \param newValue - new distance in meters
-	*/
-	virtual void setCamOffsetY(double newValue);
-	/*!
-	* \brief Sets the vertical distance between the center of the camera and the center of the robot frame.
-	* \param newValue - new distance in meters
-	*/
-	virtual void setCamHeight(double newValue);
-	/*!
-	* \brief Sets the angle below the horizontal of the camera
-	* \param newValue - new angle value in radians
-	*/
-	virtual void setCamAngle(double newValue);
-	/*!
-	* \brief Sets the number of packets over which the median is taken for distance / angle measurements.
-	* Calling this function resets the median.
-	* \param newValue - the new number of packets
-	*/
-	virtual void setFilterWindow(int newValue);
-	/*!
-	* \brief Returns the hue min object detection parameter.
-	*/
-	virtual int getPVHueMin() const;
-	/*!
-	* \brief Returns the hue max object detection parameter.
-	*/
-	virtual int getPVHueMax() const;
-	/*!
-	* \brief Returns the saturation min object detection parameter.
-	*/
-	virtual int getSaturationMin() const;
-	/*!
-	* \brief Returns the saturation max object detection parameter.
-	*/
-	virtual int getSaturationMax() const;
-	/*!
-	* \brief Returns the value min object detection parameter.
-	*/
-	virtual int getValueMin() const;
-	/*!
-	* \brief Returns the value max object detection parameter.
-	*/
-	virtual int getValueMax() const;
-	/*!
-	* \brief Returns the min pixel width object detection parameter.
-	*/
-	virtual int getMinPixelWidth() const;
-	/*!
-	* \brief Returns the min pixel height object detection parameter.
-	*/
-	virtual int getMinPixelHeight() const;
-	/*!
-	* \brief Returns the max pixel width object detection parameter.
-	*/
-	virtual int getMaxPixelWidth() const;
-	/*!
-	* \brief Returns the max pixel height object detection parameter.
-	*/
-	virtual int getMaxPixelHeight() const;
-	/*!
-	* \brief Returns the min pixel area object detection parameter.
-	*/
-	virtual int getMinPixelArea() const;
-	/*!
-	* \brief Returns the max pixel area object detection parameter.
-	*/
-	virtual int getMaxPixelArea() const;
-	/*!
-	* \brief Returns the min percent fill object detection parameter.
-	*/
-	virtual double getMinPercentFill() const;
-	/*!
-	* \brief Returns the x offset of the camera center relative to the center of the robot in meters.
-	*/
-	virtual double getCamOffsetX() const;
-	/*!
-	* \brief Returns the y offset of the camera center relative to the center of the robot in meters.
-	*/
-	virtual double getCamOffsetY() const;
-	/*!
-	* \brief Returns the height offset of the camera center relative to the center of the robot in meters.
-	*/
-	virtual double getCamHeight() const;
-	/*!
-	* \brief Returns the angle below the horizontal of the camera in radians.
-	*/
-	virtual double getCamAngle() const;
-	/*!
-	* \brief Returns the number of packets over which the median is taken for distance / angle measurements.
-	*/
-	virtual int getFilterWindow() const;
+	
 	virtual ~ObjectFrameProcessor();
 	/*! \brief Handles a time sync event from networkTables.
 	* \param e - The networktables event.

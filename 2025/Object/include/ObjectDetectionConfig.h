@@ -23,10 +23,13 @@ class ObjectDetectionConfig {
 private:
 	std::vector<ObjectDetectionConfigValueGen> m_configValues;
 	std::string m_configPath;
+	T currentConfigStructure;
+	const pbuf::Reflection* reflection;
 public:
 	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string ntConfigSubpath);
 	void LoadConfigFromFile();
 	void WriteConfigToFile();
 	void UpdateFromNetworkTables();
-	T GetConfigStructure();
+	void RefreshConfigStructure();
+	const T& GetConfigStructure();
 };

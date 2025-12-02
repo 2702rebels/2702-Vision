@@ -14,7 +14,7 @@ template class ObjectDetectionConfig<ObjectDetectionSettings>;
 
 template<typename T>
 ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string ntConfigSubpath)
-	: m_configPath(configFilePath)
+	: m_configPath(configFilePath), reflection(currentConfigStructure.GetReflection())
 {
 	const pbuf::Descriptor* messageClass = defaultConfigSettings.GetDescriptor();
 	m_configValues.reserve(messageClass->field_count());
@@ -67,6 +67,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 		}
 		}
 	}
+	RefreshConfigStructure();
 }
 
 template<typename T>
@@ -79,8 +80,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 	std::ostringstream buffer;
 	buffer << configFile.rdbuf();
 	std::string configContents = buffer.str();
-	T configMessage;
-	auto status = pbuf::util::JsonStringToMessage(configContents, &configMessage);
+	auto status = pbuf::util::JsonStringToMessage(configContents, &currentConfigStructure);
 	if (!status.ok()) {
 		spdlog::error("Failed to parse config file at path: {}\nParse error: {}", m_configPath, status.message());
 		throw;
@@ -88,21 +88,20 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 	for (auto& configValue : m_configValues) {
 		// Runs value.UpdateFromConfigMessage if value is any one of the variant types
 		std::visit([&](auto& value) {
-			value.UpdateFromConfigMessage(configMessage);
-			}, configValue);
+			value.UpdateFromConfigMessage(currentConfigStructure);
+		}, configValue);
 	}
 }
 
 template<typename T>
 void ObjectDetectionConfig<T>::WriteConfigToFile() {
-	T configMessage = GetConfigStructure();
 	std::ofstream configFile(m_configPath, std::ios::out | std::ios::trunc);
 	if (!configFile.is_open()) {
 		spdlog::error("Failed to open config file for writing at path: {}", m_configPath);
 		throw;
 	}
 	std::string configJson;
-	auto status = pbuf::util::MessageToJsonString(configMessage, &configJson);
+	auto status = pbuf::util::MessageToJsonString(currentConfigStructure, &configJson);
 	if (!status.ok()) {
 		spdlog::error("Failed to serialize config to JSON: {}", status.message());
 		throw;
@@ -111,28 +110,30 @@ void ObjectDetectionConfig<T>::WriteConfigToFile() {
 }
 
 template<typename T>
-T ObjectDetectionConfig<T>::GetConfigStructure() {
-	T configMessage;
-	const pbuf::Reflection* reflection = configMessage.GetReflection();
+const T& ObjectDetectionConfig<T>::GetConfigStructure() {
+	return currentConfigStructure;
+}
+
+template<typename T>
+void ObjectDetectionConfig<T>::RefreshConfigStructure() {
 	for (auto& configValue : m_configValues) {
 		std::visit([&](auto& value) {
 			const pbuf::FieldDescriptor* field = value.GetFieldDescriptor();
 			using ValueType = std::decay_t<decltype(value)>;
 			if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<int>>) {
-				reflection->SetInt32(&configMessage, field, value.GetValue());
+				reflection->SetInt32(&currentConfigStructure, field, value.GetValue());
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<double>>) {
-				reflection->SetDouble(&configMessage, field, value.GetValue());
+				reflection->SetDouble(&currentConfigStructure, field, value.GetValue());
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<float>>) {
-				reflection->SetFloat(&configMessage, field, value.GetValue());
+				reflection->SetFloat(&currentConfigStructure, field, value.GetValue());
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<bool>>) {
-				reflection->SetBool(&configMessage, field, value.GetValue());
+				reflection->SetBool(&currentConfigStructure, field, value.GetValue());
 			}
 		}, configValue);
 	}
-	return configMessage;
 }
 
 template<typename T>

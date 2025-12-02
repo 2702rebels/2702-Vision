@@ -10,12 +10,16 @@ namespace pbuf = google::protobuf;
 
 template<typename T>
 class ObjectDetectionConfigValue {
+	friend class ObjectDetectionConfig;
 private:
 	const pbuf::FieldDescriptor* field;
 	T lastValue;
 	std::function<void(T&)>* setterFunction;
 	std::unique_ptr<NetworkTopicPoller<T>> ntValueSubscriber;
 	T GetConfigValueFromMessage(const pbuf::Message& topic);
+	void UpdateFromConfigMessage(const pbuf::Message& settings);
+	void UpdateFromNetworkTables();
+	void UpdateValue(const T& newValue);
 public:
 	// Explicit move constructors
 	ObjectDetectionConfigValue(ObjectDetectionConfigValue&&) noexcept = default;
@@ -24,9 +28,6 @@ public:
 	ObjectDetectionConfigValue(const ObjectDetectionConfigValue&) = delete;
 	ObjectDetectionConfigValue& operator=(const ObjectDetectionConfigValue&) = delete;
 	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(T&)>* setter, nt::Topic ntTopic);
-	void UpdateFromConfigMessage(const pbuf::Message& settings);
-	void UpdateFromNetworkTables();
-	void UpdateValue(const T& newValue);
 	const pbuf::FieldDescriptor* GetFieldDescriptor() const;
 	T GetValue() const;
 };
