@@ -148,7 +148,7 @@ void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
 
 template<typename T>
 ObjectDetectionConfigValueGen ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
-	return m_configValues[fieldNamesToIndex[fieldName];
+	return m_configValues[fieldNamesToIndex[fieldName]];
 }
 
 template<typename T>
