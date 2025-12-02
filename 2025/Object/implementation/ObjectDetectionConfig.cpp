@@ -89,7 +89,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 		// Runs value.UpdateFromConfigMessage if value is any one of the variant types
 		std::visit([&](auto& value) {
 			value.UpdateFromConfigMessage(configMessage);
-		}, configValue);
+			}, configValue);
 	}
 }
 
@@ -114,7 +114,7 @@ template<typename T>
 T ObjectDetectionConfig<T>::GetConfigStructure() {
 	T configMessage;
 	const pbuf::Reflection* reflection = configMessage.GetReflection();
-	for(auto& configValue : m_configValues) {
+	for (auto& configValue : m_configValues) {
 		std::visit([&](auto& value) {
 			const pbuf::FieldDescriptor* field = value.GetFieldDescriptor();
 			using ValueType = std::decay_t<decltype(value)>;
@@ -137,4 +137,9 @@ T ObjectDetectionConfig<T>::GetConfigStructure() {
 
 template<typename T>
 void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
+	for (auto& configValue : m_configValues) {
+		std::visit([&](auto& value) {
+			value.UpdateFromNetworkTables();
+		}, configValue);
+	}
 }

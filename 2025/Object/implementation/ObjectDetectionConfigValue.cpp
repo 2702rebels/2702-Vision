@@ -60,3 +60,11 @@ template<typename T>
 const pbuf::FieldDescriptor* ObjectDetectionConfigValue<T>::GetFieldDescriptor() const {
 	return field;
 }
+
+template<typename T>
+void ObjectDetectionConfigValue<T>::UpdateFromNetworkTables() {
+	T ntValue = ntValueSubscriber->GetValue();
+	if (ntValue != lastValue) {
+		UpdateValue(ntValue);
+	}
+}
