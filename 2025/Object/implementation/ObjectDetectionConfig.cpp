@@ -116,7 +116,7 @@ T ObjectDetectionConfig<T>::GetConfigStructure() {
 	const pbuf::Reflection* reflection = configMessage.GetReflection();
 	for(auto& configValue : m_configValues) {
 		std::visit([&](auto& value) {
-			const pbuf::FieldDescriptor* field = value.field;
+			const pbuf::FieldDescriptor* field = value.GetFieldDescriptor();
 			using ValueType = std::decay_t<decltype(value)>;
 			if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<int>>) {
 				reflection->SetInt32(&configMessage, field, value.GetValue());

@@ -26,5 +26,6 @@ public:
 	ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(T&)>* setter, nt::Topic ntTopic);
 	void UpdateFromConfigMessage(const pbuf::Message& settings);
 	void UpdateValue(const T& newValue);
+	const pbuf::FieldDescriptor* GetFieldDescriptor() const;
 	T GetValue() const;
 };

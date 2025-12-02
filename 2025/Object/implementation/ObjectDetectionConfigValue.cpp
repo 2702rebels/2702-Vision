@@ -55,3 +55,8 @@ template<typename T>
 T ObjectDetectionConfigValue<T>::GetValue() const {
 	return lastValue;
 }
+
+template<typename T>
+const pbuf::FieldDescriptor* ObjectDetectionConfigValue<T>::GetFieldDescriptor() const {
+	return field;
+}
