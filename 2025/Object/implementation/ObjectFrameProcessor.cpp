@@ -17,6 +17,13 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
+	m_config.AttachSetterFunction("hueMin", &setPVHueMin);
+	m_config.AttachSetterFunction("hueMax", &setPVHueMax);
+	m_config.AttachSetterFunction("saturationMin", &setSaturationMin);
+	m_config.AttachSetterFunction("saturationMax", &setSaturationMax);
+	m_config.AttachSetterFunction("valueMin", &setValueMin);
+	m_config.AttachSetterFunction("valueMax", &setValueMax);
+	m_config.LoadConfigFromFile();
 	m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
 	spdlog::info("Camera Matrix: {} {} {}\n{} {} {}\n{} {} {}",

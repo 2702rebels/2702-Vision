@@ -159,7 +159,7 @@ void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
 }
 
 template<typename T>
-ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
+ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string fieldName) {
 	return m_configValues[fieldNamesToIndex[fieldName]];
 }
 
@@ -170,7 +170,7 @@ ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(in
 
 template<typename T>
 template<typename O>
-ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string& fieldName) {
+ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string fieldName) {
 	return std::get<O>(GetConfigValueStruct(fieldName));
 }
 
@@ -182,7 +182,7 @@ ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(in
 
 template<typename T>
 template<typename O>
-void ObjectDetectionConfig<T>::AttachSetterFunction(std::string& fieldName, std::function<void(const O&)>* setterFunctionPtr) {
+void ObjectDetectionConfig<T>::AttachSetterFunction(std::string fieldName, std::function<void(const O&)>* setterFunctionPtr) {
 	AttachSetterFunction<O>(m_configValues[fieldNamesToIndex.at(fieldName)], setterFunctionPtr);
 }
 
