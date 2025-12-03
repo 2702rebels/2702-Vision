@@ -76,8 +76,6 @@ class ObjectFrameProcessor : public FrmProcessor
 
 #endif
 
-	double		m_fCDiam = 0.1016;
-
 	double		distance;
 
 	/*! \brief Camera calibration matrix. */

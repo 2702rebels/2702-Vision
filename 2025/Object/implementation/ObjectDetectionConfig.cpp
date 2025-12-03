@@ -79,7 +79,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 		}
 		}
 	}
-	RefreshConfigStructure();
+	LoadConfigFromFile();
 }
 
 template<typename T>
