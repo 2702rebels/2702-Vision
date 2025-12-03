@@ -13,7 +13,7 @@
 template class ObjectDetectionConfig<ObjectDetectionSettings>;
 
 template<typename T>
-ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string ntConfigSubpath)
+ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string configName)
 	: m_configPath(configFilePath), reflection(currentConfigStructure.GetReflection())
 {
 	const pbuf::Descriptor* messageClass = defaultConfigSettings.GetDescriptor();
@@ -21,7 +21,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 	for (int i = 0; i < messageClass->field_count(); i++) {
 		const pbuf::FieldDescriptor* field = messageClass->field(i);
 		fieldNamesToIndex[field->name()] = i;
-		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + ntConfigSubpath + field->name());
+		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + configName  + "/" + field->name());
 		switch (field->cpp_type()) {
 		case pbuf::FieldDescriptor::CPPTYPE_INT32: {
 			m_configValues.emplace_back(

@@ -7,13 +7,13 @@
 // Initialize static vars
 int64_t ObjectFrameProcessor::m_i64TimeOffset;
 
-ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight, std::shared_ptr<ObjectDetectionConfig<ObjectDetectionSettings>> config) :
+ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	FrmProcessor(),
-	m_config(config),
+	m_config("./processorSettings.json", ObjectDetectionSettings(), "ProcessorSettings"),
 	CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
-	m_p3dCam2Robot(m_config->Get().cameraoffsetx(), m_config->Get().cameraoffsety(), m_config->Get().cameraheight()),
-	m_distanceFilter(m_config->Get().filterpacketwindow()),
-	m_angleFilter(m_config->Get().filterpacketwindow()),
+	m_p3dCam2Robot(m_config.Get().cameraoffsetx(), m_config.Get().cameraoffsety(), m_config.Get().cameraheight()),
+	m_distanceFilter(m_config.Get().filterpacketwindow()),
+	m_angleFilter(m_config.Get().filterpacketwindow()),
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
@@ -168,7 +168,7 @@ Rebels::Point2d ObjectFrameProcessor::calculate_coral_vector(const std::vector<c
 
 	// The Camera is tiled down, so rotate the vector
 	// to "Robot Space"
-	Rebels::Quaternion qCamTilt(m_config->Get().cameraangle(), Rebels::Point3d(0., 1., 0.));
+	Rebels::Quaternion qCamTilt(m_config.Get().cameraangle(), Rebels::Point3d(0., 1., 0.));
 	Rebels::Point3d vRot = qCamTilt * v;
 
 	// Find the Z intercept -- the point where the vector touches the floor
@@ -226,16 +226,16 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 	// Sort points to get top-left in right spot
 	cv::Point center = (rect.br() + rect.tl()) * 0.5;
 	float majorAxisLength = std::max(rect.width, rect.height);
-	if (majorAxisLength < m_config->Get().minpixelwidth() || majorAxisLength > m_config->Get().maxpixelwidth())
+	if (majorAxisLength < m_config.Get().minpixelwidth() || majorAxisLength > m_config.Get().maxpixelwidth())
 	{
 		return { {}, {} };
 	}
 	float minorAxisLength = std::min(rect.width, rect.height);
-	if (minorAxisLength < m_config->Get().minpixelheight() || minorAxisLength > m_config->Get().maxpixelheight()) {
+	if (minorAxisLength < m_config.Get().minpixelheight() || minorAxisLength > m_config.Get().maxpixelheight()) {
 		return { {}, {} };
 	}
 	double area = rect.width * rect.height;
-	if (area < m_config->Get().minpixelarea() || area > m_config->Get().maxpixelarea()) {
+	if (area < m_config.Get().minpixelarea() || area > m_config.Get().maxpixelarea()) {
 		return { {}, {} };
 	}
 	// suspicious... the lines are coming out wrong the points must be goofed
@@ -274,7 +274,7 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 	spdlog::info("npixels: {}", pixels);
 	spdlog::info("validpixels: {}", validPixels);
 	// If % detection is nan or less than min fill
-	if (detectpercent < m_config->Get().minpercentfill() || std::isnan(detectpercent)) {
+	if (detectpercent < m_config.Get().minpercentfill() || std::isnan(detectpercent)) {
 		return { {}, {} };
 	}
 	std::vector<cv::Point> hull;
@@ -329,7 +329,7 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 				try {
 					char szTmp[128];
 					for (int i = 0; ; i++) {
-						snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", m_config->Get().logdirectory().c_str(), i);
+						snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", m_config.Get().logdirectory().c_str(), i);
 						if (access(szTmp, F_OK) == -1) {
 							break;
 						}
@@ -357,7 +357,7 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 	// cv::inRange(hsv, cv::Scalar( m_nHLow, m_nSLow, m_nVLow), cv::Scalar( m_nHHigh, m_nSHigh, m_nVHigh), thresh);
 
 	//frame = cv::undistort_frame(frame, mtx, dist);
-	cv::Mat mask = filter_hsv_inverted(frame, m_config->Get().huemin(), m_config->Get().huemax(), m_config->Get().saturationmin(), m_config->Get().saturationmax(), m_config->Get().valuemin(), m_config->Get().valuemax());
+	cv::Mat mask = filter_hsv_inverted(frame, m_config.Get().huemin(), m_config.Get().huemax(), m_config.Get().saturationmin(), m_config.Get().saturationmax(), m_config.Get().valuemin(), m_config.Get().valuemax());
 	cv::Mat filtered_frame;
 	cv::bitwise_and(frame, frame, filtered_frame, mask);
 	std::vector<std::vector<cv::Point>> contours;
@@ -375,7 +375,7 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 #endif
 			auto [fitted_contour, endpoints] = fit_cylinder_contour(contours[i], mask, filtered_frame, &heightPaintAt);
 			if (!fitted_contour.empty()) {
-				Rebels::Point2d coralVec = calculate_coral_vector(contours[i], m_focalLen, m_config->Get().fcdiam(), CAMERA_CENTER);
+				Rebels::Point2d coralVec = calculate_coral_vector(contours[i], m_focalLen, m_config.Get().fcdiam(), CAMERA_CENTER);
 				double distance = coralVec.length();
 				// u = x, v = y
 				double angle = std::atan2(coralVec.v(), coralVec.u());

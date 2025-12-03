@@ -63,7 +63,7 @@ using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 class ObjectFrameProcessor : public FrmProcessor
 {
-	std::shared_ptr<ObjectDetectionConfig<ObjectDetectionSettings>> m_config;
+	ObjectDetectionConfig<ObjectDetectionSettings> m_config;
 	int			m_frameWidth;
 	int			m_frameHeight;
 
@@ -134,7 +134,7 @@ class ObjectFrameProcessor : public FrmProcessor
 public:
 	static int64_t m_i64TimeOffset;
 
-	ObjectFrameProcessor(int frameWidth, int frameHeight, std::shared_ptr<ObjectDetectionConfig<ObjectDetectionSettings>> config);
+	ObjectFrameProcessor(int frameWidth, int frameHeight);
 
 	/*! \brief Start logging frames to logfile. */
 	virtual void vStartLogging();

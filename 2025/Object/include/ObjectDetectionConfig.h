@@ -29,7 +29,7 @@ private:
 	T currentConfigStructure;
 	const pbuf::Reflection* reflection;
 public:
-	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string ntConfigSubpath);
+	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string configName);
 	void LoadConfigFromFile();
 	void WriteConfigToFile();
 	void UpdateFromNetworkTables();
