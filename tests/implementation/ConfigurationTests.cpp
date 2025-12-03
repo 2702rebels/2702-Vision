@@ -51,7 +51,7 @@ TEST(ConfigurationSyncer, SaveToConfigurationFile) {
 	newConfigFile.close();
 	std::regex hueminrx(".*hueMin\":252.*");
 	std::regex cameraoffsetrx(".*cameraOffsetX\":23.2.*");
-	std::regex logdirectoryrx(".*logDirectory\":\"test2\"");
+	std::regex logdirectoryrx(".*logDirectory\":\"test2\".*");
 	ASSERT_TRUE(std::regex_match(newConfigStr, hueminrx));
 	ASSERT_TRUE(std::regex_match(newConfigStr, cameraoffsetrx));
 	ASSERT_TRUE(std::regex_match(newConfigStr, logdirectoryrx));
