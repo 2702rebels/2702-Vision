@@ -39,9 +39,9 @@ TEST(ConfigurationSyncer, LoadFromConfigurationFile) {
 TEST(ConfigurationSyncer, SaveToConfigurationFile) {
 	ObjectDetectionConfig<ObjectDetectionSettings> config("./testwritefile.json", ObjectDetectionSettings(), "ObjConfig");
 	ObjectDetectionSettings newConfig;
-	newConfig.set_huemin(250);
-	newConfig.set_cameraoffsetx(25.2);
-	newConfig.set_logdirectory("testing");
+	newConfig.set_huemin(252);
+	newConfig.set_cameraoffsetx(23.2);
+	newConfig.set_logdirectory("test2");
 	config.LoadConfigFromStructure(newConfig);
 	config.WriteConfigToFile();
 	std::ifstream newConfigFile("./testwritefile.json", std::ios::in);
@@ -49,9 +49,9 @@ TEST(ConfigurationSyncer, SaveToConfigurationFile) {
 	ss << newConfigFile.rdbuf();
 	std::string newConfigStr = ss.str();
 	newConfigFile.close();
-	std::regex hueminrx(".*hueMin\":250.*");
-	std::regex cameraoffsetrx(".*cameraOffsetX\":25.2.*");
-	std::regex logdirectoryrx(".*logDirectory\":\"testing\"");
+	std::regex hueminrx(".*hueMin\":252.*");
+	std::regex cameraoffsetrx(".*cameraOffsetX\":23.2.*");
+	std::regex logdirectoryrx(".*logDirectory\":\"test2\"");
 	ASSERT_TRUE(std::regex_match(newConfigStr, hueminrx));
 	ASSERT_TRUE(std::regex_match(newConfigStr, cameraoffsetrx));
 	ASSERT_TRUE(std::regex_match(newConfigStr, logdirectoryrx));
