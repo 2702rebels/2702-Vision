@@ -1,6 +1,10 @@
 #include <NetworkTopicGeneric.h>
 #include <type_traits>
 #include <string>
+#include <typeinfo>
+#ifdef __GNUG__
+#include <cxxabi.h>
+#endif
 
 template class NetworkTopicGeneric<int>;
 template class NetworkTopicGeneric<double>;
@@ -8,12 +12,26 @@ template class NetworkTopicGeneric<bool>;
 template class NetworkTopicGeneric<float>;
 template class NetworkTopicGeneric<std::string>;
 
+template <typename T>
+static std::string type_name() {
+	const char* name = typeid(T).name();
+#ifdef __GNUG__
+	int status = 0;
+	char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
+	std::string result = (status == 0) ? demangled : name;
+	std::free(demangled);
+	return result;
+#else
+	return name; // MSVC already gives readable names
+#endif
+}
+
 template<typename T>
 NetworkTopicGeneric<T>::NetworkTopicGeneric(nt::Topic& topic, T defaultValue) :
 	m_defaultValue(defaultValue) 
 {
 	m_subscriber = topic.GenericSubscribe();
-	m_publisher = topic.GenericPublish<T>();
+	m_publisher = topic.GenericPublish(type_name<T>());
 }
 
 template<typename T>
