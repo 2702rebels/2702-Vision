@@ -13,7 +13,7 @@ ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescr
 	: field(field),
 	lastValue(GetConfigValueFromMessage(defaultStruct)),
 	setterFunction(setter),
-	ntValueSyncer(std::make_unique<NetworkTopicPoller<T>>(ntTopic, lastValue))
+	ntValueSyncer(std::make_unique<NetworkTopicGeneric<T>>(ntTopic, lastValue))
 {
 	UpdateFromConfigMessage(defaultStruct);
 }
