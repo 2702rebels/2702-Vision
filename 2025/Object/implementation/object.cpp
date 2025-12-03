@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 			info("Connection status of NetworkTables: {}", networkTableManager.IsConnected());
 			if (networkTableManager.IsConnected())
 			{
-				info("net tables connected");
+				proc.m_config.UpdateFromNetworkTables();
 				if (!bLogStarted)
 				{
 					if (isLoggingTopic.Get())
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 				}
 			}
 #endif
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		}
 	}
 	catch (std::exception& e)

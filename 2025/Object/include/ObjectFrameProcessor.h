@@ -63,7 +63,6 @@ using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 class ObjectFrameProcessor : public FrmProcessor
 {
-	ObjectDetectionConfig<ObjectDetectionSettings> m_config;
 	int			m_frameWidth;
 	int			m_frameHeight;
 
@@ -130,6 +129,8 @@ class ObjectFrameProcessor : public FrmProcessor
 	time_t			m_tmLogEnd;
 
 public:
+	ObjectDetectionConfig<ObjectDetectionSettings> m_config;
+
 	static int64_t m_i64TimeOffset;
 
 	ObjectFrameProcessor(int frameWidth, int frameHeight);

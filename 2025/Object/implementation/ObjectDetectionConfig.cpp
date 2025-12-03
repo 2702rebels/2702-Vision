@@ -153,6 +153,7 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() {
 			}
 		}, configValue);
 	}
+	WriteConfigToFile();
 }
 
 template<typename T>
