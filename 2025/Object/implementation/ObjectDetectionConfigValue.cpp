@@ -13,7 +13,7 @@ ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescr
 	: field(field),
 	lastValue(GetConfigValueFromMessage(defaultStruct)),
 	setterFunction(setter),
-	ntValueSubscriber(std::make_unique<NetworkTopicPoller<T>>(ntTopic, lastValue))
+	ntValueSyncer(std::make_unique<NetworkTopicPoller<T>>(ntTopic, lastValue))
 {
 	UpdateFromConfigMessage(defaultStruct);
 }
@@ -49,6 +49,7 @@ T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& 
 template<typename T>
 void ObjectDetectionConfigValue<T>::UpdateValue(const T& newValue) {
 	lastValue = newValue;
+	ntValueSyncer->PushValue(newValue);
 	if (setterFunction) {
 		setterFunction(lastValue);
 	}
@@ -66,7 +67,7 @@ const pbuf::FieldDescriptor* ObjectDetectionConfigValue<T>::GetFieldDescriptor()
 
 template<typename T>
 void ObjectDetectionConfigValue<T>::UpdateFromNetworkTables() {
-	T ntValue = ntValueSubscriber->GetValue();
+	T ntValue = ntValueSyncer->GetValue();
 	if (ntValue != lastValue) {
 		UpdateValue(ntValue);
 	}

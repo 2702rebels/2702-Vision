@@ -2,7 +2,7 @@
 #include <functional>
 #include <google/protobuf/descriptor.h>
 #include <networktables/Topic.h>
-#include <NetworkTopicPoller.h>
+#include <NetworkTopicGeneric.h>
 #include <string>
 #include <memory>
 #include <google/protobuf/message.h>
@@ -16,7 +16,7 @@ private:
 	const pbuf::FieldDescriptor* field;
 	T lastValue;
 	std::function<void(const T&)> setterFunction;
-	std::unique_ptr<NetworkTopicPoller<T>> ntValueSubscriber;
+	std::unique_ptr<NetworkTopicGeneric<T>> ntValueSyncer;
 	T GetConfigValueFromMessage(const pbuf::Message& topic);
 	void UpdateFromConfigMessage(const pbuf::Message& settings);
 	void UpdateFromNetworkTables();

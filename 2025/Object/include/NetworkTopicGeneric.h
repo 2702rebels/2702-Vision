@@ -3,12 +3,14 @@
 #include <networktables/GenericEntry.h>
 
 template<typename T>
-class NetworkTopicPoller {
+class NetworkTopicGeneric {
 private:
 	nt::GenericSubscriber m_subscriber;
+	nt::GenericPublisher m_publisher;
 	T m_defaultValue;
 public:
-	NetworkTopicPoller(nt::Topic& topic, T defaultValue);
+	NetworkTopicGeneric(nt::Topic& topic, T defaultValue);
 	T GetValue() const;
-	~NetworkTopicPoller() = default;
+	void PushValue(const T& value);
+	~NetworkTopicGeneric() = default;
 };

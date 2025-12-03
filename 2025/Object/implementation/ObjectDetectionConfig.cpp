@@ -151,6 +151,9 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() {
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<bool>>) {
 				reflection->SetBool(&currentConfigStructure, field, value.GetValue());
 			}
+			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::string>>) {
+				reflection->SetString(&currentConfigStructure, field, value.GetValue());
+			}
 		}, configValue);
 	}
 	WriteConfigToFile();
