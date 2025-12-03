@@ -81,7 +81,7 @@ target_link_libraries(objectframeprocessor PRIVATE 2702log)
 
 target_link_libraries(objectframeprocessor PRIVATE objectdetectionstruct)
 
-target_link_libraries(objectframeprocessor PRIVATE objectdetectionconfig)
+target_link_libraries(objectframeprocessor PUBLIC objectdetectionconfig)
 
 target_link_libraries(objectframeprocessor PRIVATE 2702)
 target_include_directories(objectframeprocessor PUBLIC ${CMAKE_SOURCE_DIR}/lib/include)
