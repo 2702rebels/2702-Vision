@@ -13,7 +13,7 @@ NetworkTopicGeneric<T>::NetworkTopicGeneric(nt::Topic& topic, T defaultValue) :
 	m_defaultValue(defaultValue) 
 {
 	m_subscriber = topic.GenericSubscribe();
-	m_publisher = topic.GenericPublish();
+	m_publisher = topic.GenericPublish<T>();
 }
 
 template<typename T>
