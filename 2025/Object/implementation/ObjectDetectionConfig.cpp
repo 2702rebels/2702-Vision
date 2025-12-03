@@ -79,7 +79,14 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 		}
 		}
 	}
-	LoadConfigFromFile();
+	std::ifstream checkFile(configFilePath);
+	if (checkFile.is_open()) {
+		checkFile.close();
+		LoadConfigFromFile();
+	}
+	else {
+		RefreshConfigStructure();
+	}
 }
 
 template<typename T>
@@ -160,11 +167,20 @@ void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
 
 template<typename T>
 ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string fieldName) {
+	auto it = fieldNamesToIndex.find(fieldName);
+	if (it == fieldNamesToIndex.end()) {
+		spdlog::error("Failed to find field of name {} in GetConfigValueStruct", fieldName);
+		throw;
+	}
 	return m_configValues[fieldNamesToIndex[fieldName]];
 }
 
 template<typename T>
 ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
+	if (fieldIndex < 0 || fieldIndex >= m_configValues.size()) {
+		spdlog::error("Invalid fieldIndex provided to GetConfigValueStruct: {}", fieldIndex);
+		throw;
+	}
 	return m_configValues[fieldIndex];
 }
 
@@ -183,19 +199,22 @@ ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(in
 template<typename T>
 template<typename O>
 void ObjectDetectionConfig<T>::AttachSetterFunction(std::string fieldName, std::function<void(const O&)> setterFunction) {
-	AttachSetterFunctionImpl<O>(m_configValues[fieldNamesToIndex.at(fieldName)], std::move(setterFunction));
+	auto it = fieldNamesToIndex.find(fieldName);
+	if (it == fieldNamesToIndex.end()) {
+		spdlog::error("Failed to find field with name {} in AttachSetterFunction", fieldName);
+		throw;
+	}
+	std::get<ObjectDetectionConfigValue<O>>(m_configValues[it->second]).setterFunction = std::move(setterFunction);
 }
-
-template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(std::string, std::function<void(const int&)>);
-template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<double>(std::string, std::function<void(const double&)>);
-template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(std::string, std::function<void(const float&)>);
-template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(std::string, std::function<void(const bool&)>);
-template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(std::string, std::function<void(const std::string&)>);
 
 template<typename T>
 template<typename O>
 void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::function<void(const O&)> setterFunction) {
-	AttachSetterFunctionImpl<O>(m_configValues[fieldIndex], std::move(setterFunction));
+	if (fieldIndex < 0 || fieldIndex >= m_configValues.size()) {
+		spdlog::error("Invalid field index in AttachSetterFunction: {}", fieldIndex);
+		throw;
+	}
+	std::get<ObjectDetectionConfigValue<O>>(m_configValues[fieldIndex]).setterFunction = std::move(setterFunction);
 }
 
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(int, std::function<void(const int&)>);
@@ -204,7 +223,8 @@ template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFuncti
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(int, std::function<void(const bool&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(int, std::function<void(const std::string&)>);
 
-template<typename O>
-static void AttachSetterFunctionImpl(ObjectDetectionConfigValueGen configValue, std::function<void(const O&)> setterFunction) {
-	std::get<ObjectDetectionConfigValue<O>>(configValue).setterFunction = std::move(setterFunction);
-}
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(std::string, std::function<void(const int&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<double>(std::string, std::function<void(const double&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(std::string, std::function<void(const float&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(std::string, std::function<void(const bool&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(std::string, std::function<void(const std::string&)>);
