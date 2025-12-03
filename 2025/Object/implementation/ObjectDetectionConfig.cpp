@@ -186,11 +186,23 @@ void ObjectDetectionConfig<T>::AttachSetterFunction(std::string fieldName, std::
 	AttachSetterFunction<O>(m_configValues[fieldNamesToIndex.at(fieldName)], std::move(setterFunction));
 }
 
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(std::string, std::function<void(const int&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<double>(std::string, std::function<void(const double&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(std::string, std::function<void(const float&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(std::string, std::function<void(const bool&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(std::string, std::function<void(const std::string&)>);
+
 template<typename T>
 template<typename O>
 void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::function<void(const O&)> setterFunction) {
 	AttachSetterFunction<O>(m_configValues[fieldIndex], std::move(setterFunction));
 }
+
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(int, std::function<void(const int&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<double>(int, std::function<void(const double&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(int, std::function<void(const float&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(int, std::function<void(const bool&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(int, std::function<void(const std::string&)>);
 
 template<typename O>
 static void AttachSetterFunction(ObjectDetectionConfigValueGen configValue, std::function<void(const O&)> setterFunction) {
