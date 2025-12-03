@@ -134,7 +134,7 @@ class ObjectFrameProcessor : public FrmProcessor
 public:
 	static int64_t m_i64TimeOffset;
 
-	ObjectFrameProcessor(std::string logDir, int frameWidth, int frameHeight);
+	ObjectFrameProcessor(int frameWidth, int frameHeight, std::shared_ptr<ObjectDetectionConfig<ObjectDetectionSettings>> config);
 
 	/*! \brief Start logging frames to logfile. */
 	virtual void vStartLogging();
