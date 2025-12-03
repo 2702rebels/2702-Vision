@@ -12,7 +12,7 @@ class StdVideoLogProc : public FrmProcessor {
     FILE* ffmpegFiltered;
     public:
     StdVideoLogProc(std::string outputPath, std::string outputPathFiltered, int width, int height, int frame_rate): 
-    imageProcessor("", width, height),
+    imageProcessor(width, height),
     ffmpegRaw(popen(((std::string)("ffmpeg -y "
         "-f rawvideo "
         "-pix_fmt rgb24 "

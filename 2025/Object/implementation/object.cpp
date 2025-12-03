@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 	signal(SIGINT, sighandler);
 	try
 	{
-		ObjectFrameProcessor proc(LOG_DIR, RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
+		ObjectFrameProcessor proc(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 		//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
 		RPICamera mycam0("/dev/video0", 0, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, DRM_FORMAT_RGB888, proc, FIXED_EXPOSURE_TIME, FIXED_GAIN_VALUE);
 		//	nvCamera mycam1( "/dev/video1", 4, 1 );
@@ -60,26 +60,7 @@ int main(int argc, char* argv[])
 		//	printinfo( mycam0 );
 #if USE_NETWORK_TABLES
 		auto networkTableManager = nt::NetworkTableInstance::GetDefault();
-		auto objectDetectionTable = networkTableManager.GetTable("ObjectDetection");
 		auto visionTable = networkTableManager.GetTable("Vision");
-		nt::IntegerSubscriber hueMinTopic = objectDetectionTable->GetIntegerTopic("HueMin").Subscribe(proc.getPVHueMin());
-		nt::IntegerSubscriber hueMaxTopic = objectDetectionTable->GetIntegerTopic("HueMax").Subscribe(proc.getPVHueMax());
-		nt::IntegerSubscriber saturationMinTopic = objectDetectionTable->GetIntegerTopic("SaturationMin").Subscribe(proc.getSaturationMin());
-		nt::IntegerSubscriber saturationMaxTopic = objectDetectionTable->GetIntegerTopic("SaturationMax").Subscribe(proc.getSaturationMax());
-		nt::IntegerSubscriber valueMinTopic = objectDetectionTable->GetIntegerTopic("ValueMin").Subscribe(proc.getValueMin());
-		nt::IntegerSubscriber valueMaxTopic = objectDetectionTable->GetIntegerTopic("ValueMax").Subscribe(proc.getValueMax());
-		nt::IntegerSubscriber minPixelWidthTopic = objectDetectionTable->GetIntegerTopic("MinPixelWidth").Subscribe(proc.getMinPixelWidth());
-		nt::IntegerSubscriber minPixelHeightTopic = objectDetectionTable->GetIntegerTopic("MinPixelHeight").Subscribe(proc.getMinPixelHeight());
-		nt::IntegerSubscriber minPixelAreaTopic = objectDetectionTable->GetIntegerTopic("MinPixelArea").Subscribe(proc.getMinPixelArea());
-		nt::IntegerSubscriber maxPixelWidthTopic = objectDetectionTable->GetIntegerTopic("MaxPixelWidth").Subscribe(proc.getMaxPixelWidth());
-		nt::IntegerSubscriber maxPixelHeightTopic = objectDetectionTable->GetIntegerTopic("MaxPixelHeight").Subscribe(proc.getMaxPixelHeight());
-		nt::IntegerSubscriber maxPixelAreaTopic = objectDetectionTable->GetIntegerTopic("MaxPixelArea").Subscribe(proc.getMaxPixelArea());
-		nt::DoubleSubscriber  minPercentFillTopic = objectDetectionTable->GetDoubleTopic("MinPercentFill").Subscribe(proc.getMinPercentFill());
-		nt::DoubleSubscriber  camOffsetXTopic = objectDetectionTable->GetDoubleTopic("CamOffsetX").Subscribe(proc.getCamOffsetX());
-		nt::DoubleSubscriber  camOffsetYTopic = objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(proc.getCamOffsetY());
-		nt::DoubleSubscriber  camHeightTopic = objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(proc.getCamHeight());
-		nt::DoubleSubscriber  camAngleTopic = objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(proc.getCamAngle());
-		nt::IntegerSubscriber filterPacketWindowTopic = objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Subscribe(proc.getFilterWindow());
 		nt::BooleanSubscriber isLoggingTopic = visionTable->GetBooleanTopic("IsLogging").Subscribe(false);
 		bool bLogStarted = false;
 		networkTableManager.StartClient4("networkTableClient");
