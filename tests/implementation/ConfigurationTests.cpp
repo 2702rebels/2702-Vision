@@ -9,4 +9,7 @@ TEST(ConfigurationSyncer, LoadFromConfigurationStruct) {
 	newConfig.set_cameraoffsetx(25.2);
 	newConfig.set_logdirectory("testing");
 	config.LoadConfigFromStructure(newConfig);
+	ASSERT_EQ(config.Get().huemin(), 250);
+	ASSERT_DOUBLE_EQ(config.Get().cameraoffsetx(), 25.2);
+	ASSERT_STREQ(config.Get().logdirectory(), "testing");
 }
