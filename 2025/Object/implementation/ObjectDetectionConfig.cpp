@@ -90,6 +90,16 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 }
 
 template<typename T>
+void ObjectDetectionConfig<T>::LoadConfigFromStructure(const T& newConfigSettings) {
+	currentConfigStructure.CopyFrom(newConfigSettings);
+	for (auto& configValue : m_configValues) {
+		std::visit([&](auto& value) {
+			value.UpdateFromConfigStructure(currentConfigStructure);
+		}, configValue);
+	}
+}
+
+template<typename T>
 void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 	std::ifstream configFile(m_configPath);
 	if (!configFile.is_open()) {

@@ -34,6 +34,7 @@ public:
 	void WriteConfigToFile();
 	void UpdateFromNetworkTables();
 	void RefreshConfigStructure();
+	void LoadConfigFromStructure(const T& newConfigSettings);
 	const T& Get();
 	ObjectDetectionConfigValueGen& GetConfigValueStruct(std::string fieldName);
 	ObjectDetectionConfigValueGen& GetConfigValueStruct(int valueIndex);

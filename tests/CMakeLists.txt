@@ -17,6 +17,8 @@ target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/2025/Object/include
 
 target_link_libraries(tests PRIVATE objectframeprocessor)
 
+target_link_libraries(tests PRIVATE objectdetectionconfig)
+
 target_link_libraries(tests PRIVATE gtest gtest_main)
 
 gtest_discover_tests(tests)
