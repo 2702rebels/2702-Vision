@@ -44,7 +44,7 @@ TEST(ConfigurationSyncer, SaveToConfigurationFile) {
 	newConfig.set_logdirectory("testing");
 	config.LoadConfigFromStructure(newConfig);
 	config.WriteConfigToFile();
-	std::ifstream newConfigFile("./testloadfile.json", std::ios::in);
+	std::ifstream newConfigFile("./testwritefile.json", std::ios::in);
 	std::ostringstream ss;
 	ss << newConfigFile.rdbuf();
 	std::string newConfigStr = ss.str();
