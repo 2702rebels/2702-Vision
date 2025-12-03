@@ -49,8 +49,7 @@ T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& 
 template<typename T>
 void ObjectDetectionConfigValue<T>::UpdateValue(const T& newValue) {
 	lastValue = newValue;
-	if (setterFunction == nullptr) return;
-	(*setterFunction)(lastValue);
+	setterFunction(lastValue);
 }
 
 template<typename T>

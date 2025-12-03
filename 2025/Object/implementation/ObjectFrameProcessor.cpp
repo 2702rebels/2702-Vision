@@ -18,12 +18,12 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
-	m_config.AttachSetterFunction("hueMin", &std::bind(&ObjectFrameProcessor::setPVHueMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction("hueMax", &std::bind(&ObjectFrameProcessor::setPVHueMax, this, std::placeholders::_1));
-	m_config.AttachSetterFunction("saturationMin", &std::bind(&ObjectFrameProcessor::setSaturationMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction("saturationMax", &std::bind(&ObjectFrameProcessor::setSaturationMax, this, std::placeholders::_1));
-	m_config.AttachSetterFunction("valueMin", &std::bind(&ObjectFrameProcessor::setValueMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction("valueMax", &std::bind(&ObjectFrameProcessor::setValueMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("hueMin", std::bind(&ObjectFrameProcessor::setPVHueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("hueMax", std::bind(&ObjectFrameProcessor::setPVHueMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("saturationMin", std::bind(&ObjectFrameProcessor::setSaturationMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("saturationMax", std::bind(&ObjectFrameProcessor::setSaturationMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("valueMin", std::bind(&ObjectFrameProcessor::setValueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("valueMax", std::bind(&ObjectFrameProcessor::setValueMax, this, std::placeholders::_1));
 	m_config.LoadConfigFromFile();
 	m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 

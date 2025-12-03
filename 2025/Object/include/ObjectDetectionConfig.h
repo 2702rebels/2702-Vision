@@ -42,7 +42,7 @@ public:
 	template<typename O>
 	ObjectDetectionConfigValue<O>& GetConfigValueStruct(int valueIndex);
 	template<typename O>
-	void AttachSetterFunction(std::string fieldName, std::function<void(const O&)>* setterFunctionPtr);
+	void AttachSetterFunction(std::string fieldName, std::function<void(const O&)> setterFunction);
 	template<typename O>
-	void AttachSetterFunction(int valueIndex, std::function<void(const O&)>* setterFunctionPtr);
+	void AttachSetterFunction(int valueIndex, std::function<void(const O&)> setterFunction);
 };
