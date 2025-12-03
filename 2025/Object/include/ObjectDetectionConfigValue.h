@@ -5,6 +5,7 @@
 #include <NetworkTopicPoller.h>
 #include <string>
 #include <memory>
+#include <google/protobuf/message.h>
 
 namespace pbuf = google::protobuf;
 

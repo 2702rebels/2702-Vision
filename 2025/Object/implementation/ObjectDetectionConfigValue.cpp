@@ -2,7 +2,6 @@
 #include <string>
 #include <type_traits>
 
-
 template class ObjectDetectionConfigValue<int>;
 template class ObjectDetectionConfigValue<double>;
 template class ObjectDetectionConfigValue<float>;
