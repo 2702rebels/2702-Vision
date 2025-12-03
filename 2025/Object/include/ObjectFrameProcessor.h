@@ -135,38 +135,38 @@ public:
 	ObjectFrameProcessor(int frameWidth, int frameHeight);
 
 	/*! \brief Start logging frames to logfile. */
-	virtual void vStartLogging();
+	void vStartLogging();
 
 	/*!
 	* \brief Sets hue min object detection parameter.
 	* \param  newValue - integer representing the new hue min value
 	*/
-	virtual void setPVHueMin(const int& newValue);
+	void setPVHueMin(const int& newValue);
 	/*!
 	* \brief Sets hue max object detection parameter.
 	* \param  newValue - integer representing the new hue max value
 	*/
-	virtual void setPVHueMax(const int& newValue);
+	void setPVHueMax(const int& newValue);
 	/*!
 	* \brief Sets saturation min object detection parameter.
 	* \param  newValue - integer representing the new saturation min value
 	*/
-	virtual void setSaturationMin(const int& newValue);
+	void setSaturationMin(const int& newValue);
 	/*!
 	* \brief Sets saturation max object detection parameter.
 	* \param  newValue - integer representing the new saturation max value
 	*/
-	virtual void setSaturationMax(const int& newValue);
+	void setSaturationMax(const int& newValue);
 	/*!
 	* \brief Sets value min object detection parameter.
 	* \param  newValue - integer representing the new value min value
 	*/
-	virtual void setValueMin(const int& newValue);
+	void setValueMin(const int& newValue);
 	/*!
 	* \brief Sets value max object detection parameter.
 	* \param  newValue - integer representing the new value max value
 	*/
-	virtual void setValueMax(const int& newValue);
+	void setValueMax(const int& newValue);
 	
 	virtual ~ObjectFrameProcessor();
 	/*! \brief Handles a time sync event from networkTables.
