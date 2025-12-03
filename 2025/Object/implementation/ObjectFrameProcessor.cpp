@@ -3,6 +3,7 @@
 #include <cameraserver/CameraServer.h>
 #include <cstdint>
 #include <spdlog/spdlog.h>
+#include <functional>
 
 // Initialize static vars
 int64_t ObjectFrameProcessor::m_i64TimeOffset;
@@ -17,12 +18,12 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
-	m_config.AttachSetterFunction("hueMin", &setPVHueMin);
-	m_config.AttachSetterFunction("hueMax", &setPVHueMax);
-	m_config.AttachSetterFunction("saturationMin", &setSaturationMin);
-	m_config.AttachSetterFunction("saturationMax", &setSaturationMax);
-	m_config.AttachSetterFunction("valueMin", &setValueMin);
-	m_config.AttachSetterFunction("valueMax", &setValueMax);
+	m_config.AttachSetterFunction("hueMin", &std::bind(setPVHueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("hueMax", &std::bind(setPVHueMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("saturationMin", &std::bind(setSaturationMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("saturationMax", &std::bind(setSaturationMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("valueMin", &std::bind(setValueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction("valueMax", &std::bind(setValueMax, this, std::placeholders::_1));
 	m_config.LoadConfigFromFile();
 	m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
