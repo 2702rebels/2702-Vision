@@ -94,7 +94,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromStructure(const T& newConfigSetting
 	currentConfigStructure.CopyFrom(newConfigSettings);
 	for (auto& configValue : m_configValues) {
 		std::visit([&](auto& value) {
-			value.UpdateFromConfigStructure(currentConfigStructure);
+			value.UpdateFromConfigMessage(currentConfigStructure);
 		}, configValue);
 	}
 }
