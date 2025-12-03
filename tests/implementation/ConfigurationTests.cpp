@@ -11,5 +11,5 @@ TEST(ConfigurationSyncer, LoadFromConfigurationStruct) {
 	config.LoadConfigFromStructure(newConfig);
 	ASSERT_EQ(config.Get().huemin(), 250);
 	ASSERT_DOUBLE_EQ(config.Get().cameraoffsetx(), 25.2);
-	ASSERT_STREQ(config.Get().logdirectory(), "testing");
+	ASSERT_STREQ(config.Get().logdirectory().c_str(), "testing");
 }
