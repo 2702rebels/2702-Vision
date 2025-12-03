@@ -9,11 +9,11 @@ int64_t ObjectFrameProcessor::m_i64TimeOffset;
 
 ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight, std::shared_ptr<ObjectDetectionConfig<ObjectDetectionSettings>> config) :
 	FrmProcessor(),
+	m_config(config),
 	CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
-	m_p3dCam2Robot(m_camOffsetX, m_camOffsetY, m_camHeight),
-	m_distanceFilter(m_filterPacketWindow),
-	m_angleFilter(m_filterPacketWindow),
-	m_config(config)
+	m_p3dCam2Robot(m_config->Get().cameraoffsetx(), m_config->Get().cameraoffsety(), m_config->Get().cameraheight()),
+	m_distanceFilter(m_config->Get().filterpacketwindow()),
+	m_angleFilter(m_config->Get().filterpacketwindow()),
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
