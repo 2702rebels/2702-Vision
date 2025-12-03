@@ -38,7 +38,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 				std::in_place_type<ObjectDetectionConfigValue<double>>,
 				field,
 				defaultConfigSettings,
-				std::function<void(const int&)>{},
+				std::function<void(const double&)>{},
 				ntTopic
 			);
 			break;
@@ -48,7 +48,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 				std::in_place_type<ObjectDetectionConfigValue<bool>>,
 				field,
 				defaultConfigSettings,
-				std::function<void(const int&)>{},
+				std::function<void(const bool&)>{},
 				ntTopic
 			);
 			break;
@@ -58,7 +58,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 				std::in_place_type<ObjectDetectionConfigValue<float>>,
 				field,
 				defaultConfigSettings,
-				std::function<void(const int&)>{},
+				std::function<void(const float&)>{},
 				ntTopic
 			);
 			break;
@@ -68,7 +68,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 				std::in_place_type<ObjectDetectionConfigValue<std::string>>,
 				field,
 				defaultConfigSettings,
-				std::function<void(const int&)>{},
+				std::function<void(const std::string&)>{},
 				ntTopic
 			);
 			break;
@@ -183,16 +183,16 @@ ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(in
 template<typename T>
 template<typename O>
 void ObjectDetectionConfig<T>::AttachSetterFunction(std::string fieldName, std::function<void(const O&)> setterFunction) {
-	AttachSetterFunction<O>(m_configValues[fieldNamesToIndex.at(fieldName)], setterFunction);
+	AttachSetterFunction<O>(m_configValues[fieldNamesToIndex.at(fieldName)], std::move(setterFunction));
 }
 
 template<typename T>
 template<typename O>
 void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::function<void(const O&)> setterFunction) {
-	AttachSetterFunction<O>(m_configValues[fieldIndex], setterFunction);
+	AttachSetterFunction<O>(m_configValues[fieldIndex], std::move(setterFunction));
 }
 
 template<typename O>
 static void AttachSetterFunction(ObjectDetectionConfigValueGen configValue, std::function<void(const O&)> setterFunction) {
-	std::get<ObjectDetectionConfigValue<O>>(configValue).setterFunction = setterFunction;
+	std::get<ObjectDetectionConfigValue<O>>(configValue).setterFunction = std::move(setterFunction);
 }
