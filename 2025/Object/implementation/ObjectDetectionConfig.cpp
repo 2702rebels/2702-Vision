@@ -191,11 +191,12 @@ ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(st
 
 template<typename T>
 ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
-	if (fieldIndex < 0 || fieldIndex >= m_configValues.size()) {
+	int arrIndex = fieldIndex - 1;
+	if (arrIndex < 0 || arrIndex >= m_configValues.size()) {
 		spdlog::error("Invalid fieldIndex provided to GetConfigValueStruct: {}", fieldIndex);
 		throw;
 	}
-	return m_configValues[fieldIndex];
+	return m_configValues[arrIndex];
 }
 
 template<typename T>
@@ -224,11 +225,12 @@ void ObjectDetectionConfig<T>::AttachSetterFunction(std::string fieldName, std::
 template<typename T>
 template<typename O>
 void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::function<void(const O&)> setterFunction) {
-	if (fieldIndex < 0 || fieldIndex >= m_configValues.size()) {
+	int arrIndex = fieldIndex - 1;
+	if (arrIndex < 0 || arrIndex >= m_configValues.size()) {
 		spdlog::error("Invalid field index in AttachSetterFunction: {}", fieldIndex);
 		throw;
 	}
-	std::get<ObjectDetectionConfigValue<O>>(m_configValues[fieldIndex]).setterFunction = std::move(setterFunction);
+	std::get<ObjectDetectionConfigValue<O>>(m_configValues[arrIndex]).setterFunction = std::move(setterFunction);
 }
 
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(int, std::function<void(const int&)>);

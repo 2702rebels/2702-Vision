@@ -19,6 +19,6 @@ message ObjectDetectionSettings {
 	double cameraHeight = 16;
 	double cameraAngle = 17;
 	int32 filterPacketWindow = 18;
-	string logDirectory = 19;
-	double fcDiam = 20;
+	double fcDiam = 19;
+	string logDirectory = 20;
 }
