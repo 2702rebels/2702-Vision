@@ -14,6 +14,10 @@ template class NetworkTopicGeneric<std::string>;
 
 template <typename T>
 static std::string type_name() {
+	// The actual std::string expands to a bit of an ugly mess, so just handle the edge case explicitly
+	if constexpr (std::is_same_v<T, std::string>) {
+		return "string";
+	}
 	const char* name = typeid(T).name();
 #ifdef __GNUG__
 	int status = 0;
