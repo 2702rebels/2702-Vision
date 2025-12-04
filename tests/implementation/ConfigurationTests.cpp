@@ -70,7 +70,7 @@ TEST(ConfigurationSyncer, NetworkTableSyncPublish) {
 	nt::Topic logDirectoryTopic = ntinst.GetTopic("ObjectDetectionConfig/TestConfigName/logDirectory");
 	nt::IntegerSubscriber hueMinSub = hueMinTopic.Subscribe(-1);
 	nt::DoubleSubscriber cameraOffsetXSub = cameraOffsetXTopic.Subscribe(-1.0);
-	nt::GenericSubscriber logDirectorySub = logDirectoryTopic.GenericSubscribe("string");
+	nt::GenericSubscriber logDirectorySub = logDirectoryTopic.GenericSubscribe();
 	ObjectDetectionSettings defaults;
 	defaults.set_huemin(25);
 	defaults.set_cameraoffsetx(5.5);
