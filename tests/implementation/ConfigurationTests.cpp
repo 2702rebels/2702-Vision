@@ -5,6 +5,10 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <networktables/IntegerTopic.h>
+#include <networktables/DoubleTopic.h>
+#include <networktables/StringTopic.h>
+#include <networktables/NetworkTableInstance.h>
 
 TEST(ConfigurationSyncer, LoadFromConfigurationStruct) {
 	ObjectDetectionConfig<ObjectDetectionSettings> config("./LoadFromConfigurationStruct.json", ObjectDetectionSettings(), "ObjConfig");
@@ -58,7 +62,29 @@ TEST(ConfigurationSyncer, SaveToConfigurationFile) {
 }
 
 TEST(ConfigurationSyncer, NetworkTableSyncPublish) {
-
+	nt::NetworkTableInstance ntinst = nt::NetworkTableInstance::GetDefault();
+	nt::IntegerTopic hueMinTopic = ntinst.GetIntegerTopic("ObjectDetectionConfig/TestConfigName/hueMin");
+	nt::DoubleTopic cameraOffsetXTopic = ntinst.GetDoubleTopic("ObjectDetectionConfig/TestConfigName/cameraOffsetX");
+	nt::StringTopic logDirectoryTopic = ntinst.GetStringTopic("ObjectDetectionConfig/TestConfigName/logDirectory");
+	nt::IntegerSubscriber hueMinSub = hueMinTopic.Subscribe(-1);
+	nt::DoubleSubscriber cameraOffsetXSub = cameraOffsetXTopic.Subscribe(-1.0);
+	nt::StringSubscriber logDirectorySub = logDirectoryTopic.Subscribe("");
+	ObjectDetectionSettings defaults;
+	defaults.set_huemin(25);
+	defaults.set_cameraoffsetx(5.5);
+	defaults.set_logdirectory("ntpubdefault");
+	ObjectDetectionConfig<ObjectDetectionSettings> config("./NetworkTableSyncPublish.json", defaults, "TestConfigName");
+	ASSERT_EQ(hueMinSub.Get(), 25);
+	ASSERT_DOUBLE_EQ(cameraOffsetXSub.Get(), 5.5);
+	ASSERT_STREQ(logDirectorySub.Get().c_str(), "ntpubdefault");
+	ObjectDetectionSettings newSettings;
+	newSettings.set_huemin(75);
+	newSettings.set_cameraoffsetx(9.0);
+	newSettings.set_logdirectory("ntpub");
+	config.LoadConfigFromStructure(newSettings);
+	ASSERT_EQ(hueMinSub.Get(), 75);
+	ASSERT_DOUBLE_EQ(cameraOffsetXSub.Get(), 9.0);
+	ASSERT_STREQ(logDirectorySub.Get().c_str(), "ntpub");
 }
 
 TEST(ConfigurationSyncer, NetworkTableSyncFetch) {
