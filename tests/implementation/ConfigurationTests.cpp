@@ -90,7 +90,18 @@ TEST(ConfigurationSyncer, NetworkTableSyncPublish) {
 }
 
 TEST(ConfigurationSyncer, NetworkTableSyncFetch) {
-
+	nt::NetworkTableInstance ntinst = nt::NetworkTableInstance::GetDefault();
+	nt::IntegerPublisher hueMinPub = ntinst.GetIntegerTopic("ObjectDetectionConfig/TestConfigFetch/hueMin").Publish();
+	nt::DoublePublisher cameraOffsetPub = ntinst.GetDoubleTopic("ObjectDetectionConfig/TestConfigFetch/cameraOffsetX").Publish();
+	nt::StringPublisher logDirectoryPub = ntinst.GetStringTopic("ObjectDetectionConfig/TestConfigFetch/logDirectory").Publish();
+	ObjectDetectionConfig<ObjectDetectionSettings> config("./NetworkTableSyncFetch.json", ObjectDetectionSettings(), "TestConfigFetch");
+	hueMinPub.Set(84);
+	cameraOffsetPub.Set(18.4);
+	logDirectoryPub.Set("fetchSync");
+	config.UpdateFromNetworkTables();
+	ASSERT_EQ(config.Get().huemin(), 84);
+	ASSERT_DOUBLE_EQ(config.Get().cameraoffsetx(), 18.4);
+	ASSERT_STREQ(config.Get().logdirectory(), "fetchSync");
 }
 
 static int setterIntValueReceived = -1;
