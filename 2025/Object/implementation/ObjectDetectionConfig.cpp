@@ -74,8 +74,8 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 			break;
 		}
 		default: {
-			spdlog::error("Unsupported field type of field #{} {}", field->index(), field->name());
-			throw;
+			spdlog::error("Unsupported field type of field #{} {} in ObjectDetectionConfig", field->index(), field->name());
+			throw std::invalid_argument("Unsupported field type");
 		}
 		}
 	}
@@ -104,7 +104,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 	std::ifstream configFile(m_configPath);
 	if (!configFile.is_open()) {
 		spdlog::error("Failed to open config file at path: {}", m_configPath);
-		throw;
+		throw std::runtime_error("Failed to open config file");
 	}
 	std::ostringstream buffer;
 	buffer << configFile.rdbuf();
@@ -112,7 +112,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 	auto status = pbuf::util::JsonStringToMessage(configContents, &currentConfigStructure);
 	if (!status.ok()) {
 		spdlog::error("Failed to parse config file at path: {}\nParse error: {}", m_configPath, status.message());
-		throw;
+		throw std:::runtime_error("Failed to parse config file");
 	}
 	for (auto& configValue : m_configValues) {
 		// Runs value.UpdateFromConfigMessage if value is any one of the variant types
@@ -127,13 +127,13 @@ void ObjectDetectionConfig<T>::WriteConfigToFile() {
 	std::ofstream configFile(m_configPath, std::ios::out | std::ios::trunc);
 	if (!configFile.is_open()) {
 		spdlog::error("Failed to open config file for writing at path: {}", m_configPath);
-		throw;
+		throw std::runtime_error("Failed to open config file for writing");
 	}
 	std::string configJson;
 	auto status = pbuf::util::MessageToJsonString(currentConfigStructure, &configJson);
 	if (!status.ok()) {
 		spdlog::error("Failed to serialize config to JSON: {}", status.message());
-		throw;
+		throw std::runtime_error("Failed to serialize config to JSON");
 	}
 	configFile << configJson;
 }
@@ -184,7 +184,7 @@ ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(st
 	auto it = fieldNamesToIndex.find(fieldName);
 	if (it == fieldNamesToIndex.end()) {
 		spdlog::error("Failed to find field of name {} in GetConfigValueStruct", fieldName);
-		throw;
+		throw std::invalid_argument("Failed to find field of name");
 	}
 	return m_configValues[fieldNamesToIndex[fieldName]];
 }
@@ -194,7 +194,7 @@ ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(in
 	int arrIndex = fieldIndex - 1;
 	if (arrIndex < 0 || arrIndex >= m_configValues.size()) {
 		spdlog::error("Invalid fieldIndex provided to GetConfigValueStruct: {}", fieldIndex);
-		throw;
+		throw std::invalid_argument("Invalid fieldIndex");
 	}
 	return m_configValues[arrIndex];
 }
@@ -217,7 +217,7 @@ void ObjectDetectionConfig<T>::AttachSetterFunction(std::string fieldName, std::
 	auto it = fieldNamesToIndex.find(fieldName);
 	if (it == fieldNamesToIndex.end()) {
 		spdlog::error("Failed to find field with name {} in AttachSetterFunction", fieldName);
-		throw;
+		throw std::invalid_argument("Failed to find field with name");
 	}
 	std::get<ObjectDetectionConfigValue<O>>(m_configValues[it->second]).setterFunction = std::move(setterFunction);
 }
@@ -228,7 +228,7 @@ void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::functio
 	int arrIndex = fieldIndex - 1;
 	if (arrIndex < 0 || arrIndex >= m_configValues.size()) {
 		spdlog::error("Invalid field index in AttachSetterFunction: {}", fieldIndex);
-		throw;
+		throw std::invalid_argument("Invalid fieldIndex");
 	}
 	std::get<ObjectDetectionConfigValue<O>>(m_configValues[arrIndex]).setterFunction = std::move(setterFunction);
 }
