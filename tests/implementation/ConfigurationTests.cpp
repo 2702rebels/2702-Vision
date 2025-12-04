@@ -78,7 +78,7 @@ TEST(ConfigurationSyncer, NetworkTableSyncPublish) {
 	ObjectDetectionConfig<ObjectDetectionSettings> config("./NetworkTableSyncPublish.json", defaults, "TestConfigName");
 	ASSERT_EQ(hueMinSub.Get(), 25);
 	ASSERT_DOUBLE_EQ(cameraOffsetXSub.Get(), 5.5);
-	ASSERT_STREQ(logDirectorySub.Get().c_str(), "ntpubdefault");
+	ASSERT_STREQ(logDirectorySub.Get().GetString().data(), "ntpubdefault");
 	ObjectDetectionSettings newSettings;
 	newSettings.set_huemin(75);
 	newSettings.set_cameraoffsetx(9.0);
@@ -86,7 +86,7 @@ TEST(ConfigurationSyncer, NetworkTableSyncPublish) {
 	config.LoadConfigFromStructure(newSettings);
 	ASSERT_EQ(hueMinSub.Get(), 75);
 	ASSERT_DOUBLE_EQ(cameraOffsetXSub.Get(), 9.0);
-	ASSERT_STREQ(logDirectorySub.Get().c_str(), "ntpub");
+	ASSERT_STREQ(logDirectorySub.Get().GetString().data(), "ntpub");
 }
 
 TEST(ConfigurationSyncer, NetworkTableSyncFetch) {
