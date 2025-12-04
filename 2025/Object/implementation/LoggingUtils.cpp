@@ -37,36 +37,3 @@ void SetupTextLogger() {
 	register_logger(textLogsOutput);
 	set_default_logger(textLogsOutput);
 }
-
-std::shared_ptr<logger> SetupFrameLogger(const char* name) {
-	auto logger = spdlog::create_async<sinks::basic_file_sink_mt>(
-		name, "Logs/" + GetCurTimeStr() + "_" + name + ".log"
-	);
-	logger->set_pattern("%v");
-	register_logger(logger);
-	return logger;
-}
-
-FrameLogger::FrameLogger(const char* unfilteredName, const char* maskedName, const char* annotatedName) {
-	m_unfilteredLogger = SetupFrameLogger(unfilteredName);
-	m_maskedLogger = SetupFrameLogger(maskedName);
-	m_annotatedLogger = SetupFrameLogger(annotatedName);
-}
-
-void FrameLogger::LogUnfilteredFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
-	m_unfilteredLogger->info("<<FRM>>\n{}\n{}", u32Seq, u32Exp);
-	m_unfilteredLogger->info("{}\n{}", frame.rows, frame.cols);
-	m_unfilteredLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));
-}
-
-void FrameLogger::LogMaskedFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
-	m_maskedLogger->info("<<FRM>>\n{}\n{}", u32Seq, u32Exp);
-	m_maskedLogger->info("{}\n{}", frame.rows, frame.cols);
-	m_maskedLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));
-}
-
-void FrameLogger::LogAnnotatedFrame(const cv::Mat& frame, uint32_t u32Seq, uint32_t u32Exp) {
-	m_annotatedLogger->info("<<FRM>>\n{}\n{}", u32Seq, u32Exp);
-	m_annotatedLogger->info("{}\n{}", frame.rows, frame.cols);
-	m_annotatedLogger->info(std::string((char*)frame.data, frame.rows * frame.cols));
-}
