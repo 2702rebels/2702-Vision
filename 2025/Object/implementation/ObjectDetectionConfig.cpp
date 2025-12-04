@@ -112,7 +112,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 	auto status = pbuf::util::JsonStringToMessage(configContents, &currentConfigStructure);
 	if (!status.ok()) {
 		spdlog::error("Failed to parse config file at path: {}\nParse error: {}", m_configPath, status.message());
-		throw std:::runtime_error("Failed to parse config file");
+		throw std::runtime_error("Failed to parse config file");
 	}
 	for (auto& configValue : m_configValues) {
 		// Runs value.UpdateFromConfigMessage if value is any one of the variant types
