@@ -8,6 +8,7 @@
 #include <networktables/IntegerTopic.h>
 #include <networktables/DoubleTopic.h>
 #include <networktables/StringTopic.h>
+#include <networktables/Topic.h>
 #include <networktables/NetworkTableInstance.h>
 
 TEST(ConfigurationSyncer, LoadFromConfigurationStruct) {
@@ -65,10 +66,10 @@ TEST(ConfigurationSyncer, NetworkTableSyncPublish) {
 	nt::NetworkTableInstance ntinst = nt::NetworkTableInstance::GetDefault();
 	nt::IntegerTopic hueMinTopic = ntinst.GetIntegerTopic("ObjectDetectionConfig/TestConfigName/hueMin");
 	nt::DoubleTopic cameraOffsetXTopic = ntinst.GetDoubleTopic("ObjectDetectionConfig/TestConfigName/cameraOffsetX");
-	nt::StringTopic logDirectoryTopic = ntinst.GetStringTopic("ObjectDetectionConfig/TestConfigName/logDirectory");
+	nt::Topic logDirectoryTopic = ntinst.GetTopic("ObjectDetectionConfig/TestConfigName/logDirectory");
 	nt::IntegerSubscriber hueMinSub = hueMinTopic.Subscribe(-1);
 	nt::DoubleSubscriber cameraOffsetXSub = cameraOffsetXTopic.Subscribe(-1.0);
-	nt::StringSubscriber logDirectorySub = logDirectoryTopic.Subscribe("");
+	nt::GenericSubscriber logDirectorySub = logDirectoryTopic.GenericSubscribe<std::string>("string");
 	ObjectDetectionSettings defaults;
 	defaults.set_huemin(25);
 	defaults.set_cameraoffsetx(5.5);
