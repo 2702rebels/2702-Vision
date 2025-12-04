@@ -93,6 +93,6 @@ TEST(ConfigurationSyncer, GetConfigValueStructFieldIndex) {
 	ASSERT_ANY_THROW(config.GetConfigValueStruct("SomeNonExistantField"));
 	ASSERT_ANY_THROW(config.GetConfigValueStruct<int>("SomeNonExistantField"));
 	ASSERT_EQ(config.GetConfigValueStruct<int>("hueMin").GetValue(), 20);
-	ASSERT_DOUBLE_EQ(config.GetConfigValueStruct<double>("cameraOffsetX"), 3.1);
+	ASSERT_DOUBLE_EQ(config.GetConfigValueStruct<double>("cameraOffsetX").GetValue(), 3.1);
 	ASSERT_STREQ(config.GetConfigValueStruct<std::string>("logDirectory").GetValue().c_str(), "test4");
 }
