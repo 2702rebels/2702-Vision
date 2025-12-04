@@ -202,13 +202,13 @@ ObjectDetectionConfigValueGen& ObjectDetectionConfig<T>::GetConfigValueStruct(in
 template<typename T>
 template<typename O>
 ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(std::string fieldName) {
-	return std::get<O>(GetConfigValueStruct(fieldName));
+	return std::get<ObjectDetectionConfigValue<O>>(GetConfigValueStruct(fieldName));
 }
 
 template<typename T>
 template<typename O>
 ObjectDetectionConfigValue<O>& ObjectDetectionConfig<T>::GetConfigValueStruct(int fieldIndex) {
-	return std::get<O>(GetConfigValueStruct(fieldIndex));
+	return std::get<ObjectDetectionConfigValue<O>>(GetConfigValueStruct(fieldIndex));
 }
 
 template<typename T>
@@ -244,3 +244,15 @@ template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFuncti
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(std::string, std::function<void(const float&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(std::string, std::function<void(const bool&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(std::string, std::function<void(const std::string&)>);
+
+template ObjectDetectionConfigValue<int>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int>(std::string);
+template ObjectDetectionConfigValue<double>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<double>(std::string);
+template ObjectDetectionConfigValue<float>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<float>(std::string);
+template ObjectDetectionConfigValue<bool>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<bool>(std::string);
+template ObjectDetectionConfigValue<std::string>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<std::string>(std::string);
+
+template ObjectDetectionConfigValue<int>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int>(int);
+template ObjectDetectionConfigValue<double>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<double>(int);
+template ObjectDetectionConfigValue<float>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<float>(int);
+template ObjectDetectionConfigValue<bool>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<bool>(int);
+template ObjectDetectionConfigValue<std::string>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<std::string>(int);
