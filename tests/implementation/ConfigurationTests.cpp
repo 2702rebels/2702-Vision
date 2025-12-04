@@ -101,7 +101,7 @@ TEST(ConfigurationSyncer, NetworkTableSyncFetch) {
 	config.UpdateFromNetworkTables();
 	ASSERT_EQ(config.Get().huemin(), 84);
 	ASSERT_DOUBLE_EQ(config.Get().cameraoffsetx(), 18.4);
-	ASSERT_STREQ(config.Get().logdirectory(), "fetchSync");
+	ASSERT_STREQ(config.Get().logdirectory().c_str(), "fetchSync");
 }
 
 static int setterIntValueReceived = -1;
