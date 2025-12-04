@@ -65,8 +65,50 @@ TEST(ConfigurationSyncer, NetworkTableSyncFetch) {
 
 }
 
+static int setterIntValueReceived = -1;
+static double setterDoubleValueReceived = -1;
+static std::string setterStringValueReceived = "";
+
+static void SetterFunction1(const int& newValue) {
+	setterIntValueReceived = newValue;
+}
+
+static void SetterFunction2(const double& newValue) {
+	setterDoubleValueReceived = newValue;
+}
+
+static void SetterFunction3(const std::string& newValue) {
+	setterStringValueReceived = newValue;
+}
+
 TEST(ConfigurationSyncer, AttachSetterFunctionFieldName) {
-	
+	ObjectDetectionConfig<ObjectDetectionSettings> config("./AttachSetterFunctionFieldName.json", ObjectDetectionSettings(), "ObjConfig");
+	config.AttachSetterFunction<int>("hueMin", SetterFunction1);
+	config.AttachSetterFunction<double>("cameraOffsetX", SetterFunction2);
+	config.AttachSetterFunction<std::string>("logDirectory", SetterFunction3);
+	ObjectDetectionSettings newConfig;
+	newConfig.set_huemin(2);
+	newConfig.set_cameraoffsetx(5.0);
+	newConfig.set_logdirectory("AttachFieldName");
+	config.LoadConfigFromStructure(newConfig);
+	ASSERT_EQ(setterIntValueReceived, 2);
+	ASSERT_DOUBLE_EQ(setterDoubleValueReceived, 5.0);
+	ASSERT_STREQ(setterStringValueReceived.c_str(), "AttachFieldName");
+}
+
+TEST(ConfigurationSyncer, AttachSetterFunctionFieldIndex) {
+	ObjectDetectionConfig<ObjectDetectionSettings> config("./AttachSetterFunctionFieldIndex.json", ObjectDetectionSettings(), "ObjConfig");
+	config.AttachSetterFunction<int>(1, SetterFunction1);
+	config.AttachSetterFunction<double>(14, SetterFunction2);
+	config.AttachSetterFunction<std::string>(20, SetterFunction3);
+	ObjectDetectionSettings newConfig;
+	newConfig.set_huemin(3);
+	newConfig.set_cameraoffsetx(6.0);
+	newConfig.set_logdirectory("AttachFieldIndex");
+	config.LoadConfigFromStructure(newConfig);
+	ASSERT_EQ(setterIntValueReceived, 3);
+	ASSERT_DOUBLE_EQ(setterDoubleValueReceived, 6.0);
+	ASSERT_STREQ(setterStringValueReceived.c_str(), "AttachFieldIndex");
 }
 
 TEST(ConfigurationSyncer, GetConfigValueStructFieldName) {
