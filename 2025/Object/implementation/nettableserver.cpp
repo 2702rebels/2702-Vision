@@ -10,6 +10,8 @@
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/IntegerTopic.h>
 #include <networktables/DoubleTopic.h>
+#include <networktables/GenericEntry.h>
+#include <networktables/Topic.h>
 #include <signal.h>
 #include <chrono>
 #include <thread>
@@ -49,6 +51,7 @@ nt::DoublePublisher  camOffsetYTopic;
 nt::DoublePublisher  camHeightTopic;
 nt::DoublePublisher  camAngleTopic;
 nt::IntegerPublisher filterWindowTopic;
+nt::GenericPublisher genPublisher;
 
 /*! \brief This is called when Ctrl+C is pressed 
 * \param nSig - The signal code that was interrupted, should always be 2 for Ctrl+C
@@ -66,7 +69,7 @@ void showHelp(){
     << "pushmaxwidth - pushes a new value for the maxpixelwidth param\n" << "pushminheight - pushes a new value for the minpixelheight param\n" << "pushmaxheight - pushes a new value for the maxpixelheight\n" 
     << "pushminarea - pushes a new value for the minpixelarea param\n" << "pushmaxarea - pushes a new value for the maxpixelarea param\n" << "pushminpercentfill - pushes a new value for the min percent fill param\n" 
     << "pushcamoffsetx - pushes a new value for the camoffsetx param\n" << "pushcamoffsety - pushes a new value for the camoffsety param\n" << "pushcamheight - pushes a new value for the camheight param\n" 
-    << "pushcamangle - pushes a new value for the camangle param\n" << "pushfilterwindow - pushes a new value for the filterwindow param\n" << "stop - shuts the server down\n" << "help - displays this text\n";
+    << "pushcamangle - pushes a new value for the camangle param\n" << "pushfilterwindow - pushes a new value for the filterwindow param\n" << "pushstrgen - push new strgen value" << "stop - shuts the server down\n" << "help - displays this text\n";
 }
 
 /*! \brief Shuts down the server. Note that this is not immediate, and the program will walk through one more tick before exiting.*/
@@ -224,6 +227,13 @@ void pushFilterWindow(){
     filterWindowTopic.SetDefault(stoi(value));
 }
 
+void pushgenstring() {
+    std::string val;
+    std::cout << "Enter a value: ";
+    std::cin >> val;
+    genPublisher.SetString(val);
+}
+
 int main( int argc, char **argv ){
     signal(SIGINT, sighandler); // Handles Ctrl+C interrupts
     // Assign commands
@@ -248,6 +258,7 @@ int main( int argc, char **argv ){
     commandMap["pushcamheight"] = pushCamHeight;
     commandMap["pushcamangle"] = pushCamAngle;
     commandMap["pushfilterwindow"] = pushFilterWindow;
+    commandMap["pushstrgen"] = pushgenstring;
     nt::NetworkTableInstance netTableManager = nt::NetworkTableInstance::GetDefault();
     netTableManager.StartServer(); // Server will accept requests using either the NT3 or NT4 protocols
     auto objectDetectionTable = netTableManager.GetTable("ObjectDetection");
@@ -272,6 +283,7 @@ int main( int argc, char **argv ){
     camHeightTopic = objectDetectionTable->GetDoubleTopic("CamHeight").Publish();
     camAngleTopic = objectDetectionTable->GetDoubleTopic("CamAngle").Publish();
     filterWindowTopic = objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Publish();
+    genPublisher = objectDetectionTable->GetTopic("testString").GenericPublish("string");
     showHelp();
     // Start an async thread to handle user input, this allows the server to keep responding to requests while waiting for input
     auto commandInputThread = std::async(std::launch::async, [] {
