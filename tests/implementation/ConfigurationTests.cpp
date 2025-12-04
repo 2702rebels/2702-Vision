@@ -10,6 +10,7 @@
 #include <networktables/StringTopic.h>
 #include <networktables/Topic.h>
 #include <networktables/NetworkTableInstance.h>
+#include <networktables/GenericEntry.h>
 
 TEST(ConfigurationSyncer, LoadFromConfigurationStruct) {
 	ObjectDetectionConfig<ObjectDetectionSettings> config("./LoadFromConfigurationStruct.json", ObjectDetectionSettings(), "ObjConfig");
@@ -69,7 +70,7 @@ TEST(ConfigurationSyncer, NetworkTableSyncPublish) {
 	nt::Topic logDirectoryTopic = ntinst.GetTopic("ObjectDetectionConfig/TestConfigName/logDirectory");
 	nt::IntegerSubscriber hueMinSub = hueMinTopic.Subscribe(-1);
 	nt::DoubleSubscriber cameraOffsetXSub = cameraOffsetXTopic.Subscribe(-1.0);
-	nt::GenericSubscriber logDirectorySub = logDirectoryTopic.GenericSubscribe<std::string>("string");
+	nt::GenericSubscriber logDirectorySub = logDirectoryTopic.GenericSubscribe("string");
 	ObjectDetectionSettings defaults;
 	defaults.set_huemin(25);
 	defaults.set_cameraoffsetx(5.5);
