@@ -15,6 +15,13 @@ target_link_libraries(2702log PUBLIC ${OpenCV_LIBS})
 
 target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/cfg/processorConfig.json ${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json
+    COMMENT "Copying object detection processor config"
+)
+
 set(PROTOBUF_IMPORT_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/proto"
 )
