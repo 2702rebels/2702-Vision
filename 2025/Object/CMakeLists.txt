@@ -15,12 +15,16 @@ target_link_libraries(2702log PUBLIC ${OpenCV_LIBS})
 
 target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
+set(CONFIG_DEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json")
+set(CONFIG_SRC_FILE "${CMAKE_CURRENT_LIST_DIR}/cfg/processorConfig.json")
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/cfg/processorConfig.json ${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json
+    OUTPUT "${CONFIG_DEST_FILE}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CONFIG_SRC_FILE}" "${CONFIG_DEST_FILE}"
+    DEPENDS "${CONFIG_SRC_FILE}"
     COMMENT "Copying object detection processor config"
 )
+
+add_custom_target(copyconfigfile DEPENDS "${CONFIG_DEST_FILE}")
 
 set(PROTOBUF_IMPORT_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/proto"
@@ -98,6 +102,7 @@ target_link_libraries(objectframeprocessor PRIVATE ${OpenCV_LIBS})
 
 target_link_libraries(objectframeprocessor PUBLIC wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
+add_dependencies(objectframeprocessor copyconfigfile)
 
 
 add_executable(calibrate implementation/calibrate.cpp)
