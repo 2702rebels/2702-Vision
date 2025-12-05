@@ -25,7 +25,6 @@ add_custom_command(
 )
 
 add_custom_target(copyconfigfile DEPENDS "${CONFIG_DEST_FILE}")
-target_compile_definitions(copyconfigfile PUBLIC CONFIG_DIRECTORY="${CMAKE_CURRENT_BINARY_DIR}/cfg")
 
 set(PROTOBUF_IMPORT_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/proto"
@@ -104,6 +103,7 @@ target_link_libraries(objectframeprocessor PRIVATE ${OpenCV_LIBS})
 target_link_libraries(objectframeprocessor PUBLIC wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
 
 add_dependencies(objectframeprocessor copyconfigfile)
+target_compile_definitions(copyconfigfile PUBLIC CONFIG_DIRECTORY="${CMAKE_CURRENT_BINARY_DIR}/cfg")
 
 
 add_executable(calibrate implementation/calibrate.cpp)
