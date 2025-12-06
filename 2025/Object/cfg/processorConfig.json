@@ -1,0 +1,22 @@
+{
+	"hueMin": 0,
+	"hueMax": 30,
+	"saturationMin": 0,
+	"saturationMax": 30,
+	"valueMin": 215,
+	"valueMax": 255,
+	"minPixelWidth": 20,
+	"maxPixelWidth": 500,
+	"minPixelHeight": 25,
+	"maxPixelHeight": 350,
+	"minPixelArea": 4500,
+	"maxPixelArea": 115000,
+	"minPercentFill": 0.45,
+	"camOffsetX": 0.22225,
+	"camOffsetY": 0.33655,
+	"camHeight": 0.334,
+	"camAngle": 0.45378560551852569000015959980704,
+	"filterPacketWindow": 8,
+	"fcDiam": 0.1016,
+	"logDirectory": "/data/logs"
+}

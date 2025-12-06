@@ -14,17 +14,17 @@ Helper binaries that only use lib, such as rpisample which records a video and s
 ### Installing dependencies
 **Linux**
 2. Run ```chmod +x installpackages.sh```
-3. Run ```./installpackages.sh```
+3. Run ```sudo ./installpackages.sh```
 
 
 ### Building the program
 Currently only supported on linux
 **Linux**
-1. ```cd lib```
-2. ```make```
-3. ```cd ..```
-4. ```cd 2025/Object```
-5. ```make```
+1. ```mkdir build```
+2. ```cd build```
+3. ```cmake ..```
+4. ```cmake --build .```
+The hierarchical structure of the build folder will somewhat ressemble the structure of the build folder. Eg lib2702.a will be in build/lib.
 
 ### Building the docs
 
@@ -44,9 +44,8 @@ Currently only supported on linux
 8. Google, you usually aren't the first person and won't be the last
 ## Include / Link errors
 1. Read the error to find out which package is having a problem.
-3. Have you included the path of the header in the Makefile? Check for a .pc file for the package though first and prefer using that over manually including the directory
-5. Are the names of your -l flags correct? -ltest123 will search for libtest123.a, but prefer using a .pc file from the library over manually including the .a files with -l flags, to find .a files for your library try ```find . -name "*yourlibname*.a"```
-6. Is the order of your -l flags correct? Libraries should be linked from the top out, meaning the library which has the most dependencies should be linked first, so for example if b depends on a, b should be linked first.
+2. Have you included the folder where the header is located using target_include_directories(yourtarget TRANSITIVE thefolder)? Check for a .pc file for the package though first and prefer using that over manually including the directory
+3. Are the names of your libraries correct? Prefer using CMake configure files whenever possible(use ```find . -name "*libname*.cmake"```  at root to search), but you can also use pkg_check_modules if there are no cmake configure files provided.
 
 ### Standard logic debugging loop / troubleshooting tips
 1. Get logs either from object using the isLogging flag in AdvantageScope or through rpi-sample
