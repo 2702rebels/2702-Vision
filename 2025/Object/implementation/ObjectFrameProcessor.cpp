@@ -10,7 +10,7 @@ int64_t ObjectFrameProcessor::m_i64TimeOffset;
 
 ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	FrmProcessor(),
-	m_config(CONFIG_DIRECTORY + "/processorSettings.json", ObjectDetectionSettings(), "ProcessorSettings"),
+	m_config(std::string(CONFIG_DIRECTORY) + "/processorSettings.json", ObjectDetectionSettings(), "ProcessorSettings"),
 	CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
 	m_p3dCam2Robot(m_config.Get().cameraoffsetx(), m_config.Get().cameraoffsety(), m_config.Get().cameraheight()),
 	m_distanceFilter(m_config.Get().filterpacketwindow()),
