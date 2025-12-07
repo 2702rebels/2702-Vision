@@ -49,7 +49,7 @@ target_include_directories(vid-sample PRIVATE ${OpenCV_INCLUDE_DIRS})
 add_executable(v1logtov2 v1logtov2/v1logtov2.cpp)
 
 target_link_libraries(v1logtov2 PRIVATE 2702)
-target_include_directories(v1logtov2 ${CMAKE_SOURCE_DIR}/lib/include)
+target_include_directories(v1logtov2 PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
 target_include_directories(v1logtov2 PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(v1logtov2 PRIVATE ${OpenCV_LIBS})
