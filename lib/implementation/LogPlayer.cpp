@@ -1,7 +1,8 @@
 #include <stdint.h>
 #include <sys/time.h>
+#include <LogFrame.h>
 #include "LogPlayer.h"
-#include <CameraFrame.h>
+#include "frmprocessor.h"
 
 /*! \brief Creates a LogPlayer from a logfile path and a frame processor. 
 * \param logfilePath - The logfile path to use.
@@ -22,8 +23,8 @@ bool LogPlayer::bNextFrame()
 	if (!nextFrame) {
 		return false;
 	}
-	CameraFrame cFrame(std::move(nextFrame));
-	m_fp.ProcessFrame(0, &cFrame);
+	LogFrame lf(std::move(nextFrame));
+	m_fp.ProcessFrame(0, &lf);
 	return true;
 }
 
