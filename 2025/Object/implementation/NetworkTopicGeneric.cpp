@@ -1,33 +1,38 @@
 #include <NetworkTopicGeneric.h>
 #include <type_traits>
 #include <string>
-#include <typeinfo>
-#ifdef __GNUG__
-#include <cxxabi.h>
-#endif
+#include <cstdint>
 
-template class NetworkTopicGeneric<int>;
+template class NetworkTopicGeneric<int32_t>;
 template class NetworkTopicGeneric<double>;
 template class NetworkTopicGeneric<bool>;
 template class NetworkTopicGeneric<float>;
 template class NetworkTopicGeneric<std::string>;
+template class NetworkTopicGeneric<int64_t>;
 
 template <typename T>
 static std::string type_name() {
-	// The actual std::string expands to a bit of an ugly mess, so just handle the edge case explicitly
-	if constexpr (std::is_same_v<T, std::string>) {
+	if constexpr (std::is_same_v<T, int32_t>) {
+		return "int";
+	}
+	else if constexpr (std::is_same_v<T, double>) {
+		return "double";
+	}
+	else if constexpr (std::is_same_v<T, bool>) {
+		return "boolean";
+	}
+	else if constexpr (std::is_same_v<T, float>) {
+		return "double";
+	}
+	else if constexpr (std::is_same_v<T, std::string>) {
 		return "string";
 	}
-	const char* name = typeid(T).name();
-#ifdef __GNUG__
-	int status = 0;
-	char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
-	std::string result = (status == 0) ? demangled : name;
-	std::free(demangled);
-	return result;
-#else
-	return name; // MSVC already gives readable names
-#endif
+	else if constexpr (std::is_same_v<T, int64_t>) {
+		return "int";
+	}
+	else {
+		static_assert(false, "Type not supported by NetworkTopicGeneric::type_name()");
+	}
 }
 
 template<typename T>
@@ -40,7 +45,7 @@ NetworkTopicGeneric<T>::NetworkTopicGeneric(nt::Topic& topic, T defaultValue) :
 
 template<typename T>
 T NetworkTopicGeneric<T>::GetValue() const {
-	if constexpr (std::is_same_v<T, int>) {
+	if constexpr (std::is_same_v<T, int32_t>) {
 		return m_subscriber.GetInteger(m_defaultValue);
 	}
 	else if constexpr (std::is_same_v<T, double>) {
@@ -54,6 +59,9 @@ T NetworkTopicGeneric<T>::GetValue() const {
 	}
 	else if constexpr (std::is_same_v<T, std::string>) {
 		return m_subscriber.GetString(m_defaultValue);
+	}
+	else if constexpr (std::is_same_v<T, int64_t>) {
+		return m_subscriber.GetInteger(m_defaultValue);
 	}
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
@@ -76,6 +84,9 @@ void NetworkTopicGeneric<T>::PushValue(const T& value) {
 	}
 	else if constexpr (std::is_same_v<T, std::string>) {
 		m_publisher.SetString(value);
+	}
+	else if constexpr (std::is_same_v<T, int64_t>) {
+		m_publisher.SetInteger(value);
 	}
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::PushValue");

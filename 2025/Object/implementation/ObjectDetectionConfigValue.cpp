@@ -2,11 +2,12 @@
 #include <string>
 #include <type_traits>
 
-template class ObjectDetectionConfigValue<int>;
+template class ObjectDetectionConfigValue<int32_t>;
 template class ObjectDetectionConfigValue<double>;
 template class ObjectDetectionConfigValue<float>;
 template class ObjectDetectionConfigValue<bool>;
 template class ObjectDetectionConfigValue<std::string>;
+template class ObjectDetectionConfigValue<int64_t>;
 
 template<typename T>
 ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(const T&)> setter, nt::Topic ntTopic)
@@ -40,6 +41,9 @@ T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& 
 	}
 	else if constexpr (std::is_same_v<T, std::string>) {
 		return settingStruct.GetReflection()->GetString(settingStruct, field);
+	}
+	else if constexpr (std::is_same_v<T, int64_t>) {
+		return settingStruct.GetReflection()->GetInt64(settingStruct, field);
 	}
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");

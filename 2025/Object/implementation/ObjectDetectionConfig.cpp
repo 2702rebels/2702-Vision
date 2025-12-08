@@ -73,6 +73,16 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 			);
 			break;
 		}
+		case pbuf::FieldDescriptor::CPPTYPE_INT64: {
+			m_configValues.emplace_back(
+				std::in_place_type<ObjectDetectionConfigValue<int64_t>>,
+				field,
+				defaultConfigSettings,
+				std::function<void(const int64_t&)>{},
+				ntTopic
+			);
+			break;
+		}
 		default: {
 			spdlog::error("Unsupported field type of field #{} {} in ObjectDetectionConfig", field->index(), field->name());
 			throw std::invalid_argument("Unsupported field type");
@@ -149,7 +159,7 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() {
 		std::visit([&](auto& value) {
 			const pbuf::FieldDescriptor* field = value.GetFieldDescriptor();
 			using ValueType = std::decay_t<decltype(value)>;
-			if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<int>>) {
+			if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<int32_t>>) {
 				reflection->SetInt32(&currentConfigStructure, field, value.GetValue());
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<double>>) {
@@ -163,6 +173,12 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() {
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::string>>) {
 				reflection->SetString(&currentConfigStructure, field, value.GetValue());
+			}
+			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<int64_t>>) {
+				reflection->SetInt64(&currentConfigStructure, field, value.GetValue());
+			}
+			else {
+				static_assert(false, "Unsupported ValueType provided to ObjectDetectionConfig::RefreshConfigStructure");
 			}
 		}, configValue);
 	}
@@ -233,26 +249,30 @@ void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::functio
 	std::get<ObjectDetectionConfigValue<O>>(m_configValues[arrIndex]).setterFunction = std::move(setterFunction);
 }
 
-template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(int, std::function<void(const int&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int32_t>(int, std::function<void(const int32_t&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<double>(int, std::function<void(const double&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(int, std::function<void(const float&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(int, std::function<void(const bool&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(int, std::function<void(const std::string&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int64_t>(int, std::function<void(const int64_t&)>);
 
-template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int>(std::string, std::function<void(const int&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int32_t>(std::string, std::function<void(const int32_t&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<double>(std::string, std::function<void(const double&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(std::string, std::function<void(const float&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<bool>(std::string, std::function<void(const bool&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<std::string>(std::string, std::function<void(const std::string&)>);
+template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int64_t>(std::string, std::function<void(const int64_t&)>);
 
-template ObjectDetectionConfigValue<int>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int>(std::string);
+template ObjectDetectionConfigValue<int>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int32_t>(std::string);
 template ObjectDetectionConfigValue<double>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<double>(std::string);
 template ObjectDetectionConfigValue<float>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<float>(std::string);
 template ObjectDetectionConfigValue<bool>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<bool>(std::string);
 template ObjectDetectionConfigValue<std::string>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<std::string>(std::string);
+template ObjectDetectionConfigValue<int64_t>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int64_t>(std::string);
 
-template ObjectDetectionConfigValue<int>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int>(int);
+template ObjectDetectionConfigValue<int>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int32_t>(int);
 template ObjectDetectionConfigValue<double>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<double>(int);
 template ObjectDetectionConfigValue<float>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<float>(int);
 template ObjectDetectionConfigValue<bool>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<bool>(int);
 template ObjectDetectionConfigValue<std::string>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<std::string>(int);
+template ObjectDetectionConfigValue<int64_t>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<int64_t>(int);

@@ -12,11 +12,12 @@
 namespace pbuf = google::protobuf;
 
 using ObjectDetectionConfigValueGen = std::variant<
-	ObjectDetectionConfigValue<int>,
+	ObjectDetectionConfigValue<int32_t>,
 	ObjectDetectionConfigValue<double>,
 	ObjectDetectionConfigValue<float>,
 	ObjectDetectionConfigValue<bool>,
-	ObjectDetectionConfigValue<std::string>
+	ObjectDetectionConfigValue<std::string>,
+	ObjectDetectionConfigValue<int64_t>
 >;
 
 template<typename T>
