@@ -25,6 +25,8 @@ bool bStop = false;
 
 #include "ObjectFrameProcessor.h"
 
+#include <networktables/BooleanTopic.h>
+
 #define USE_NETWORK_TABLES 1
 #define IS_ROBOT 1
 /*! \brief Fixed exposure time in us that is fed to rpicam. */

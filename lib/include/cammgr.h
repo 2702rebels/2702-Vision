@@ -17,7 +17,6 @@
 #include "cameraserver/CameraServer.h"
 #endif
 
-#include "VisLog.h"
 #include "frmprocessor.h"
 
 // maximum # of managed exposure times.

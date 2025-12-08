@@ -21,4 +21,5 @@ message ObjectDetectionSettings {
 	int32 filterPacketWindow = 18;
 	double fcDiam = 19;
 	string logDirectory = 20;
+	int32 nLogWriterThreads = 21;
 }

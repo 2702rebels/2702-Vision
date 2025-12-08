@@ -28,7 +28,7 @@
 #include <drm/drm_fourcc.h>
 
 #include "rpicam.h"
-#include "VisLog.h"
+#include "VisionLog.h"
 
 using namespace std;
 
@@ -56,7 +56,7 @@ void sighandler( int nSig )
 
 class imgProc : public FrmProcessor
 {
-	VisionLog	m_vl;
+	VisionLogWriter	m_vl;
 	std::mutex	m_mtxLog;
 	std::mutex	m_mtxCS;
 	bool		m_bFirstVid = true;
@@ -64,7 +64,7 @@ class imgProc : public FrmProcessor
 public:
 	imgProc( char const *pszLogFile ) :
 		FrmProcessor(),
-		m_vl( pszLogFile, true )
+		m_vl( pszLogFile, LogFrameType::RGB, 640, 480 )
 		
 	{
 	}
@@ -79,7 +79,7 @@ public:
 
 		if (m_mtxLog.try_lock()) {
 			cv::Mat img( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
-			m_vl.bWritePNG( img, pcf->u32Sequence(), pcf->u32Exposure() );
+			m_vl.WriteFrame(img);
 			m_mtxLog.unlock();
 		}
 		if (m_mtxCS.try_lock()) { 

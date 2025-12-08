@@ -19,7 +19,6 @@
 #include "cameraserver/CameraServer.h"
 #endif
 
-#include "VisLog.h"
 #include "cambase.h"
 #include "frmprocessor.h"
 

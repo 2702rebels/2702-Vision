@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 4.2)
 project(2702Vision)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(CMAKE_CUDA_HOST_COMPILER)
     message(STATUS "Building for Jetson")
     set(IS_JETSON TRUE)

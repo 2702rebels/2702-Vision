@@ -14,6 +14,7 @@ if(IS_RPI)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
     target_link_libraries(2702 PUBLIC PkgConfig::libcamera)
+    target_include_directories(2702 PUBLIC ${libcamera_INCLUDE_DIRS})
 endif()
 
 target_sources(2702 PRIVATE ${2702_SOURCES})

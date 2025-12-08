@@ -37,7 +37,7 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/imgutils.h>
 };
-#include "VisLog.h"
+#include "VisionLog.h"
 
 static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
                    FILE *outfile)
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     filename = argv[2];
     codec_name = argv[3];
 
-	VisionLog vl( infile );
+	VisionLogReader vl( infile );
 
     /* find the mpeg1video encoder */
     codec = avcodec_find_encoder_by_name(codec_name);
@@ -162,10 +162,10 @@ int main(int argc, char **argv)
     }
 
     /* encode 1 second of video */
-	cv::Mat frm;
-	int32_t i32Frm;
-	int32_t i32Exp;
-    for (int i = 0; (i32Frm = vl.i32ReadNext( frm, i32Exp ) >= 0); i++ ) {
+    while(std::unique_ptr<cv::Mat> frm = vl.ReadFrame()){
+        if (!frm) {
+            break;
+        }
         fflush(stdout);
 
         /* Make sure the frame data is writable.
@@ -197,8 +197,8 @@ int main(int argc, char **argv)
         /* Y */
         for (y = 0; y < c->height; y++) {
             for (x = 0; x < c->width; x++) {
-				uint8_t u8I = frm.at<uint8_t>(y, x);
-                frame->data[0][y * frame->linesize[0] + x] = frm.at<uint8_t>(y, x);
+				uint8_t u8I = frm->at<uint8_t>(y, x);
+                frame->data[0][y * frame->linesize[0] + x] = frm->at<uint8_t>(y, x);
             }
         }
 

@@ -117,6 +117,10 @@ target_link_libraries(calibrate PRIVATE 2702log)
 if(IS_RPI)
 	add_executable(object ${CMAKE_CURRENT_SOURCE_DIR}/implementation/object.cpp)
 	target_link_libraries(object PRIVATE objectframeprocessor)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
+    target_link_libraries(object PRIVATE PkgConfig::libcamera)
+    target_include_directories(object PRIVATE ${libcamera_INCLUDE_DIRS})
 endif()
 
 

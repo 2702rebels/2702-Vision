@@ -1,14 +1,15 @@
 #pragma once
 #include "frmprocessor.h"
-#include "VisLog.h"
+#include "VisionLog.h"
 
 class LogPlayer : public VisionLog
 {
 	FrmProcessor	&m_fp;
+	VisionLogReader m_logReader;
 public:
-	LogPlayer( char const *pszFile, FrmProcessor &fp );
-	virtual ~LogPlayer();
+	LogPlayer( fs::path logfilePath, FrmProcessor &fp );
 
-	void vRewind();
 	bool bNextFrame();
+	VisionLogReader& GetLogReader();
+	void vRewind();
 };
