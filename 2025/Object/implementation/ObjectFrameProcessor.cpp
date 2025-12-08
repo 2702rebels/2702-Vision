@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <spdlog/spdlog.h>
 #include <functional>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 // Initialize static vars
 int64_t ObjectFrameProcessor::m_i64TimeOffset;
@@ -33,11 +36,6 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 		mtx.at<float>(2, 0), mtx.at<float>(2, 1), mtx.at<float>(2, 2));
 	spdlog::info("Focal Length Coefficients: {}, {}", mtx.at<float>(0, 0), mtx.at<float>(1, 2));
 	spdlog::info("Focal Length: {}", m_focalLen);
-#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
-	m_angleFile.open("./angle.txt");
-	m_distFile.open("./dist.txt");
-	m_latencyFile.open("./latency.txt");
-#endif
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::namedWindow("Filtered Video");
 
@@ -52,7 +50,29 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 }
 
 void ObjectFrameProcessor::vStartLogging() {
-	m_bIsLogging = true;
+	fs::path logDir(m_config.Get().logdirectory());
+	int nWriterThreads = m_config.Get().nlogwriterthreads();
+	for (int i = 0; ; i++) {
+		fs::path unfilteredPath(logDir / ("object-" + std::to_string(i) + "_unfiltered.log"));
+		if (fs::exists(unfilteredPath)) {
+			continue;
+		}
+		m_unfilteredLogger = std::make_unique<AsyncVisionLog>(unfilteredPath, m_frameWidth, m_frameHeight, LogFrameType::RGB, nWriterThreads);
+	}
+	for (int i = 0;; i++) {
+		fs::path maskedPath(logDir / ("object-" + std::to_string(i) + "_masked.log"));
+		if (fs::exists(maskedPath)) {
+			continue;
+		}
+		m_maskedLogger = std::make_unique<AsyncVisionLog>(maskedPath, m_frameWidth, m_frameHeight, LogFrameType::GRAYSCALE, nWriterThreads);
+	}
+	for (int i = 0;; i++) {
+		fs::path filteredPath(logDir / ("object-" + std::to_string(i) + "_filtered.log"));
+		if (fs::exists(filteredPath)) {
+			continue;
+		}
+		m_filteredLogger = std::make_unique<AsyncVisionLog>(filteredPath, m_frameWidth, m_frameHeight, LogFrameType::RGB, nWriterThreads);
+	}
 }
 
 /*!
@@ -145,9 +165,10 @@ void ObjectFrameProcessor::SendObjectDetectionPacket(ObjectDetectionPacket packe
 #endif
 }
 
-cv::Mat ObjectFrameProcessor::filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
+std::shared_ptr<cv::Mat> ObjectFrameProcessor::filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
 {
-	cv::Mat hsv, mask;
+	cv::Mat hsv;
+	std::shared_ptr<cv::Mat> mask = std::make_shared<cv::Mat>();
 	cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
 	auto invert_and_scale_hue = [](int pv_hue) {
@@ -164,7 +185,7 @@ cv::Mat ObjectFrameProcessor::filter_hsv_inverted(const cv::Mat& frame, int pv_h
 
 	cv::Scalar lower_bound(cv_hue_min, saturation_min, value_min);
 	cv::Scalar upper_bound(cv_hue_max, saturation_max, value_max);
-	cv::inRange(hsv, lower_bound, upper_bound, mask);
+	cv::inRange(hsv, lower_bound, upper_bound, *mask);
 	return mask;
 }
 
@@ -318,42 +339,12 @@ void ObjectFrameProcessor::ProcessFrame(int nCam, CameraFrame const* pcf) {
 
 cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* pcf)
 {
-	spdlog::info("Have Frame from cam {}:#{} {}x{}", nCam, pcf->u32Sequence(), pcf->nRows(), pcf->nCols());
-	cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
-	int heightPaintAt = 60;
-	if (m_mtxLog.try_lock()) {
-		if (m_bLoggingDone) {
-		}
-		else if (m_vl.bIsOpen()) {
-			m_vl.bWriteRGB(frame, pcf->u32Sequence(), pcf->u32Exposure());
-			if (time(0) > m_tmLogEnd) {
-				m_vl.vClose();
-				m_bLoggingDone = true;
-				spdlog::info("Finished logging");
-			}
-		}
-		else {
-			if (m_bIsLogging) {
-				try {
-					char szTmp[128];
-					for (int i = 0; ; i++) {
-						snprintf(szTmp, sizeof(szTmp), "%s/object-%04d.log", m_config.Get().logdirectory().c_str(), i);
-						if (access(szTmp, F_OK) == -1) {
-							break;
-						}
-					}
-					spdlog::info("Opening log file at {}", szTmp);
-					m_vl.vOpen(szTmp, true);
-					m_tmLogEnd = time(0) + 160;
-				}
-				catch (std::exception& e) {
-					m_bLoggingDone = true;
-					spdlog::error("Unable to start logging: {}", e.what());
-				}
-			}
-		}
-		m_mtxLog.unlock();
+	spdlog::info("Have Frame from cam {}: {}x{}", nCam, pcf->nRows(), pcf->nCols());
+	std::shared_ptr<cv::Mat> frame = std::make_shared<cv::Mat>(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
+	if (m_unfilteredLogger) {
+		m_unfilteredLogger->AddFrameToQueueAsync(frame);
 	}
+	int heightPaintAt = 60;
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::imshow("Raw", frame);
 #endif
@@ -365,11 +356,11 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 	// cv::inRange(hsv, cv::Scalar( m_nHLow, m_nSLow, m_nVLow), cv::Scalar( m_nHHigh, m_nSHigh, m_nVHigh), thresh);
 
 	//frame = cv::undistort_frame(frame, mtx, dist);
-	cv::Mat mask = filter_hsv_inverted(frame, m_config.Get().huemin(), m_config.Get().huemax(), m_config.Get().saturationmin(), m_config.Get().saturationmax(), m_config.Get().valuemin(), m_config.Get().valuemax());
-	cv::Mat filtered_frame;
-	cv::bitwise_and(frame, frame, filtered_frame, mask);
+	std::shared_ptr<cv::Mat> mask = filter_hsv_inverted(*frame, m_config.Get().huemin(), m_config.Get().huemax(), m_config.Get().saturationmin(), m_config.Get().saturationmax(), m_config.Get().valuemin(), m_config.Get().valuemax());
+	std::shared_ptr<cv::Mat> filtered_frame = std::make_shared<cv::Mat>();
+	cv::bitwise_and(*frame, *frame, *filtered_frame, *mask);
 	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(*mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	std::vector<ObjectDetectionInfo> corals;
 	if (!contours.empty()) {
 		for (int i = 0; i < contours.size(); i++) {
@@ -381,7 +372,7 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 				});
 			contours[i] = *largest_contour;
 #endif
-			auto [fitted_contour, endpoints] = fit_cylinder_contour(contours[i], mask, filtered_frame, &heightPaintAt);
+			auto [fitted_contour, endpoints] = fit_cylinder_contour(contours[i], *mask, *filtered_frame, &heightPaintAt);
 			if (!fitted_contour.empty()) {
 				Rebels::Point2d coralVec = calculate_coral_vector(contours[i], m_focalLen, m_config.Get().fcdiam(), CAMERA_CENTER);
 				double distance = coralVec.length();
@@ -402,18 +393,16 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 					std::string coral_vec_text = "(" + std::to_string(coralVec.u()) + ", " + std::to_string(coralVec.v()) + ")";
 					std::string distance_text = "Distance: " + std::to_string(distance / 0.0254) + "in";
 					std::string angle_text = "Angle: " + std::to_string(angle * (180 / M_PI)) + "deg";
-					m_distFile << distance << "\n";
-					m_angleFile << angle << "\n";
-					cv::putText(filtered_frame, coral_vec_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+					cv::putText(*filtered_frame, coral_vec_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 					heightPaintAt += 30;
-					cv::putText(filtered_frame, distance_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+					cv::putText(*filtered_frame, distance_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 					heightPaintAt += 30;
-					cv::putText(filtered_frame, angle_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+					cv::putText(*filtered_frame, angle_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 					heightPaintAt += 30;
-					cv::drawContours(filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
+					cv::drawContours(*filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
 					// Draw the major axis line if endpoints are valid
 					if (endpoints.first.x != 0 || endpoints.first.y != 0 || endpoints.second.x != 0 || endpoints.second.y != 0) {
-						cv::line(filtered_frame, endpoints.first, endpoints.second, cv::Scalar(255, 0, 0), 2);
+						cv::line(*filtered_frame, endpoints.first, endpoints.second, cv::Scalar(255, 0, 0), 2);
 					}
 #endif
 				}
@@ -452,24 +441,23 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 	clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur);
 	TIMESPEC_TO_TIMEVAL(&tvCur, &tsCur);
 	timersub(&tvCur, pcf->ts(), &tvDelta);
-	m_latencyFile << tvDelta.tv_usec << "\n";
 	m_nLastLatencyTopic.SetDefault(tvDelta.tv_usec);
 #if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
 	// Display distance and angle (only if valid values were calculated)
 	std::string latency_text = "Latency: " + std::to_string(tvDelta.tv_usec) + "us";
-	std::string exposure_text = "Exposure: " + std::to_string(pcf->u32Exposure());
-	cv::putText(filtered_frame, exposure_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+	cv::putText(*filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 	heightPaintAt += 30;
-	cv::putText(filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
-	heightPaintAt += 30;
+	if (m_filteredLogger) {
+		m_filteredLogger->AddFrameToQueueAsync(filtered_frame);
+	}
 	if (m_mtxCS.try_lock()) {
 		if (m_bFirstVid) {
 			m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows());
 			m_outputStreamRaw = frc::CameraServer::PutVideo("VisionRaw", pcf->nCols(), pcf->nRows());
 			m_bFirstVid = false;
 		}
-		m_outputStream.PutFrame(filtered_frame);
-		m_outputStreamRaw.PutFrame(frame);
+		m_outputStream.PutFrame(*filtered_frame);
+		m_outputStreamRaw.PutFrame(*frame);
 		m_mtxCS.unlock();
 	}
 #endif
@@ -486,5 +474,5 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 		exit(0);
 	}
 #endif
-	return filtered_frame;
+	return *filtered_frame;
 }

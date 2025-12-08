@@ -18,5 +18,6 @@
 	"camAngle": 0.45378560551852569000015959980704,
 	"filterPacketWindow": 8,
 	"fcDiam": 0.1016,
-	"logDirectory": "/data/logs"
+	"logDirectory": "/data/logs",
+	"nLogWriterThreads": 1
 }

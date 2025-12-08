@@ -9,7 +9,7 @@
 
 class AsyncVisionLog {
 private:
-	std::queue<std::unique_ptr<cv::Mat>> m_frameQueue;
+	std::queue<std::shared_ptr<cv::Mat>> m_frameQueue;
 	std::mutex m_frameQueueMtx;
 	std::condition_variable frameWaitingCondition;
 
@@ -21,13 +21,13 @@ private:
 
 	std::vector<std::jthread> m_pusherThreads;
 
-	void PusherThread(std::unique_ptr<cv::Mat> frame);
-	std::function<void(std::unique_ptr<cv::Mat>)> m_boundPusherThread;
+	void PusherThread(std::shared_ptr<cv::Mat> frame);
+	std::function<void(std::shared_ptr<cv::Mat>)> m_boundPusherThread;
 public:
 	AsyncVisionLog(fs::path logPath, unsigned int resWidth, unsigned int resHeight, LogFrameType logFrameType, int nWriterThreads);
 
 	/** Synchronously adds the frame to the queue, but then the writing to disk process is async */
-	void AddFrameToQueueSync(std::unique_ptr<cv::Mat> frame);
+	void AddFrameToQueueSync(std::shared_ptr<cv::Mat> frame);
 	/** Both the process of writing the frame to the queue and the writing to disk process is async */
-	void AddFrameToQueueAsync(std::unique_ptr<cv::Mat> frame);
+	void AddFrameToQueueAsync(std::shared_ptr<cv::Mat> frame);
 };

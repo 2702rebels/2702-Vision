@@ -15,11 +15,11 @@
 #include <ObjectDetectionStruct.h>
 #include <udpsender.h>
 #include <2702math.h>
-#include <VisLog.h>
 #include <cameraserver/CameraServer.h>
 #include <frc/filter/MedianFilter.h>
 #include <ObjectDetectionConfig.h>
 #include <ObjectDetectionSettings.pb.h>
+#include <AsyncVisionLog.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
@@ -108,25 +108,15 @@ class ObjectFrameProcessor : public FrmProcessor
 	cs::CvSource 	m_outputStream;
 	/*! \brief Camera server output stream for the raw frame. */
 	cs::CvSource    m_outputStreamRaw;
-	/*! \brief File that will be written with the processed distances. */
-	std::ofstream m_distFile;
-	/*! \brief File that will be written with the processed angles. */
-	std::ofstream m_angleFile;
-	/*! \brief File that will be written with the latency of each frame. */
-	std::ofstream m_latencyFile;
 #endif
 
-	/*! \brief Thread lock for logfile output. */
-	std::mutex		m_mtxLog;
-	/*! \brief Logger for frames. */
-	VisionLog		m_vl;
+	/*! \brief Logger for raw frames inputted into the algorithm */
+	std::unique_ptr<AsyncVisionLog> m_unfilteredLogger;
+	/*! \brief Logger for frames after the hsv mask has been applied */
+	std::unique_ptr<AsyncVisionLog> m_maskedLogger;
+	/*! \brief Logger for RGB frames after they have been fully filtered */
+	std::unique_ptr<AsyncVisionLog> m_filteredLogger;
 
-	/*! \brief Whether or not the incoming frames are being logged to the .log file. */
-	bool			m_bIsLogging = false;
-	/*! \brief Is true when logging is complete, as to not write any more frames to the file. */
-	bool			m_bLoggingDone = false;
-	/*! \brief The time when the \ref m_bLoggingDone was set to true. */
-	time_t			m_tmLogEnd;
 
 public:
 	ObjectDetectionConfig<ObjectDetectionSettings> m_config;
@@ -193,7 +183,7 @@ public:
 	* \param value_max - If a pixel's brightness is lower than this, it will not be valid.
 	* \returns The filtered frame as a \ref cv::Mat.
 	*/
-	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max);
+	std::shared_ptr<cv::Mat> filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max);
 
 	/*!
 	* \brief Returns object distance on the floor to the center of the robot in meters and the top plane angle to the center of the coral from the center of the robot in radians.
