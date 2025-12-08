@@ -25,6 +25,7 @@ private:
 	std::function<void(std::shared_ptr<cv::Mat>)> m_boundPusherThread;
 public:
 	AsyncVisionLog(fs::path logPath, unsigned int resWidth, unsigned int resHeight, LogFrameType logFrameType, int nWriterThreads);
+	~AsyncVisionLog();
 
 	/** Synchronously adds the frame to the queue, but then the writing to disk process is async */
 	void AddFrameToQueueSync(std::shared_ptr<cv::Mat> frame);

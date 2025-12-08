@@ -14,14 +14,38 @@ AsyncVisionLog::AsyncVisionLog(fs::path logPath, unsigned int resWidth, unsigned
 	}
 }
 
+AsyncVisionLog::~AsyncVisionLog() {
+	// Wait for any remaining frames to be added to the frame queue
+	for (std::jthread& pusherThread : m_pusherThreads) {
+		pusherThread.join();
+	}
+	while (true) {
+		std::lock_guard<std::mutex> queueLock(m_frameQueueMtx);
+		// Wait for the writer threads to finish writing all frames
+		if (!m_frameQueue.empty()) {
+			continue;
+		}
+		// Stop the writer threads
+		for (std::jthread& writerThread : m_writingThreads) {
+			writerThread.request_stop();
+		}
+		frameWaitingCondition.notify_all();
+		break;
+	}
+	// Resource cleanup continues afterwards including joining of all alive threads
+}
+
 // Idea: maybe batching will be better for performance than constantly sleeping and waking up the thread again? will bother with that after this works though
 
 void AsyncVisionLog::WriterThread(std::stop_token cancellationToken) {
 	while (!cancellationToken.stop_requested()) {
 		std::unique_lock<std::mutex> lock(m_frameQueueMtx);
-		frameWaitingCondition.wait(lock, [this] {
-			return !this->m_frameQueue.empty();
-		});
+		frameWaitingCondition.wait(lock, [this, &cancellationToken] {
+			return !this->m_frameQueue.empty() || cancellationToken.stop_requested();
+			});
+		if (cancellationToken.stop_requested()) {
+			break;
+		}
 		m_syncWriter.WriteFrame(*m_frameQueue.front());
 		m_frameQueue.pop();
 	}
