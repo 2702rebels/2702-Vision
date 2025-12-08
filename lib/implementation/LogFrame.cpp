@@ -1,13 +1,13 @@
 #include <LogFrame.h>
 
 LogFrame::LogFrame(std::unique_ptr<cv::Mat> frame) :
-	m_pu8Img(frame->data),
-	m_nRows(frame->rows),
-	m_nCols(frame->cols),
-	m_nBuffer(frame->channels()),
+	CameraFrame(),
 	m_cvFrame(std::move(frame))
 {
-
+	m_pu8Img = m_cvFrame->data;
+	m_nRows = m_cvFrame->rows;
+	m_nCols = m_cvFrame->cols;
+	m_nBuffer = m_cvFrame->channels();
 }
 
 cv::Mat& LogFrame::GetCVFrame() {
