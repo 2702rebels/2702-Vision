@@ -1,11 +1,10 @@
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 #include <opencv2/imgcodecs.hpp>
 
-using namespace std;
-
-#include "VisLog.h"
+#include "VisionLog.h"
 #include "Bayer2RGB.h"
 #include <filesystem>
 #include "Bayer2Grey.h"
@@ -68,15 +67,15 @@ void Bayer2Green( cv::Mat &matGreen, cv::Mat const &matBayer )
 
 void Usage()
 {
-	cerr << "Usage: log2mjpeg [-colour|colour2|grey|grey2|bayer|red|green|blue|input] infile outdir\n";
-	cerr << "      colour     -> RGB\n";
-	cerr << "      colour2    -> RGB 1/2 resolution\n";
-	cerr << "      grey       -> GreyScale\n";
-	cerr << "      grey2      -> GreyScale 1/2 resolution\n";
-	cerr << "      beyer      -> Raw Bayer frame\n";
-	cerr << "      red        -> Extracts the red pixels\n";
-	cerr << "      green      -> Extracts the green pixels\n";
-	cerr << "      blue       -> Extracts the blue pixels\n";
+	std::cerr << "Usage: log2mjpeg [-colour|colour2|grey|grey2|bayer|red|green|blue|input] infile outdir\n";
+	std::cerr << "      colour     -> RGB\n";
+	std::cerr << "      colour2    -> RGB 1/2 resolution\n";
+	std::cerr << "      grey       -> GreyScale\n";
+	std::cerr << "      grey2      -> GreyScale 1/2 resolution\n";
+	std::cerr << "      beyer      -> Raw Bayer frame\n";
+	std::cerr << "      red        -> Extracts the red pixels\n";
+	std::cerr << "      green      -> Extracts the green pixels\n";
+	std::cerr << "      blue       -> Extracts the blue pixels\n";
 	exit(1);
 }
 
@@ -119,81 +118,82 @@ int main( int argc, char **argv )
 		return 1;
 	}
 
-	VisionLog vl( pszIn );
+	VisionLogReader vl( pszIn );
 	DIR* dir = opendir(pszOut);
 	if(!dir){
 		fs::create_directories(pszOut);
 	}
 
 	cv::Mat img;
-	int nExp;
-	int nSeq;
-	while( (nSeq = vl.i32ReadNext( img, nExp )) >= 0 ) {
-		cout << nSeq << endl;
-
+	int nSeq = 0;
+	while( std::unique_ptr<cv::Mat> img = vl.ReadFrame()) {
+		if (!img) {
+			break;
+		}
 		cv::Mat imgOut;
 		switch( procmode ) {
 		case pminput:
-			imgOut = img;
+			imgOut = *img;
 			break;
 		case pmgrey:
 			{
-				cv::Mat matGrey( img.rows, img.cols, CV_8UC1 );
-				Bayer2Grey( matGrey, img );
+				cv::Mat matGrey( img->rows, img->cols, CV_8UC1 );
+				Bayer2Grey( matGrey, *img );
 				imgOut = matGrey;
 			}
 			break;
 		case pmgrey2:
 			{
-				cv::Mat matGrey( img.rows/2, img.cols/2, CV_8UC1 );
-				Bayer2HalfGrey( matGrey, img );
+				cv::Mat matGrey( img->rows/2, img->cols/2, CV_8UC1 );
+				Bayer2HalfGrey( matGrey, *img );
 				imgOut = matGrey;
 			}
 			break;
 		case pmbayer:
-			imgOut = img;
+			imgOut = *img;
 			break;
 		case pmred:
 			{
-				cv::Mat matRed( img.rows/2, img.cols/2, CV_8UC1 );
-				Bayer2Red( matRed, img );
+				cv::Mat matRed( img->rows/2, img->cols/2, CV_8UC1 );
+				Bayer2Red( matRed, *img );
 				imgOut = matRed;
 			}
 			break;
 		case pmgreen:
 			{
-				cv::Mat matGreen( img.rows/2, img.cols/2, CV_8UC1 );
-				Bayer2Green( matGreen, img );
+				cv::Mat matGreen( img->rows/2, img->cols/2, CV_8UC1 );
+				Bayer2Green( matGreen, *img );
 				imgOut = matGreen;
 			}
 			break;
 		case pmblue:
 			{
-				cv::Mat matBlue( img.rows/2, img.cols/2, CV_8UC1 );
-				Bayer2Blue( matBlue, img );
+				cv::Mat matBlue( img->rows/2, img->cols/2, CV_8UC1 );
+				Bayer2Blue( matBlue, *img );
 				imgOut = matBlue;
 			}
 			break;
 		case pmcolor2:
 			{
-				cv::Mat matRGB( img.rows/2, img.cols/2, CV_8UC3 );
-				Bayer2HalfRGB( matRGB, img );
+				cv::Mat matRGB( img->rows/2, img->cols/2, CV_8UC3 );
+				Bayer2HalfRGB( matRGB, *img );
 				imgOut = matRGB;
 			}
 			break;
 		case pmcolor:
 		default:
 			{
-				cv::Mat matRGB( img.rows, img.cols, CV_8UC3 );
-				Bayer2RGB( matRGB, img );
+				cv::Mat matRGB( img->rows, img->cols, CV_8UC3 );
+				Bayer2RGB( matRGB, *img );
 				imgOut = matRGB;
 			}
 			break;
 		}
-		vector<uchar> vJPEG;
+		std::vector<uchar> vJPEG;
 		cv::imencode( ".jpg", imgOut, vJPEG );
-		ofstream outfile(std::string(pszOut) + "/" + std::to_string(nSeq) + ".jpg");
+		std::ofstream outfile(std::string(pszOut) + "/" + std::to_string(nSeq) + ".jpg");
 		outfile.write( (const char *)vJPEG.data(), vJPEG.size() );
+		nSeq++;
 	}
 	return 0;
 }
