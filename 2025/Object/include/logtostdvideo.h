@@ -1,5 +1,4 @@
 #pragma once
-#include "VisLog.h"
 #include <frmprocessor.h>
 #include <string>
 #include "LoggingUtils.h"
@@ -10,6 +9,7 @@ class StdVideoLogProc : public FrmProcessor {
     ObjectFrameProcessor imageProcessor;
     FILE* ffmpegRaw;
     FILE* ffmpegFiltered;
+    int frameCount = 0;
     public:
     StdVideoLogProc(std::string outputPath, std::string outputPathFiltered, int width, int height, int frame_rate): 
     imageProcessor(width, height),
@@ -43,7 +43,8 @@ class StdVideoLogProc : public FrmProcessor {
         fwrite(static_cast<const void*>(frame.data), 1, frame.total() * frame.elemSize(), ffmpegRaw);
         cv::Mat filteredFrame = imageProcessor.ProcessFrameWithRet(nCam, pcf);
         fwrite(static_cast<const void*>(filteredFrame.data), 1, filteredFrame.total() * filteredFrame.elemSize(), ffmpegFiltered);
-        info("Finished writing frame {}", pcf->u32Sequence());
+        info("Finished writing frame {}", frameCount);
+        frameCount++;
     }
 
     virtual void LogEnd(){
