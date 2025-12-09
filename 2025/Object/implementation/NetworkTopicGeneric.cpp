@@ -12,6 +12,11 @@ template class NetworkTopicGeneric<float>;
 template class NetworkTopicGeneric<std::string>;
 template class NetworkTopicGeneric<int64_t>;
 template class NetworkTopicGeneric<std::vector<int32_t>>;
+template class NetworkTopicGeneric<std::vector<double>>;
+template class NetworkTopicGeneric<std::vector<bool>>;
+template class NetworkTopicGeneric<std::vector<float>>;
+template class NetworkTopicGeneric<std::vector<std::string>>;
+template class NetworkTopicGeneric<std::vector<int64_t>>;
 
 template <typename T>
 static std::string type_name() {
