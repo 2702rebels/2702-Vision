@@ -8,6 +8,12 @@ template class ObjectDetectionConfigValue<float>;
 template class ObjectDetectionConfigValue<bool>;
 template class ObjectDetectionConfigValue<std::string>;
 template class ObjectDetectionConfigValue<int64_t>;
+template class ObjectDetectionConfigValue<std::vector<int32_t>>;
+template class ObjectDetectionConfigValue<std::vector<double>>;
+template class ObjectDetectionConfigValue<std::vector<float>>;
+template class ObjectDetectionConfigValue<std::vector<bool>>;
+template class ObjectDetectionConfigValue<std::vector<std::string>>;
+template class ObjectDetectionConfigValue<std::vector<int64_t>>;
 
 template<typename T>
 ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(const T&)> setter, nt::Topic ntTopic)
@@ -27,7 +33,7 @@ void ObjectDetectionConfigValue<T>::UpdateFromConfigMessage(const pbuf::Message&
 
 template<typename T>
 T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& settingStruct) {
-	if constexpr (std::is_same_v<T, int>) {
+	if constexpr (std::is_same_v<T, int32_t>) {
 		return settingStruct.GetReflection()->GetInt32(settingStruct, field);
 	}
 	else if constexpr (std::is_same_v<T, double>) {
@@ -44,6 +50,60 @@ T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& 
 	}
 	else if constexpr (std::is_same_v<T, int64_t>) {
 		return settingStruct.GetReflection()->GetInt64(settingStruct, field);
+	}
+	else if constexpr (std::is_same_v<T, std::vector<int32_t>>) {
+		std::vector<int32_t> vec;
+		int sz = settingStruct.GetReflection()->FieldSize(settingStruct, field);
+		vec.reserve(sz);
+		for (int i = 0; i < sz; i++) {
+			vec.push_back(settingStruct.GetReflection()->GetRepeatedInt32(settingStruct, field, i));
+		}
+		return vec;
+	}
+	else if constexpr (std::is_same_v<T, std::vector<double>>) {
+		std::vector<double> vec;
+		int sz = settingStruct.GetReflection()->FieldSize(settingStruct, field);
+		vec.reserve(sz);
+		for (int i = 0; i < sz; i++) {
+			vec.push_back(settingStruct.GetReflection()->GetRepeatedDouble(settingStruct, field, i));
+		}
+		return vec;
+	}
+	else if constexpr (std::is_same_v<T, std::vector<float>>) {
+		std::vector<float> vec;
+		int sz = settingStruct.GetReflection()->FieldSize(settingStruct, field);
+		vec.reserve(sz);
+		for (int i = 0; i < sz; i++) {
+			vec.push_back(settingStruct.GetReflection()->GetRepeatedFloat(settingStruct, field, i));
+		}
+		return vec;
+	}
+	else if constexpr (std::is_same_v<T, std::vector<bool>>) {
+		std::vector<bool> vec;
+		int sz = settingStruct.GetReflection()->FieldSize(settingStruct, field);
+		vec.reserve(sz);
+		for (int i = 0; i < sz; i++) {
+			vec.push_back(settingStruct.GetReflection()->GetRepeatedBool(settingStruct, field, i));
+		}
+		return vec;
+	}
+	else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+		std::vector<std::string> vec;
+		int sz = settingStruct.GetReflection()->FieldSize(settingStruct, field);
+		vec.reserve(sz);
+		for (int i = 0; i < sz; i++) {
+			vec.push_back(settingStruct.GetReflection()->GetRepeatedString(settingStruct, field, i));
+		}
+		return vec;
+	}
+	else if constexpr (std::is_same_v<T, std::vector<int64_t>>) {
+		std::vector<int64_t> vec;
+		int sz = settingStruct.GetReflection()->FieldSize(settingStruct, field);
+		vec.reserve(sz);
+		for (int i = 0; i < sz; i++) {
+			vec.push_back(settingStruct.GetReflection()->GetRepeatedInt64(settingStruct, field, i));
+		}
+		return vec;
 	}
 	else {
 		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");

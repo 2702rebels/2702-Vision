@@ -21,12 +21,12 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
-	m_config.AttachSetterFunction<int>("hueMin", std::bind(&ObjectFrameProcessor::setPVHueMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int>("hueMax", std::bind(&ObjectFrameProcessor::setPVHueMax, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int>("saturationMin", std::bind(&ObjectFrameProcessor::setSaturationMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int>("saturationMax", std::bind(&ObjectFrameProcessor::setSaturationMax, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int>("valueMin", std::bind(&ObjectFrameProcessor::setValueMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int>("valueMax", std::bind(&ObjectFrameProcessor::setValueMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("hueMin", std::bind(&ObjectFrameProcessor::setPVHueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("hueMax", std::bind(&ObjectFrameProcessor::setPVHueMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("saturationMin", std::bind(&ObjectFrameProcessor::setSaturationMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("saturationMax", std::bind(&ObjectFrameProcessor::setSaturationMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("valueMin", std::bind(&ObjectFrameProcessor::setValueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("valueMax", std::bind(&ObjectFrameProcessor::setValueMax, this, std::placeholders::_1));
 	m_config.LoadConfigFromFile();
 	m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
@@ -79,7 +79,7 @@ void ObjectFrameProcessor::vStartLogging() {
 * \brief Sets hue min object detection parameter.
 * \param newValue - integer representing the new hue min value
 */
-void ObjectFrameProcessor::setPVHueMin(const int& newValue)
+void ObjectFrameProcessor::setPVHueMin(const int32_t& newValue)
 {
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
@@ -89,7 +89,7 @@ void ObjectFrameProcessor::setPVHueMin(const int& newValue)
 * \brief Sets hue max object detection parameter.
 * \param newValue - integer representing the new hue max value
 */
-void ObjectFrameProcessor::setPVHueMax(const int& newValue)
+void ObjectFrameProcessor::setPVHueMax(const int32_t& newValue)
 {
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
@@ -99,7 +99,7 @@ void ObjectFrameProcessor::setPVHueMax(const int& newValue)
 * \brief Sets saturation min object detection parameter.
 * \param newValue - integer representing the new saturation min value
 */
-void ObjectFrameProcessor::setSaturationMin(const int& newValue)
+void ObjectFrameProcessor::setSaturationMin(const int32_t& newValue)
 {
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
@@ -109,7 +109,7 @@ void ObjectFrameProcessor::setSaturationMin(const int& newValue)
 * \brief Sets saturation max object detection parameter.
 * \param newValue - integer representing the new saturation max value
 */
-void ObjectFrameProcessor::setSaturationMax(const int& newValue)
+void ObjectFrameProcessor::setSaturationMax(const int32_t& newValue)
 {
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
@@ -119,7 +119,7 @@ void ObjectFrameProcessor::setSaturationMax(const int& newValue)
 * \brief Sets value min object detection parameter.
 * \param newValue - integer representing the new value min value
 */
-void ObjectFrameProcessor::setValueMin(const int& newValue)
+void ObjectFrameProcessor::setValueMin(const int32_t& newValue)
 {
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
@@ -129,7 +129,7 @@ void ObjectFrameProcessor::setValueMin(const int& newValue)
 * \brief Sets value max object detection parameter.
 * \param newValue - integer representing the new value max value
 */
-void ObjectFrameProcessor::setValueMax(const int& newValue)
+void ObjectFrameProcessor::setValueMax(const int32_t& newValue)
 {
 #if (IMGPROC_GUI && !PRODUCTION)
 	cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
@@ -212,7 +212,7 @@ std::array<cv::Point2f, 4> ObjectFrameProcessor::OrderPointArray(cv::Point2f* po
 	int highestIndex = 0;
 	int max = 0;
 	int lowestIndex = 0;
-	int min = std::numeric_limits<int>::max();
+	int min = std::numeric_limits<int32_t>::max();
 	// Find top-right point
 	for (int i = 0; i < 4; i++) {
 		if (points[i].x + points[i].y > max) {
@@ -227,7 +227,7 @@ std::array<cv::Point2f, 4> ObjectFrameProcessor::OrderPointArray(cv::Point2f* po
 	std::array<cv::Point2f, 4> pointsSorted;
 	pointsSorted[1] = points[highestIndex];
 	pointsSorted[3] = points[lowestIndex];
-	std::vector<int> indexes = { 0,1,2,3 };
+	std::vector<int32_t> indexes = { 0,1,2,3 };
 	indexes.erase(std::remove(indexes.begin(), indexes.end(), highestIndex), indexes.end());
 	indexes.erase(std::remove(indexes.begin(), indexes.end(), lowestIndex), indexes.end());
 	if (points[indexes[0]].x > points[indexes[1]].x) {

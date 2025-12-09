@@ -132,32 +132,32 @@ public:
 	* \brief Sets hue min object detection parameter.
 	* \param  newValue - integer representing the new hue min value
 	*/
-	void setPVHueMin(const int& newValue);
+	void setPVHueMin(const int32_t& newValue);
 	/*!
 	* \brief Sets hue max object detection parameter.
 	* \param  newValue - integer representing the new hue max value
 	*/
-	void setPVHueMax(const int& newValue);
+	void setPVHueMax(const int32_t& newValue);
 	/*!
 	* \brief Sets saturation min object detection parameter.
 	* \param  newValue - integer representing the new saturation min value
 	*/
-	void setSaturationMin(const int& newValue);
+	void setSaturationMin(const int32_t& newValue);
 	/*!
 	* \brief Sets saturation max object detection parameter.
 	* \param  newValue - integer representing the new saturation max value
 	*/
-	void setSaturationMax(const int& newValue);
+	void setSaturationMax(const int32_t& newValue);
 	/*!
 	* \brief Sets value min object detection parameter.
 	* \param  newValue - integer representing the new value min value
 	*/
-	void setValueMin(const int& newValue);
+	void setValueMin(const int32_t& newValue);
 	/*!
 	* \brief Sets value max object detection parameter.
 	* \param  newValue - integer representing the new value max value
 	*/
-	void setValueMax(const int& newValue);
+	void setValueMax(const int32_t& newValue);
 	
 	virtual ~ObjectFrameProcessor();
 	/*! \brief Handles a time sync event from networkTables.

@@ -17,18 +17,24 @@ using ObjectDetectionConfigValueGen = std::variant<
 	ObjectDetectionConfigValue<float>,
 	ObjectDetectionConfigValue<bool>,
 	ObjectDetectionConfigValue<std::string>,
-	ObjectDetectionConfigValue<int64_t>
+	ObjectDetectionConfigValue<int64_t>,
+	ObjectDetectionConfigValue<std::vector<int32_t>>,
+	ObjectDetectionConfigValue<std::vector<double>>,
+	ObjectDetectionConfigValue<std::vector<float>>,
+	ObjectDetectionConfigValue<std::vector<bool>>,
+	ObjectDetectionConfigValue<std::vector<std::string>>,
+	ObjectDetectionConfigValue<std::vector<int64_t>>
 >;
 
 template<typename T>
 class ObjectDetectionConfig {
 	static_assert(std::is_base_of<pbuf::Message, T>::value, "ObjectDetectionConfig can only be instantiated with protobuf message types");
 private:
+	const pbuf::Reflection* reflection;
+	std::string m_configPath;
 	std::vector<ObjectDetectionConfigValueGen> m_configValues;
 	std::unordered_map<std::string, int> fieldNamesToIndex;
-	std::string m_configPath;
 	T currentConfigStructure;
-	const pbuf::Reflection* reflection;
 public:
 	ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string configName);
 	void LoadConfigFromFile();
