@@ -146,7 +146,7 @@ void NetworkTopicGeneric<T>::PushValue(const T& value) {
 		m_publisher.SetInteger(value);
 	}
 	else if constexpr (std::is_same_v<T, std::vector<int32_t>>) {
-		std::vector<long int> longVec(value.begin(), value.end());
+		std::vector<int64_t> longVec(value.begin(), value.end());
 		m_publisher.SetIntegerArray(longVec);
 	}
 	else if constexpr (std::is_same_v<T, std::vector<double>>) {
@@ -161,7 +161,7 @@ void NetworkTopicGeneric<T>::PushValue(const T& value) {
 		for (int i = 0; i < value.size(); i++) {
 			boolAsInt[i] = value[i] ? 1 : 0;
 		}
-		m_publisher.SetBooleanArray(std::span<const int>(boolAsInt));
+		m_publisher.SetBooleanArray(boolAsInt);
 	}
 	else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
 		m_publisher.SetStringArray(value);

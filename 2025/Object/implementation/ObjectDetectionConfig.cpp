@@ -1,5 +1,6 @@
 #include <ObjectDetectionConfig.h>
 #include <ObjectDetectionSettings.pb.h>
+#include <TestConfigurationSettings.pb.h>
 #include <google/protobuf/descriptor.h>
 #include <fstream>
 #include <sstream>
@@ -9,8 +10,10 @@
 #include <networktables/NetworkTableInstance.h>
 #include <type_traits>
 #include <google/protobuf/message.h>
+#include <filesystem>
 
 template class ObjectDetectionConfig<ObjectDetectionSettings>;
+template class ObjectDetectionConfig<TestConfigurationSettings>;
 
 template<typename T>
 ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string configName)
@@ -21,7 +24,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 	for (int i = 0; i < messageClass->field_count(); i++) {
 		const pbuf::FieldDescriptor* field = messageClass->field(i);
 		fieldNamesToIndex[field->name()] = i;
-		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + configName  + "/" + field->name());
+		nt::Topic ntTopic = nt::NetworkTableInstance::GetDefault().GetTopic("ObjectDetectionConfig/" + configName + "/" + field->name());
 		if (!field->is_repeated()) {
 			switch (field->cpp_type()) {
 			case pbuf::FieldDescriptor::CPPTYPE_INT32: {
@@ -159,9 +162,7 @@ ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T de
 			}
 		}
 	}
-	std::ifstream checkFile(configFilePath);
-	if (checkFile.is_open()) {
-		checkFile.close();
+	if (std::filesystem::exists(configFilePath)) {
 		LoadConfigFromFile();
 	}
 	else {
@@ -175,7 +176,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromStructure(const T& newConfigSetting
 	for (auto& configValue : m_configValues) {
 		std::visit([&](auto& value) {
 			value.UpdateFromConfigMessage(currentConfigStructure);
-		}, configValue);
+			}, configValue);
 	}
 }
 
@@ -198,7 +199,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromFile() {
 		// Runs value.UpdateFromConfigMessage if value is any one of the variant types
 		std::visit([&](auto& value) {
 			value.UpdateFromConfigMessage(currentConfigStructure);
-		}, configValue);
+			}, configValue);
 	}
 }
 
@@ -248,55 +249,55 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() {
 				reflection->SetInt64(&currentConfigStructure, field, value.GetValue());
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::vector<int32_t>>>) {
-				std::vector<int32_t> vec = value.GetValue();
-				for (int i = 0; i < vec.size(); i++) {
-					reflection->SetRepeatedInt64(&currentConfigStructure, field, i, vec[i]);
+				reflection->ClearField(&currentConfigStructure, field);
+				for (int32_t val : value.GetValue()) {
+					reflection->AddInt32(&currentConfigStructure, field, val);
 				}
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::vector<double>>>) {
-				std::vector<double> vec = value.GetValue();
-				for (int i = 0; i < vec.size(); i++) {
-					reflection->SetRepeatedDouble(&currentConfigStructure, field, i, vec[i]);
+				reflection->ClearField(&currentConfigStructure, field);
+				for (double val : value.GetValue()) {
+					reflection->AddDouble(&currentConfigStructure, field, val);
 				}
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::vector<float>>>) {
-				std::vector<float> vec = value.GetValue();
-				for (int i = 0; i < vec.size(); i++) {
-					reflection->SetRepeatedInt64(&currentConfigStructure, field, i, vec[i]);
+				reflection->ClearField(&currentConfigStructure, field);
+				for (float val : value.GetValue()) {
+					reflection->AddFloat(&currentConfigStructure, field, val);
 				}
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::vector<bool>>>) {
-				std::vector<bool> vec = value.GetValue();
-				for (int i = 0; i < vec.size(); i++) {
-					reflection->SetRepeatedBool(&currentConfigStructure, field, i, vec[i]);
+				reflection->ClearField(&currentConfigStructure, field);
+				for (bool val : value.GetValue()) {
+					reflection->AddBool(&currentConfigStructure, field, val);
 				}
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::vector<std::string>>>) {
-				std::vector<std::string> vec = value.GetValue();
-				for (int i = 0; i < vec.size(); i++) {
-					reflection->SetRepeatedString(&currentConfigStructure, field, i, vec[i]);
+				reflection->ClearField(&currentConfigStructure, field);
+				for (std::string val : value.GetValue()) {
+					reflection->AddString(&currentConfigStructure, field, val);
 				}
 			}
 			else if constexpr (std::is_same_v<ValueType, ObjectDetectionConfigValue<std::vector<int64_t>>>) {
-				std::vector<int64_t> vec = value.GetValue();
-				for (int i = 0; i < vec.size(); i++) {
-					reflection->SetRepeatedInt64(&currentConfigStructure, field, i, vec[i]);
+				reflection->ClearField(&currentConfigStructure, field);
+				for (int64_t val : value.GetValue()) {
+					reflection->AddInt64(&currentConfigStructure, field, val);
 				}
 			}
 			else {
 				static_assert(false, "Unsupported ValueType provided to ObjectDetectionConfig::RefreshConfigStructure");
 			}
-		}, configValue);
+			}, configValue);
 	}
 	WriteConfigToFile();
 }
 
 template<typename T>
 void ObjectDetectionConfig<T>::UpdateFromNetworkTables() {
-	for (auto& configValue : m_configValues) {
+	for (ObjectDetectionConfigValueGen& configValue : m_configValues) {
 		std::visit([&](auto& value) {
 			value.UpdateFromNetworkTables();
-		}, configValue);
+			}, configValue);
 	}
 	RefreshConfigStructure();
 }
@@ -355,6 +356,8 @@ void ObjectDetectionConfig<T>::AttachSetterFunction(int fieldIndex, std::functio
 	std::get<ObjectDetectionConfigValue<O>>(m_configValues[arrIndex]).setterFunction = std::move(setterFunction);
 }
 
+/** Wall of template instantiations */
+
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<int32_t>(int, std::function<void(const int32_t&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<double>(int, std::function<void(const double&)>);
 template void ObjectDetectionConfig<ObjectDetectionSettings>::AttachSetterFunction<float>(int, std::function<void(const float&)>);
@@ -406,3 +409,55 @@ template ObjectDetectionConfigValue<std::vector<float>>& ObjectDetectionConfig<O
 template ObjectDetectionConfigValue<std::vector<bool>>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<std::vector<bool>>(int);
 template ObjectDetectionConfigValue<std::vector<std::string>>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<std::vector<std::string>>(int);
 template ObjectDetectionConfigValue<std::vector<int64_t>>& ObjectDetectionConfig<ObjectDetectionSettings>::GetConfigValueStruct<std::vector<int64_t>>(int);
+
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<int32_t>(int, std::function<void(const int32_t&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<double>(int, std::function<void(const double&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<float>(int, std::function<void(const float&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<bool>(int, std::function<void(const bool&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::string>(int, std::function<void(const std::string&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<int64_t>(int, std::function<void(const int64_t&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<int32_t>>(int, std::function<void(const std::vector<int32_t>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<double>>(int, std::function<void(const std::vector<double>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<float>>(int, std::function<void(const std::vector<float>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<bool>>(int, std::function<void(const std::vector<bool>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<std::string>>(int, std::function<void(const std::vector<std::string>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<int64_t>>(int, std::function<void(const std::vector<int64_t>&)>);
+
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<int32_t>(std::string, std::function<void(const int32_t&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<double>(std::string, std::function<void(const double&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<float>(std::string, std::function<void(const float&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<bool>(std::string, std::function<void(const bool&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::string>(std::string, std::function<void(const std::string&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<int64_t>(std::string, std::function<void(const int64_t&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<int32_t>>(std::string, std::function<void(const std::vector<int32_t>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<double>>(std::string, std::function<void(const std::vector<double>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<float>>(std::string, std::function<void(const std::vector<float>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<bool>>(std::string, std::function<void(const std::vector<bool>&)>);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<std::string>>(std::string, std::function<void(const std::vector<std::string>&) >);
+template void ObjectDetectionConfig<TestConfigurationSettings>::AttachSetterFunction<std::vector<int64_t>>(std::string, std::function<void(const std::vector<int64_t>&)>);
+
+template ObjectDetectionConfigValue<int32_t>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<int32_t>(std::string);
+template ObjectDetectionConfigValue<double>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<double>(std::string);
+template ObjectDetectionConfigValue<float>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<float>(std::string);
+template ObjectDetectionConfigValue<bool>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<bool>(std::string);
+template ObjectDetectionConfigValue<std::string>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::string>(std::string);
+template ObjectDetectionConfigValue<int64_t>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<int64_t>(std::string);
+template ObjectDetectionConfigValue<std::vector<int32_t>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<int32_t>>(std::string);
+template ObjectDetectionConfigValue<std::vector<double>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<double>>(std::string);
+template ObjectDetectionConfigValue<std::vector<float>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<float>>(std::string);
+template ObjectDetectionConfigValue<std::vector<bool>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<bool>>(std::string);
+template ObjectDetectionConfigValue<std::vector<std::string>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<std::string>>(std::string);
+template ObjectDetectionConfigValue<std::vector<int64_t>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<int64_t>>(std::string);
+
+template ObjectDetectionConfigValue<int32_t>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<int32_t>(int);
+template ObjectDetectionConfigValue<double>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<double>(int);
+template ObjectDetectionConfigValue<float>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<float>(int);
+template ObjectDetectionConfigValue<bool>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<bool>(int);
+template ObjectDetectionConfigValue<std::string>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::string>(int);
+template ObjectDetectionConfigValue<int64_t>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<int64_t>(int);
+template ObjectDetectionConfigValue<std::vector<int32_t>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<int32_t>>(int);
+template ObjectDetectionConfigValue<std::vector<double>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<double>>(int);
+template ObjectDetectionConfigValue<std::vector<float>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<float>>(int);
+template ObjectDetectionConfigValue<std::vector<bool>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<bool>>(int);
+template ObjectDetectionConfigValue<std::vector<std::string>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<std::string>>(int);
+template ObjectDetectionConfigValue<std::vector<int64_t>>& ObjectDetectionConfig<TestConfigurationSettings>::GetConfigValueStruct<std::vector<int64_t>>(int);
