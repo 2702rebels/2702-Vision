@@ -27,7 +27,7 @@ int main( int argc, char **argv )
 	}
 	int width = std::stoi(argv[2]);
 	int height = std::stoi(argv[3]);
-	ObjectFrameProcessor ip(width, height);
+	ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON> ip(width, height);
 	LogPlayer lp( argv[1], ip );
 	while (true) {
 		if (!lp.bNextFrame()) {

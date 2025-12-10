@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 	signal(SIGINT, sighandler);
 	try
 	{
-		ObjectFrameProcessor proc(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
+		ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON> proc(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
 		//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
 		RPICamera mycam0("/dev/video0", 0, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, DRM_FORMAT_RGB888, proc, FIXED_EXPOSURE_TIME, FIXED_GAIN_VALUE);
 		//	nvCamera mycam1( "/dev/video1", 4, 1 );

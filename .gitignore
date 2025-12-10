@@ -17,6 +17,7 @@ allwpilib/
 *.txt
 !CMakeLists.txt
 vcpkg/
+.idea/
 vcpkg_installed/
 *~
 /tests/test
