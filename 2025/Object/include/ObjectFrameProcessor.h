@@ -42,6 +42,9 @@ using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 class ObjectFrameProcessor : public FrmProcessor
 {
+	public:
+	ObjectDetectionConfig<ObjectDetectionSettings> m_config;
+	private:
 	int			m_frameWidth;
 	int			m_frameHeight;
 
@@ -102,8 +105,6 @@ class ObjectFrameProcessor : public FrmProcessor
 	static void onTrackbarSetValMax(int newPos, void* inst);
 
 public:
-	ObjectDetectionConfig<ObjectDetectionSettings> m_config;
-
 	static int64_t m_i64TimeOffset;
 
 	ObjectFrameProcessor(int frameWidth, int frameHeight);

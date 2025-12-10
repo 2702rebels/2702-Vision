@@ -24,6 +24,16 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDet
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::namedWindow("Filtered Video");
+
+		cv::createTrackbar("PV Hue Min", "Filtered Video", &trackbarHueMin, 360, ObjectFrameProcessor::onTrackbarSetHueMin, this);
+		cv::createTrackbar("PV Hue Max", "Filtered Video", &trackbarHueMax, 360, ObjectFrameProcessor::onTrackbarSetHueMax, this);
+		cv::createTrackbar("Sat Min", "Filtered Video", &trackbarSatMin, 255, ObjectFrameProcessor::onTrackbarSetSatMin, this);
+		cv::createTrackbar("Sat Max", "Filtered Video", &trackbarSatMax, 255, ObjectFrameProcessor::onTrackbarSetSatMax, this);
+		cv::createTrackbar("Val Min", "Filtered Video", &trackbarValMin, 255, ObjectFrameProcessor::onTrackbarSetValMin, this);
+		cv::createTrackbar("Val Max", "Filtered Video", &trackbarValMax, 255, ObjectFrameProcessor::onTrackbarSetValMax, this);
+	}
 	m_config.AttachSetterFunction<int32_t>("hueMin", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setPVHueMin, this, std::placeholders::_1));
 	m_config.AttachSetterFunction<int32_t>("hueMax", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setPVHueMax, this, std::placeholders::_1));
 	m_config.AttachSetterFunction<int32_t>("saturationMin", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setSaturationMin, this, std::placeholders::_1));
@@ -40,22 +50,12 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDet
 		mtx.at<float>(2, 0), mtx.at<float>(2, 1), mtx.at<float>(2, 2));
 	spdlog::info("Focal Length Coefficients: {}, {}", mtx.at<float>(0, 0), mtx.at<float>(1, 2));
 	spdlog::info("Focal Length: {}", m_focalLen);
-	if constexpr (UseGui == ObjUseGui::ON) {
-		cv::namedWindow("Filtered Video");
-
-		cv::createTrackbar("PV Hue Min", "Filtered Video", &trackbarHueMin, 360, ObjectFrameProcessor::onTrackbarSetHueMin, this);
-		cv::createTrackbar("PV Hue Max", "Filtered Video", &trackbarHueMax, 360, ObjectFrameProcessor::onTrackbarSetHueMax, this);
-		cv::createTrackbar("Sat Min", "Filtered Video", &trackbarSatMin, 255, ObjectFrameProcessor::onTrackbarSetSatMin, this);
-		cv::createTrackbar("Sat Max", "Filtered Video", &trackbarSatMax, 255, ObjectFrameProcessor::onTrackbarSetSatMax, this);
-		cv::createTrackbar("Val Min", "Filtered Video", &trackbarValMin, 255, ObjectFrameProcessor::onTrackbarSetValMin, this);
-		cv::createTrackbar("Val Max", "Filtered Video", &trackbarValMax, 255, ObjectFrameProcessor::onTrackbarSetValMax, this);
-	}
 	spdlog::info("Reached end of FrameProcessor constructor");
 }
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetHueMin(int newPos, void* inst) {
-	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	ObjectFrameProcessor* instObj = static_cast<ObjectFrameProcessor*>(inst);
 	instObj->trackbarHueMin = newPos;
 	ObjectDetectionSettings newSettings;
 	newSettings.CopyFrom(instObj->m_config.Get());
@@ -65,7 +65,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetHueMax(int newPos, void* inst) {
-	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	ObjectFrameProcessor* instObj = static_cast<ObjectFrameProcessor*>(inst);
 	instObj->trackbarHueMax = newPos;
 	ObjectDetectionSettings newSettings;
 	newSettings.CopyFrom(instObj->m_config.Get());
@@ -75,7 +75,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetSatMin(int newPos, void* inst) {
-	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	ObjectFrameProcessor* instObj = static_cast<ObjectFrameProcessor*>(inst);
 	instObj->trackbarSatMin = newPos;
 	ObjectDetectionSettings newSettings;
 	newSettings.CopyFrom(instObj->m_config.Get());
@@ -85,7 +85,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetSatMax(int newPos, void* inst) {
-	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	ObjectFrameProcessor* instObj = static_cast<ObjectFrameProcessor*>(inst);
 	instObj->trackbarSatMax = newPos;
 	ObjectDetectionSettings newSettings;
 	newSettings.CopyFrom(instObj->m_config.Get());
@@ -95,7 +95,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetValMin(int newPos, void* inst) {
-	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	ObjectFrameProcessor* instObj = static_cast<ObjectFrameProcessor*>(inst);
 	instObj->trackbarValMin = newPos;
 	ObjectDetectionSettings newSettings;
 	newSettings.CopyFrom(instObj->m_config.Get());
@@ -105,7 +105,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetValMax(int newPos, void* inst) {
-	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	ObjectFrameProcessor* instObj = static_cast<ObjectFrameProcessor*>(inst);
 	instObj->trackbarValMax = newPos;
 	ObjectDetectionSettings newSettings;
 	newSettings.CopyFrom(instObj->m_config.Get());
@@ -123,6 +123,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 			continue;
 		}
 		m_unfilteredLogger = std::make_unique<AsyncVisionLog>(unfilteredPath, m_frameWidth, m_frameHeight, LogFrameType::RGB, nWriterThreads);
+		break;
 	}
 	for (int i = 0;; i++) {
 		fs::path maskedPath(logDir / ("object-" + std::to_string(i) + "_masked.log"));
@@ -130,6 +131,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 			continue;
 		}
 		m_maskedLogger = std::make_unique<AsyncVisionLog>(maskedPath, m_frameWidth, m_frameHeight, LogFrameType::GRAYSCALE, nWriterThreads);
+		break;
 	}
 	for (int i = 0;; i++) {
 		fs::path filteredPath(logDir / ("object-" + std::to_string(i) + "_filtered.log"));
@@ -137,6 +139,7 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 			continue;
 		}
 		m_filteredLogger = std::make_unique<AsyncVisionLog>(filteredPath, m_frameWidth, m_frameHeight, LogFrameType::RGB, nWriterThreads);
+		break;
 	}
 }
 
