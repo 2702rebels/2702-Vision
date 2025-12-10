@@ -5,13 +5,16 @@
 #include <spdlog/spdlog.h>
 #include <functional>
 #include <filesystem>
+#include <opencv2/highgui.hpp>
 
 namespace fs = std::filesystem;
 
-// Initialize static vars
-int64_t ObjectFrameProcessor::m_i64TimeOffset;
+// instantiate static var
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::m_i64TimeOffset;
 
-ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	FrmProcessor(),
 	m_config(std::string(CONFIG_DIRECTORY) + "/processorSettings.json", ObjectDetectionSettings(), "ProcessorSettings"),
 	CAMERA_CENTER(mtx.at<float>(0, 2), mtx.at<float>(1, 2)),
@@ -21,13 +24,14 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 	m_frameWidth(frameWidth),
 	m_frameHeight(frameHeight)
 {
-	m_config.AttachSetterFunction<int32_t>("hueMin", std::bind(&ObjectFrameProcessor::setPVHueMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int32_t>("hueMax", std::bind(&ObjectFrameProcessor::setPVHueMax, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int32_t>("saturationMin", std::bind(&ObjectFrameProcessor::setSaturationMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int32_t>("saturationMax", std::bind(&ObjectFrameProcessor::setSaturationMax, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int32_t>("valueMin", std::bind(&ObjectFrameProcessor::setValueMin, this, std::placeholders::_1));
-	m_config.AttachSetterFunction<int32_t>("valueMax", std::bind(&ObjectFrameProcessor::setValueMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("hueMin", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setPVHueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("hueMax", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setPVHueMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("saturationMin", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setSaturationMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("saturationMax", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setSaturationMax, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("valueMin", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setValueMin, this, std::placeholders::_1));
+	m_config.AttachSetterFunction<int32_t>("valueMax", std::bind(&ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setValueMax, this, std::placeholders::_1));
 	m_config.LoadConfigFromFile();
+
 	m_focalLen = (mtx.at<float>(0, 0) + mtx.at<float>(1, 1)) / 2;
 
 	spdlog::info("Camera Matrix: {} {} {}\n{} {} {}\n{} {} {}",
@@ -36,20 +40,81 @@ ObjectFrameProcessor::ObjectFrameProcessor(int frameWidth, int frameHeight) :
 		mtx.at<float>(2, 0), mtx.at<float>(2, 1), mtx.at<float>(2, 2));
 	spdlog::info("Focal Length Coefficients: {}, {}", mtx.at<float>(0, 0), mtx.at<float>(1, 2));
 	spdlog::info("Focal Length: {}", m_focalLen);
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::namedWindow("Filtered Video");
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::namedWindow("Filtered Video");
 
-	cv::createTrackbar("PV Hue Min", "Filtered Video", config->Get().huemin(), 360);
-	cv::createTrackbar("PV Hue Max", "Filtered Video", config->Get().huemax(), 360);
-	cv::createTrackbar("Sat Min", "Filtered Video", config->Get().saturationmin(), 255);
-	cv::createTrackbar("Sat Max", "Filtered Video", config->Get().saturationmax(), 255);
-	cv::createTrackbar("Val Min", "Filtered Video", config->Get().valuemin(), 255);
-	cv::createTrackbar("Val Max", "Filtered Video", config->Get().valuemax(), 255);
-#endif
+		cv::createTrackbar("PV Hue Min", "Filtered Video", &trackbarHueMin, 360, ObjectFrameProcessor::onTrackbarSetHueMin, this);
+		cv::createTrackbar("PV Hue Max", "Filtered Video", &trackbarHueMax, 360, ObjectFrameProcessor::onTrackbarSetHueMax, this);
+		cv::createTrackbar("Sat Min", "Filtered Video", &trackbarSatMin, 255, ObjectFrameProcessor::onTrackbarSetSatMin, this);
+		cv::createTrackbar("Sat Max", "Filtered Video", &trackbarSatMax, 255, ObjectFrameProcessor::onTrackbarSetSatMax, this);
+		cv::createTrackbar("Val Min", "Filtered Video", &trackbarValMin, 255, ObjectFrameProcessor::onTrackbarSetValMin, this);
+		cv::createTrackbar("Val Max", "Filtered Video", &trackbarValMax, 255, ObjectFrameProcessor::onTrackbarSetValMax, this);
+	}
 	spdlog::info("Reached end of FrameProcessor constructor");
 }
 
-void ObjectFrameProcessor::vStartLogging() {
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetHueMin(int newPos, void* inst) {
+	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	instObj->trackbarHueMin = newPos;
+	ObjectDetectionSettings newSettings;
+	newSettings.CopyFrom(instObj->m_config.Get());
+	newSettings.set_huemin(newPos);
+	instObj->m_config.LoadConfigFromStructure(newSettings);
+}
+
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetHueMax(int newPos, void* inst) {
+	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	instObj->trackbarHueMax = newPos;
+	ObjectDetectionSettings newSettings;
+	newSettings.CopyFrom(instObj->m_config.Get());
+	newSettings.set_huemax(newPos);
+	instObj->m_config.LoadConfigFromStructure(newSettings);
+}
+
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetSatMin(int newPos, void* inst) {
+	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	instObj->trackbarSatMin = newPos;
+	ObjectDetectionSettings newSettings;
+	newSettings.CopyFrom(instObj->m_config.Get());
+	newSettings.set_saturationmin(newPos);
+	instObj->m_config.LoadConfigFromStructure(newSettings);
+}
+
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetSatMax(int newPos, void* inst) {
+	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	instObj->trackbarSatMax = newPos;
+	ObjectDetectionSettings newSettings;
+	newSettings.CopyFrom(instObj->m_config.Get());
+	newSettings.set_saturationmax(newPos);
+	instObj->m_config.LoadConfigFromStructure(newSettings);
+}
+
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetValMin(int newPos, void* inst) {
+	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	instObj->trackbarValMin = newPos;
+	ObjectDetectionSettings newSettings;
+	newSettings.CopyFrom(instObj->m_config.Get());
+	newSettings.set_valuemin(newPos);
+	instObj->m_config.LoadConfigFromStructure(newSettings);
+}
+
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::onTrackbarSetValMax(int newPos, void* inst) {
+	ObjectFrameProcessor* instObj = reinterpret_cast<ObjectFrameProcessor*>(inst);
+	instObj->trackbarValMax = newPos;
+	ObjectDetectionSettings newSettings;
+	newSettings.CopyFrom(instObj->m_config.Get());
+	newSettings.set_valuemax(newPos);
+	instObj->m_config.LoadConfigFromStructure(newSettings);
+}
+
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::vStartLogging() {
 	fs::path logDir(m_config.Get().logdirectory());
 	int nWriterThreads = m_config.Get().nlogwriterthreads();
 	for (int i = 0; ; i++) {
@@ -79,66 +144,74 @@ void ObjectFrameProcessor::vStartLogging() {
 * \brief Sets hue min object detection parameter.
 * \param newValue - integer representing the new hue min value
 */
-void ObjectFrameProcessor::setPVHueMin(const int32_t& newValue)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setPVHueMin(const int32_t& newValue)
 {
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
-#endif
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::setTrackbarPos("PV Hue Min", "Filtered Video", newValue);
+	}
 }
 /*!
 * \brief Sets hue max object detection parameter.
 * \param newValue - integer representing the new hue max value
 */
-void ObjectFrameProcessor::setPVHueMax(const int32_t& newValue)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setPVHueMax(const int32_t& newValue)
 {
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
-#endif
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::setTrackbarPos("PV Hue Max", "Filtered Video", newValue);
+	}
 }
 /*!
 * \brief Sets saturation min object detection parameter.
 * \param newValue - integer representing the new saturation min value
 */
-void ObjectFrameProcessor::setSaturationMin(const int32_t& newValue)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setSaturationMin(const int32_t& newValue)
 {
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
-#endif
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::setTrackbarPos("Sat Min", "Filtered Video", newValue);
+	}
 }
 /*!
 * \brief Sets saturation max object detection parameter.
 * \param newValue - integer representing the new saturation max value
 */
-void ObjectFrameProcessor::setSaturationMax(const int32_t& newValue)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setSaturationMax(const int32_t& newValue)
 {
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
-#endif
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::setTrackbarPos("Sat Max", "Filtered Video", newValue);
+	}
 }
 /*!
 * \brief Sets value min object detection parameter.
 * \param newValue - integer representing the new value min value
 */
-void ObjectFrameProcessor::setValueMin(const int32_t& newValue)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setValueMin(const int32_t& newValue)
 {
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
-#endif
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::setTrackbarPos("Val Min", "Filtered Video", newValue);
+	}
 }
 /*!
 * \brief Sets value max object detection parameter.
 * \param newValue - integer representing the new value max value
 */
-void ObjectFrameProcessor::setValueMax(const int32_t& newValue)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::setValueMax(const int32_t& newValue)
 {
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
-#endif
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::setTrackbarPos("Val Max", "Filtered Video", newValue);
+	}
 }
 
-ObjectFrameProcessor::~ObjectFrameProcessor() {}
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::~ObjectFrameProcessor() {}
 
-void ObjectFrameProcessor::timesynccallback(nt::Event const& e)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::timesynccallback(nt::Event const& e)
 {
 	if (e.flags & NT_EVENT_TIMESYNC) {
 		spdlog::info("tscb::: Have TIMESYNC\n");
@@ -151,21 +224,23 @@ void ObjectFrameProcessor::timesynccallback(nt::Event const& e)
 	}
 }
 
-void ObjectFrameProcessor::SendObjectDetectionPacket(ObjectDetectionPacket packet) {
-#if SEND_PACKETS || PRODUCTION
-	try {
-		std::vector<uint8_t> bytesVec(StructTypeObjectDetectionPacket::GetSize());
-		std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
-		StructTypeObjectDetectionPacket::Pack(bytes, packet);
-		udpSender.bSend(bytes);
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::SendObjectDetectionPacket(ObjectDetectionPacket packet) {
+	if constexpr (SendPackets == ObjSendPackets::ON) {
+		try {
+			std::vector<uint8_t> bytesVec(StructTypeObjectDetectionPacket::GetSize());
+			std::span<uint8_t> bytes(bytesVec.data(), bytesVec.size());
+			StructTypeObjectDetectionPacket::Pack(bytes, packet);
+			udpSender.bSend(bytes);
+		}
+		catch (std::exception& e) {
+			spdlog::error("Failed to send packet with an exception: {}", e.what());
+		}
 	}
-	catch (std::exception& e) {
-		spdlog::error("Failed to send packet with an exception: {}", e.what());
-	}
-#endif
 }
 
-std::shared_ptr<cv::Mat> ObjectFrameProcessor::filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+std::shared_ptr<cv::Mat> ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max)
 {
 	cv::Mat hsv;
 	std::shared_ptr<cv::Mat> mask = std::make_shared<cv::Mat>();
@@ -189,7 +264,8 @@ std::shared_ptr<cv::Mat> ObjectFrameProcessor::filter_hsv_inverted(const cv::Mat
 	return mask;
 }
 
-Rebels::Point2d ObjectFrameProcessor::calculate_coral_vector(const std::vector<cv::Point>& contour, double focal_length, double actual_diameter, const cv::Point2d& camera_center)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+Rebels::Point2d ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::calculate_coral_vector(const std::vector<cv::Point>& contour, double focal_length, double actual_diameter, const cv::Point2d& camera_center)
 {
 	cv::RotatedRect rect = cv::fitEllipse(contour);
 	// Calculate the vector from the sensor to the object
@@ -208,7 +284,8 @@ Rebels::Point2d ObjectFrameProcessor::calculate_coral_vector(const std::vector<c
 	return Rebels::Point2d(pos.x(), pos.y());
 }
 
-std::array<cv::Point2f, 4> ObjectFrameProcessor::OrderPointArray(cv::Point2f* points) {
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+std::array<cv::Point2f, 4> ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::OrderPointArray(cv::Point2f* points) {
 	int highestIndex = 0;
 	int max = 0;
 	int lowestIndex = 0;
@@ -241,7 +318,8 @@ std::array<cv::Point2f, 4> ObjectFrameProcessor::OrderPointArray(cv::Point2f* po
 	return pointsSorted;
 }
 
-std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFrameProcessor::fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask, cv::Mat filteredFrame, int* heightPaintAt)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask, cv::Mat filteredFrame, int* heightPaintAt)
 {
 	if (contour.size() < 5) {
 		return { {}, {} };
@@ -324,20 +402,22 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 		center.y - majorAxisLength / 2 * sin(angleRad)
 	);
 
-#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
-	std::string uvtext = "(" + std::to_string(ellipse.center.x) + ", " + std::to_string(ellipse.center.y) + ")";
-	cv::putText(filteredFrame, uvtext, cv::Point(10, *heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
-	*heightPaintAt = *heightPaintAt + 30;
-#endif
+	if constexpr (UseGui == ObjUseGui::ON || VideoDebugging == ObjVideoDebuggingInfo::ON) {
+		std::string uvtext = "(" + std::to_string(ellipse.center.x) + ", " + std::to_string(ellipse.center.y) + ")";
+		cv::putText(filteredFrame, uvtext, cv::Point(10, *heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+		*heightPaintAt = *heightPaintAt + 30;
+	}
 
 	return { hull, { majorAxisEndPoint1, majorAxisEndPoint2 } };
 }
 
-void ObjectFrameProcessor::ProcessFrame(int nCam, CameraFrame const* pcf) {
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::ProcessFrame(int nCam, CameraFrame const* pcf) {
 	ProcessFrameWithRet(nCam, pcf);
 }
 
-cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* pcf)
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
+cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::ProcessFrameWithRet(int nCam, CameraFrame const* pcf)
 {
 	spdlog::info("Have Frame from cam {}: {}x{}", nCam, pcf->nRows(), pcf->nCols());
 	std::shared_ptr<cv::Mat> frame = std::make_shared<cv::Mat>(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
@@ -345,9 +425,10 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 		m_unfilteredLogger->AddFrameToQueueAsync(frame);
 	}
 	int heightPaintAt = 60;
-#if (IMGPROC_GUI && !PRODUCTION)
-	cv::imshow("Raw", frame);
-#endif
+	if constexpr (UseGui == ObjUseGui::ON) {
+		cv::imshow("Raw", *frame);
+	}
+
 	// cv::Mat hsv( pcf->nRows(), pcf->nCols(), CV_8UC3);
 
 	// cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
@@ -365,13 +446,13 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 	if (!contours.empty()) {
 		for (int i = 0; i < contours.size(); i++) {
 			// Fit a contour and get endpoints
-#if NO_MULTIPLE_OBJECT_DETECTION
-			auto largest_contour = std::max_element(contours.begin(), contours.end(),
-				[](const std::vector<cv::Point>& a, const std::vector<cv::Point>& b) {
-					return cv::contourArea(a) < cv::contourArea(b);
-				});
-			contours[i] = *largest_contour;
-#endif
+			if (MultipleObjectDetection == ObjMultipleObjectDetection::OFF) {
+				auto largest_contour = std::max_element(contours.begin(), contours.end(),
+					[](const std::vector<cv::Point>& a, const std::vector<cv::Point>& b) {
+						return cv::contourArea(a) < cv::contourArea(b);
+					});
+				contours[i] = *largest_contour;
+			}
 			auto [fitted_contour, endpoints] = fit_cylinder_contour(contours[i], *mask, *filtered_frame, &heightPaintAt);
 			if (!fitted_contour.empty()) {
 				Rebels::Point2d coralVec = calculate_coral_vector(contours[i], m_focalLen, m_config.Get().fcdiam(), CAMERA_CENTER);
@@ -381,98 +462,107 @@ cv::Mat ObjectFrameProcessor::ProcessFrameWithRet(int nCam, CameraFrame const* p
 				spdlog::info("distance: {}, angle: {}", distance, angle);
 				// NaN compare operations are always false, so if either is NaN, don't use it.
 				if (distance == distance && angle == angle) {
-#if USE_OUTPUT_FILTERING
-					distance = m_distanceFilter.Calculate(distance);
-					angle = m_angleFilter.Calculate(angle);
-#endif
+					if constexpr (UseOutputFiltering == ObjUseOutputFiltering::ON) {
+						distance = m_distanceFilter.Calculate(distance);
+						angle = m_angleFilter.Calculate(angle);
+					}
 					m_nLastCoralDistanceTopic.SetDefault(distance);
 					m_nLastCoralAngleTopic.SetDefault(angle);
 					corals.push_back(ObjectDetectionInfo(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL));
 					// Draw the fitted contour
-#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
-					std::string coral_vec_text = "(" + std::to_string(coralVec.u()) + ", " + std::to_string(coralVec.v()) + ")";
-					std::string distance_text = "Distance: " + std::to_string(distance / 0.0254) + "in";
-					std::string angle_text = "Angle: " + std::to_string(angle * (180 / M_PI)) + "deg";
-					cv::putText(*filtered_frame, coral_vec_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
-					heightPaintAt += 30;
-					cv::putText(*filtered_frame, distance_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
-					heightPaintAt += 30;
-					cv::putText(*filtered_frame, angle_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
-					heightPaintAt += 30;
-					cv::drawContours(*filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
-					// Draw the major axis line if endpoints are valid
-					if (endpoints.first.x != 0 || endpoints.first.y != 0 || endpoints.second.x != 0 || endpoints.second.y != 0) {
-						cv::line(*filtered_frame, endpoints.first, endpoints.second, cv::Scalar(255, 0, 0), 2);
+					if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON || UseGui == ObjUseGui::ON) {
+						std::string coral_vec_text = "(" + std::to_string(coralVec.u()) + ", " + std::to_string(coralVec.v()) + ")";
+						std::string distance_text = "Distance: " + std::to_string(distance / 0.0254) + "in";
+						std::string angle_text = "Angle: " + std::to_string(angle * (180 / M_PI)) + "deg";
+						cv::putText(*filtered_frame, coral_vec_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+						heightPaintAt += 30;
+						cv::putText(*filtered_frame, distance_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+						heightPaintAt += 30;
+						cv::putText(*filtered_frame, angle_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+						heightPaintAt += 30;
+						cv::drawContours(*filtered_frame, std::vector<std::vector<cv::Point>>{fitted_contour}, -1, cv::Scalar(0, 255, 0), 2);
+						// Draw the major axis line if endpoints are valid
+						if (endpoints.first.x != 0 || endpoints.first.y != 0 || endpoints.second.x != 0 || endpoints.second.y != 0) {
+							cv::line(*filtered_frame, endpoints.first, endpoints.second, cv::Scalar(255, 0, 0), 2);
+						}
 					}
-#endif
 				}
 			}
-#if NO_MULTIPLE_OBJECT_DETECTION
-			break;
-#endif
+			if constexpr (MultipleObjectDetection == ObjMultipleObjectDetection::OFF) {
+				break;
+			}
 		}
-#if SEND_PACKETS || PRODUCTION
+		if constexpr (SendPackets == ObjSendPackets::ON) {
+			struct timespec tsCur;
+			struct timeval tvCur;
+			struct timeval tvDelta;
+
+			// Get current time since power on
+			clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur);
+			TIMESPEC_TO_TIMEVAL(&tvCur, &tsCur);
+			// Calculate delta between when frame was catured and now.
+			timersub(&tvCur, pcf->ts(), &tvDelta);
+			std::sort(corals.begin(), corals.end());
+			int count = corals.size();
+			while (corals.size() < 4) {
+				corals.push_back(ObjectDetectionInfo());
+			}
+			long time = nt::Now() + m_i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+			ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, count, corals.at(0), corals.at(1), corals.at(2), corals.at(3));
+			SendObjectDetectionPacket(packet);
+		}
+
+	}
+
+	if constexpr (LatencyReporting == ObjLatencyReporting::ON) {
 		struct timespec tsCur;
 		struct timeval tvCur;
 		struct timeval tvDelta;
 
-		// Get current time since power on
 		clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur);
 		TIMESPEC_TO_TIMEVAL(&tvCur, &tsCur);
-		// Calculate delta between when frame was catured and now.
 		timersub(&tvCur, pcf->ts(), &tvDelta);
-		std::sort(corals.begin(), corals.end());
-		int count = corals.size();
-		while (corals.size() < 4) {
-			corals.push_back(ObjectDetectionInfo());
+		m_nLastLatencyTopic.SetDefault(tvDelta.tv_usec);
+
+		if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON || UseGui == ObjUseGui::ON) {
+			// Display distance and angle (only if valid values were calculated)
+			std::string latency_text = "Latency: " + std::to_string(tvDelta.tv_usec) + "us";
+			cv::putText(*filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+			heightPaintAt += 30;
+			if (m_filteredLogger) {
+				m_filteredLogger->AddFrameToQueueAsync(filtered_frame);
+			}
+			if (m_mtxCS.try_lock()) {
+				if (m_bFirstVid) {
+					m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows());
+					m_outputStreamRaw = frc::CameraServer::PutVideo("VisionRaw", pcf->nCols(), pcf->nRows());
+					m_bFirstVid = false;
+				}
+				m_outputStream.PutFrame(*filtered_frame);
+				m_outputStreamRaw.PutFrame(*frame);
+				m_mtxCS.unlock();
+			}
 		}
-		long time = nt::Now() + m_i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
-		ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, count, corals.at(0), corals.at(1), corals.at(2), corals.at(3));
-		SendObjectDetectionPacket(packet);
-#endif
-
 	}
 
-#if DEBUG && !PRODUCTION
-	struct timespec tsCur;
-	struct timeval tvCur;
-	struct timeval tvDelta;
 
-	clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur);
-	TIMESPEC_TO_TIMEVAL(&tvCur, &tsCur);
-	timersub(&tvCur, pcf->ts(), &tvDelta);
-	m_nLastLatencyTopic.SetDefault(tvDelta.tv_usec);
-#if (DEBUG_VIDEO || IMGPROC_GUI) && !PRODUCTION
-	// Display distance and angle (only if valid values were calculated)
-	std::string latency_text = "Latency: " + std::to_string(tvDelta.tv_usec) + "us";
-	cv::putText(*filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
-	heightPaintAt += 30;
-	if (m_filteredLogger) {
-		m_filteredLogger->AddFrameToQueueAsync(filtered_frame);
-	}
-	if (m_mtxCS.try_lock()) {
-		if (m_bFirstVid) {
-			m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows());
-			m_outputStreamRaw = frc::CameraServer::PutVideo("VisionRaw", pcf->nCols(), pcf->nRows());
-			m_bFirstVid = false;
+	if constexpr (UseGui == ObjUseGui::ON) {
+		// Display the results
+		cv::imshow("Filtered Video", *filtered_frame);
+		cv::imshow("Mask", *mask);
+
+		if (cv::waitKey(1) == 'q') {
+			cv::destroyAllWindows();
+			exit(0);
 		}
-		m_outputStream.PutFrame(*filtered_frame);
-		m_outputStreamRaw.PutFrame(*frame);
-		m_mtxCS.unlock();
 	}
-#endif
-#endif
 
-
-#if (IMGPROC_GUI && !PRODUCTION)
-	// Display the results
-	cv::imshow("Filtered Video", filtered_frame);
-	cv::imshow("Mask", mask);
-
-	if (cv::waitKey(1) == 'q') {
-		cv::destroyAllWindows();
-		exit(0);
-	}
-#endif
 	return *filtered_frame;
 }
+
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::OFF, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::OFF, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON>;
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON>;

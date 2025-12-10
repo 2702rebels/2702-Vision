@@ -6,7 +6,7 @@
 #include <ObjectFrameProcessor.h>
 
 class StdVideoLogProc : public FrmProcessor {
-    ObjectFrameProcessor imageProcessor;
+    ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON> imageProcessor;
     FILE* ffmpegRaw;
     FILE* ffmpegFiltered;
     int frameCount = 0;

@@ -20,6 +20,7 @@
 #include <ObjectDetectionConfig.h>
 #include <ObjectDetectionSettings.pb.h>
 #include <AsyncVisionLog.h>
+#include <ObjectFrameProcessorOpts.h>
 
 /*! \brief Contains the object detection image processing classes. Main is located in object.cpp
 * Depends on:
@@ -30,37 +31,15 @@
 // Allows us to access M_PI and other constants from math.h
 #define _USE_MATH_DEFINES
 
-#ifndef IMGPROC_GUI
-#define IMGPROC_GUI	0
-#endif
 /*! \brief UDP address to send object detection packets to. */
 #define OBJECT_DETECTION_SERVER_IP "10.27.2.2"
 /*! \brief UDP port to send object detection packets to. */
 #define OBJECT_DETECTION_SERVER_PORT "27021"
-/*! \brief Prints the latency to console. */
-#ifndef DEBUG
-#define DEBUG 1
-#endif
-/*! \brief Performs all the actions of \ref DEBUG plus annotating the video stream and sending it to the camera server for viewing in the browser and writes distance and angle values to .txt files in the directory, does nothing if DEBUG is off*/
-#ifndef DEBUG_VIDEO
-#define DEBUG_VIDEO 1
-#endif
-/*! \brief Enables or disables the sending of UDP packets to the server. Should be disabled when the server is not active. */
-#ifndef SEND_PACKETS
-#define SEND_PACKETS 1
-#endif
-/*! \brief Disables all debug flags and enables all features. */
-#ifndef PRODUCTION
-#define PRODUCTION 0
-#endif
-/*! \brief Whether or not to use median filtering for the output distance and angle values. */
-#define USE_OUTPUT_FILTERING 1
-/*! \brief Whether or not the camera should detect multiple objects. */
-#define NO_MULTIPLE_OBJECT_DETECTION 0
 // Structure classes where the serialization / deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
+template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 class ObjectFrameProcessor : public FrmProcessor
 {
 	int			m_frameWidth;
@@ -70,10 +49,7 @@ class ObjectFrameProcessor : public FrmProcessor
 	nt::DoublePublisher m_nLastCoralDistanceTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralDistance").Publish();
 	nt::DoublePublisher m_nLastCoralAngleTopic = m_nObjectDetectionNetTable->GetDoubleTopic("CoralAngle").Publish();
 
-#if DEBUG && !PRODUCTION
 	nt::IntegerPublisher m_nLastLatencyTopic = m_nObjectDetectionNetTable->GetIntegerTopic("Latency").Publish();
-
-#endif
 
 	double		distance;
 
@@ -92,14 +68,11 @@ class ObjectFrameProcessor : public FrmProcessor
 	frc::MedianFilter<double> m_distanceFilter;
 	frc::MedianFilter<double> m_angleFilter;
 
-#if SEND_PACKETS || PRODUCTION
 	/*! \brief UDP packet sender. */
 	CUDPSender udpSender;
 
 	nt::NetworkTableListener ntl = nt::NetworkTableListener::CreateTimeSyncListener(nt::NetworkTableInstance::GetDefault(), true, timesynccallback);
-#endif
 
-#if DEBUG_VIDEO && !PRODUCTION
 	/*! \brief Thread lock for the camera server output. */
 	std::mutex	m_mtxCS;
 	/*! \brief Bool to enable running setup of camera server only on first frame. */
@@ -108,7 +81,6 @@ class ObjectFrameProcessor : public FrmProcessor
 	cs::CvSource 	m_outputStream;
 	/*! \brief Camera server output stream for the raw frame. */
 	cs::CvSource    m_outputStreamRaw;
-#endif
 
 	/*! \brief Logger for raw frames inputted into the algorithm */
 	std::unique_ptr<AsyncVisionLog> m_unfilteredLogger;
@@ -117,6 +89,17 @@ class ObjectFrameProcessor : public FrmProcessor
 	/*! \brief Logger for RGB frames after they have been fully filtered */
 	std::unique_ptr<AsyncVisionLog> m_filteredLogger;
 
+	static void onTrackbarSetHueMin(int newPos, void* inst);
+
+	static void onTrackbarSetHueMax(int newPos, void* inst);
+
+	static void onTrackbarSetSatMin(int newPos, void* inst);
+
+	static void onTrackbarSetSatMax(int newPos, void* inst);
+
+	static void onTrackbarSetValMin(int newPos, void* inst);
+
+	static void onTrackbarSetValMax(int newPos, void* inst);
 
 public:
 	ObjectDetectionConfig<ObjectDetectionSettings> m_config;
@@ -127,6 +110,13 @@ public:
 
 	/*! \brief Start logging frames to logfile. */
 	void vStartLogging();
+
+	int trackbarHueMin;
+	int trackbarHueMax;
+	int trackbarSatMin;
+	int trackbarSatMax;
+	int trackbarValMin;
+	int trackbarValMax;
 
 	/*!
 	* \brief Sets hue min object detection parameter.
@@ -158,7 +148,7 @@ public:
 	* \param  newValue - integer representing the new value max value
 	*/
 	void setValueMax(const int32_t& newValue);
-	
+
 	virtual ~ObjectFrameProcessor();
 	/*! \brief Handles a time sync event from networkTables.
 	* \param e - The networktables event.
