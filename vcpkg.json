@@ -58,12 +58,8 @@
     {
       "name": "wpilib",
       "features": [
-        "cameraserver",
-        "ntcore",
-        "wpimath",
-        "wpiunits",
-        "protobuf",
-        "wpilibc"
+        "allwpilib",
+        "cameraserver"
       ]
     },
     "protobuf"

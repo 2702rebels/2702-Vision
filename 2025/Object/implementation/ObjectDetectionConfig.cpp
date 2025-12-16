@@ -178,6 +178,7 @@ void ObjectDetectionConfig<T>::LoadConfigFromStructure(const T& newConfigSetting
 			value.UpdateFromConfigMessage(currentConfigStructure);
 			}, configValue);
 	}
+    WriteConfigToFile();
 }
 
 template<typename T>
