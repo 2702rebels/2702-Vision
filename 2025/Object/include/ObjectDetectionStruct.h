@@ -14,11 +14,11 @@
 #define PACKET_VERSION 1
 
 /**
- * @class ObjectDetectionTypes
+ * @class ObjectDetectionType
  * @brief Possible values for @ref ObjectDetectionInfo::m_type
  * @version 1.0
  */
-enum class ObjectDetectionTypes : uint8_t {
+enum class ObjectDetectionType : uint8_t {
     CORAL
 };
 
@@ -37,11 +37,11 @@ public:
      * @param distance The distance of the detection from the origin of the robot
      * @param angle The angle of the object from the origin of the robot in radians (note FRC directions for radians)
      * @param quality Currently unused parameter to describe the confidence of the algorithm in the detection
-     * @param type The type of object detected by the processor, must be a member of the @ref ObjectDetectionTypes enum
+     * @param type The type of object detected by the processor, must be a member of the @ref ObjectDetectionType enum
      */
-    ObjectDetectionInfo(double distance, double angle, uint8_t quality, uint8_t type);
-    /** @brief Object type, corresponds to an enum value from @ref ObjectDetectionTypes */
-    uint8_t m_type;
+    ObjectDetectionInfo(double distance, double angle, uint8_t quality, ObjectDetectionType type);
+    /** @brief Object type, corresponds to an enum value from @ref ObjectDetectionType */
+    ObjectDetectionType m_type;
     /** @brief The distance of the detection from the origin of the robot  */
     double m_distance;
     /** @brief The angle of the object from the origin of the robot in radians (note FRC directions for radians) */

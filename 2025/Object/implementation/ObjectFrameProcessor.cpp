@@ -471,7 +471,7 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 					}
 					m_nLastCoralDistanceTopic.SetDefault(distance);
 					m_nLastCoralAngleTopic.SetDefault(angle);
-					corals.push_back(ObjectDetectionInfo(distance, angle, (uint8_t)20, ObjectDetectionTypes::CORAL));
+					corals.push_back(ObjectDetectionInfo(distance, angle, (uint8_t)20, ObjectDetectionType::CORAL));
 					// Draw the fitted contour
 					if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON || UseGui == ObjUseGui::ON) {
 						std::string coral_vec_text = "(" + std::to_string(coralVec.u()) + ", " + std::to_string(coralVec.v()) + ")";

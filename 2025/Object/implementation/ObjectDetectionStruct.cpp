@@ -40,13 +40,13 @@ namespace
 
 /*! \brief Creates an ObjectDetection filled with data. 
 * Created from its distance from the camera, its angle relative to the camera, the quality of the detection,
-* and the type of detection(see \ref ObjectDetectionTypes )
+* and the type of detection(see \ref ObjectDetectionType )
 * \param  distance - The distance of the object from the camera as a distance on the ground in meters
 * \param  angle - The angle of the detection relative to the camera in radians
 * \param  quality - The quality of the detection
-* \param  type - Type of detection(see \ref ObjectDetectionTypes )
+* \param  type - Type of detection(see \ref ObjectDetectionType )
 */
-ObjectDetectionInfo::ObjectDetectionInfo(double distance, double angle, uint8_t quality, uint8_t type) : m_distance(distance), m_angle(angle), m_quality(quality), m_type(type) {}
+ObjectDetectionInfo::ObjectDetectionInfo(double distance, double angle, uint8_t quality, ObjectDetectionType type) : m_distance(distance), m_angle(angle), m_quality(quality), m_type(type) {}
 
 /*!
 * \brief Creates an empty \ref ObjectDetectionInfo with all values set to 0.
@@ -56,7 +56,7 @@ ObjectDetectionInfo::ObjectDetectionInfo()
     m_distance = 0.0f;
     m_angle = 0.0f;
     m_quality = 0;
-    m_type = 0;
+    m_type = ObjectDetectionType::CORAL;
 }
 
 using ObjectDetectionInfoStructType = wpi::Struct<ObjectDetectionInfo>; // Importing the structure that will contain the serialization and deserialization functions for the ObjectDetection
@@ -68,7 +68,7 @@ using ObjectDetectionInfoStructType = wpi::Struct<ObjectDetectionInfo>; // Impor
 ObjectDetectionInfo ObjectDetectionInfoStructType::Unpack(std::span<const uint8_t> data)
 {
     // Unpack the data into the span using the type and the offsets found at the top of this file
-    uint8_t type = wpi::UnpackStruct<uint8_t, typeOff>(data);
+    ObjectDetectionType type = static_cast<ObjectDetectionType>(wpi::UnpackStruct<uint8_t, typeOff>(data));
     double dist = wpi::UnpackStruct<double, distOff>(data);
     double angle = wpi::UnpackStruct<double, angleOff>(data);
     uint8_t quality = wpi::UnpackStruct<int, qualityOff>(data);
@@ -81,7 +81,7 @@ ObjectDetectionInfo ObjectDetectionInfoStructType::Unpack(std::span<const uint8_
 void ObjectDetectionInfoStructType::Pack(std::span<uint8_t> data, const ObjectDetectionInfo &value)
 {
     // Pack the data into the span using the offsets found at the top of this file, detects the type automatically from the inputted value
-    wpi::PackStruct<typeOff>(data, value.m_type);
+    wpi::PackStruct<typeOff>(data, static_cast<uint8_t>(value.m_type));
     wpi::PackStruct<distOff>(data, value.m_distance);
     wpi::PackStruct<angleOff>(data, value.m_angle);
     wpi::PackStruct<qualityOff>(data, value.m_quality);
