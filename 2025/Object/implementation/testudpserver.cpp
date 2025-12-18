@@ -60,19 +60,19 @@ int main()
         info("distance1: {}", unpackedPacket.m_coral1.m_distance);
         info("angle1: {}", unpackedPacket.m_coral1.m_angle);
         info("quality1: {}", unpackedPacket.m_coral1.m_quality);
-        info("type1: {}", unpackedPacket.m_coral1.m_type);
+        info("type1: {}", (uint8_t)unpackedPacket.m_coral1.m_type);
         info("distance2: {}", unpackedPacket.m_coral2.m_distance);
         info("angle2: {}", unpackedPacket.m_coral2.m_angle);
         info("quality2: {}", unpackedPacket.m_coral2.m_quality);
-        info("type2: {}", unpackedPacket.m_coral2.m_type);
+        info("type2: {}", (uint8_t)unpackedPacket.m_coral2.m_type);
         info("distance: {}", unpackedPacket.m_coral3.m_distance);
         info("angle3: {}", unpackedPacket.m_coral3.m_angle);
         info("quality3: {}", unpackedPacket.m_coral3.m_quality);
-        info("type3: {}", unpackedPacket.m_coral3.m_type);
+        info("type3: {}", (uint8_t)unpackedPacket.m_coral3.m_type);
         info("distance4: {}", unpackedPacket.m_coral4.m_distance);
         info("angle4: {}", unpackedPacket.m_coral4.m_angle);
         info("quality4: {}", unpackedPacket.m_coral4.m_quality);
-        info("type4: {}", unpackedPacket.m_coral4.m_type);
+        info("type4: {}", (uint8_t)unpackedPacket.m_coral4.m_type);
         timestamps.push_back(unpackedPacket.m_time);
     }
     return 0;
