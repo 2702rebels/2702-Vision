@@ -24,7 +24,6 @@
         "aravis",
         "calib3d",
         "contrib",
-        "eigen",
         "ffmpeg",
         "freetype",
         "fs",
@@ -55,13 +54,7 @@
     },
     "pthread",
     "spdlog",
-    {
-      "name": "wpilib",
-      "features": [
-        "allwpilib",
-        "cameraserver"
-      ]
-    },
+    "wpilib",
     "protobuf"
   ]
 }

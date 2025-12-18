@@ -5,7 +5,7 @@ using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
 TEST(Serialization, ObjectDetectionInfoSerialize) {
-    ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, 0);
+    ObjectDetectionInfo coral1 = ObjectDetectionInfo(25.2f, 51.6f, 50, ObjectDetectionType::CORAL);
     std::vector<uint8_t> coralBytesVec(1000);
     std::span<uint8_t> coralBytes(coralBytesVec.data(), coralBytesVec.size());
     StructTypeObjectDetectionInfo::Pack(coralBytes, coral1);
