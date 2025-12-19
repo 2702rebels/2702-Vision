@@ -1,0 +1,20 @@
+function(add_wpilib_to_target_from_vcpkg targetname is_private)
+    find_package(wpilib REQUIRED)
+    if(is_private EQUAL TRUE)
+        target_link_libraries(${targetname} PRIVATE wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+    else ()
+        target_link_libraries(${targetname} PUBLIC wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+    endif ()
+endfunction()
+
+function(add_wpilib_to_target_from_sys targetname is_private)
+    find_package(wpilib REQUIRED)
+    if(is_private EQUAL TRUE)
+        target_link_libraries(${targetname} PRIVATE wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+    else ()
+        target_link_libraries(${targetname} PUBLIC wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+    endif ()
+endfunction()
+
+
+add_package_finder("wpilib" "add_wpilib_to_target_from_vcpkg" "add_wpilib_to_target_from_sys")

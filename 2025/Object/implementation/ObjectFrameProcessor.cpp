@@ -22,7 +22,8 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDet
 	m_distanceFilter(m_config.Get().filterpacketwindow()),
 	m_angleFilter(m_config.Get().filterpacketwindow()),
 	m_frameWidth(frameWidth),
-	m_frameHeight(frameHeight)
+	m_frameHeight(frameHeight),
+    udpSender(OBJECT_DETECTION_SERVER_IP, OBJECT_DETECTION_SERVER_PORT)
 {
 	if constexpr (UseGui == ObjUseGui::ON) {
 		cv::namedWindow("Filtered Video");

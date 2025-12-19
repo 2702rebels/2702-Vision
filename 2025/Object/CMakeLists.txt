@@ -1,19 +1,12 @@
-find_package(OpenCV REQUIRED)
-find_package(spdlog REQUIRED)
-find_package(wpilib REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(protobuf REQUIRED IMPORTED_TARGET protobuf)
-
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
 target_include_directories(2702log PRIVATE include)
 
-target_include_directories(2702log PUBLIC ${spdlog_INCLUDE_DIRS})
-target_link_libraries(2702log PUBLIC ${spdlog_LIBS})
-
-target_include_directories(2702log PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(2702log PUBLIC ${OpenCV_LIBS})
-
+add_package_to_target("spdlog" "2702log" FALSE)
 target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
+
+add_library(udpsender STATIC implementation/UDPSender.cpp)
+target_include_directories(udpsender PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+add_package_to_target("asio" "udpsender" FALSE)
 
 set(CONFIG_DEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/cfg/processorConfig.json")
 set(CONFIG_SRC_FILE "${CMAKE_CURRENT_LIST_DIR}/cfg/processorConfig.json")
@@ -25,6 +18,7 @@ add_custom_command(
 )
 
 add_custom_target(copyconfigfile DEPENDS "${CONFIG_DEST_FILE}")
+
 
 set(PROTOBUF_IMPORT_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/proto"
@@ -43,13 +37,14 @@ file(GLOB_RECURSE PERSISTENCE_PROTOBUF_FILES CMAKE_CONFIGURE_DEPENDS "${CMAKE_CU
 set(GENERATED_PROTO_SRCS "")
 set(GENERATED_PROTO_HDRS "")
 
+add_package_to_target("protoc" "null" FALSE)
 foreach(proto_file IN LISTS PACKETS_PROTOBUF_FILES PERSISTENCE_PROTOBUF_FILES)
     get_filename_component(proto_name ${proto_file} NAME_WE)
     set(proto_src_abs "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.cc")
     set(proto_head_abs "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.h")
     add_custom_command(
         OUTPUT ${proto_src_abs} ${proto_head_abs}
-        COMMAND protoc
+        COMMAND ${PROTOC_EXE}
         ARGS
         ${PROTOBUF_FLAGS}
         --cpp_out=${CMAKE_CURRENT_BINARY_DIR}
@@ -70,9 +65,8 @@ add_dependencies(objectdetectionconfig generate_protos)
 
 target_include_directories(objectdetectionconfig PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(objectdetectionconfig PUBLIC PkgConfig::protobuf)
-
-target_link_libraries(objectdetectionconfig PUBLIC ntcore)
+add_package_to_target("protobuf" "objectdetectionconfig" FALSE)
+add_package_to_target("wpilib" "objectdetectionconfig" FALSE)
 
 target_sources(objectdetectionconfig PRIVATE ${GENERATED_PROTO_SRCS})
 
@@ -82,7 +76,7 @@ add_library(objectdetectionstruct STATIC implementation/ObjectDetectionStruct.cp
 
 target_include_directories(objectdetectionstruct PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(objectdetectionstruct PUBLIC wpiutil)
+add_package_to_target("wpilib" "objectdetectionstruct" FALSE)
 
 add_library(objectframeprocessor STATIC implementation/ObjectFrameProcessor.cpp)
 
@@ -94,13 +88,13 @@ target_link_libraries(objectframeprocessor PRIVATE objectdetectionstruct)
 
 target_link_libraries(objectframeprocessor PUBLIC objectdetectionconfig)
 
+target_link_libraries(objectframeprocessor PUBLIC udpsender)
+
 target_link_libraries(objectframeprocessor PRIVATE 2702)
 target_include_directories(objectframeprocessor PUBLIC ${CMAKE_SOURCE_DIR}/lib/include)
 
-target_include_directories(objectframeprocessor PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(objectframeprocessor PRIVATE ${OpenCV_LIBS})
-
-target_link_libraries(objectframeprocessor PUBLIC wpilibNewCommands wpilibc cameraserver cscore ntcore wpinet wpimath wpiutil)
+add_package_to_target("opencv" "objectframeprocessor" TRUE)
+add_package_to_target("wpilib" "objectframeprocessor" TRUE)
 
 add_dependencies(objectframeprocessor copyconfigfile)
 target_compile_definitions(objectframeprocessor PRIVATE CONFIG_DIRECTORY="${CMAKE_CURRENT_BINARY_DIR}/cfg")
@@ -109,18 +103,14 @@ target_compile_definitions(objectframeprocessor PRIVATE CONFIG_DIRECTORY="${CMAK
 add_executable(calibrate implementation/calibrate.cpp)
 target_include_directories(calibrate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_include_directories(calibrate PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(calibrate PRIVATE ${OpenCV_LIBS})
+add_package_to_target("opencv" "calibrate" TRUE)
 
 target_link_libraries(calibrate PRIVATE 2702log)
 
 if(IS_RPI)
 	add_executable(object ${CMAKE_CURRENT_SOURCE_DIR}/implementation/object.cpp)
 	target_link_libraries(object PRIVATE objectframeprocessor)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
-    target_link_libraries(object PRIVATE PkgConfig::libcamera)
-    target_include_directories(object PRIVATE ${libcamera_INCLUDE_DIRS})
+    add_package_to_target("libcamera" "object" TRUE)
 endif()
 
 
@@ -128,7 +118,7 @@ add_executable(nettableserver implementation/nettableserver.cpp)
 
 target_include_directories(nettableserver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(nettableserver PRIVATE ntcore wpinet wpiutil)
+add_package_to_target("wpilib" "nettableserver" TRUE)
 
 target_link_libraries(nettableserver PRIVATE 2702log)
 
@@ -137,7 +127,7 @@ add_executable(nettableclient implementation/nettableclient.cpp)
 
 target_include_directories(nettableclient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(nettableclient PRIVATE ntcore wpinet wpiutil)
+add_package_to_target("wpilib" "nettableclient" TRUE)
 
 target_link_libraries(nettableclient PRIVATE 2702log)
 
@@ -150,8 +140,7 @@ target_link_libraries(testudpserver PRIVATE 2702log)
 
 target_link_libraries(testudpserver PRIVATE objectdetectionstruct)
 
-target_include_directories(testudpserver PRIVATE /usr/include/asio)
-
+add_package_to_target("asio" "testudpserver" TRUE)
 
 add_executable(logtostdvideo implementation/logtostdvideo.cpp)
 

@@ -1,14 +1,7 @@
-#include <assert.h>
-#include <iostream>
+#include <cassert>
 
-#include <linux/videodev2.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-using namespace std;
-using namespace cv;
 
 
 // MatRGB must be initialized to same size as matBayer and must be of type CV_8UC3
@@ -16,7 +9,7 @@ using namespace cv;
 * \param matRGB - Must be initialized to same size as matBayer and must be of type CV_8UC3, will be written to as the result of the conversion. 
 * \param matBayer - The bayer material to convert.
 */
-void Bayer2RGB( Mat &matRGB, Mat const &matBayer )
+void Bayer2RGB( cv::Mat &matRGB, cv::Mat const &matBayer )
 {
 	int nRows = matBayer.rows;
 	int nLoopRows = nRows - 1;  // rows that have normal pixels .. i.e not special cases
@@ -122,7 +115,7 @@ void Bayer2RGB( Mat &matRGB, Mat const &matBayer )
 * \param matRGB - must be initialized to same size as matBayer and be of type CV_8UC3, will be written to as the result of the conversion.
 * \param matBayer - The bayer material to convert.
 */
-void Bayer2HalfRGB1( Mat &matRGB, Mat const &matBayer )
+void Bayer2HalfRGB1( cv::Mat &matRGB, cv::Mat const &matBayer )
 {
 	assert( matRGB.rows == matBayer.rows/2 && matRGB.cols == matBayer.cols/2 );
 	assert( matRGB.type() == CV_8UC3 && matBayer.type() == CV_8UC1 );
@@ -167,7 +160,7 @@ void Bayer2HalfRGB1( Mat &matRGB, Mat const &matBayer )
 * \param matRGB - must be initialized to same size as matBayer and be of type CV_8UC3, will be written to as the result of the conversion.
 * \param matBayer - The bayer material to convert. 
 */
-void Bayer2HalfRGB( Mat &matRGB, Mat const &matBayer )
+void Bayer2HalfRGB( cv::Mat &matRGB, cv::Mat const &matBayer )
 {
 	assert( (matRGB.cols & 0x7) == 0 );
 	assert( matRGB.rows == matBayer.rows/2 && matRGB.cols == matBayer.cols/2 );
@@ -190,25 +183,6 @@ void Bayer2HalfRGB( Mat &matRGB, Mat const &matBayer )
 	for( int r = 0; r < nRows; r++, p += (nInCols /4), p2 += (nInCols /4) )
 	{
 		for( int c = 0; c < nCols; c += 4 ){
-#if 0
-			uint32_t u32Bayer1 = *p++;
-			uint32_t u32Bayer2 = *p2++;
-
-			uint32_t u32RGB = (u32Bayer1 & 0x0000ffff) | ((u32Bayer2 & 0x0000ff00) << 8) | ((u32Bayer1 & 0x00ff0000) << 8);
-			*ppix++ = u32RGB;
-
-			u32Bayer1 = *p++;
-
-			u32RGB = (u32Bayer2 >> 16) | (u32Bayer1 <<16);
-			
-			*ppix++ = u32RGB;
-
-			u32Bayer2 = *p2++;
-
-			u32RGB = ((u32Bayer2 >> 8) & 0xFF) | ((u32Bayer1 >> 8) & 0x00FFFF00) | (u32Bayer2 & 0xFF000000);
-
-			*ppix++ = u32RGB;
-#else
 			uint32_t u32Bayer1 = *p++;
 			uint32_t u32Bayer2 = *p2++;
 	
@@ -226,30 +200,6 @@ void Bayer2HalfRGB( Mat &matRGB, Mat const &matBayer )
 			u32RGB = ((u32Bayer1 >> 8) & 0xFF) | ((u32Bayer2 >> 8) & 0x00FFFF00) | (u32Bayer1 & 0xFF000000);
 
 			*ppix++ = u32RGB;
-#endif
 		}
 	}
 }
-#if 0
-int main( int argc, char **argv )
-{
-	if (argc !=3) {
-		cerr << "Usage: Bayer2RGB infile outfile\n";
-		return 1;
-	}
-	Mat matBayer = imread( argv[1], IMREAD_UNCHANGED );
-	if (matBayer.empty()) {
-		cerr << "Unable to open input file\n";
-		return 1;
-	}
-	
-	cout << "Image Type: " << matBayer.type() << "  Expect " << CV_8UC1 << endl;
-	cout << "Image Size: " << matBayer.rows << " x " << matBayer.cols << endl;
-	Mat matRGB( matBayer.rows, matBayer.cols, CV_8UC3 );
-	Bayer2RGB( matRGB, matBayer );
-	imwrite( argv[2], matRGB );
-	return 0;
-	
-}
-
-#endif
