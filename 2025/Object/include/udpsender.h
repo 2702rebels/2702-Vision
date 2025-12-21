@@ -11,7 +11,7 @@ class UDPSender
 
  
 public:
-	CUDPSender(const std::string& ipStr, const unsigned short port);
+	UDPSender(const std::string& ipStr, const unsigned short port);
 
     bool bSend( std::span<uint8_t> const &spBuf );
 };

@@ -1,9 +1,9 @@
 function(add_spdlog_to_target_vcpkg targetname is_private)
-    find_package(spdlog CONFIG REQUIRED)
+    find_package(spdlog REQUIRED)
     if(is_private EQUAL TRUE)
-        target_link_libraries(${targetname} PRIVATE spdlog::spdlog)
+        target_link_libraries(${targetname} PRIVATE spdlog::spdlog_header_only)
     else ()
-        target_link_libraries(${targetname} PUBLIC spdlog::spdlog)
+        target_link_libraries(${targetname} PUBLIC spdlog::spdlog_header_only)
     endif ()
 endfunction()
 

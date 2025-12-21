@@ -90,8 +90,8 @@ T NetworkTopicGeneric<T>::GetValue() const {
 		return m_subscriber.GetInteger(m_defaultValue);
 	}
 	else if constexpr (std::is_same_v<T, std::vector<int32_t>>) {
-		std::vector<long int> longDefaultValue(m_defaultValue.begin(), m_defaultValue.end());
-		std::vector<long int> longArr = m_subscriber.GetIntegerArray(longDefaultValue);
+		std::vector<int64_t> longDefaultValue(m_defaultValue.begin(), m_defaultValue.end());
+		std::vector<int64_t> longArr = m_subscriber.GetIntegerArray(longDefaultValue);
 		return std::vector<int32_t>(longArr.begin(), longArr.end());
 	}
 	else if constexpr (std::is_same_v<T, std::vector<double>>) {

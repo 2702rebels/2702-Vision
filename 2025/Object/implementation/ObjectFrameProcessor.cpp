@@ -1,11 +1,11 @@
 #include "ObjectFrameProcessor.h"
-#include <fstream>
+#include <numbers>
 #include <cameraserver/CameraServer.h>
-#include <cstdint>
 #include <spdlog/spdlog.h>
 #include <functional>
 #include <filesystem>
 #include <opencv2/highgui.hpp>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
@@ -477,7 +477,7 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 					if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON || UseGui == ObjUseGui::ON) {
 						std::string coral_vec_text = "(" + std::to_string(coralVec.u()) + ", " + std::to_string(coralVec.v()) + ")";
 						std::string distance_text = "Distance: " + std::to_string(distance / 0.0254) + "in";
-						std::string angle_text = "Angle: " + std::to_string(angle * (180 / M_PI)) + "deg";
+						std::string angle_text = "Angle: " + std::to_string(angle * (180 / std::numbers::pi)) + "deg";
 						cv::putText(*filtered_frame, coral_vec_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 						heightPaintAt += 30;
 						cv::putText(*filtered_frame, distance_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
@@ -497,21 +497,16 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 			}
 		}
 		if constexpr (SendPackets == ObjSendPackets::ON) {
-			struct timespec tsCur;
-			struct timeval tvCur;
-			struct timeval tvDelta;
-
 			// Get current time since power on
-			clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur);
-			TIMESPEC_TO_TIMEVAL(&tvCur, &tsCur);
+		    std::chrono::system_clock::time_point tsCur = std::chrono::system_clock::now();
 			// Calculate delta between when frame was catured and now.
-			timersub(&tvCur, pcf->ts(), &tvDelta);
+			std::chrono::system_clock::duration frameProcDelta = tsCur - *pcf->ts();
 			std::sort(corals.begin(), corals.end());
 			int count = corals.size();
 			while (corals.size() < 4) {
 				corals.push_back(ObjectDetectionInfo());
 			}
-			long time = nt::Now() + m_i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+			long time = nt::Now() + m_i64TimeOffset - std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta).count(); // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
 			ObjectDetectionPacket packet(PACKET_KEY, PACKET_VERSION, time, count, corals.at(0), corals.at(1), corals.at(2), corals.at(3));
 			SendObjectDetectionPacket(packet);
 		}
@@ -519,18 +514,14 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 	}
 
 	if constexpr (LatencyReporting == ObjLatencyReporting::ON) {
-		struct timespec tsCur;
-		struct timeval tvCur;
-		struct timeval tvDelta;
-
-		clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur);
-		TIMESPEC_TO_TIMEVAL(&tvCur, &tsCur);
-		timersub(&tvCur, pcf->ts(), &tvDelta);
-		m_nLastLatencyTopic.SetDefault(tvDelta.tv_usec);
+	    std::chrono::system_clock::time_point tsCur = std::chrono::system_clock::now();
+	    // Calculate delta between when frame was catured and now.
+	    std::chrono::system_clock::duration frameProcDelta = tsCur - *pcf->ts();
+		m_nLastLatencyTopic.SetDefault(std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta).count());
 
 		if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON || UseGui == ObjUseGui::ON) {
 			// Display distance and angle (only if valid values were calculated)
-			std::string latency_text = "Latency: " + std::to_string(tvDelta.tv_usec) + "us";
+			std::string latency_text = "Latency: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta).count()) + "us";
 			cv::putText(*filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 			heightPaintAt += 30;
 			if (m_filteredLogger) {

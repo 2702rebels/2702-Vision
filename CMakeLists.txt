@@ -15,6 +15,10 @@ else()
     set(IS_DESKTOP TRUE)
 endif()
 
+if(WIN32)
+    add_compile_definitions(_WIN32_WINNT=0x0A00)
+endif ()
+
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/MultiSourcePackageFinder.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/PackageFinders.cmake")
 

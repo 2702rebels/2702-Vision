@@ -142,10 +142,12 @@ target_link_libraries(testudpserver PRIVATE objectdetectionstruct)
 
 add_package_to_target("asio" "testudpserver" TRUE)
 
-add_executable(logtostdvideo implementation/logtostdvideo.cpp)
+add_executable(logtostdvideo implementation/logtostdvideo.cpp implementation/FFMPEGLogger.cpp)
 
 target_link_libraries(logtostdvideo PRIVATE objectframeprocessor)
 target_link_libraries(logtostdvideo PRIVATE 2702log)
+
+add_package_to_target("ffmpeg" "logtostdvideo" TRUE)
 
 add_executable(replay implementation/replay.cpp)
 

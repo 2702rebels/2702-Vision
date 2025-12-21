@@ -7,8 +7,9 @@
     {
       "name": "ffmpeg",
       "features": [
-        "ffmpeg",
-        "ffprobe"
+        "all",
+        "all-gpl",
+        "all-nonfree"
       ]
     },
     "gtest",
@@ -31,7 +32,11 @@
       "features": [
         "ntcore",
         "protobuf",
-        "cameraserver"
+        "cameraserver",
+        "wpimath",
+        "allwpilib",
+        "simulationmodules",
+        "gui"
       ]
     }
   ]

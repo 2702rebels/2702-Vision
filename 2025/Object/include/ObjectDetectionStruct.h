@@ -4,11 +4,9 @@
 */
 
 #pragma once
-#include <string>
 #include <span>
 #include <wpi/struct/Struct.h>
-#include <iostream>
-#include <vector>
+#include <cstdint>
 
 #define PACKET_KEY 5
 #define PACKET_VERSION 1
@@ -119,13 +117,13 @@ public:
      * @param coral3 The third detetion
      * @param coral4 The fourth detection
      */
-    ObjectDetectionPacket(int key, int versionNumber, long time, uint8_t count, ObjectDetectionInfo coral1, ObjectDetectionInfo coral2, ObjectDetectionInfo coral3, ObjectDetectionInfo coral4);
+    ObjectDetectionPacket(int key, int versionNumber, int64_t time, uint8_t count, ObjectDetectionInfo coral1, ObjectDetectionInfo coral2, ObjectDetectionInfo coral3, ObjectDetectionInfo coral4);
     /** @brief Magic number used to check for corruption or invalid packet, set using @ref PACKET_KEY */
-    int m_key;
+    int32_t m_key;
     /** @brief Version number of packet, set using @ref PACKET_VERSION */
-    int m_versionNumber;
+    int32_t m_versionNumber;
     /** @brief Timestamp of packet, microseconds from NetworkTables adjusted for server */
-    long m_time;
+    int64_t m_time;
     /** @brief How many of the corals are filled with real data */
     uint8_t m_count;
     /** @brief First coral */
@@ -158,7 +156,7 @@ struct wpi::Struct<ObjectDetectionPacket>
     /** @brief Returns the schema of the packet detailing its format as a string. */
     static constexpr std::string_view GetSchema()
     {
-        return "int key;int version;long timestamp;uint8 count;ObjectDetectionInfo objects[4]";
+        return "int key;int version;int64 timestamp;uint8 count;ObjectDetectionInfo objects[4]";
     }
 
     /** @brief Deserializes a @ref ObjectDetectionPacket. 

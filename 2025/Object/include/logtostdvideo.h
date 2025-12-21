@@ -1,54 +1,16 @@
 #pragma once
 #include <frmprocessor.h>
 #include <string>
-#include "LoggingUtils.h"
-#include <spdlog/spdlog.h>
 #include <ObjectFrameProcessor.h>
+#include <FFMPEGLogger.h>
 
 class StdVideoLogProc : public FrmProcessor {
-    ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON> imageProcessor;
-    FILE* ffmpegRaw;
-    FILE* ffmpegFiltered;
-    int frameCount = 0;
+    ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON> m_imageProcessor;
+    FFMPEGLogger m_logger;
+    FFMPEGLogger m_filteredLogger;
+    int m_frameCount = 0;
     public:
-    StdVideoLogProc(std::string outputPath, std::string outputPathFiltered, int width, int height, int frame_rate): 
-    imageProcessor(width, height),
-    ffmpegRaw(popen(((std::string)("ffmpeg -y "
-        "-f rawvideo "
-        "-pix_fmt rgb24 "
-        "-s " + std::to_string(width) + "x" + std::to_string(height) + " "
-        "-r " + std::to_string(frame_rate) + " "
-        "-i - "
-        "-c:v libx264 "
-        "-preset ultrafast "
-        "-tune zerolatency "
-        "-qp 0 "
-        "-f mp4 " + outputPath)).c_str(), "w")),
-    ffmpegFiltered(popen(((std::string)("ffmpeg -y "
-        "-f rawvideo "
-        "-pix_fmt rgb24 "
-        "-s " + std::to_string(width) + "x" + std::to_string(height) + " "
-        "-r " + std::to_string(frame_rate) + " "
-        "-i - "
-        "-c:v libx264 "
-        "-preset ultrafast "
-        "-tune zerolatency "
-        "-qp 0 "
-        "-f mp4 " + outputPathFiltered)).c_str(), "w"))
-    {
-    };
+    StdVideoLogProc(const std::string& outputPath, const std::string& outputPathFiltered, int width, int height, int fps, int bitrate);
 
-    virtual void ProcessFrame(int nCam, CameraFrame const *pcf){
-        cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
-        fwrite(static_cast<const void*>(frame.data), 1, frame.total() * frame.elemSize(), ffmpegRaw);
-        cv::Mat filteredFrame = imageProcessor.ProcessFrameWithRet(nCam, pcf);
-        fwrite(static_cast<const void*>(filteredFrame.data), 1, filteredFrame.total() * filteredFrame.elemSize(), ffmpegFiltered);
-        info("Finished writing frame {}", frameCount);
-        frameCount++;
-    }
-
-    virtual void LogEnd(){
-        pclose(ffmpegRaw);
-        pclose(ffmpegFiltered);
-    }
+    void ProcessFrame(int nCam, CameraFrame const *pcf) override;
 };
