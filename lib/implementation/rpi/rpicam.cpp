@@ -53,7 +53,6 @@ class RPIFrame : public CameraFrame
 	double			m_fixedGain = -1;
 	std::chrono::system_clock::time_point m_ts;
     static std::chrono::duration<long long, std::nano> m_steadyOffset;
-
 	uint8_t	*m_pu8Img;
 
 	void vSetFrame( libcamera::Request *pReq )
@@ -150,8 +149,9 @@ public:
 	virtual libcamera::Request *Req() {
 		return m_pReq;
 	}
-	
 };
+
+std::chrono::duration<long long, std::nano> RPIFrame::m_steadyOffset = std::chrono::nanoseconds(0);
 // If fixed exposure not set, use default auto-adjust exposure
 RPICamera::RPICamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, FrmProcessor &nfp, int fixedExposure = -1, double fixedGain = -1) :
 	m_bShutdown( false ),
