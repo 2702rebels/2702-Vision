@@ -52,7 +52,7 @@ class RPIFrame : public CameraFrame
 	int			m_fixedExposure = -1;
 	double			m_fixedGain = -1;
 	std::chrono::system_clock::time_point m_ts;
-    static std::chrono::system_clock::duration m_steadyOffset;
+    static std::chrono::duration<long long, std::nano> m_steadyOffset;
 
 	uint8_t	*m_pu8Img;
 
@@ -164,7 +164,7 @@ RPICamera::RPICamera( char const *pszVid, int nCam, int nWidth, int nHeight, uin
 {
     const std::chrono::system_clock::time_point sysNow = std::chrono::system_clock::now();
     const std::chrono::steady_clock::time_point steadyNow = std::chrono::steady_clock::now();
-    RPIFrame::m_steadyOffset = sysNow - steadyNow;
+    RPIFrame::m_steadyOffset = sysNow.time_since_epoch() - steadyNow.time_since_epoch();
 	/* SPDX-License-Identifier: GPL-2.0-or-later */
 	/*
 	 * Copyright (C) 2020, Ideas on Board Oy.
