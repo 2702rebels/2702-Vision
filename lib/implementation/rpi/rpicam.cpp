@@ -51,7 +51,8 @@ class RPIFrame : public CameraFrame
 	int			m_nCols = 0;
 	int			m_fixedExposure = -1;
 	double			m_fixedGain = -1;
-	struct timeval m_ts;
+	std::chrono::system_clock::time_point m_ts;
+    static std::chrono::system_clock::duration m_steadyOffset;
 
 	uint8_t	*m_pu8Img;
 
@@ -69,8 +70,10 @@ class RPIFrame : public CameraFrame
 		auto rmd = pBuf->metadata();
 
 		m_u32Seq = rmd.sequence; //pReq->sequence();
-		m_ts.tv_sec = rmd.timestamp / 1000000000;
-		m_ts.tv_usec = (rmd.timestamp - (m_ts.tv_sec * 1000000000)) / 1000;
+	    m_ts = std::chrono::time_point<std::chrono::system_clock>(
+	        std::chrono::steady_clock::time_point{std::chrono::nanoseconds(rmd.timestamp)}
+	        + m_steadyOffset
+	    );
 
 		auto cookie = pBuf->cookie();
 
@@ -140,7 +143,7 @@ public:
 	{
 		return m_pu8Img;
 	}
-	virtual const struct timeval *ts() const
+	virtual const std::chrono::system_clock::time_point *ts() const
 	{
 		return &m_ts;
 	}
@@ -159,6 +162,9 @@ RPICamera::RPICamera( char const *pszVid, int nCam, int nWidth, int nHeight, uin
 	m_fixedExposure(fixedExposure),
 	m_fixedGain(fixedGain)
 {
+    const std::chrono::system_clock::time_point sysNow = std::chrono::system_clock::now();
+    const std::chrono::steady_clock::time_point steadyNow = std::chrono::steady_clock::now();
+    RPIFrame::m_steadyOffset = sysNow - steadyNow;
 	/* SPDX-License-Identifier: GPL-2.0-or-later */
 	/*
 	 * Copyright (C) 2020, Ideas on Board Oy.
