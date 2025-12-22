@@ -145,6 +145,7 @@ add_package_to_target("asio" "testudpserver" TRUE)
 add_library(ffmpeglogger STATIC implementation/FFMPEGLogger.cpp)
 add_package_to_target("ffmpeg" "ffmpeglogger" FALSE)
 add_package_to_target("opencv" "ffmpeglogger" FALSE)
+target_include_directories(ffmpeglogger PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
 add_executable(logtostdvideo implementation/logtostdvideo.cpp implementation/FFMPEGLogger.cpp)
 
