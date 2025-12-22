@@ -34,9 +34,7 @@
         "protobuf",
         "cameraserver",
         "wpimath",
-        "allwpilib",
-        "simulationmodules",
-        "gui"
+        "allwpilib"
       ]
     }
   ]
