@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
 #include <opencv2/core/mat.hpp>
-
+extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
+}
 
 /**
  * @class FFMPEGLogger
