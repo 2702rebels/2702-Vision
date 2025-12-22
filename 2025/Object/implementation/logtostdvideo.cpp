@@ -23,9 +23,6 @@ using namespace std;
 #include <spdlog/spdlog.h>
 using namespace spdlog;
 
-#include <libavformat/avformat.h>
-#include <libavcodec/avcodec.h>
-
 bool bStop = false;
 namespace fs = std::filesystem;
 
@@ -49,7 +46,6 @@ void StdVideoLogProc::ProcessFrame(int nCam, CameraFrame const* pcf)
 
 int main(int argc, char **argv)
 {
-    avformat_network_init();
 	SetupTextLogger();
 	if (argc != 2)
 	{
