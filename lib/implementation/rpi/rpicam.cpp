@@ -71,7 +71,7 @@ class RPIFrame : public CameraFrame
 
 		m_u32Seq = rmd.sequence; //pReq->sequence();
 	    m_ts = std::chrono::time_point<std::chrono::system_clock>(
-	        std::chrono::steady_clock::time_point{std::chrono::nanoseconds(rmd.timestamp)}
+	        std::chrono::nanoseconds(rmd.timestamp)
 	        + m_steadyOffset
 	    );
 
