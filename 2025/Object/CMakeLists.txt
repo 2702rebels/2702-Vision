@@ -147,7 +147,7 @@ add_package_to_target("ffmpeg" "ffmpeglogger" FALSE)
 add_package_to_target("opencv" "ffmpeglogger" FALSE)
 target_include_directories(ffmpeglogger PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
-add_executable(logtostdvideo implementation/logtostdvideo.cpp implementation/FFMPEGLogger.cpp)
+add_executable(logtostdvideo implementation/logtostdvideo.cpp)
 
 target_link_libraries(logtostdvideo PRIVATE objectframeprocessor)
 target_link_libraries(logtostdvideo PRIVATE 2702log)
