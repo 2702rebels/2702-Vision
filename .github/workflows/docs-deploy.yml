@@ -2,10 +2,7 @@ name: Deploy Doxygen Docs
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches:
-      - '*'
+    branches: [ main ]
 
 jobs:
   build-docs:
