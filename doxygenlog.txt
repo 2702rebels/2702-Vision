@@ -1,0 +1,617 @@
+/home/runner/work/2702-Vision/2702-Vision/Utilities/logffmpeg/logffmpeg.cpp:24: warning: the name 'libavcodec' supplied as the argument in the \file statement is not an input file
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionStruct.h:73: warning: Internal inconsistency: scope for class wpi::Struct< ObjectDetectionInfo > not found!
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionStruct.h:150: warning: Internal inconsistency: scope for class wpi::Struct< ObjectDetectionPacket > not found!
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:362: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< int32_t >(int, std::function< void(const int32_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:363: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< double >(int, std::function< void(const double &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:364: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< float >(int, std::function< void(const float &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:365: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< bool >(int, std::function< void(const bool &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:366: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::string >(int, std::function< void(const std::string &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:367: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< int64_t >(int, std::function< void(const int64_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:368: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< int32_t > >(int, std::function< void(const std::vector< int32_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:369: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< double > >(int, std::function< void(const std::vector< double > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:370: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< float > >(int, std::function< void(const std::vector< float > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:371: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< bool > >(int, std::function< void(const std::vector< bool > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:372: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< std::string > >(int, std::function< void(const std::vector< std::string > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:373: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< int64_t > >(int, std::function< void(const std::vector< int64_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:375: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< int32_t >(std::string, std::function< void(const int32_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:376: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< double >(std::string, std::function< void(const double &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:377: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< float >(std::string, std::function< void(const float &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:378: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< bool >(std::string, std::function< void(const bool &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:379: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::string >(std::string, std::function< void(const std::string &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:380: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< int64_t >(std::string, std::function< void(const int64_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:381: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< int32_t > >(std::string, std::function< void(const std::vector< int32_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:382: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< double > >(std::string, std::function< void(const std::vector< double > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:383: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< float > >(std::string, std::function< void(const std::vector< float > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:384: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< bool > >(std::string, std::function< void(const std::vector< bool > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:385: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< std::string > >(std::string, std::function< void(const std::vector< std::string > &) >)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:386: warning: no uniquely matching class member found for 
+  template void ObjectDetectionConfig< ObjectDetectionSettings >::AttachSetterFunction< std::vector< int64_t > >(std::string, std::function< void(const std::vector< int64_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:388: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< int32_t > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< int32_t >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:389: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< double > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< double >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:390: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< float > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< float >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:391: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< bool > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< bool >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:392: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::string > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::string >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:393: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< int64_t > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< int64_t >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:394: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< int32_t > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< int32_t > >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:395: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< double > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< double > >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:396: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< float > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< float > >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:397: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< bool > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< bool > >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:398: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< std::string > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< std::string > >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:399: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< int64_t > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< int64_t > >(std::string)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:401: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< int32_t > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< int32_t >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:402: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< double > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< double >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:403: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< float > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< float >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:404: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< bool > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< bool >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:405: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::string > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::string >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:406: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< int64_t > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< int64_t >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:407: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< int32_t > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< int32_t > >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:408: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< double > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< double > >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:409: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< float > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< float > >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:410: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< bool > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< bool > >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:411: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< std::string > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< std::string > >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:412: warning: no uniquely matching class member found for 
+  template ObjectDetectionConfigValue< std::vector< int64_t > > & ObjectDetectionConfig< ObjectDetectionSettings >::GetConfigValueStruct< std::vector< int64_t > >(int)
+Possible candidates:
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 75 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'ObjectDetectionConfigValueGen & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 79 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(std::string fieldName)' at line 86 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  ObjectDetectionConfigValue< O > & ObjectDetectionConfig< T >::GetConfigValueStruct(int fieldIndex)' at line 93 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:414: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< int32_t >(int, const std::function< void(int32_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:415: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< double >(int, const std::function< void(double &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:416: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< float >(int, const std::function< void(float &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:417: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< bool >(int, const std::function< void(bool &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:418: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::string >(int, const std::function< void(std::string &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:419: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< int64_t >(int, const std::function< void(int64_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:420: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< int32_t > >(int, const std::function< void(std::vector< int32_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:421: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< double > >(int, const std::function< void(std::vector< double > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:422: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< float > >(int, const std::function< void(std::vector< float > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:423: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< bool > >(int, const std::function< void(std::vector< bool > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:424: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< std::string > >(int, const std::function< void(std::vector< std::string > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:425: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< int64_t > >(int, const std::function< void(std::vector< int64_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:427: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< int32_t >(std::string, const std::function< void(int32_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:428: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< double >(std::string, const std::function< void(double &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:429: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< float >(std::string, const std::function< void(float &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:430: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< bool >(std::string, const std::function< void(bool &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:431: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::string >(std::string, const std::function< void(std::string &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:432: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< int64_t >(std::string, const std::function< void(int64_t &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:433: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< int32_t > >(std::string, const std::function< void(std::vector< int32_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:434: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< double > >(std::string, const std::function< void(std::vector< double > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:435: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< float > >(std::string, const std::function< void(std::vector< float > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:436: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< bool > >(std::string, const std::function< void(std::vector< bool > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:437: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< std::string > >(std::string, const std::function< void(std::vector< std::string > &) >)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionConfig.cpp:438: warning: no matching class member found for 
+  template void ObjectDetectionConfig< T >::AttachSetterFunction< std::vector< int64_t > >(std::string, const std::function< void(std::vector< int64_t > &)>)
+Possible candidates:
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(std::string fieldName, std::function< void(const O &)> setterFunction)' at line 101 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+  'template < O >
+  void ObjectDetectionConfig< T >::AttachSetterFunction(int valueIndex, std::function< void(const O &)> setterFunction)' at line 109 of file /home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectDetectionConfig.h
+/home/runner/work/2702-Vision/2702-Vision/lib/include/AsyncVisionLog.h:55: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/FFMPEGLogger.h:12: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:220: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:220: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:228: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:228: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/Utilities/logffmpeg/logffmpeg.cpp:27: warning: included file encode_video.c is not found. Check your EXAMPLE_PATH
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/FFMPEGLogger.h:12: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/include/AsyncVisionLog.h:55: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/include/AsyncVisionLog.h:55: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/FFMPEGLogger.h:12: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/FFMPEGLogger.h:12: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/FFMPEGLogger.h:12: warning: unable to resolve reference to 'CV_8UC3' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/include/LogFrameType.h:5: warning: unable to resolve reference to 'CV_8UC1' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/include/LogFrameType.h:5: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/include/LogFrameType.h:6: warning: unable to resolve reference to 'CV_8UC3' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/include/LogFrameType.h:6: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/implementation/LogPlayer.cpp:5: warning: argument 'logfilePath' from the argument list of LogPlayer::LogPlayer has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/lib/implementation/LogPlayer.cpp:5: warning: argument 'fp' from the argument list of LogPlayer::LogPlayer has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/NetworkTopicGeneric.h:22: warning: Found unknown command '@defaultValue'
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/NetworkTopicGeneric.h:21: warning: The following parameter of NetworkTopicGeneric::NetworkTopicGeneric(nt::Topic &topic, T defaultValue) is not documented:
+  parameter 'defaultValue'
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:36: warning: argument 'distance' from the argument list of ObjectDetectionInfo::ObjectDetectionInfo has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:36: warning: argument 'angle' from the argument list of ObjectDetectionInfo::ObjectDetectionInfo has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:36: warning: argument 'quality' from the argument list of ObjectDetectionInfo::ObjectDetectionInfo has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:36: warning: argument 'type' from the argument list of ObjectDetectionInfo::ObjectDetectionInfo has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'time' of command @param is not found in the argument list of ObjectDetectionPacket::ObjectDetectionPacket(int key, int versionNumber, int64_t timestamp, uint8_t count, ObjectDetectionInfo coral1, ObjectDetectionInfo coral2, ObjectDetectionInfo coral3, ObjectDetectionInfo coral4)
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'key' from the argument list of ObjectDetectionPacket::ObjectDetectionPacket has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'versionNumber' from the argument list of ObjectDetectionPacket::ObjectDetectionPacket has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'count' from the argument list of ObjectDetectionPacket::ObjectDetectionPacket has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'coral1' from the argument list of ObjectDetectionPacket::ObjectDetectionPacket has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'coral2' from the argument list of ObjectDetectionPacket::ObjectDetectionPacket has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'coral3' from the argument list of ObjectDetectionPacket::ObjectDetectionPacket has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:105: warning: argument 'coral4' from the argument list of ObjectDetectionPacket::ObjectDetectionPacket has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:220: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:228: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:197: warning: argument 'actual_diamater' of command @param is not found in the argument list of ObjectFrameProcessor< LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering >::calculate_coral_vector(const std::vector< cv::Point > &contour, double focal_length, double actual_diameter, const cv::Point2d &camera_center)
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:197: warning: The following parameter of ObjectFrameProcessor::calculate_coral_vector(const std::vector< cv::Point > &contour, double focal_length, double actual_diameter, const cv::Point2d &camera_center) is not documented:
+  parameter 'actual_diameter'
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:191: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:183: warning: argument 'saturation_min' from the argument list of ObjectFrameProcessor::filter_hsv_inverted has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:183: warning: The following parameter of ObjectFrameProcessor::filter_hsv_inverted(const cv::Mat &frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max) is not documented:
+  parameter 'saturation_max'
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:213: warning: unable to resolve reference to 'cv::findContours' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:213: warning: The following parameter of ObjectFrameProcessor::fit_cylinder_contour(const std::vector< cv::Point > &contour, cv::Mat mask, cv::Mat filteredFrame, int *heightPaintAt) is not documented:
+  parameter 'heightPaintAt'
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:220: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:220: warning: unable to resolve reference to 'SEND_PACKETS' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:220: warning: unable to resolve reference to 'PRODUCTION' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:220: warning: found documented return type for ObjectFrameProcessor::ProcessFrame that does not return anything
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:228: warning: unable to resolve reference to 'm_bIsLogging' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:228: warning: unable to resolve reference to 'SEND_PACKETS' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:228: warning: unable to resolve reference to 'PRODUCTION' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/ObjectFrameProcessor.h:171: warning: found documented return type for ObjectFrameProcessor::timesynccallback that does not return anything
+/home/runner/work/2702-Vision/2702-Vision/lib/include/VisionLog.h:58: warning: unable to resolve reference to 'LogFrameType::GRAYSCALE' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/lib/include/VisionLog.h:58: warning: unable to resolve reference to 'LogFrameType::RGB' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:77: warning: argument 'data' from the argument list of wpi::Struct< ObjectDetectionInfo >::Pack has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:77: warning: argument 'value' from the argument list of wpi::Struct< ObjectDetectionInfo >::Pack has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:141: warning: argument 'data' from the argument list of wpi::Struct< ObjectDetectionPacket >::Pack has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/implementation/ObjectDetectionStruct.cpp:141: warning: argument 'value' from the argument list of wpi::Struct< ObjectDetectionPacket >::Pack has multiple @param documentation sections
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/FFMPEGLogger.h:12: warning: unable to resolve reference to 'cv::Mat' for \ref command
+/home/runner/work/2702-Vision/2702-Vision/2025/Object/include/FFMPEGLogger.h:12: warning: unable to resolve reference to 'cv::Mat' for \ref command
