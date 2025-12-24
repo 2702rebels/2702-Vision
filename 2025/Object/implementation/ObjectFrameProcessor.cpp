@@ -126,22 +126,6 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 		m_unfilteredLogger = std::make_unique<AsyncVisionLog>(unfilteredPath, m_frameWidth, m_frameHeight, LogFrameType::RGB, nWriterThreads);
 		break;
 	}
-	for (int i = 0;; i++) {
-		fs::path maskedPath(logDir / ("object-" + std::to_string(i) + "_masked.log"));
-		if (fs::exists(maskedPath)) {
-			continue;
-		}
-		m_maskedLogger = std::make_unique<AsyncVisionLog>(maskedPath, m_frameWidth, m_frameHeight, LogFrameType::GRAYSCALE, nWriterThreads);
-		break;
-	}
-	for (int i = 0;; i++) {
-		fs::path filteredPath(logDir / ("object-" + std::to_string(i) + "_filtered.log"));
-		if (fs::exists(filteredPath)) {
-			continue;
-		}
-		m_filteredLogger = std::make_unique<AsyncVisionLog>(filteredPath, m_frameWidth, m_frameHeight, LogFrameType::RGB, nWriterThreads);
-		break;
-	}
 }
 
 /*!
@@ -524,9 +508,6 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 			std::string latency_text = "Latency: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta).count()) + "us";
 			cv::putText(*filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
 			heightPaintAt += 30;
-			if (m_filteredLogger) {
-				m_filteredLogger->AddFrameToQueueAsync(filtered_frame);
-			}
 			if (m_mtxCS.try_lock()) {
 				if (m_bFirstVid) {
 					m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows());

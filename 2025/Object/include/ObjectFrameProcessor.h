@@ -103,10 +103,6 @@ class ObjectFrameProcessor : public FrmProcessor
 
 	/** @brief Logger for raw frames inputted into the algorithm */
 	std::unique_ptr<AsyncVisionLog> m_unfilteredLogger;
-	/** @brief Logger for frames after the hsv mask has been applied */
-	std::unique_ptr<AsyncVisionLog> m_maskedLogger;
-	/** @brief Logger for RGB frames after they have been fully filtered */
-	std::unique_ptr<AsyncVisionLog> m_filteredLogger;
 
 	static void onTrackbarSetHueMin(int newPos, void* inst);
 
