@@ -2,7 +2,7 @@ name: Deploy Doxygen Docs
 
 on:
   push:
-    branches: [ main ]
+    branches: [ offseason-changes ]
 
 jobs:
   build-docs:
@@ -21,7 +21,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/html   # adjust to your Doxygen output folder
+          path: docs/html
 
   deploy-docs:
     needs: build-docs
