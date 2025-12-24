@@ -98,6 +98,7 @@ T NetworkTopicGeneric<T>::GetValue() const {
 		{
 			retArr.push_back(static_cast<int32_t>(val));
 		}
+		return retArr;
 	}
 	else if constexpr (std::is_same_v<T, std::vector<double>>) {
 		return m_subscriber.GetDoubleArray(m_defaultValue);
