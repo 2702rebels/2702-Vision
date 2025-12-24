@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <malloc.h>
+#include <fcntl.h>
 
 class v4lImageProcessor
 {

@@ -1,9 +1,4 @@
-find_package(OpenCV REQUIRED)
-find_package(wpilib REQUIRED)
-find_package(GTest REQUIRED)
-
 enable_testing()
-include(GoogleTest)
 
 add_executable(tests)
 
@@ -19,6 +14,6 @@ target_link_libraries(tests PRIVATE objectframeprocessor)
 
 target_link_libraries(tests PRIVATE objectdetectionconfig)
 
-target_link_libraries(tests PRIVATE gtest gtest_main)
+add_package_to_target("gtest" "tests" TRUE)
 
 gtest_discover_tests(tests)

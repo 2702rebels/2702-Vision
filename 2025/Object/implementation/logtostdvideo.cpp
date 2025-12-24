@@ -10,30 +10,38 @@
 
 using namespace std;
 
-#include <signal.h>
-
 #define WIDTH 640
 #define HEIGHT 480
 #define FRAME_RATE 20
+#define BITRATE 40000
 
 #include "LogPlayer.h"
 #include "logtostdvideo.h"
 
 #include <string>
-#include <signal.h>
-#include <iostream>
 #include <filesystem>
+#include <spdlog/spdlog.h>
+using namespace spdlog;
 
 bool bStop = false;
 namespace fs = std::filesystem;
 
-/*! \brief This is called when Ctrl+C is pressed
- * \param nSig - The signal code that was interrupted, should always be 2 for Ctrl+C
- */
-void sighandler(int nSig)
+StdVideoLogProc::StdVideoLogProc(const std::string& outputPath, const std::string& outputPathFiltered, const int width, const int height, const int fps, const int bitrate) :
+    m_imageProcessor(width, height),
+    m_logger(outputPath, width, height, fps, bitrate),
+    m_filteredLogger(outputPathFiltered, width, height, fps, bitrate)
 {
-	info("Received Signal: {}", nSig);
-	bStop = true;
+
+}
+
+void StdVideoLogProc::ProcessFrame(int nCam, CameraFrame const* pcf)
+{
+    cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
+    m_logger.LogFrame(frame);
+    cv::Mat filteredFrame = m_imageProcessor.ProcessFrameWithRet(nCam, pcf);
+    m_filteredLogger.LogFrame(filteredFrame);
+    info("Finished writing frame {}", m_frameCount);
+    m_frameCount++;
 }
 
 int main(int argc, char **argv)
@@ -50,44 +58,40 @@ int main(int argc, char **argv)
 		{
 			if (entry.is_regular_file())
 			{
-				StdVideoLogProc videoLogProc = StdVideoLogProc((entry.path().parent_path() / (entry.path().filename().string() + "raw.mp4")).string(), (entry.path().parent_path() / (entry.path().filename().string() + "filtered.mp4")).string(), WIDTH, HEIGHT, FRAME_RATE);
+				StdVideoLogProc videoLogProc((entry.path().parent_path() / (entry.path().filename().string() + "raw.mp4")).string(), (entry.path().parent_path() / (entry.path().filename().string() + "filtered.mp4")).string(), WIDTH, HEIGHT, FRAME_RATE, BITRATE);
 				LogPlayer lp(entry.path().c_str(), videoLogProc);
 				while (true)
 				{
 					if (bStop)
 					{
-						videoLogProc.LogEnd();
-						return 0;
+					    break;
 					}
 					if (!lp.bNextFrame())
 					{
 						info("Succesfully translated file!");
-						videoLogProc.LogEnd();
 						break;
 					}
-					sleep(1);
+					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 				}
 			}
 		}
 	}
 	else if(fs::is_regular_file(argv[1])){
 		info("Provided file, using filemode");
-		StdVideoLogProc videoLogProc = StdVideoLogProc((fs::path(argv[1]).parent_path() / (fs::path(argv[1]).filename().string() + "raw.mp4")).string(), (fs::path(argv[1]).parent_path() / ((fs::path(argv[1]).filename().string() + "filtered.mp4"))).string(), WIDTH, HEIGHT, FRAME_RATE);
+		StdVideoLogProc videoLogProc((fs::path(argv[1]).parent_path() / (fs::path(argv[1]).filename().string() + "raw.mp4")).string(), (fs::path(argv[1]).parent_path() / ((fs::path(argv[1]).filename().string() + "filtered.mp4"))).string(), WIDTH, HEIGHT, FRAME_RATE , BITRATE);
 		LogPlayer lp(argv[1], videoLogProc);
 		while (true)
 		{
 			if (bStop)
 			{
-				videoLogProc.LogEnd();
 				return 0;
 			}
 			if (!lp.bNextFrame())
 			{
 				info("Succesfully translated file!");
-				videoLogProc.LogEnd();
 				break;
 			}
-			sleep(1);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	}
 	else{

@@ -1,14 +1,7 @@
-#include <assert.h>
-#include <iostream>
+#include <cassert>
 
-#include <linux/videodev2.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-using namespace std;
-using namespace cv;
 
 
 // MatGrey must be initialized to same size as matBayer and must be of type CV_8UC1
@@ -17,7 +10,7 @@ using namespace cv;
 * \param matGrey - The grayscale material that will be written with the result of the conversion. 
 * \param matBayer - The bayer material to convert to the grayscale material. 
 */
-void Bayer2Grey( Mat &matGrey, Mat &matBayer )
+void Bayer2Grey( cv::Mat &matGrey, cv::Mat &matBayer )
 {
 	int nRows = matBayer.rows;
 	int nLoopRows = nRows - 1;  // rows that have normal pixels .. i.e not special cases
@@ -131,7 +124,7 @@ void Bayer2Grey( Mat &matGrey, Mat &matBayer )
 * \param matGrey - Must be initialized to the same size as matBayer and must be of type CV_8UC1, will be written as the result of the conversion.
 * \param matBayer - The bayer material to convert to the half grayscale material. 
 */
-void Bayer2HalfGrey( Mat &matGrey, Mat const &matBayer )
+void Bayer2HalfGrey( cv::Mat &matGrey, cv::Mat const &matBayer )
 {
 	assert( (matGrey.cols & 0x7) == 0 );
 	assert( matGrey.rows == matBayer.rows/2 && matGrey.cols == matBayer.cols/2 );
@@ -166,27 +159,3 @@ void Bayer2HalfGrey( Mat &matGrey, Mat const &matBayer )
 		}
 	}
 }
-
-#if 0
-int main( int argc, char **argv )
-{
-	if (argc !=3) {
-		cerr << "Usage: Bayer2RGB infile outfile\n";
-		return 1;
-	}
-	Mat matBayer = imread( argv[1], IMREAD_UNCHANGED );
-	if (matBayer.empty()) {
-		cerr << "Unable to open input file\n";
-		return 1;
-	}
-	
-	cout << "Image Type: " << matBayer.type() << "  Expect " << CV_8UC1 << endl;
-	cout << "Image Size: " << matBayer.rows << " x " << matBayer.cols << endl;
-	Mat matGrey( matBayer.rows, matBayer.cols, CV_8UC3 );
-	Bayer2RGB( matGrey, matBayer );
-	imwrite( argv[2], matGrey );
-	return 0;
-	
-}
-
-#endif

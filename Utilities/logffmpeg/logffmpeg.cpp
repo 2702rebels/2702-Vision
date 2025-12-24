@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 	const char *codec_name = 0;
     const AVCodec *codec;
     AVCodecContext *c= NULL;
-    int i, ret, x, y;
+    int x, y = 0;
     FILE *f;
     AVFrame *frame;
     AVPacket *pkt;
@@ -115,8 +115,8 @@ int main(int argc, char **argv)
     c->width = 1280;
     c->height = 720;
     /* frames per second */
-    c->time_base = (AVRational){1, 72};
-    c->framerate = (AVRational){72, 1};
+    c->time_base = AVRational{1, 72};
+    c->framerate = AVRational{72, 1};
 
     /* emit one intra frame every ten frames
      * check frame pict_type before passing frame
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
         av_opt_set(c->priv_data, "preset", "slow", 0);
 
     /* open it */
-    ret = avcodec_open2(c, codec, NULL);
+    int ret = avcodec_open2(c, codec, NULL);
     if (ret < 0) {
 		char szErr[AV_ERROR_MAX_STRING_SIZE];
 		av_make_error_string( szErr, sizeof(szErr), ret );
@@ -163,6 +163,7 @@ int main(int argc, char **argv)
 
     /* encode 1 second of video */
     while(std::unique_ptr<cv::Mat> frm = vl.ReadFrame()){
+        int i = 0;
         if (!frm) {
             break;
         }

@@ -34,7 +34,7 @@
 /** @brief UDP address to send object detection packets to. */
 #define OBJECT_DETECTION_SERVER_IP "10.27.2.2"
 /** @brief UDP port to send object detection packets to. */
-#define OBJECT_DETECTION_SERVER_PORT "27021"
+#define OBJECT_DETECTION_SERVER_PORT 27021
 // Structure classes where the serialization / deserialization functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
@@ -88,7 +88,7 @@ class ObjectFrameProcessor : public FrmProcessor
 	frc::MedianFilter<double> m_angleFilter;
 
 	/** @brief UDP packet sender. */
-	CUDPSender udpSender;
+	UDPSender udpSender;
 
 	nt::NetworkTableListener ntl = nt::NetworkTableListener::CreateTimeSyncListener(nt::NetworkTableInstance::GetDefault(), true, timesynccallback);
 

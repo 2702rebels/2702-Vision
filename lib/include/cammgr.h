@@ -2,6 +2,8 @@
 
 #ifndef DISPLAY
 #define DISPLAY 0
+#include <mutex>
+#include <thread>
 #endif
 #ifndef CAMSERVER
 #define CAMSERVER 0
@@ -34,7 +36,7 @@ class CamManagerFrame : public CameraFrame
 	uint32_t		m_u32Exp;
 	uint8_t			*m_pu8Img;
 
-	struct timeval	m_ts;
+	std::chrono::system_clock::time_point	m_ts;
 public:
 	CamManagerFrame() :
 		CameraFrame(),
@@ -68,7 +70,7 @@ public:
 	{
 		return m_pu8Img;
 	}
-	virtual const struct timeval *ts() const
+	virtual const std::chrono::system_clock::time_point *ts() const
 	{
 		return &m_ts;
 	}

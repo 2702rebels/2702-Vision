@@ -15,6 +15,16 @@ else()
     set(IS_DESKTOP TRUE)
 endif()
 
+if(WIN32)
+    add_compile_definitions(_WIN32_WINNT=0x0A00)
+endif ()
+if(MSVC)
+    add_compile_options(/utf-8)
+endif ()
+
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/MultiSourcePackageFinder.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/PackageFinders.cmake")
+
 add_subdirectory(lib) # ** Important: must be first to define library targets prior to initialization of other targets
 add_subdirectory(2025/Object)
 add_subdirectory(Utilities)

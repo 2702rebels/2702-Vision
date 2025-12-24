@@ -1,24 +1,14 @@
 #include <unistd.h>
-#include <stdint.h>
-#include <sys/stat.h>
+#include <cstdint>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-
-//#include <X11/Xlib.h>
-//#include <cameraserver/CameraServer.h>
-//#include <networktables/NetworkTableInstance.h>
 
 #include <linux/videodev2.h>
-#include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <drm/drm_fourcc.h>
 #include <thread>
-#include <vector>
-#include <mutex>
 #include <condition_variable>
 
 #include <string>

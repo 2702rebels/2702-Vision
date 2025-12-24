@@ -1,5 +1,3 @@
-#include <stdint.h>
-#include <sys/time.h>
 #include <LogFrame.h>
 #include "LogPlayer.h"
 #include "frmprocessor.h"

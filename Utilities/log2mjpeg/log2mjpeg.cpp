@@ -8,7 +8,6 @@
 #include "Bayer2RGB.h"
 #include <filesystem>
 #include "Bayer2Grey.h"
-#include <dirent.h>
 
 enum pmode { pmcolor, pmcolor2, pmgrey, pmgrey2, pmbayer, pmgreen, pmred, pmblue, pminput };
 
@@ -119,8 +118,7 @@ int main( int argc, char **argv )
 	}
 
 	VisionLogReader vl( pszIn );
-	DIR* dir = opendir(pszOut);
-	if(!dir){
+	if(!fs::exists(pszOut)){
 		fs::create_directories(pszOut);
 	}
 
