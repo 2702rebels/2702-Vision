@@ -5,36 +5,37 @@ on:
     branches: [ offseason-changes ]
 
 jobs:
-  build-docs:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # required so we can push to gh-pages
 
       - name: Install Doxygen
         run: sudo apt-get install -y doxygen
 
       - name: Build docs
-        run: doxygen Doxyfile
+        run: doxygen
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/html
+      - name: Deploy to gh-pages
+        run: |
+          # Configure git
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
-  deploy-docs:
-    needs: build-docs
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+          # Switch to gh-pages branch (create if missing)
+          git checkout gh-pages || git checkout --orphan gh-pages
 
-    runs-on: ubuntu-latest
+          # Remove old docs
+          git rm -rf . || true
 
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          # Copy new docs
+          cp -r docs/html/* .
+
+          # Commit and push
+          git add .
+          git commit -m "Update Doxygen docs for commit ${{ github.sha }}" || true
+          git push origin gh-pages --force
