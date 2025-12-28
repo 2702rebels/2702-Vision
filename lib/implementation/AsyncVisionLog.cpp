@@ -46,21 +46,21 @@ void AsyncVisionLog::WriterThread(std::stop_token cancellationToken) {
 		if (cancellationToken.stop_requested()) {
 			break;
 		}
-		m_syncWriter.WriteFrame(*m_frameQueue.front());
+		m_syncWriter.WriteFrame(m_frameQueue.front());
 		m_frameQueue.pop();
 	}
 }
 
-void AsyncVisionLog::PusherThread(std::shared_ptr<cv::Mat> frame) {
+void AsyncVisionLog::PusherThread(const cv::Mat& frame) {
 	std::lock_guard<std::mutex> queueLock(m_frameQueueMtx);
 	m_frameQueue.push(frame);
 	frameWaitingCondition.notify_one();
 }
 
-void AsyncVisionLog::AddFrameToQueueSync(std::shared_ptr<cv::Mat> frame) {
+void AsyncVisionLog::AddFrameToQueueSync(const cv::Mat& frame) {
 	PusherThread(frame);
 }
 
-void AsyncVisionLog::AddFrameToQueueAsync(std::shared_ptr<cv::Mat> frame) {
+void AsyncVisionLog::AddFrameToQueueAsync(const cv::Mat& frame) {
 	m_pusherThreads.emplace_back(m_boundPusherThread, frame);
 }

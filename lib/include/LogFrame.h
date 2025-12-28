@@ -9,10 +9,10 @@
 class LogFrame : public CameraFrame {
 private:
     /** @brief The cv::Mat frame that was read from the log */
-	std::unique_ptr<cv::Mat> m_cvFrame;
+	cv::Mat m_cvFrame;
 public:
     /** @brief Create the @ref LogFrame from a cv::Mat */
-	LogFrame(std::unique_ptr<cv::Mat> frame);
+	LogFrame(const cv::Mat& frame);
 
     /** @brief Get a reference to the cv::Mat in @ref m_cvFrame */
 	cv::Mat& GetCVFrame();

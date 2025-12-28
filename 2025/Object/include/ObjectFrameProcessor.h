@@ -172,7 +172,7 @@ public:
 	/** @brief Send an @ref ObjectDetectionPacket .
 	* @param packet - Packet to send.
 	*/
-	void SendObjectDetectionPacket(ObjectDetectionPacket packet);
+	void SendObjectDetectionPacket(const ObjectDetectionPacket& packet);
 
 	/*!
 	* @brief Filters the image into a mask where each pixel is either able to be part of a valid detection(white) or not(black).
@@ -186,7 +186,7 @@ public:
 	* @param value_max - If a pixel's brightness is lower than this, it will not be valid.
 	* @returns The filtered frame as a @ref cv::Mat.
 	*/
-	std::shared_ptr<cv::Mat> filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max);
+	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max);
 
 	/*!
 	* @brief Returns object distance on the floor to the center of the robot in meters and the top plane angle to the center of the coral from the center of the robot in radians.

@@ -18,7 +18,7 @@ private:
     /**
      * @brief the FILO queue of frames to log
      */
-	std::queue<std::shared_ptr<cv::Mat>> m_frameQueue;
+	std::queue<cv::Mat> m_frameQueue;
     /**
      * @brief Who has access to the @ref m_frameQueue
      */
@@ -54,11 +54,11 @@ private:
     /**
      * @brief Function to take a @ref cv::Mat and push it into the queue
      */
-	void PusherThread(std::shared_ptr<cv::Mat> frame);
+	void PusherThread(const cv::Mat& frame);
     /**
      * @brief @ref AsyncVisionLog::PusherThread bound into a lambda using std::bind
      */
-	std::function<void(std::shared_ptr<cv::Mat>)> m_boundPusherThread;
+	std::function<void(const cv::Mat&)> m_boundPusherThread;
 public:
     /**
      * @brief Create a new logger from the @ref VisionLogWriter constructor parameters and the number of writer threads to use
@@ -70,7 +70,7 @@ public:
 	~AsyncVisionLog();
 
 	/** @brief Synchronously adds the frame to the @ref m_frameQueue, but then the writing to disk process is async */
-	void AddFrameToQueueSync(std::shared_ptr<cv::Mat> frame);
+	void AddFrameToQueueSync(const cv::Mat& frame);
 	/** @brief Both the process of writing the frame to the @ref m_frameQueue and the writing to disk process is async */
-	void AddFrameToQueueAsync(std::shared_ptr<cv::Mat> frame);
+	void AddFrameToQueueAsync(const cv::Mat& frame);
 };

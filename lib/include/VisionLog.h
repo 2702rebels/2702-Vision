@@ -4,6 +4,7 @@
 #include <functional>
 #include <LogFrameType.h>
 #include <opencv2/core.hpp>
+#include <optional>
 
 namespace fs = std::filesystem;
 
@@ -44,20 +45,20 @@ private:
     /** @brief File handle of the logfile being read */
 	std::ifstream m_logfile;
     /** @brief Read the next frame as a grayscale frame and automatically move the read location forward
-     * @returns a cv::Mat pointer with @ref m_resWidth cols and @ref m_resHeight rows with CV_8UC1 channel spec
-     * @returns a nullptr when reading the next frame fails, usually because there is no next frame to read
+     * @returns a cv::Mat with @ref m_resWidth cols and @ref m_resHeight rows with CV_8UC1 channel spec
+     * @returns a null optional when reading the next frame fails, usually because there is no next frame to read
      */
-	std::unique_ptr<cv::Mat> ReadGrayscaleFrame();
+	std::optional<cv::Mat> TryReadGrayscaleFrame();
     /** @brief Read the next frame as a RGB frame and automatically move the read location forward
-     * @returns a cv::Mat pointer with @ref m_resWidth cols and @ref m_resHeight rows with CV_8UC3 channel spec
-     * @returns a nullptr when reading the next frame fails, usually because there is no next frame to read
+     * @returns a cv::Mat with @ref m_resWidth cols and @ref m_resHeight rows with CV_8UC3 channel spec
+     * @returns a null optional when reading the next frame fails, usually because there is no next frame to read
      */
-	std::unique_ptr<cv::Mat> ReadRGBFrame();
+	std::optional<cv::Mat> TryReadRGBFrame();
 
     /** @brief The current read function, set in the constructor depending on the header data of the logfile
      * @details Set to a lambda of @ref ReadGrayscaleFrame if @ref LogFrameType::GRAYSCALE, or @ref ReadRGBFrame if @ref LogFrameType::RGB
      */
-	std::function<std::unique_ptr<cv::Mat>()> m_readFrameFun;
+    std::function<std::optional<cv::Mat>()> m_readFrameFun;
     /** @brief Size of each frame in bytes */
 	int m_frameSize;
 public:
@@ -70,10 +71,12 @@ public:
      * @returns nullptr if there is no next frame to read or it cannot be read
      * @returns A cv::Mat pointer corresponding to the return types of @ref ReadGrayscaleFrame or @ref ReadRGBFrame depending on the log frame type
      */
-	std::unique_ptr<cv::Mat> ReadFrame();
+	cv::Mat ReadFrame();
     /** @brief Skip to a certain frame number
      * @param frameNum the 0 indexed frame number to jump to, can be either ahead of or behind the current position. Must not be negative
      */
+    std::optional<cv::Mat> TryReadFrame();
+
 	void SkipToFrame(int frameNum);
 };
 

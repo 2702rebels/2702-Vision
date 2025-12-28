@@ -44,21 +44,21 @@ TEST(FrameLog, RGBFrames) {
 	delete writer;
 	VisionLogReader reader(fs::path("./rgbFrames.log"));
 	for (int i = 0; i < nFrames; i++) {
-		std::unique_ptr<cv::Mat> curFrame = reader.ReadFrame();
-		EXPECT_EQ(curFrame->size(), rgbFrames[i].size());
-		EXPECT_EQ(curFrame->type(), rgbFrames[i].type());
+		std::optional<cv::Mat> curFrame = reader.TryReadFrame();
+		EXPECT_EQ(curFrame.value().size(), rgbFrames[i].size());
+		EXPECT_EQ(curFrame.value().type(), rgbFrames[i].type());
 		EXPECT_EQ(cv::norm(*curFrame, rgbFrames[i]), 0);
 	}
 	reader.SkipToFrame(1);
-	std::unique_ptr<cv::Mat> curFrame = reader.ReadFrame();
-	EXPECT_EQ(curFrame->size(), rgbFrames[1].size());
-	EXPECT_EQ(curFrame->type(), rgbFrames[1].type());
+	std::optional<cv::Mat> curFrame = reader.TryReadFrame();
+	EXPECT_EQ(curFrame.value().size(), rgbFrames[1].size());
+	EXPECT_EQ(curFrame.value().type(), rgbFrames[1].type());
 	EXPECT_EQ(cv::norm(*curFrame, rgbFrames[1]), 0);
 	// skip to end
 	for (int i = 1; i < nFrames; i++) {
 		reader.ReadFrame();
 	}
-	std::unique_ptr<cv::Mat> noFrame = reader.ReadFrame();
+	std::optional<cv::Mat> noFrame = reader.TryReadFrame();
 	EXPECT_FALSE(noFrame);
 }
 
@@ -80,20 +80,20 @@ TEST(FrameLog, GrayscaleFrames) {
 	delete writer;
 	VisionLogReader reader(fs::path("./grayscaleFrames.log"));
 	for (int i = 0; i < nFrames; i++) {
-		std::unique_ptr<cv::Mat> curFrame = reader.ReadFrame();
-		EXPECT_EQ(curFrame->size(), grayscaleFrames[i].size());
-		EXPECT_EQ(curFrame->type(), grayscaleFrames[i].type());
+		std::optional<cv::Mat> curFrame = reader.TryReadFrame();
+		EXPECT_EQ(curFrame.value().size(), grayscaleFrames[i].size());
+		EXPECT_EQ(curFrame.value().type(), grayscaleFrames[i].type());
 		EXPECT_EQ(cv::norm(*curFrame, grayscaleFrames[i]), 0);
 	}
 	reader.SkipToFrame(1);
-	std::unique_ptr<cv::Mat> curFrame = reader.ReadFrame();
-	EXPECT_EQ(curFrame->size(), grayscaleFrames[1].size());
-	EXPECT_EQ(curFrame->type(), grayscaleFrames[1].type());
+	std::optional<cv::Mat> curFrame = reader.TryReadFrame();
+	EXPECT_EQ(curFrame.value().size(), grayscaleFrames[1].size());
+	EXPECT_EQ(curFrame.value().type(), grayscaleFrames[1].type());
 	EXPECT_EQ(cv::norm(*curFrame, grayscaleFrames[1]), 0);
 	// skip to end
 	for (int i = 1; i < nFrames; i++) {
 		reader.ReadFrame();
 	}
-	std::unique_ptr<cv::Mat> noFrame = reader.ReadFrame();
+	std::optional<cv::Mat> noFrame = reader.TryReadFrame();
 	EXPECT_FALSE(noFrame);
 }
