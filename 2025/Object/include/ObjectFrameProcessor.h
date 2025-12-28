@@ -67,8 +67,6 @@ class ObjectFrameProcessor : public FrmProcessor
 
 	nt::IntegerPublisher m_nLastLatencyTopic = m_nObjectDetectionNetTable->GetIntegerTopic("Latency").Publish();
 
-	double		distance;
-
 	/** @brief Camera calibration matrix. */
 	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 601.9259931202599, 0, 321.8862267762323,
 		0, 595.9193354697203, 258.3875534160956,
@@ -104,18 +102,6 @@ class ObjectFrameProcessor : public FrmProcessor
 	/** @brief Logger for raw frames inputted into the algorithm */
 	std::unique_ptr<AsyncVisionLog> m_unfilteredLogger;
 
-	static void onTrackbarSetHueMin(int newPos, void* inst);
-
-	static void onTrackbarSetHueMax(int newPos, void* inst);
-
-	static void onTrackbarSetSatMin(int newPos, void* inst);
-
-	static void onTrackbarSetSatMax(int newPos, void* inst);
-
-	static void onTrackbarSetValMin(int newPos, void* inst);
-
-	static void onTrackbarSetValMax(int newPos, void* inst);
-
 public:
 	static int64_t m_i64TimeOffset;
 
@@ -124,45 +110,7 @@ public:
 	/** @brief Start logging frames to logfile. */
 	void vStartLogging();
 
-	int trackbarHueMin;
-	int trackbarHueMax;
-	int trackbarSatMin;
-	int trackbarSatMax;
-	int trackbarValMin;
-	int trackbarValMax;
-
-	/*!
-	* @brief Sets hue min object detection parameter.
-	* @param  newValue - integer representing the new hue min value
-	*/
-	void setPVHueMin(const int32_t& newValue);
-	/*!
-	* @brief Sets hue max object detection parameter.
-	* @param  newValue - integer representing the new hue max value
-	*/
-	void setPVHueMax(const int32_t& newValue);
-	/*!
-	* @brief Sets saturation min object detection parameter.
-	* @param  newValue - integer representing the new saturation min value
-	*/
-	void setSaturationMin(const int32_t& newValue);
-	/*!
-	* @brief Sets saturation max object detection parameter.
-	* @param  newValue - integer representing the new saturation max value
-	*/
-	void setSaturationMax(const int32_t& newValue);
-	/*!
-	* @brief Sets value min object detection parameter.
-	* @param  newValue - integer representing the new value min value
-	*/
-	void setValueMin(const int32_t& newValue);
-	/*!
-	* @brief Sets value max object detection parameter.
-	* @param  newValue - integer representing the new value max value
-	*/
-	void setValueMax(const int32_t& newValue);
-
-	virtual ~ObjectFrameProcessor();
+	~ObjectFrameProcessor() override;
 	/** @brief Handles a time sync event from networkTables.
 	* @param e - The networktables event.
 	* @returns Nothing.
@@ -172,7 +120,7 @@ public:
 	/** @brief Send an @ref ObjectDetectionPacket .
 	* @param packet - Packet to send.
 	*/
-	void SendObjectDetectionPacket(ObjectDetectionPacket packet);
+	void SendObjectDetectionPacket(const ObjectDetectionPacket& packet);
 
 	/*!
 	* @brief Filters the image into a mask where each pixel is either able to be part of a valid detection(white) or not(black).
@@ -186,7 +134,7 @@ public:
 	* @param value_max - If a pixel's brightness is lower than this, it will not be valid.
 	* @returns The filtered frame as a @ref cv::Mat.
 	*/
-	std::shared_ptr<cv::Mat> filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max);
+	cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min, int pv_hue_max, int saturation_min, int saturation_max, int value_min, int value_max);
 
 	/*!
 	* @brief Returns object distance on the floor to the center of the robot in meters and the top plane angle to the center of the coral from the center of the robot in radians.
@@ -209,9 +157,9 @@ public:
 	* @param contour - The input contour, as provided by @ref cv::findContours.
 	* @param mask - The binary image where white is a valid part of a detection and black where it is not.
 	* @param filteredFrame - The image to print any debugging text to.
-	* @returns Empty pair if invalid contour, or a pair of the contour hull, and another pair of the major and minor axis endpoints(in that order).
+	* @returns Empty pair if invalid contour, or a pair of the contour hull, and another pair of the major and minor axis endpoints(in that order) and the center point of the ellipse.
 	*/
-	std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask, cv::Mat filteredFrame, int* heightPaintAt);
+	std::tuple<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>, cv::Point> fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask);
 
 	/** @brief Processes each frame, logs it to the logfile if @ref m_bIsLogging is set to true, runs the object detection on it, pushes the value to nettables,
 	* @brief and sends the packet with the data to the roboRIO if @ref SEND_PACKETS or @ref PRODUCTION is true(and there is a valid detection).

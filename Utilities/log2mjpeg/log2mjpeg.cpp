@@ -122,67 +122,67 @@ int main( int argc, char **argv )
 		fs::create_directories(pszOut);
 	}
 
-	cv::Mat img;
 	int nSeq = 0;
-	while( std::unique_ptr<cv::Mat> img = vl.ReadFrame()) {
-		if (!img) {
+	std::optional<cv::Mat> img;
+	while( img = vl.TryReadFrame()) {
+		if (!img.has_value()) {
 			break;
 		}
 		cv::Mat imgOut;
 		switch( procmode ) {
 		case pminput:
-			imgOut = *img;
+			imgOut = img.value();
 			break;
 		case pmgrey:
 			{
-				cv::Mat matGrey( img->rows, img->cols, CV_8UC1 );
-				Bayer2Grey( matGrey, *img );
+				cv::Mat matGrey( img.value().rows, img.value().cols, CV_8UC1 );
+				Bayer2Grey( matGrey, img.value() );
 				imgOut = matGrey;
 			}
 			break;
 		case pmgrey2:
 			{
-				cv::Mat matGrey( img->rows/2, img->cols/2, CV_8UC1 );
-				Bayer2HalfGrey( matGrey, *img );
+				cv::Mat matGrey( img.value().rows/2, img.value().cols/2, CV_8UC1 );
+				Bayer2HalfGrey( matGrey, img.value() );
 				imgOut = matGrey;
 			}
 			break;
 		case pmbayer:
-			imgOut = *img;
+			imgOut = img.value();
 			break;
 		case pmred:
 			{
-				cv::Mat matRed( img->rows/2, img->cols/2, CV_8UC1 );
-				Bayer2Red( matRed, *img );
+				cv::Mat matRed( img.value().rows/2, img.value().cols/2, CV_8UC1 );
+				Bayer2Red( matRed, img.value() );
 				imgOut = matRed;
 			}
 			break;
 		case pmgreen:
 			{
-				cv::Mat matGreen( img->rows/2, img->cols/2, CV_8UC1 );
-				Bayer2Green( matGreen, *img );
+				cv::Mat matGreen( img.value().rows/2, img.value().cols/2, CV_8UC1 );
+				Bayer2Green( matGreen, img.value() );
 				imgOut = matGreen;
 			}
 			break;
 		case pmblue:
 			{
-				cv::Mat matBlue( img->rows/2, img->cols/2, CV_8UC1 );
-				Bayer2Blue( matBlue, *img );
+				cv::Mat matBlue( img.value().rows/2, img.value().cols/2, CV_8UC1 );
+				Bayer2Blue( matBlue, img.value() );
 				imgOut = matBlue;
 			}
 			break;
 		case pmcolor2:
 			{
-				cv::Mat matRGB( img->rows/2, img->cols/2, CV_8UC3 );
-				Bayer2HalfRGB( matRGB, *img );
+				cv::Mat matRGB( img.value().rows/2, img.value().cols/2, CV_8UC3 );
+				Bayer2HalfRGB( matRGB, img.value() );
 				imgOut = matRGB;
 			}
 			break;
 		case pmcolor:
 		default:
 			{
-				cv::Mat matRGB( img->rows, img->cols, CV_8UC3 );
-				Bayer2RGB( matRGB, *img );
+				cv::Mat matRGB( img.value().rows, img.value().cols, CV_8UC3 );
+				Bayer2RGB( matRGB, img.value() );
 				imgOut = matRGB;
 			}
 			break;

@@ -17,11 +17,11 @@ LogPlayer::LogPlayer( fs::path logfilePath, FrmProcessor &fp ) :
 */
 bool LogPlayer::bNextFrame()
 {
-	std::unique_ptr<cv::Mat> nextFrame = m_logReader.ReadFrame();
+	std::optional<cv::Mat> nextFrame = m_logReader.TryReadFrame();
 	if (!nextFrame) {
 		return false;
 	}
-	LogFrame lf(std::move(nextFrame));
+	LogFrame lf(nextFrame.value());
 	m_fp.ProcessFrame(0, &lf);
 	return true;
 }

@@ -2,6 +2,8 @@
 #include <spdlog/spdlog.h>
 #include <cassert>
 
+constexpr int LOGFILE_HEADER_SIZE = 12;
+
 unsigned int VisionLog::GetWidth() const {
 	return m_resWidth;
 }
@@ -30,11 +32,11 @@ VisionLogReader::VisionLogReader(fs::path logPath) :
 		throw;
 	}
 	if (m_logType == LogFrameType::GRAYSCALE) {
-		m_readFrameFun = std::bind(&VisionLogReader::ReadGrayscaleFrame, this);
+		m_readFrameFun = std::bind(&VisionLogReader::TryReadGrayscaleFrame, this);
 		m_frameSize = m_resHeight * m_resWidth;
 	}
 	else if (m_logType == LogFrameType::RGB) {
-		m_readFrameFun = std::bind(&VisionLogReader::ReadRGBFrame, this);
+		m_readFrameFun = std::bind(&VisionLogReader::TryReadRGBFrame, this);
 		m_frameSize = m_resHeight * m_resWidth * 3;
 	}
 	else {
@@ -51,36 +53,41 @@ VisionLogReader::VisionLogReader(fs::path logPath) :
 	}
 }
 
-std::unique_ptr<cv::Mat> VisionLogReader::ReadGrayscaleFrame() {
-	std::unique_ptr<cv::Mat> frame = std::make_unique<cv::Mat>(m_resHeight, m_resWidth, CV_8UC1);
-	if (!m_logfile.read((char*)frame->data, m_frameSize)) {
-		return nullptr;
+std::optional<cv::Mat> VisionLogReader::TryReadGrayscaleFrame() {
+	cv::Mat frame(m_resHeight, m_resWidth, CV_8UC1);
+	if (!m_logfile.read((char*)frame.data, m_frameSize)) {
+		return std::nullopt;
 	}
-	return std::move(frame);
+	return frame;
 }
 
-std::unique_ptr<cv::Mat> VisionLogReader::ReadRGBFrame() {
-	std::unique_ptr<cv::Mat> frame = std::make_unique<cv::Mat>(m_resHeight, m_resWidth, CV_8UC3);
-	if (!m_logfile.read((char*)frame->data, m_frameSize)) {
-		return nullptr;
+std::optional<cv::Mat> VisionLogReader::TryReadRGBFrame() {
+	cv::Mat frame(m_resHeight, m_resWidth, CV_8UC3);
+	if (!m_logfile.read((char*)frame.data, m_frameSize)) {
+		return std::nullopt;
 	}
-	return std::move(frame);
+	return frame;
 }
 
-std::unique_ptr<cv::Mat> VisionLogReader::ReadFrame() {
+cv::Mat VisionLogReader::ReadFrame() {
+	std::optional<cv::Mat> frame = m_readFrameFun();
+	if (!frame.has_value()) {
+		spdlog::error("Hard readFrame was called and failed to read the frame");
+		throw std::runtime_error("Hard readFrame was called and failed to read the frame");
+	}
+	return frame.value();
+}
+
+std::optional<cv::Mat> VisionLogReader::TryReadFrame() {
 	return m_readFrameFun();
 }
 
 void VisionLogReader::SkipToFrame(int frameNum) {
-	if (m_logType == LogFrameType::GRAYSCALE) {
-		m_logfile.seekg(12 + m_resWidth * m_resHeight * frameNum, std::ios::beg);
-	}
-	else if (m_logType == LogFrameType::RGB) {
-		m_logfile.seekg(12 + m_resWidth * m_resHeight * 3 * frameNum, std::ios::beg);
-	}
-	else {
-		spdlog::error("Unrecognized frame type");
-		throw;
+	m_logfile.clear(); // clear the end-of-file(EOF) bit manually as seekg does not reset it and reads will fail if it is still set
+	m_logfile.seekg(LOGFILE_HEADER_SIZE + m_frameSize * frameNum, std::ios::beg);
+	if (!m_logfile)
+	{
+		spdlog::error("Failed to rewind ifstream ptr to start of file");
 	}
 }
 
