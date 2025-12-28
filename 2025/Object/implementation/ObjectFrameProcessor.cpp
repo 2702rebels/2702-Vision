@@ -307,10 +307,10 @@ std::array<cv::Point2f, 4> ObjectFrameProcessor<LatencyReporting, VideoDebugging
 }
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
-std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask, cv::Mat filteredFrame, int* heightPaintAt)
+std::tuple<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>, cv::Point> ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask)
 {
 	if (contour.size() < 5) {
-		return { {}, {} };
+		return { {}, {}, {} };
 	}
 
 	cv::RotatedRect ellipse = cv::fitEllipse(contour);
@@ -323,15 +323,15 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 	float majorAxisLength = std::max(rect.width, rect.height);
 	if (majorAxisLength < m_config.Get().minpixelwidth() || majorAxisLength > m_config.Get().maxpixelwidth())
 	{
-		return { {}, {} };
+		return { {}, {}, {} };
 	}
 	float minorAxisLength = std::min(rect.width, rect.height);
 	if (minorAxisLength < m_config.Get().minpixelheight() || minorAxisLength > m_config.Get().maxpixelheight()) {
-		return { {}, {} };
+		return { {}, {}, {} };
 	}
 	double area = rect.width * rect.height;
 	if (area < m_config.Get().minpixelarea() || area > m_config.Get().maxpixelarea()) {
-		return { {}, {} };
+		return { {}, {}, {} };
 	}
 	// suspicious... the lines are coming out wrong the points must be goofed
 	Rebels::LinearSlope line1(pointsSorted[0].x, pointsSorted[0].y, pointsSorted[1].x, pointsSorted[1].y); // top
@@ -370,7 +370,7 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 	spdlog::info("validpixels: {}", validPixels);
 	// If % detection is nan or less than min fill
 	if (detectpercent < m_config.Get().minpercentfill() || std::isnan(detectpercent)) {
-		return { {}, {} };
+		return { {}, {}, {} };
 	}
 	std::vector<cv::Point> hull;
 	cv::convexHull(contour, hull);
@@ -390,19 +390,18 @@ std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> ObjectFramePr
 		center.y - majorAxisLength / 2 * sin(angleRad)
 	);
 
-	if constexpr (UseGui == ObjUseGui::ON || VideoDebugging == ObjVideoDebuggingInfo::ON) {
-		std::string uvtext = "(" + std::to_string(ellipse.center.x) + ", " + std::to_string(ellipse.center.y) + ")";
-		cv::putText(filteredFrame, uvtext, cv::Point(10, *heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
-		*heightPaintAt = *heightPaintAt + 30;
-	}
-
-	return { hull, { majorAxisEndPoint1, majorAxisEndPoint2 } };
+	return { hull, { majorAxisEndPoint1, majorAxisEndPoint2 }, ellipse.center };
 }
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::ProcessFrame(int nCam, CameraFrame const* pcf) {
 	ProcessFrameWithRet(nCam, pcf);
 }
+
+struct EmptyStruct
+{
+
+};
 
 template<ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui, ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, UseOutputFiltering>::ProcessFrameWithRet(int nCam, CameraFrame const* pcf)
@@ -412,13 +411,18 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 	if (m_unfilteredLogger) {
 		m_unfilteredLogger->AddFrameToQueueAsync(frame);
 	}
-	int heightPaintAt = 60;
 	if constexpr (UseGui == ObjUseGui::ON) {
 		cv::imshow("Raw", frame);
 	}
 	cv::Mat mask = filter_hsv_inverted(frame, m_config.Get().huemin(), m_config.Get().huemax(), m_config.Get().saturationmin(), m_config.Get().saturationmax(), m_config.Get().valuemin(), m_config.Get().valuemax());
-	cv::Mat filtered_frame(pcf->nRows(), pcf->nCols(), CV_8UC3);
-	cv::bitwise_and(frame, frame, filtered_frame, mask); // BIG STALL, 9.3% of cpu time spent here
+	std::conditional_t<VideoDebugging == ObjVideoDebuggingInfo::ON, cv::Mat, EmptyStruct> filtered_frame; // A little ugly, but the idea is that anything trying to use filtered_frame when video debugging is not enabled will fail
+	std::conditional_t<VideoDebugging == ObjVideoDebuggingInfo::ON, int, EmptyStruct> heightPaintAt;
+	if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON)
+	{
+		filtered_frame = cv::Mat(pcf->nRows(), pcf->nCols(), CV_8UC3);
+		cv::bitwise_and(frame, frame, filtered_frame, mask); // BIG STALL, 9.3% of cpu time spent here
+		heightPaintAt = 60;
+	}
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	std::vector<ObjectDetectionInfo> corals;
@@ -432,7 +436,12 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 					});
 				contours[i] = *largest_contour;
 			}
-			auto [fitted_contour, endpoints] = fit_cylinder_contour(contours[i], mask, filtered_frame, &heightPaintAt);
+			auto [fitted_contour, endpoints, center] = fit_cylinder_contour(contours[i], mask);
+			if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
+				std::string uvtext = "(" + std::to_string(center.x) + ", " + std::to_string(center.y) + ")";
+				cv::putText(filtered_frame, uvtext, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+				heightPaintAt += 30;
+			}
 			if (!fitted_contour.empty()) {
 				Rebels::Point2d coralVec = calculate_coral_vector(contours[i], m_focalLen, m_config.Get().fcdiam(), CAMERA_CENTER);
 				double distance = coralVec.length();
@@ -449,7 +458,7 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 					m_nLastCoralAngleTopic.SetDefault(angle);
 					corals.push_back(ObjectDetectionInfo(distance, angle, (uint8_t)20, ObjectDetectionType::CORAL));
 					// Draw the fitted contour
-					if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON || UseGui == ObjUseGui::ON) {
+					if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
 						std::string coral_vec_text = "(" + std::to_string(coralVec.u()) + ", " + std::to_string(coralVec.v()) + ")";
 						std::string distance_text = "Distance: " + std::to_string(distance / 0.0254) + "in";
 						std::string angle_text = "Angle: " + std::to_string(angle * (180 / std::numbers::pi)) + "deg";
@@ -494,7 +503,7 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 	    std::chrono::system_clock::duration frameProcDelta = tsCur - *pcf->ts();
 		m_nLastLatencyTopic.SetDefault(std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta).count());
 
-		if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON || UseGui == ObjUseGui::ON) {
+		if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
 			// Display distance and angle (only if valid values were calculated)
 			std::string latency_text = "Latency: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta).count()) + "us";
 			cv::putText(filtered_frame, latency_text, cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
@@ -515,7 +524,10 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 
 	if constexpr (UseGui == ObjUseGui::ON) {
 		// Display the results
-		cv::imshow("Filtered Video", filtered_frame);
+		if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON)
+		{
+			cv::imshow("Filtered Video", filtered_frame);
+		}
 		cv::imshow("Mask", mask);
 
 		if (cv::waitKey(1) == 'q') {
@@ -523,8 +535,13 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 			exit(0);
 		}
 	}
-
-	return filtered_frame;
+	if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON)
+	{
+		return filtered_frame;
+	} else
+	{
+		return {};
+	}
 }
 
 template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;

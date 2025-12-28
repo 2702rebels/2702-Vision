@@ -209,9 +209,9 @@ public:
 	* @param contour - The input contour, as provided by @ref cv::findContours.
 	* @param mask - The binary image where white is a valid part of a detection and black where it is not.
 	* @param filteredFrame - The image to print any debugging text to.
-	* @returns Empty pair if invalid contour, or a pair of the contour hull, and another pair of the major and minor axis endpoints(in that order).
+	* @returns Empty pair if invalid contour, or a pair of the contour hull, and another pair of the major and minor axis endpoints(in that order) and the center point of the ellipse.
 	*/
-	std::pair<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>> fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask, cv::Mat filteredFrame, int* heightPaintAt);
+	std::tuple<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>, cv::Point> fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask);
 
 	/** @brief Processes each frame, logs it to the logfile if @ref m_bIsLogging is set to true, runs the object detection on it, pushes the value to nettables,
 	* @brief and sends the packet with the data to the roboRIO if @ref SEND_PACKETS or @ref PRODUCTION is true(and there is a valid detection).
