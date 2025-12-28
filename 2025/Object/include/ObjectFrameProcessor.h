@@ -67,8 +67,6 @@ class ObjectFrameProcessor : public FrmProcessor
 
 	nt::IntegerPublisher m_nLastLatencyTopic = m_nObjectDetectionNetTable->GetIntegerTopic("Latency").Publish();
 
-	double		distance;
-
 	/** @brief Camera calibration matrix. */
 	cv::Mat mtx = (cv::Mat_<float>(3, 3) << 601.9259931202599, 0, 321.8862267762323,
 		0, 595.9193354697203, 258.3875534160956,
@@ -104,18 +102,6 @@ class ObjectFrameProcessor : public FrmProcessor
 	/** @brief Logger for raw frames inputted into the algorithm */
 	std::unique_ptr<AsyncVisionLog> m_unfilteredLogger;
 
-	static void onTrackbarSetHueMin(int newPos, void* inst);
-
-	static void onTrackbarSetHueMax(int newPos, void* inst);
-
-	static void onTrackbarSetSatMin(int newPos, void* inst);
-
-	static void onTrackbarSetSatMax(int newPos, void* inst);
-
-	static void onTrackbarSetValMin(int newPos, void* inst);
-
-	static void onTrackbarSetValMax(int newPos, void* inst);
-
 public:
 	static int64_t m_i64TimeOffset;
 
@@ -124,45 +110,7 @@ public:
 	/** @brief Start logging frames to logfile. */
 	void vStartLogging();
 
-	int trackbarHueMin;
-	int trackbarHueMax;
-	int trackbarSatMin;
-	int trackbarSatMax;
-	int trackbarValMin;
-	int trackbarValMax;
-
-	/*!
-	* @brief Sets hue min object detection parameter.
-	* @param  newValue - integer representing the new hue min value
-	*/
-	void setPVHueMin(const int32_t& newValue);
-	/*!
-	* @brief Sets hue max object detection parameter.
-	* @param  newValue - integer representing the new hue max value
-	*/
-	void setPVHueMax(const int32_t& newValue);
-	/*!
-	* @brief Sets saturation min object detection parameter.
-	* @param  newValue - integer representing the new saturation min value
-	*/
-	void setSaturationMin(const int32_t& newValue);
-	/*!
-	* @brief Sets saturation max object detection parameter.
-	* @param  newValue - integer representing the new saturation max value
-	*/
-	void setSaturationMax(const int32_t& newValue);
-	/*!
-	* @brief Sets value min object detection parameter.
-	* @param  newValue - integer representing the new value min value
-	*/
-	void setValueMin(const int32_t& newValue);
-	/*!
-	* @brief Sets value max object detection parameter.
-	* @param  newValue - integer representing the new value max value
-	*/
-	void setValueMax(const int32_t& newValue);
-
-	virtual ~ObjectFrameProcessor();
+	~ObjectFrameProcessor() override;
 	/** @brief Handles a time sync event from networkTables.
 	* @param e - The networktables event.
 	* @returns Nothing.
