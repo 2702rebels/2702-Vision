@@ -435,7 +435,7 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 	std::conditional_t<VideoDebugging == ObjVideoDebuggingInfo::ON, int, EmptyStruct> heightPaintAt;
 	if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON)
 	{
-		filtered_frame = cv::Mat(pcf->nRows(), pcf->nCols(), CV_8UC3);
+		filtered_frame = cv::Mat::zeros(pcf->nRows(), pcf->nCols(), CV_8UC3);
 		cv::bitwise_and(frame, frame, filtered_frame, mask); // BIG STALL, 9.3% of cpu time spent here
 		heightPaintAt = 60;
 	}
