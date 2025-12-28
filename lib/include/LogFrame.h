@@ -12,7 +12,7 @@ private:
 	cv::Mat m_cvFrame;
 public:
     /** @brief Create the @ref LogFrame from a cv::Mat */
-	LogFrame(const cv::Mat& frame);
+	LogFrame(cv::Mat frame);
 
     /** @brief Get a reference to the cv::Mat in @ref m_cvFrame */
 	cv::Mat& GetCVFrame();
