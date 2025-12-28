@@ -544,9 +544,6 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 	}
 }
 
-template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
-template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::OFF, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
-template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::OFF, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
-template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
-template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON>;
 template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON>;
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::OFF, ObjMultipleObjectDetection::OFF, ObjSendPackets::ON, ObjUseOutputFiltering::ON>;
+template class ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON, ObjUseGui::ON, ObjMultipleObjectDetection::OFF, ObjSendPackets::OFF, ObjUseOutputFiltering::ON>;
