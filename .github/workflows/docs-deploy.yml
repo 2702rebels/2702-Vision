@@ -2,7 +2,7 @@ name: Deploy Doxygen Docs
 
 on:
   push:
-    branches: [ offseason-changes ]
+    branches: [ main ]
 
 jobs:
   build:
