@@ -45,21 +45,25 @@ TEST(FrameLog, RGBFrames) {
 	VisionLogReader reader(fs::path("./rgbFrames.log"));
 	for (int i = 0; i < nFrames; i++) {
 		std::optional<cv::Mat> curFrame = reader.TryReadFrame();
+		EXPECT_TRUE(curFrame.has_value());
 		EXPECT_EQ(curFrame.value().size(), rgbFrames[i].size());
 		EXPECT_EQ(curFrame.value().type(), rgbFrames[i].type());
-		EXPECT_EQ(cv::norm(*curFrame, rgbFrames[i]), 0);
+		EXPECT_EQ(cv::norm(curFrame.value(), rgbFrames[i]), 0);
 	}
 	reader.SkipToFrame(1);
 	std::optional<cv::Mat> curFrame = reader.TryReadFrame();
 	EXPECT_EQ(curFrame.value().size(), rgbFrames[1].size());
 	EXPECT_EQ(curFrame.value().type(), rgbFrames[1].type());
-	EXPECT_EQ(cv::norm(*curFrame, rgbFrames[1]), 0);
+	EXPECT_EQ(cv::norm(curFrame.value(), rgbFrames[1]), 0);
 	// skip to end
-	for (int i = 1; i < nFrames; i++) {
+	for (int i = 2; i < nFrames; i++) {
 		reader.ReadFrame();
 	}
 	std::optional<cv::Mat> noFrame = reader.TryReadFrame();
-	EXPECT_FALSE(noFrame);
+	EXPECT_FALSE(noFrame.has_value());
+	reader.SkipToFrame(0);
+	std::optional<cv::Mat> frame = reader.TryReadFrame();
+	EXPECT_TRUE(frame.has_value());
 }
 
 TEST(FrameLog, GrayscaleFrames) {
@@ -91,9 +95,12 @@ TEST(FrameLog, GrayscaleFrames) {
 	EXPECT_EQ(curFrame.value().type(), grayscaleFrames[1].type());
 	EXPECT_EQ(cv::norm(*curFrame, grayscaleFrames[1]), 0);
 	// skip to end
-	for (int i = 1; i < nFrames; i++) {
+	for (int i = 2; i < nFrames; i++) {
 		reader.ReadFrame();
 	}
 	std::optional<cv::Mat> noFrame = reader.TryReadFrame();
-	EXPECT_FALSE(noFrame);
+	EXPECT_FALSE(noFrame.has_value());
+	reader.SkipToFrame(0);
+	std::optional<cv::Mat> frame = reader.TryReadFrame();
+	EXPECT_TRUE(frame.has_value());
 }

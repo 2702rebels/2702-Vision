@@ -83,15 +83,11 @@ std::optional<cv::Mat> VisionLogReader::TryReadFrame() {
 }
 
 void VisionLogReader::SkipToFrame(int frameNum) {
-	if (m_logType == LogFrameType::GRAYSCALE) {
-		m_logfile.seekg(LOGFILE_HEADER_SIZE + m_resWidth * m_resHeight * frameNum, std::ios::beg);
-	}
-	else if (m_logType == LogFrameType::RGB) {
-		m_logfile.seekg(LOGFILE_HEADER_SIZE + m_resWidth * m_resHeight * 3 * frameNum, std::ios::beg);
-	}
-	else {
-		spdlog::error("Unrecognized frame type");
-		throw;
+	m_logfile.clear(); // clear the end-of-file(EOF) bit manually as seekg does not reset it and reads will fail if it is still set
+	m_logfile.seekg(LOGFILE_HEADER_SIZE + m_frameSize * frameNum, std::ios::beg);
+	if (!m_logfile)
+	{
+		spdlog::error("Failed to rewind ifstream ptr to start of file");
 	}
 }
 
