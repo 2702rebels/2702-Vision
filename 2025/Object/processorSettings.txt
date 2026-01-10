@@ -1,1 +1,0 @@
-{"hueMax":30,"hueMin":0,"satMax":30,"satMin":0,"valMax":255,"valMin":185}

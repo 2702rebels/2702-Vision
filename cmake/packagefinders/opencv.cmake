@@ -1,0 +1,12 @@
+function(opencv_add_to_target_sys targetname is_private)
+    find_package(OpenCV REQUIRED)
+    if(is_private EQUAL TRUE)
+        target_link_libraries(${targetname} PRIVATE ${OpenCV_LIBS})
+        target_include_directories(${targetname} PRIVATE ${OpenCV_INCLUDE_DIRS})
+    else ()
+        target_link_libraries(${targetname} PUBLIC ${OpenCV_LIBS})
+        target_include_directories(${targetname} PUBLIC ${OpenCV_INCLUDE_DIRS})
+    endif ()
+endfunction()
+
+add_package_finder("opencv" "opencv_add_to_target_sys" "opencv_add_to_target_sys")

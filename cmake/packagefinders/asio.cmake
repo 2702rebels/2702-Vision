@@ -1,0 +1,18 @@
+function(add_asio_to_target_vcpkg targetname is_private)
+    find_package(asio CONFIG REQUIRED)
+    if(is_private EQUAL TRUE)
+        target_link_libraries(${targetname} PRIVATE asio::asio)
+    else ()
+        target_link_libraries(${targetname} PUBLIC asio::asio)
+    endif ()
+endfunction()
+
+function(add_asio_to_target_sys targetname is_private)
+    if(is_private EQUAL TRUE)
+        target_include_directories(${targetname} PRIVATE /usr/include/asio)
+    else ()
+        target_include_directories(${targetname} PUBLIC /usr/include/asio)
+    endif ()
+endfunction()
+
+add_package_finder("asio" "add_asio_to_target_vcpkg" "add_asio_to_target_sys")

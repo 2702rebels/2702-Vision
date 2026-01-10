@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+message TestConfigurationSettings {
+	int32 hueMin = 1;
+	int32 hueMax = 2;
+	int32 saturationMin = 3;
+	int32 saturationMax = 4;
+	int32 valueMin = 5;
+	int32 valueMax = 6;
+	int32 minPixelWidth = 7;
+	int32 maxPixelWidth = 8;
+	int32 minPixelHeight = 9;
+	int32 maxPixelHeight = 10;
+	int32 minPixelArea = 11;
+	int32 maxPixelArea = 12;
+	double minPercentFill = 13;
+	double cameraOffsetX = 14;
+	double cameraOffsetY = 15;
+	double cameraHeight = 16;
+	double cameraAngle = 17;
+	int32 filterPacketWindow = 18;
+	double fcDiam = 19;
+	string logDirectory = 20;
+	int32 nLogWriterThreads = 21;
+	repeated int32 repeatedInt = 22;
+	repeated int64 repeatedInt2 = 23;
+	repeated string repeatedStr = 24;
+	repeated bool repeatedBool = 25;
+	repeated double repeatedDouble = 26;
+}

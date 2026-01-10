@@ -1,23 +1,14 @@
 #include <unistd.h>
-#include <stdint.h>
-#include <sys/stat.h>
+#include <cstdint>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-
-//#include <X11/Xlib.h>
-//#include <cameraserver/CameraServer.h>
-//#include <networktables/NetworkTableInstance.h>
 
 #include <linux/videodev2.h>
-#include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <drm/drm_fourcc.h>
 #include <thread>
-#include <vector>
-#include <mutex>
 #include <condition_variable>
 
 #include <string>
@@ -59,7 +50,7 @@ public:
 	}
 	virtual void ProcessFrame( int nCam, CameraFrame const *pcf )
 	{
-		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
+		printf( "Have Frame from %d\n", nCam);
 	}
 };
 
@@ -81,7 +72,7 @@ int main( int argc, char **argv )
 	//	ntinst.StartClientTeam( 2702 );
 	//	ntinst.StartServer();
 		imgProc proc;
-		CameraManager mycam0( "/dev/video0", 4, 0, proc );
+		CameraManager mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
 	//	nvCamera mycam1( "/dev/video1", 4, 1 );
 
 		printinfo( mycam0 );

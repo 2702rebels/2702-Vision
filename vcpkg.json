@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "2702vision",
+  "description": "The 2702 Vision object detection / apriltag system.",
+  "dependencies": [
+    "asio",
+    {
+      "name": "ffmpeg",
+      "features": [
+        "all",
+        "all-gpl",
+        "all-nonfree"
+      ]
+    },
+    "gtest",
+    {
+      "name": "libcamera",
+      "platform": "linux"
+    },
+    {
+      "name": "opencv4",
+      "features": [
+        "calib3d",
+        "highgui"
+      ]
+    },
+    "protobuf",
+    "pthread",
+    "spdlog",
+    {
+      "name": "wpilib",
+      "features": [
+        "ntcore",
+        "protobuf",
+        "cameraserver",
+        "wpimath",
+        "allwpilib"
+      ]
+    }
+  ]
+}
