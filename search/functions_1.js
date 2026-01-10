@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['bayer2blue_0',['Bayer2Blue',['../dd/df7/log2mjpeg_8cpp.html#a81565e16a7c3cb993defcdec888c01cb',1,'log2mjpeg.cpp']]],
+  ['bayer2green_1',['Bayer2Green',['../dd/df7/log2mjpeg_8cpp.html#aac1e335561cb7b6734ac0b317c0646bf',1,'log2mjpeg.cpp']]],
+  ['bayer2grey_2',['bayer2grey',['../df/d5f/Bayer2Grey_8h.html#ae9378e2f1a2181aa662e74f27934a916',1,'Bayer2Grey(cv::Mat &amp;matGrey, cv::Mat &amp;matBayer):&#160;Bayer2Grey.cpp'],['../df/d5f/Bayer2Grey_8cpp.html#ae9378e2f1a2181aa662e74f27934a916',1,'Bayer2Grey(cv::Mat &amp;matGrey, cv::Mat &amp;matBayer):&#160;Bayer2Grey.cpp']]],
+  ['bayer2halfgrey_3',['bayer2halfgrey',['../df/d5f/Bayer2Grey_8h.html#adb9c3f3c6f8206248dde2a33b1e755fb',1,'Bayer2HalfGrey(cv::Mat &amp;matGrey, const cv::Mat &amp;matBayer):&#160;Bayer2Grey.cpp'],['../df/d5f/Bayer2Grey_8cpp.html#a73e764ba60ffa153c6493fde3135c9ce',1,'Bayer2HalfGrey(cv::Mat &amp;matGrey, cv::Mat const &amp;matBayer):&#160;Bayer2Grey.cpp']]],
+  ['bayer2halfrgb_4',['bayer2halfrgb',['../d4/d06/Bayer2RGB_8h.html#a58809d53e3232e64aa4aadee365081ea',1,'Bayer2HalfRGB(cv::Mat &amp;matRGB, cv::Mat const &amp;matBayer):&#160;Bayer2RGB.cpp'],['../da/d48/Bayer2RGB_8cpp.html#a58809d53e3232e64aa4aadee365081ea',1,'Bayer2HalfRGB(cv::Mat &amp;matRGB, cv::Mat const &amp;matBayer):&#160;Bayer2RGB.cpp']]],
+  ['bayer2halfrgb1_5',['Bayer2HalfRGB1',['../da/d48/Bayer2RGB_8cpp.html#abad8606205823f2d4aaac6afc821a920',1,'Bayer2RGB.cpp']]],
+  ['bayer2red_6',['Bayer2Red',['../dd/df7/log2mjpeg_8cpp.html#af1120a03a5edf1d07bc6f69b981d49a7',1,'log2mjpeg.cpp']]],
+  ['bayer2rgb_7',['bayer2rgb',['../d4/d06/Bayer2RGB_8h.html#aa50a3853650bd850ead6005e2f91ac41',1,'Bayer2RGB(cv::Mat &amp;matRGB, cv::Mat const &amp;matBayer):&#160;Bayer2RGB.cpp'],['../da/d48/Bayer2RGB_8cpp.html#aa50a3853650bd850ead6005e2f91ac41',1,'Bayer2RGB(cv::Mat &amp;matRGB, cv::Mat const &amp;matBayer):&#160;Bayer2RGB.cpp']]],
+  ['bload_8',['bLoad',['../da/de1/classRebels_1_1StereoCam.html#af23de3ce839023a709e26a7d63e6c0bd',1,'Rebels::StereoCam']]],
+  ['bloadcam_9',['bLoadCam',['../da/de1/classRebels_1_1StereoCam.html#a6b1c26748d77c7d8d2c089c7704105a4',1,'Rebels::StereoCam']]],
+  ['bnextframe_10',['bNextFrame',['../d6/daf/classLogPlayer.html#aafe89185a5c1b6733b6bee65d997673f',1,'LogPlayer']]],
+  ['bprocessframe_11',['bprocessframe',['../d8/dbf/classCameraManager.html#a30806ecf9b2a3a29fee133c73c861f0c',1,'CameraManager::bProcessFrame()'],['../db/d37/classnvCamera.html#a48efbcabf87acaaca66226011c2f5131',1,'nvCamera::bProcessFrame()'],['../d3/d6e/classv4lcam.html#a08b3636a85a14838121a1e5bd43d604d',1,'v4lcam::bProcessFrame()']]],
+  ['bprocessimage_12',['bProcessImage',['../dc/d59/classv4lImageProcessor.html#a90cef146e645c133db0e35c8c30bf4e6',1,'v4lImageProcessor']]],
+  ['bsend_13',['bSend',['../d2/dd5/classUDPSender.html#adb97758a966fc158dc062eafed826ad9',1,'UDPSender']]],
+  ['bsetautoexposure_14',['bSetAutoExposure',['../d3/d6e/classv4lcam.html#a086f787a4c24bf406a4fb0d4f1fb4064',1,'v4lcam']]],
+  ['bsetautogain_15',['bSetAutoGain',['../d3/d6e/classv4lcam.html#aa05174f8cfbe88bbdfe7645af9de4959',1,'v4lcam']]],
+  ['bsetcrop_16',['bSetCrop',['../d3/d6e/classv4lcam.html#a59bae3ebc162b022a66e0070ea9c436f',1,'v4lcam']]],
+  ['bsetexposure_17',['bsetexposure',['../db/d37/classnvCamera.html#a65dc15ae231fef0ca2f1675a2075c4f9',1,'nvCamera::bSetExposure()'],['../d3/d6e/classv4lcam.html#ad2cac1c3852f170b44b8fbe0e2ab772a',1,'v4lcam::bSetExposure(uint64_t uExp)']]],
+  ['bsetgain_18',['bSetGain',['../d3/d6e/classv4lcam.html#ac5df29e0dd313d3ce3e990fd3801d858',1,'v4lcam']]],
+  ['bsetiso_19',['bSetISO',['../d3/d6e/classv4lcam.html#aadb187a91de973212743a97348480a0e',1,'v4lcam']]],
+  ['bsetres_20',['bSetRes',['../d3/d6e/classv4lcam.html#a2604379bc9ed7340bf2050548672013f',1,'v4lcam']]],
+  ['bsetselection_21',['bSetSelection',['../d3/d6e/classv4lcam.html#a2a4e8817b9e2c3639ba0ebcb6bf32c55',1,'v4lcam']]],
+  ['bstart_22',['bstart',['../d3/d6e/classv4lcam.html#a311c11d588849ab344449a2052be7697',1,'v4lcam::bStart()'],['../d2/d93/classRPICamera.html#a3a28a10ff6a42cbdf543a513b54ad250',1,'RPICamera::bStart()'],['../db/d37/classnvCamera.html#aeb19155b50803586950883c8cbc480a1',1,'nvCamera::bStart()'],['../d8/dbf/classCameraManager.html#a70101994a18cd2bcf3cfed8b53c47efb',1,'CameraManager::bStart()']]],
+  ['bstop_23',['bstop',['../d3/d6e/classv4lcam.html#a266face2c547dfa68233ed5fb71e472f',1,'v4lcam::bStop()'],['../d2/d93/classRPICamera.html#a826fdb361ab45b83db6312ad690bb589',1,'RPICamera::bStop()'],['../db/d37/classnvCamera.html#af7784df3cdbc66407416221c4bd1056f',1,'nvCamera::bStop()'],['../d8/dbf/classCameraManager.html#a8e7339debd67541bd47a72214c7b7320',1,'CameraManager::bStop()']]],
+  ['buf_24',['buf',['../dc/d6c/structv4lcam_1_1memBuff.html#a6d0a5ad73a9e13d4a9918887172ca137',1,'v4lcam::memBuff']]]
+];
