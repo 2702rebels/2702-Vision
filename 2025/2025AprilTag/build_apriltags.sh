@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -d apriltags_cuda ]; then
-	git clone https://2702rebels/apriltags_cuda
+	git clone https://github.com/2702rebels/apriltags_cuda
 fi
 
 cd apriltags_cuda
