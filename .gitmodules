@@ -1,3 +1,6 @@
 [submodule "vcpkg"]
 	path = vcpkg
 	url = https://github.com/Microsoft/vcpkg
+[submodule "calibrationdevice/cameracalibrationfirmware"]
+	path = calibrationdevice/cameracalibrationfirmware
+	url = https://github.com/2702rebels/cameracalibrationfirmware
