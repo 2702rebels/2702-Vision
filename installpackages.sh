@@ -46,4 +46,17 @@ sudo cmake --build . --target install --parallel $(nproc)
 cd ..
 cd ..
 sudo rm -rf spdlog
+echo "Downloading and compiling cserialport"
+git clone https://github.com/itas109/cserialport
+cd cserialport
+git checkout v4.3.3
+mkdir build
+cd build
+cmake .. -DCSERIALPORT_BUILD_EXAMPLES=OFF -DCSERIALPORT_BUILD_TEST=OFF -DCMAKE_BUILD_TYPE=Debug
+sudo cmake --build . --target install --parallel $(nproc)
+cmake .. -DCSERIALPORT_BUILD_EXAMPLES=OFF -DCSERIALPORT_BUILD_TEST=OFF -DCMAKE_BUILD_TYPE=Release
+sudo cmake --build . --target install --parallel $(nproc)
+cd ..
+cd ..
+rm -rf cserialport
 echo "Finished installing dependencies"
