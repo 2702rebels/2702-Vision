@@ -15,6 +15,8 @@ jobs:
       matrix:
         build_type: [debug, release]
       max-parallel: 1
+    permissions:
+      contents: read
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
