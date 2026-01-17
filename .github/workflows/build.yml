@@ -1,0 +1,58 @@
+name: build.yml
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        build_type: [debug, release]
+      max-parallel: 1
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install compiler
+        run: |
+          sudo apt update
+          sudo apt-get update
+          sudo apt-get install -y curl zip unzip tar
+          sudo apt install -y build-essential ninja-build linux-libc-dev python3.12-venv libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libglx-dev bison libudev-dev libxi-dev libxtst-dev libxrandr-dev
+          sudo apt-get install -y autoconf autoconf-archive automake libtool nasm flex
+          sudo apt install -y linux-libc-dev pkg-config
+
+      - name: Install cmake
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common lsb-release
+          sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+          sudo apt-key adv --fetch-keys https://apt.kitware.com/keys/kitware-archive-latest.asc
+          sudo apt-get update
+          sudo apt-get install -y cmake
+
+      - name: Cache vcpkg archive
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: vcpkg-${{hashFiles('vcpkg.json')}}-${{hashFiles('vcpkg/**')}}
+          restore-keys: |
+            vcpkg-
+
+      - name: Create auth.json
+        # secret isn't actually written since I don't have access to create new secrets, but the file just needs to exist so its okay
+        run: |
+          echo "{\"steamApiKey\": \"${{ secrets.STEAM_API_KEY }}\"}" > auth.json
+
+      - name: Configure ${{matrix.build_type}}
+        run: |
+          /usr/bin/cmake . --preset x64-${{matrix.build_type}}-linux
+
+      - name: Build ${{matrix.build_type}}
+        run: /usr/bin/cmake --build out/build/x64-${{matrix.build_type}}-linux
