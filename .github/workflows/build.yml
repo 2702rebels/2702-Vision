@@ -4,8 +4,6 @@ on:
     branches: [master]
   pull_request:
     branches: ["*"]
-permissions:
-  contents: read
 
 jobs:
   build:
@@ -15,14 +13,14 @@ jobs:
       matrix:
         build_type: [debug, release]
       max-parallel: 1
-    permissions:
-      contents: read
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: none
+
+      - name: Fetch vcpkg submodule
+        run: git submodule update --init --recursive vcpkg
 
       - name: Install compiler
         run: |
