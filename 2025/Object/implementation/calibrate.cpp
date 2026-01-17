@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 	Size patternSize(9, 6);  // 9x6 checkerboard
 	char const* inputDir = 0;
 	if (argc == 1 || argc > 2) {
-		error("Usage: ./calibrate inputDir, where inputDir is a path to a directory with .jpg imgs to calibrate");
+		error("Usage: ./calibrate inputDir, where inputDir is a path to a directory with imgs to calibrate");
 		error("Example: ./calibrate /media/sf_2702_Vision/2025/Object/good/");
 		return 1;
 	}
@@ -39,13 +39,12 @@ int main(int argc, char** argv) {
 
 	// Load the checkerboard images
 	vector<String> filenames;
-	glob(std::string(inputDir) + "*.jpg", filenames);
+	glob(std::string(inputDir) + "*.*", filenames);
 
 	// Detect checkerboard corners in each image
 	Mat gray;
 	for (const auto& filename : filenames) {
-		Mat image = imread(filename);
-		cvtColor(image, gray, COLOR_BGR2GRAY);
+		Mat image = imread(filename, cv::IMREAD_GRAYSCALE);
 
 		vector<Point2f> corners;
 		bool found = findChessboardCorners(gray, patternSize, corners,
@@ -63,7 +62,7 @@ int main(int argc, char** argv) {
 			// Draw and display the corners (optional)
 			drawChessboardCorners(image, patternSize, corners, found);
 			imshow("Corners", image);
-			waitKey(500);
+			waitKey();
 		}
 	}
 
