@@ -22,9 +22,15 @@
       "features": [
         "calib3d",
         "highgui",
-        "dshow",
+        {
+          "name": "dshow",
+          "platform": "windows & !uwp"
+        },
         "ffmpeg",
-        "msmf",
+        {
+          "name": "msmf",
+          "platform": "windows & !uwp & !mingw"
+        },
         "jpeg",
         "jpegxl",
         "opencl",
