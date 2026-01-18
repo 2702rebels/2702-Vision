@@ -34,9 +34,8 @@ jobs:
       - name: Install cmake
         run: |
           sudo apt-get update
-          sudo apt-get install -y software-properties-common lsb-release
-          sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-          sudo apt-key adv --fetch-keys https://apt.kitware.com/keys/kitware-archive-latest.asc
+          echo "deb https://apt.kitware.com/ubuntu/ noble main" | sudo tee /etc/apt/sources.list.d/kitware.list
+          curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/kitware.gpg
           sudo apt-get update
           sudo apt-get install -y cmake
 
@@ -47,11 +46,6 @@ jobs:
           key: vcpkg-${{hashFiles('vcpkg.json')}}-${{hashFiles('vcpkg/**')}}
           restore-keys: |
             vcpkg-
-
-      - name: Create auth.json
-        # secret isn't actually written since I don't have access to create new secrets, but the file just needs to exist so its okay
-        run: |
-          echo "{\"steamApiKey\": \"${{ secrets.STEAM_API_KEY }}\"}" > auth.json
 
       - name: Configure ${{matrix.build_type}}
         run: |
