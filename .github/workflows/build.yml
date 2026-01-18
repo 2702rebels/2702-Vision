@@ -27,7 +27,7 @@ jobs:
           sudo apt update
           sudo apt-get update
           sudo apt-get install -y curl zip unzip tar
-          sudo apt install -y build-essential ninja-build linux-libc-dev python3.12-venv libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libglx-dev bison libudev-dev libxi-dev libxtst-dev libxrandr-dev
+          sudo apt install -y build-essential ninja-build linux-libc-dev python3.12-venv libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libglx-dev bison libudev-dev libxi-dev libxtst-dev libxrandr-dev libltdl-dev
           sudo apt-get install -y autoconf autoconf-archive automake libtool nasm flex
           sudo apt install -y linux-libc-dev pkg-config
 
