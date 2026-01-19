@@ -22,12 +22,6 @@ jobs:
       - name: Fetch vcpkg submodule
         run: git submodule update --init --recursive vcpkg
 
-      - name: Copy uploaded bincache
-        if: ${{hashFiles('bincache.zip') != ''}}
-        run: |
-          mkdir -p ~/.cache/vcpkg/archives
-          unzip bincache.zip -d ~/.cache/vcpkg/archives
-
       - name: Install compiler
         run: |
           sudo apt update
