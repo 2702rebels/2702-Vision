@@ -1,5 +1,5 @@
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
-target_include_directories(2702log PRIVATE include)
+target_include_directories(2702log PUBLIC include)
 
 add_package_to_target("spdlog" "2702log" FALSE)
 target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)

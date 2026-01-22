@@ -6,10 +6,13 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <filesystem>
+#include <spdlog/spdlog.h>
+
+#include <LoggingUtils.h>
 // todo: produce the output coefficients
 // todo: show heatmap of where most of the checkerboard squares were
 namespace fs = std::filesystem;
-
+using namespace spdlog;
 using namespace itas109;
 
 static constexpr int MC_BAUDRATE = 115200;
@@ -17,6 +20,9 @@ static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
 static constexpr int ANGLE_INTERVAL = 5;
 static constexpr int CAMERA_INDEX = 0;
 static cv::Size checkerboardPatternSize = cv::Size(9, 6);
+std::vector<std::vector<cv::Point3f>> objectPoints;
+std::vector<std::vector<cv::Point2f>> imagePoints;
+std::vector<cv::Point3f> objp;
 int imageIndex = 0;
 fs::path outdir;
 
@@ -36,6 +42,13 @@ void Tilt(int deg)
     motorControllerPort.writeData(tiltMsg.data(), tiltMsg.size());
     motorControllerPort.flushBuffers();
     std::this_thread::sleep_for(MC_WAITTIME);
+}
+
+cv::Size GetCaptureSize(cv::VideoCapture& camCapture)
+{
+    cv::Mat img;
+    camCapture >> img;
+    return cv::Size(img.cols, img.rows);
 }
 
 void TiltAndImage(int deg, cv::VideoCapture& camCapture)
@@ -69,10 +82,8 @@ void TiltAndImage(int deg, cv::VideoCapture& camCapture)
         {
             cornerSubPix(grayscale, corners, cv::Size(11, 11), cv::Size(-1, -1),
             cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001));
-
-            // Add object points and image points
-            //objectPoints.push_back(objp);
-            //imagePoints.push_back(corners);
+            objectPoints.push_back(objp);
+            imagePoints.push_back(corners);
 
             // Draw and display the corners (optional)
             drawChessboardCorners(image, checkerboardPatternSize, corners, cornersFound);
@@ -86,6 +97,12 @@ void TiltAndImage(int deg, cv::VideoCapture& camCapture)
 }
 
 int main(int argc, char** argv) {
+    SetupTextLogger();
+    for (int i = 0; i < checkerboardPatternSize.height; ++i) {
+        for (int j = 0; j < checkerboardPatternSize.width; ++j) {
+            objp.push_back(cv::Point3f(j, i, 0));
+        }
+    }
     cv::VideoCapture camCapture(CAMERA_INDEX);
     if (!camCapture.isOpened())
     {
@@ -127,6 +144,17 @@ int main(int argc, char** argv) {
         TiltAndImage(i, camCapture);
     }
     motorControllerPort.close();
-    std::cout << "Calibration images saved to output directory, use calibrate program to transform them into coefficients" << std::endl;
+    cv::destroyAllWindows();
+    std::cout << "image-taking job complete, transforming into calibration coefficients..." << std::endl;
+    cv::Mat cameraMatrix, distCoeffs, rvecs, tvecs;
+    cv::calibrateCamera(objectPoints, imagePoints, GetCaptureSize(camCapture), cameraMatrix, distCoeffs, rvecs, tvecs);
+    info("Camera Matrix:\n {}, {}, {},\n{}, {}, {},\n{}, {}, {}",
+    cameraMatrix.at<float>(0, 0), cameraMatrix.at<float>(0, 1), cameraMatrix.at<float>(0, 2),
+    cameraMatrix.at<float>(1, 0), cameraMatrix.at<float>(1, 1), cameraMatrix.at<float>(1, 2),
+    cameraMatrix.at<float>(2, 0), cameraMatrix.at<float>(2, 1), cameraMatrix.at<float>(2, 2)
+);
+    info("Distortion Coefficients :\n {}, {}, {}, {}, {}",
+        distCoeffs.at<float>(0, 0), distCoeffs.at<float>(0, 1), distCoeffs.at<float>(0, 2), distCoeffs.at<float>(0, 3), distCoeffs.at<float>(0, 4)
+    );
     return 0;
 }

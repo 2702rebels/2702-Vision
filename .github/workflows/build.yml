@@ -51,6 +51,12 @@ jobs:
         run: |
           /usr/bin/cmake . --preset x64-${{matrix.build_type}}-linux
 
+      - name: Restore vcpkg dir to default for cache write
+        if: always()
+        run: |
+          rm -rf vcpkg
+          git submodule update --init --recursive vcpkg
+
       - name: Upload vcpkg archive cache
         uses: actions/cache/save@v4
         if: always()
