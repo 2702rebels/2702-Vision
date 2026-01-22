@@ -6,7 +6,8 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <filesystem>
-
+// todo: produce the output coefficients
+// todo: show heatmap of where most of the checkerboard squares were
 namespace fs = std::filesystem;
 
 using namespace itas109;
@@ -15,6 +16,7 @@ static constexpr int MC_BAUDRATE = 115200;
 static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
 static constexpr int ANGLE_INTERVAL = 5;
 static constexpr int CAMERA_INDEX = 0;
+static cv::Size checkerboardPatternSize = cv::Size(9, 6);
 int imageIndex = 0;
 fs::path outdir;
 
@@ -39,23 +41,47 @@ void Tilt(int deg)
 void TiltAndImage(int deg, cv::VideoCapture& camCapture)
 {
     Tilt(deg);
-    cv::Mat image;
-    camCapture >> image;
-    if (image.empty())
+    bool cornersFound = false;
+    cv::Mat image, grayscale;
+    do
     {
-        std::cerr << "Failed to capture image" << std::endl;
-        throw;
-    }
-    cv::Mat grayscale;
-    if (image.channels() > 1)
-    {
-        cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
-    }
-    else
-    {
-        grayscale = image.clone();
-    }
+        camCapture >> image;
+        if (image.empty())
+        {
+            std::cerr << "Failed to capture image" << std::endl;
+            throw;
+        }
+        if (image.channels() > 1)
+        {
+            cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
+        }
+        else
+        {
+            grayscale = image.clone();
+        }
+        std::vector<cv::Point2f> corners;
+        cornersFound = findChessboardCorners(grayscale, checkerboardPatternSize, corners,
+            cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
+        if (!cornersFound)
+        {
+            cv::putText(image, "No checkerboard found!", cv::Point(30,30), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 0, 0));
+        } else
+        {
+            cornerSubPix(grayscale, corners, cv::Size(11, 11), cv::Size(-1, -1),
+            cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001));
+
+            // Add object points and image points
+            //objectPoints.push_back(objp);
+            //imagePoints.push_back(corners);
+
+            // Draw and display the corners (optional)
+            drawChessboardCorners(image, checkerboardPatternSize, corners, cornersFound);
+        }
+        cv::imshow("Captured Image (Filtered)" , image);
+        cv::waitKey(1);
+    } while (cornersFound == false);
     cv::imwrite((outdir / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
+    cv::imwrite((outdir / ("img-filtered-" + std::to_string(imageIndex) + ".png")).string(), image);
     imageIndex++;
 }
 
@@ -90,9 +116,9 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::this_thread::sleep_for(std::chrono::seconds(3));
-    Tilt(90);
+    Tilt(78);
     Pan(90);
-    for (int i = 90; i < 135; i += ANGLE_INTERVAL)
+    for (int i = 78; i < 135; i += ANGLE_INTERVAL)
     {
         TiltAndImage(i, camCapture);
     }
