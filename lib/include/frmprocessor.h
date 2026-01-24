@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 #include <chrono>
+#if WIN32
+#include <winsock2.h>
+#endif
 
 class CameraFrame
 {
