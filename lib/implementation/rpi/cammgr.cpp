@@ -84,7 +84,7 @@ bool CameraManager::bProcessFrame( v4l2_buffer &buf )
 	int nIdx = buf.index;
 	m_grpFrms[nIdx].m_u32Seq = buf.sequence;
 	m_grpFrms[nIdx].m_u32Exp = nGetExposure();
-	m_grpFrms[nIdx].m_ts = std::chrono::system_clock::time_point{std::chrono::seconds(buf.timestamp.tv_sec) + std::chrono::microseconds(buf.timestamp.tv_usec)};
+	m_grpFrms[nIdx].m_ts = buf.timestamp;
 	m_grpFrms[nIdx].m_pu8Img = (uint8_t *)m_grBuffers[nIdx].m_pMem;
 
 	// If there is a worker thread waiting, queue this frame
