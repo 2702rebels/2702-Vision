@@ -7,8 +7,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <span>
-#include <iostream>
-#include <sstream>
 
 //#include <X11/Xlib.h>
 #include <linux/videodev2.h>
@@ -28,14 +26,12 @@
 #include <drm/drm_fourcc.h>
 
 #include "rpicam.h"
-#include "VisionLog.h"
+#include "VisLog.h"
 
 using namespace std;
 
 #include <signal.h>
-#define DEFAULT_EXPOSURE 75000
-// waterloo comp #define FIXED_GAIN_VALUE 1.4
-#define DEFAULT_GAIN 5 // practice field 2025
+
 #if 0
 void printinfo( v4lcam &cam )
 {
@@ -56,7 +52,7 @@ void sighandler( int nSig )
 
 class imgProc : public FrmProcessor
 {
-	VisionLogWriter	m_vl;
+	VisionLog	m_vl;
 	std::mutex	m_mtxLog;
 	std::mutex	m_mtxCS;
 	bool		m_bFirstVid = true;
@@ -64,7 +60,7 @@ class imgProc : public FrmProcessor
 public:
 	imgProc( char const *pszLogFile ) :
 		FrmProcessor(),
-		m_vl( pszLogFile, LogFrameType::RGB, 640, 480 )
+		m_vl( pszLogFile, true )
 		
 	{
 	}
@@ -79,7 +75,7 @@ public:
 
 		if (m_mtxLog.try_lock()) {
 			cv::Mat img( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
-			m_vl.WriteFrame(img);
+			m_vl.bWritePNG( img, pcf->u32Sequence(), pcf->u32Exposure() );
 			m_mtxLog.unlock();
 		}
 		if (m_mtxCS.try_lock()) { 
@@ -126,20 +122,7 @@ int main( int argc, char **argv )
 		ntinst.StartServer();
 		imgProc proc( szLog );
 //		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
-		if(argc != 3) {
-			RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc, DEFAULT_EXPOSURE, DEFAULT_GAIN);
-		}
-		else {
-			stringstream strFixedExposure;
-			strFixedExposure << argv[1];
-			int fixedExposure;
-			strFixedExposure >> fixedExposure;
-			stringstream strFixedGain;
-			strFixedGain << argv[2];
-			double fixedGain;
-			strFixedGain >> fixedGain;
-			RPICamera mycam0("/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc, fixedExposure, fixedGain);
-		}
+		RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
 
 		while( !bStop ) {
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );
