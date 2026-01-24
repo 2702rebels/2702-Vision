@@ -15,6 +15,9 @@
 template class ObjectDetectionConfig<ObjectDetectionSettings>;
 template class ObjectDetectionConfig<TestConfigurationSettings>;
 
+// gcc magic trick, see else branches
+template <typename> inline constexpr bool always_false_v = false;
+
 template<typename T>
 ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings, std::string configName)
 	: m_configPath(configFilePath), reflection(currentConfigStructure.GetReflection())
@@ -286,7 +289,7 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() {
 				}
 			}
 			else {
-				static_assert(false, "Unsupported ValueType provided to ObjectDetectionConfig::RefreshConfigStructure");
+				static_assert(always_false_v<T>, "Unsupported ValueType provided to ObjectDetectionConfig::RefreshConfigStructure");
 			}
 			}, configValue);
 	}

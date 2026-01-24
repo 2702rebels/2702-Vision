@@ -15,6 +15,9 @@ template class ObjectDetectionConfigValue<std::vector<bool>>;
 template class ObjectDetectionConfigValue<std::vector<std::string>>;
 template class ObjectDetectionConfigValue<std::vector<int64_t>>;
 
+// gcc magic trick, see else branches
+template <typename> inline constexpr bool always_false_v = false;
+
 template<typename T>
 ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(const pbuf::FieldDescriptor* field, pbuf::Message& defaultStruct, std::function<void(const T&)> setter, nt::Topic ntTopic)
 	: field(field),
@@ -106,7 +109,7 @@ T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(const pbuf::Message& 
 		return vec;
 	}
 	else {
-		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
+		static_assert(always_false_v<T>, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
 	}
 }
 

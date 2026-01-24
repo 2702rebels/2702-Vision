@@ -88,8 +88,8 @@ void TiltAndImage(int deg, cv::VideoCapture& camCapture)
             // Draw and display the corners (optional)
             drawChessboardCorners(image, checkerboardPatternSize, corners, cornersFound);
         }
-        cv::imshow("Captured Image (Filtered)" , image);
-        cv::waitKey(1);
+        //cv::imshow("Captured Image (Filtered)" , image);
+        //cv::waitKey(1);
     } while (cornersFound == false);
     cv::imwrite((outdir / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
     cv::imwrite((outdir / ("img-filtered-" + std::to_string(imageIndex) + ".png")).string(), image);

@@ -17,6 +17,8 @@ template class NetworkTopicGeneric<std::vector<bool>>;
 template class NetworkTopicGeneric<std::vector<float>>;
 template class NetworkTopicGeneric<std::vector<std::string>>;
 template class NetworkTopicGeneric<std::vector<int64_t>>;
+// gcc magic trick, see else branches
+template <typename> inline constexpr bool always_false_v = false;
 
 template <typename T>
 static std::string type_name() {
@@ -57,7 +59,8 @@ static std::string type_name() {
 		return "int[]";
 	}
 	else {
-		static_assert(false, "Type not supported by NetworkTopicGeneric::type_name()");
+		// gcc magic trick, this is now dependent on the type and won't be evaluated when first reading the function
+		static_assert(always_false_v<T>, "Type not supported by NetworkTopicGeneric::type_name()");
 	}
 }
 
@@ -127,7 +130,8 @@ T NetworkTopicGeneric<T>::GetValue() const {
 		return m_subscriber.GetIntegerArray(m_defaultValue);
 	}
 	else {
-		static_assert(false, "Type not supported by ObjectDetectionConfigValue::UpdateFromConfigMessage");
+		// gcc magic trick, this is now dependent on the type and won't be evaluated when first reading the function
+		static_assert(always_false_v<T>, "Type not supported by NetworkTopicGeneric::GetValue()");
 	}
 }
 
@@ -176,6 +180,7 @@ void NetworkTopicGeneric<T>::PushValue(const T& value) {
 		m_publisher.SetIntegerArray(value);
 	}
 	else {
-		static_assert(false, "Type not supported by ObjectDetectionConfigValue::PushValue");
+		// gcc magic trick, this is now dependent on the type and won't be evaluated when first reading the function
+		static_assert(always_false_v<T>, "Type not supported by NetworkTopicGeneric::PushValue()");
 	}
 }
