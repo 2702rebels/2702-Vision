@@ -9,6 +9,10 @@
 #include <spdlog/spdlog.h>
 
 #include <LoggingUtils.h>
+#include <frmprocessor.h>
+#include <VisionLog.h>
+#include <cameraserver/cameraserver/CameraServer.h>
+#include <cscore/cscore_cv.h>
 // todo: produce the output coefficients
 // todo: show heatmap of where most of the checkerboard squares were
 namespace fs = std::filesystem;
@@ -27,6 +31,56 @@ int imageIndex = 0;
 fs::path outdir;
 
 CSerialPort motorControllerPort;
+
+class imgProc : public FrmProcessor
+{
+    cv::Mat m_matLastFrame;
+    std::mutex m_mtxLastFrame;
+    VisionLogWriter	m_vl;
+    std::mutex	m_mtxLog;
+    std::mutex	m_mtxCS;
+    bool		m_bFirstVid = true;
+    cs::CvSource m_outputStream;
+public:
+    imgProc( char const *pszLogFile ) :
+        FrmProcessor(),
+        m_vl( fs::path(pszLogFile), LogFrameType::RGB, 640, 480 )
+
+    {
+    }
+    virtual ~imgProc()
+    {
+
+    }
+    virtual void ProcessFrame( int nCam, CameraFrame const *pcf )
+    {
+        cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
+        //		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
+
+        if (m_mtxLog.try_lock()) {
+            m_vl.WriteFrame(frame);
+            m_mtxLog.unlock();
+        }
+        if (m_mtxCS.try_lock()) {
+            if (m_bFirstVid) {
+                m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows() );
+                m_bFirstVid = false;
+            }
+            m_outputStream.PutFrame(frame);
+            m_mtxCS.unlock();
+        }
+        if (m_mtxLastFrame.try_lock())
+        {
+            m_matLastFrame = frame;
+            m_mtxLastFrame.unlock();
+        }
+    }
+    void GetLastFrame(cv::Mat& frame)
+    {
+        std::unique_lock<std::mutex> mtx(m_mtxLastFrame);
+        frame = m_matLastFrame.clone();
+    }
+};
 
 void Pan(int deg)
 {
@@ -51,14 +105,22 @@ cv::Size GetCaptureSize(cv::VideoCapture& camCapture)
     return cv::Size(img.cols, img.rows);
 }
 
+#if DESKTOP
 void TiltAndImage(int deg, cv::VideoCapture& camCapture)
+#else
+void TiltAndImage(int deg)
+#endif
 {
     Tilt(deg);
     bool cornersFound = false;
     cv::Mat image, grayscale;
     do
     {
+#if DESKTOP
         camCapture >> image;
+#else
+        proc.GetLastFrame(image);
+#endif
         if (image.empty())
         {
             std::cerr << "Failed to capture image" << std::endl;
@@ -88,8 +150,10 @@ void TiltAndImage(int deg, cv::VideoCapture& camCapture)
             // Draw and display the corners (optional)
             drawChessboardCorners(image, checkerboardPatternSize, corners, cornersFound);
         }
-        //cv::imshow("Captured Image (Filtered)" , image);
-        //cv::waitKey(1);
+#if DESKTOP
+        cv::imshow("Captured Image (Filtered)" , image);
+        cv::waitKey(1);
+#endif
     } while (cornersFound == false);
     cv::imwrite((outdir / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
     cv::imwrite((outdir / ("img-filtered-" + std::to_string(imageIndex) + ".png")).string(), image);
@@ -103,12 +167,29 @@ int main(int argc, char** argv) {
             objp.push_back(cv::Point3f(j, i, 0));
         }
     }
+#if DESKTOP
     cv::VideoCapture camCapture(CAMERA_INDEX);
     if (!camCapture.isOpened())
     {
         std::cerr << "Failed to open camera" << std::endl;
         return 1;
     }
+#else
+    char szLog[1024] = "test.log";
+    if (access("/data/logs", F_OK) != 0)
+    {
+        throw;
+    }
+    for( int i = 0; i < 1024; i++)
+    {
+        sprintf( szLog, "/data/logs/test%05d.log", i );
+        if (access(szLog, F_OK) != 0)
+            break;
+    }
+    printf( "Logging to %s\n", szLog );
+    imgProc proc( szLog );
+    RPICamera mycam0( "/dev/video0", 0, 640, 480, cv::DRM_FORMAT_RGB888, proc );
+#endif
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
     std::cin >> portname;
@@ -137,17 +218,31 @@ int main(int argc, char** argv) {
     Pan(90);
     for (int i = 78; i < 135; i += ANGLE_INTERVAL)
     {
+#if DESKTOP
         TiltAndImage(i, camCapture);
+#else
+        TiltAndImage(i);
+#endif
     }
     for (int i = 0; i < 45; i += ANGLE_INTERVAL)
     {
+#if DESKTOP
         TiltAndImage(i, camCapture);
+#else
+        TiltAndImage(i);
+#endif
     }
     motorControllerPort.close();
+#if DESKTOP
     cv::destroyAllWindows();
+#endif
     std::cout << "image-taking job complete, transforming into calibration coefficients..." << std::endl;
     cv::Mat cameraMatrix, distCoeffs, rvecs, tvecs;
+#if DESKTOP
     cv::calibrateCamera(objectPoints, imagePoints, GetCaptureSize(camCapture), cameraMatrix, distCoeffs, rvecs, tvecs);
+#else
+    cv::calibrateCamera(objectPoints, imagePoints, cv::Size(640, 480), cameraMatrix, distCoeffs, rvecs, tvecs);
+#endif
     info("Camera Matrix:\n {}, {}, {},\n{}, {}, {},\n{}, {}, {}",
     cameraMatrix.at<float>(0, 0), cameraMatrix.at<float>(0, 1), cameraMatrix.at<float>(0, 2),
     cameraMatrix.at<float>(1, 0), cameraMatrix.at<float>(1, 1), cameraMatrix.at<float>(1, 2),
