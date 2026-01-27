@@ -226,7 +226,7 @@ int main(int argc, char** argv) {
 #if DESKTOP
         TiltAndImage(i, camCapture);
 #else
-        TiltAndImage(i, imgProc);
+        TiltAndImage(i, proc);
 #endif
     }
     for (int i = 0; i < 45; i += ANGLE_INTERVAL)
@@ -234,7 +234,7 @@ int main(int argc, char** argv) {
 #if DESKTOP
         TiltAndImage(i, camCapture);
 #else
-        TiltAndImage(i, imgProc);
+        TiltAndImage(i, proc);
 #endif
     }
     motorControllerPort.close();
