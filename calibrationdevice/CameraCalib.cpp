@@ -15,6 +15,8 @@
 #include <cscore/cscore_cv.h>
 #ifndef DESKTOP
 #include <rpicam.h>
+#include <drm/drm_fourcc.h>
+#include <linux/videodev2.h>
 #endif
 // todo: produce the output coefficients
 // todo: show heatmap of where most of the checkerboard squares were
@@ -191,7 +193,7 @@ int main(int argc, char** argv) {
     }
     printf( "Logging to %s\n", szLog );
     imgProc proc( szLog );
-    RPICamera mycam0( "/dev/video0", 0, 640, 480, cv::DRM_FORMAT_RGB888, proc );
+    RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
 #endif
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
@@ -232,7 +234,7 @@ int main(int argc, char** argv) {
 #if DESKTOP
         TiltAndImage(i, camCapture);
 #else
-        TiltAndImage(i);
+        TiltAndImage(i, imgProc);
 #endif
     }
     motorControllerPort.close();
