@@ -13,6 +13,9 @@
 #include <VisionLog.h>
 #include <cameraserver/cameraserver/CameraServer.h>
 #include <cscore/cscore_cv.h>
+#ifndef DESKTOP
+#include <rpicam.h>
+#endif
 // todo: produce the output coefficients
 // todo: show heatmap of where most of the checkerboard squares were
 namespace fs = std::filesystem;
@@ -108,7 +111,7 @@ cv::Size GetCaptureSize(cv::VideoCapture& camCapture)
 #if DESKTOP
 void TiltAndImage(int deg, cv::VideoCapture& camCapture)
 #else
-void TiltAndImage(int deg)
+void TiltAndImage(int deg, imgProc& proc)
 #endif
 {
     Tilt(deg);
@@ -221,7 +224,7 @@ int main(int argc, char** argv) {
 #if DESKTOP
         TiltAndImage(i, camCapture);
 #else
-        TiltAndImage(i);
+        TiltAndImage(i, imgProc);
 #endif
     }
     for (int i = 0; i < 45; i += ANGLE_INTERVAL)
