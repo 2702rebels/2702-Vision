@@ -143,14 +143,14 @@ bool TakeCalibrationImage(int dist)
 std::pair<int, int> GetTiltFOV()
 {
     Pan(90);
-    Tilt(0);
+    Tilt(90);
     int minTilt = -1;
-    for (int i = 0; i < 110; i += TILT_STEP_SIZE)
+    for (int i = 90; i > 0; i -= TILT_STEP_SIZE)
     {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
-        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+        if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
             minTilt = i;
@@ -161,14 +161,14 @@ std::pair<int, int> GetTiltFOV()
     {
         throw std::runtime_error("Couldn't find minimum tilt to see checkerboard");
     }
-    Tilt(180);
+    Tilt(90);
     int maxTilt = 181;
-    for (int i = 180; i > 70; i -= TILT_STEP_SIZE)
+    for (int i = 90; i < 180; i += TILT_STEP_SIZE)
     {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
-        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+        if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
             maxTilt = i;
@@ -190,15 +190,15 @@ std::pair<int, int> GetTiltFOV()
 
 std::pair<int, int> GetPanFOV()
 {
-    Pan(0);
+    Pan(90);
     Tilt(90);
     int minPan = -1;
-    for (int i = 0; i < 110; i += PAN_STEP_SIZE)
+    for (int i = 90; i > 0; i -= PAN_STEP_SIZE)
     {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
-        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+        if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
             minPan = i;
@@ -209,14 +209,14 @@ std::pair<int, int> GetPanFOV()
     {
         throw std::runtime_error("Couldn't find minimum tilt to see checkerboard");
     }
-    Pan(180);
+    Pan(90);
     int maxPan = 181;
-    for (int i = 180; i > 70; i -= PAN_STEP_SIZE)
+    for (int i = 90; i < 180; i += PAN_STEP_SIZE)
     {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
-        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+        if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
             maxPan = i;
