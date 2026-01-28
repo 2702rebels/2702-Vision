@@ -29,8 +29,8 @@ using namespace itas109;
 static constexpr int MC_BAUDRATE = 115200;
 static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
 static constexpr int CAMERA_INDEX = 0;
-static constexpr int PAN_STEP_SIZE = 1;
-static constexpr int TILT_STEP_SIZE = 1;
+static constexpr int PAN_STEP_SIZE = 5;
+static constexpr int TILT_STEP_SIZE = 5;
 static cv::Size checkerboardPatternSize = cv::Size(9, 6);
 std::vector<std::vector<cv::Point3f>> objectPoints;
 std::vector<std::vector<cv::Point2f>> imagePoints;
@@ -152,7 +152,7 @@ std::pair<int, int> GetTiltFOV()
     Pan(90);
     Tilt(0);
     int minTilt = -1;
-    for (int i = 0; i < 90; i++)
+    for (int i = 0; i < 90; i += TILT_STEP_SIZE)
     {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
@@ -170,7 +170,7 @@ std::pair<int, int> GetTiltFOV()
     }
     Tilt(180);
     int maxTilt = 181;
-    for (int i = 180; i > 90; i--)
+    for (int i = 180; i > 90; i -= TILT_STEP_SIZE)
     {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
@@ -194,7 +194,7 @@ std::pair<int, int> GetPanFOV()
     Pan(0);
     Tilt(90);
     int minPan = -1;
-    for (int i = 0; i < 90; i++)
+    for (int i = 0; i < 90; i += PAN_STEP_SIZE)
     {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
@@ -212,7 +212,7 @@ std::pair<int, int> GetPanFOV()
     }
     Pan(180);
     int maxPan = 181;
-    for (int i = 180; i > 90; i--)
+    for (int i = 180; i > 90; i -= PAN_STEP_SIZE)
     {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
