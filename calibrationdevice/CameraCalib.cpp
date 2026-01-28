@@ -152,7 +152,7 @@ std::pair<int, int> GetTiltFOV()
     Pan(90);
     Tilt(0);
     int minTilt = -1;
-    for (int i = 0; i < 90; i += TILT_STEP_SIZE)
+    for (int i = 0; i < 110; i += TILT_STEP_SIZE)
     {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
@@ -170,7 +170,7 @@ std::pair<int, int> GetTiltFOV()
     }
     Tilt(180);
     int maxTilt = 181;
-    for (int i = 180; i > 90; i -= TILT_STEP_SIZE)
+    for (int i = 180; i > 70; i -= TILT_STEP_SIZE)
     {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
@@ -186,6 +186,12 @@ std::pair<int, int> GetTiltFOV()
     {
         throw std::runtime_error("Couldn't find maximum tilt to see checkerboard");
     }
+    if (maxTilt < minTilt)
+    {
+        int buf = minTilt;
+        minTilt = maxTilt;
+        maxTilt = buf;
+    }
     return {minTilt, maxTilt};
 }
 
@@ -194,7 +200,7 @@ std::pair<int, int> GetPanFOV()
     Pan(0);
     Tilt(90);
     int minPan = -1;
-    for (int i = 0; i < 90; i += PAN_STEP_SIZE)
+    for (int i = 0; i < 110; i += PAN_STEP_SIZE)
     {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
@@ -212,7 +218,7 @@ std::pair<int, int> GetPanFOV()
     }
     Pan(180);
     int maxPan = 181;
-    for (int i = 180; i > 90; i -= PAN_STEP_SIZE)
+    for (int i = 180; i > 70; i -= PAN_STEP_SIZE)
     {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
@@ -227,6 +233,12 @@ std::pair<int, int> GetPanFOV()
     if (maxPan == 181)
     {
         throw std::runtime_error("Couldn't find maximum tilt to see checkerboard");
+    }
+    if (maxPan < minPan)
+    {
+        int buf = minPan;
+        minPan = maxPan;
+        maxPan = buf;
     }
     return {minPan, maxPan};
 }
