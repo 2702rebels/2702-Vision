@@ -87,6 +87,7 @@ imgProc proc{};
 
 cv::Mat CaptureGrayscaleImage()
 {
+    cv::Mat image;
 #if DESKTOP
     cv::VideoCapture camCapture(CAMERA_INDEX);
     if (!camCapture.isOpened())
@@ -94,7 +95,6 @@ cv::Mat CaptureGrayscaleImage()
         std::cerr << "Failed to open camera" << std::endl;
         throw std::runtime_error("Failed to open camera");
     }
-    cv::Mat image;
     camCapture >> image;
     if (image.empty())
     {
