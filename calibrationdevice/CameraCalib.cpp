@@ -12,6 +12,7 @@
 #include <frmprocessor.h>
 #include <VisionLog.h>
 #include <cscore/cscore_cv.h>
+#include <cameraserver/cameraserver/CameraServer.h>
 #ifndef DESKTOP
 #include <rpicam.h>
 #include <drm/drm_fourcc.h>
@@ -34,6 +35,8 @@ static constexpr int TILT_STEP_SIZE = 5;
 static cv::Size checkerboardPatternSize = cv::Size(9, 6);
 int imageIndex = 0;
 fs::path outdir;
+cs::CvSource camServer;
+std::mutex mtxCamServer;
 
 CSerialPort motorControllerPort;
 
@@ -104,7 +107,15 @@ cv::Mat CaptureGrayscaleImage()
     {
         cv::Mat grayscale;
         cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
+        if (mtxCamServer.try_lock())
+        {
+            camServer.PutFrame(grayscale);
+        }
         return grayscale;
+    }
+    if (mtxCamServer.try_lock())
+    {
+        camServer.PutFrame(image);
     }
     return image;
 }
