@@ -11,23 +11,26 @@
 #include <LoggingUtils.h>
 #include <frmprocessor.h>
 #include <VisionLog.h>
-#include <cameraserver/cameraserver/CameraServer.h>
 #include <cscore/cscore_cv.h>
 #ifndef DESKTOP
 #include <rpicam.h>
 #include <drm/drm_fourcc.h>
 #include <linux/videodev2.h>
 #endif
-// todo: produce the output coefficients
-// todo: show heatmap of where most of the checkerboard squares were
+/** TODO LIST:
+ * - Detection of FOV (tilt and pan)
+ * - Use pan/tilt FOV to xy take images of the checkerboard all over the sensor
+ * - Fix error when outputting calibration coefficients
+*/
 namespace fs = std::filesystem;
 using namespace spdlog;
 using namespace itas109;
 
 static constexpr int MC_BAUDRATE = 115200;
 static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
-static constexpr int ANGLE_INTERVAL = 5;
 static constexpr int CAMERA_INDEX = 0;
+static constexpr int PAN_STEP_SIZE = 1;
+static constexpr int TILT_STEP_SIZE = 1;
 static cv::Size checkerboardPatternSize = cv::Size(9, 6);
 std::vector<std::vector<cv::Point3f>> objectPoints;
 std::vector<std::vector<cv::Point2f>> imagePoints;
@@ -41,45 +44,22 @@ class imgProc : public FrmProcessor
 {
     cv::Mat m_matLastFrame;
     std::mutex m_mtxLastFrame;
-    VisionLogWriter	m_vl;
-    std::mutex	m_mtxLog;
-    std::mutex	m_mtxCS;
-    bool		m_bFirstVid = true;
-    cs::CvSource m_outputStream;
-public:
-    imgProc( char const *pszLogFile ) :
-        FrmProcessor(),
-        m_vl( fs::path(pszLogFile), LogFrameType::RGB, 640, 480 )
 
-    {
-    }
+public:
     virtual ~imgProc()
     {
-
     }
-    virtual void ProcessFrame( int nCam, CameraFrame const *pcf )
-    {
-        cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
-        //		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
 
-        if (m_mtxLog.try_lock()) {
-            m_vl.WriteFrame(frame);
-            m_mtxLog.unlock();
-        }
-        if (m_mtxCS.try_lock()) {
-            if (m_bFirstVid) {
-                m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows() );
-                m_bFirstVid = false;
-            }
-            m_outputStream.PutFrame(frame);
-            m_mtxCS.unlock();
-        }
+    virtual void ProcessFrame(int nCam, CameraFrame const* pcf)
+    {
+        cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
         if (m_mtxLastFrame.try_lock())
         {
             m_matLastFrame = frame;
             m_mtxLastFrame.unlock();
         }
     }
+
     void GetLastFrame(cv::Mat& frame)
     {
         std::unique_lock<std::mutex> mtx(m_mtxLastFrame);
@@ -103,97 +83,166 @@ void Tilt(int deg)
     std::this_thread::sleep_for(MC_WAITTIME);
 }
 
-cv::Size GetCaptureSize(cv::VideoCapture& camCapture)
+imgProc proc{};
+
+cv::Mat CaptureGrayscaleImage()
 {
-    cv::Mat img;
-    camCapture >> img;
-    return cv::Size(img.cols, img.rows);
-}
-
-#if DESKTOP
-void TiltAndImage(int deg, cv::VideoCapture& camCapture)
-#else
-void TiltAndImage(int deg, imgProc& proc)
-#endif
-{
-    Tilt(deg);
-    bool cornersFound = false;
-    cv::Mat image, grayscale;
-    do
-    {
-#if DESKTOP
-        camCapture >> image;
-#else
-        proc.GetLastFrame(image);
-#endif
-        if (image.empty())
-        {
-            std::cerr << "Failed to capture image" << std::endl;
-            throw;
-        }
-        if (image.channels() > 1)
-        {
-            cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
-        }
-        else
-        {
-            grayscale = image.clone();
-        }
-        std::vector<cv::Point2f> corners;
-        cornersFound = findChessboardCorners(grayscale, checkerboardPatternSize, corners,
-            cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
-        if (!cornersFound)
-        {
-            cv::putText(image, "No checkerboard found!", cv::Point(30,30), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 0, 0));
-        } else
-        {
-            cornerSubPix(grayscale, corners, cv::Size(11, 11), cv::Size(-1, -1),
-            cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001));
-            objectPoints.push_back(objp);
-            imagePoints.push_back(corners);
-
-            // Draw and display the corners (optional)
-            drawChessboardCorners(image, checkerboardPatternSize, corners, cornersFound);
-        }
-#if DESKTOP
-        cv::imshow("Captured Image (Filtered)" , image);
-        cv::waitKey(1);
-#endif
-    } while (cornersFound == false);
-    cv::imwrite((outdir / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
-    cv::imwrite((outdir / ("img-filtered-" + std::to_string(imageIndex) + ".png")).string(), image);
-    imageIndex++;
-}
-
-int main(int argc, char** argv) {
-    SetupTextLogger();
-    for (int i = 0; i < checkerboardPatternSize.height; ++i) {
-        for (int j = 0; j < checkerboardPatternSize.width; ++j) {
-            objp.push_back(cv::Point3f(j, i, 0));
-        }
-    }
 #if DESKTOP
     cv::VideoCapture camCapture(CAMERA_INDEX);
     if (!camCapture.isOpened())
     {
         std::cerr << "Failed to open camera" << std::endl;
-        return 1;
+        throw std::runtime_error("Failed to open camera");
+    }
+    cv::Mat image;
+    camCapture >> image;
+    if (image.empty())
+    {
+        throw std::runtime_error("Failed to capture image from camera");
     }
 #else
-    char szLog[1024] = "test.log";
-    if (access("/data/logs", F_OK) != 0)
+    image = proc.GetLastFrame();
+#endif
+    if (image.channels() > 1)
     {
-        throw;
+        cv::Mat grayscale;
+        cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
+        return grayscale;
     }
-    for( int i = 0; i < 1024; i++)
+    return image;
+}
+
+cv::Size GetCaptureSize()
+{
+    cv::Mat img = CaptureGrayscaleImage();
+    return cv::Size(img.cols, img.rows);
+}
+
+bool TakeCalibrationImage()
+{
+    bool cornersFound = false;
+    cv::Mat grayscale = CaptureGrayscaleImage();
+    cv::Mat debugImage = grayscale.clone();
+    std::vector<cv::Point2f> corners;
+    cornersFound = findChessboardCorners(grayscale, checkerboardPatternSize, corners,
+                                         cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
+    if (!cornersFound)
     {
-        sprintf( szLog, "/data/logs/test%05d.log", i );
-        if (access(szLog, F_OK) != 0)
+        std::cout << "No checkerboard found!" << std::endl;
+        return false;
+    }
+    cornerSubPix(grayscale, corners, cv::Size(11, 11), cv::Size(-1, -1),
+                 cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001));
+    objectPoints.push_back(objp);
+    imagePoints.push_back(corners);
+
+    drawChessboardCorners(debugImage, checkerboardPatternSize, corners, cornersFound);
+#if DESKTOP
+    cv::imshow("Captured Image (Filtered)", debugImage);
+    cv::waitKey(1);
+#endif
+    cv::imwrite((outdir / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
+    cv::imwrite((outdir / ("img-filtered-" + std::to_string(imageIndex) + ".png")).string(), debugImage);
+    imageIndex++;
+    return true;
+}
+
+std::pair<int, int> GetTiltFOV()
+{
+    Pan(90);
+    Tilt(0);
+    int minTilt = -1;
+    for (int i = 0; i < 90; i++)
+    {
+        Tilt(i);
+        cv::Mat img = CaptureGrayscaleImage();
+        std::vector<cv::Point2f> corners;
+        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+                                  cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
+        {
+            minTilt = i;
             break;
+        }
     }
-    printf( "Logging to %s\n", szLog );
-    imgProc proc( szLog );
-    RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
+    if (minTilt == -1)
+    {
+        throw std::runtime_error("Couldn't find minimum tilt to see checkerboard");
+    }
+    Tilt(180);
+    int maxTilt = 181;
+    for (int i = 180; i > 90; i--)
+    {
+        Tilt(i);
+        cv::Mat img = CaptureGrayscaleImage();
+        std::vector<cv::Point2f> corners;
+        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+                                  cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
+        {
+            maxTilt = i;
+            break;
+        }
+    }
+    if (maxTilt == 181)
+    {
+        throw std::runtime_error("Couldn't find maximum tilt to see checkerboard");
+    }
+    return {minTilt, maxTilt};
+}
+
+std::pair<int, int> GetPanFOV()
+{
+    Pan(0);
+    Tilt(90);
+    int minPan = -1;
+    for (int i = 0; i < 90; i++)
+    {
+        Pan(i);
+        cv::Mat img = CaptureGrayscaleImage();
+        std::vector<cv::Point2f> corners;
+        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+                                  cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
+        {
+            minPan = i;
+            break;
+        }
+    }
+    if (minPan == -1)
+    {
+        throw std::runtime_error("Couldn't find minimum tilt to see checkerboard");
+    }
+    Pan(180);
+    int maxPan = 181;
+    for (int i = 180; i > 90; i--)
+    {
+        Pan(i);
+        cv::Mat img = CaptureGrayscaleImage();
+        std::vector<cv::Point2f> corners;
+        if (findChessboardCorners(img, checkerboardPatternSize, corners,
+                                  cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
+        {
+            maxPan = i;
+            break;
+        }
+    }
+    if (maxPan == 181)
+    {
+        throw std::runtime_error("Couldn't find maximum tilt to see checkerboard");
+    }
+    return {minPan, maxPan};
+}
+
+int main(int argc, char** argv)
+{
+    SetupTextLogger();
+    for (int i = 0; i < checkerboardPatternSize.height; ++i)
+    {
+        for (int j = 0; j < checkerboardPatternSize.width; ++j)
+        {
+            objp.push_back(cv::Point3f(j, i, 0));
+        }
+    }
+#ifndef DESKTOP
+    RPICamera mycam0("/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc);
 #endif
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
@@ -221,21 +270,26 @@ int main(int argc, char** argv) {
     std::this_thread::sleep_for(std::chrono::seconds(3));
     Tilt(78);
     Pan(90);
-    for (int i = 78; i < 135; i += ANGLE_INTERVAL)
+    std::pair<int, int> tiltFov = GetTiltFOV();
+    info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
+    std::pair<int, int> panFov = GetPanFOV();
+    info("Pan FOV min: {}, Pan FOV max: {}", panFov.first, panFov.second);
+    int totalSteps = (panFov.second - panFov.first) / PAN_STEP_SIZE + (tiltFov.second - tiltFov.first) / TILT_STEP_SIZE;
+    info("Total # of steps: {}", totalSteps);
+    int stepsDone = 0;
+    for (int t = tiltFov.first; t < tiltFov.second; t += TILT_STEP_SIZE)
     {
-#if DESKTOP
-        TiltAndImage(i, camCapture);
-#else
-        TiltAndImage(i, proc);
-#endif
-    }
-    for (int i = 0; i < 45; i += ANGLE_INTERVAL)
-    {
-#if DESKTOP
-        TiltAndImage(i, camCapture);
-#else
-        TiltAndImage(i, proc);
-#endif
+        for (int p = panFov.first; p < panFov.second; p += PAN_STEP_SIZE)
+        {
+            info("Step {}, {}% done", stepsDone, stepsDone / totalSteps * 100);
+            Tilt(t);
+            Pan(p);
+            if (!TakeCalibrationImage())
+            {
+                warn("Failed to find checkerboard at p{} t{} which was inside of the pan and tilt fov", p, t);
+            }
+            stepsDone++;
+        }
     }
     motorControllerPort.close();
 #if DESKTOP
@@ -244,17 +298,18 @@ int main(int argc, char** argv) {
     std::cout << "image-taking job complete, transforming into calibration coefficients..." << std::endl;
     cv::Mat cameraMatrix, distCoeffs, rvecs, tvecs;
 #if DESKTOP
-    cv::calibrateCamera(objectPoints, imagePoints, GetCaptureSize(camCapture), cameraMatrix, distCoeffs, rvecs, tvecs);
+    cv::calibrateCamera(objectPoints, imagePoints, GetCaptureSize(), cameraMatrix, distCoeffs, rvecs, tvecs);
 #else
     cv::calibrateCamera(objectPoints, imagePoints, cv::Size(640, 480), cameraMatrix, distCoeffs, rvecs, tvecs);
 #endif
     info("Camera Matrix:\n {}, {}, {},\n{}, {}, {},\n{}, {}, {}",
-    cameraMatrix.at<float>(0, 0), cameraMatrix.at<float>(0, 1), cameraMatrix.at<float>(0, 2),
-    cameraMatrix.at<float>(1, 0), cameraMatrix.at<float>(1, 1), cameraMatrix.at<float>(1, 2),
-    cameraMatrix.at<float>(2, 0), cameraMatrix.at<float>(2, 1), cameraMatrix.at<float>(2, 2)
-);
+         cameraMatrix.at<float>(0, 0), cameraMatrix.at<float>(0, 1), cameraMatrix.at<float>(0, 2),
+         cameraMatrix.at<float>(1, 0), cameraMatrix.at<float>(1, 1), cameraMatrix.at<float>(1, 2),
+         cameraMatrix.at<float>(2, 0), cameraMatrix.at<float>(2, 1), cameraMatrix.at<float>(2, 2)
+    );
     info("Distortion Coefficients :\n {}, {}, {}, {}, {}",
-        distCoeffs.at<float>(0, 0), distCoeffs.at<float>(0, 1), distCoeffs.at<float>(0, 2), distCoeffs.at<float>(0, 3), distCoeffs.at<float>(0, 4)
+         distCoeffs.at<float>(0, 0), distCoeffs.at<float>(0, 1), distCoeffs.at<float>(0, 2), distCoeffs.at<float>(0, 3),
+         distCoeffs.at<float>(0, 4)
     );
     return 0;
 }
