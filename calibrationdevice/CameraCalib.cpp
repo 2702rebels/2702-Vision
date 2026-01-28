@@ -101,7 +101,7 @@ cv::Mat CaptureGrayscaleImage()
         throw std::runtime_error("Failed to capture image from camera");
     }
 #else
-    image = proc.GetLastFrame();
+    proc.GetLastFrame(image);
 #endif
     if (image.channels() > 1)
     {
