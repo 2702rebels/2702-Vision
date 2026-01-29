@@ -313,14 +313,14 @@ int main(int argc, char** argv)
         info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
         std::pair<int, int> panFov = GetPanFOV();
         info("Pan FOV min: {}, Pan FOV max: {}", panFov.first, panFov.second);
-        int totalSteps = (panFov.second - panFov.first) / PAN_STEP_SIZE + (tiltFov.second - tiltFov.first) / TILT_STEP_SIZE;
+        int totalSteps = ((panFov.second - panFov.first) / PAN_STEP_SIZE) * ( (tiltFov.second - tiltFov.first) / TILT_STEP_SIZE);
         info("Total # of steps: {}", totalSteps);
         int stepsDone = 0;
         for (int t = tiltFov.first; t < tiltFov.second; t += TILT_STEP_SIZE)
         {
             for (int p = panFov.first; p < panFov.second; p += PAN_STEP_SIZE)
             {
-                info("Step {}, {}% done", stepsDone, stepsDone / totalSteps);
+                info("Step {}, {}% done", stepsDone, stepsDone / totalSteps * 100);
                 Tilt(t);
                 Pan(p);
                 if (!TakeCalibrationImage(dist))

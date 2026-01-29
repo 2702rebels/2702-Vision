@@ -4,6 +4,7 @@ Loads all png images from /data/calibration/ to create these calibration values.
 * - opencv
 */
 
+#include <filesystem>
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
@@ -38,21 +39,25 @@ int main(int argc, char** argv) {
 	}
 
 	// Load the checkerboard images
-	vector<String> filenames;
-	glob(std::string(inputDir) + "*.*", filenames);
 
 	// Detect checkerboard corners in each image
-	Mat gray;
-	for (const auto& filename : filenames) {
-		Mat image = imread(filename, cv::IMREAD_GRAYSCALE);
-
+	int nRows;
+	int nCols;
+	for (const auto& filename : std::filesystem::directory_iterator(inputDir)) {
+		if (!filename.is_regular_file())
+		{
+			continue;
+		}
+		Mat image = imread(filename.path().string(), cv::IMREAD_GRAYSCALE);
+		nRows = image.rows;
+		nCols = image.cols;
 		vector<Point2f> corners;
-		bool found = findChessboardCorners(gray, patternSize, corners,
+		bool found = findChessboardCorners(image, patternSize, corners,
 			CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE);
 
 		if (found) {
 			// Refine corner locations
-			cornerSubPix(gray, corners, Size(11, 11), Size(-1, -1),
+			cornerSubPix(image, corners, Size(11, 11), Size(-1, -1),
 				TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 30, 0.0001));
 
 			// Add object points and image points
@@ -62,7 +67,7 @@ int main(int argc, char** argv) {
 			// Draw and display the corners (optional)
 			drawChessboardCorners(image, patternSize, corners, found);
 			imshow("Corners", image);
-			waitKey();
+			waitKey(1);
 		}
 	}
 
@@ -70,7 +75,7 @@ int main(int argc, char** argv) {
 
 	// Calibrate the camera
 	Mat cameraMatrix, distCoeffs, rvecs, tvecs;
-	calibrateCamera(objectPoints, imagePoints, Size(gray.cols, gray.rows), cameraMatrix, distCoeffs, rvecs, tvecs);
+	calibrateCamera(objectPoints, imagePoints, Size(nCols, nRows), cameraMatrix, distCoeffs, rvecs, tvecs);
 
 	// Print the camera parameters
 	info("Camera Matrix: {}, {}, {},\n{}, {}, {},\n{}, {}, {}",
