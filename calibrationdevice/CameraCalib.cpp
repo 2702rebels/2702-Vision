@@ -299,6 +299,16 @@ int main(int argc, char** argv)
         {
             break;
         }
+        std::cout << "Waiting for chessboard..." << std::endl;
+        bool foundChessboard = false;
+        while (!foundChessboard)
+        {
+            cv::Mat img = CaptureGrayscaleImage();
+            std::vector<cv::Point2f> corners;
+            foundChessboard = findChessboardCorners(img, checkerboardPatternSize, corners,
+                                      cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
+        }
+        std::cout << "Found chessboard, starting FOV calibration" << std::endl;
         std::pair<int, int> tiltFov = GetTiltFOV();
         info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
         std::pair<int, int> panFov = GetPanFOV();
