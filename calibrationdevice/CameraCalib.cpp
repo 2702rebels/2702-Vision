@@ -108,7 +108,25 @@ cv::Mat CaptureGrayscaleImage()
     {
         cv::Mat grayscale;
         cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
+        if (bFirstFrame)
+        {
+            camServer = frc::CameraServer::PutVideo("Vision", grayscale.cols, grayscale.rows);
+            bFirstFrame = false;
+        }
+        if (mtxCamServer.try_lock())
+        {
+            camServer.PutFrame(grayscale);
+        }
         return grayscale;
+    }
+    if (bFirstFrame)
+    {
+        camServer = frc::CameraServer::PutVideo("Vision", image.cols, image.rows);
+        bFirstFrame = false;
+    }
+    if (mtxCamServer.try_lock())
+    {
+        camServer.PutFrame(image);
     }
     return image;
 }
@@ -140,15 +158,6 @@ bool TakeCalibrationImage(int dist)
 #endif
     cv::imwrite((outdir / ("img-" + std::to_string(imageIndex) + "-" + std::to_string(dist) + ".png")).string(), grayscale);
     cv::imwrite((outdir / "filtered" / ("img-" + std::to_string(imageIndex) + "-" + std::to_string(dist) + ".png")).string(), debugImage);
-    if (bFirstFrame)
-    {
-        camServer = frc::CameraServer::PutVideo("Vision", debugImage.cols, debugImage.rows);
-        bFirstFrame = false;
-    }
-    if (mtxCamServer.try_lock())
-    {
-        camServer.PutFrame(debugImage);
-    }
     imageIndex++;
     return true;
 }
@@ -166,7 +175,7 @@ std::pair<int, int> GetTiltFOV()
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
-            minTilt = i;
+            minTilt = i + TILT_STEP_SIZE;
             break;
         }
     }
@@ -184,7 +193,7 @@ std::pair<int, int> GetTiltFOV()
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
-            maxTilt = i;
+            maxTilt = i - TILT_STEP_SIZE;
             break;
         }
     }
@@ -214,7 +223,7 @@ std::pair<int, int> GetPanFOV()
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
-            minPan = i;
+            minPan = i + PAN_STEP_SIZE;
             break;
         }
     }
@@ -232,7 +241,7 @@ std::pair<int, int> GetPanFOV()
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                   cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE))
         {
-            maxPan = i;
+            maxPan = i - PAN_STEP_SIZE;
             break;
         }
     }
@@ -301,7 +310,7 @@ int main(int argc, char** argv)
         {
             for (int p = panFov.first; p < panFov.second; p += PAN_STEP_SIZE)
             {
-                info("Step {}, {}% done", stepsDone, (stepsDone / totalSteps) * 100);
+                info("Step {}, {}% done", stepsDone, stepsDone / totalSteps);
                 Tilt(t);
                 Pan(p);
                 if (!TakeCalibrationImage(dist))
