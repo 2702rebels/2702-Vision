@@ -37,6 +37,7 @@ int imageIndex = 0;
 fs::path outdir;
 cs::CvSource camServer;
 std::mutex mtxCamServer;
+bool bFirstFrame = false;
 
 CSerialPort motorControllerPort;
 
@@ -107,11 +108,21 @@ cv::Mat CaptureGrayscaleImage()
     {
         cv::Mat grayscale;
         cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
+        if (!bFirstFrame)
+        {
+            camServer = frc::CameraServer::PutVideo("Vision", grayscale.cols, grayscale.rows);
+            bFirstFrame = false;
+        }
         if (mtxCamServer.try_lock())
         {
             camServer.PutFrame(grayscale);
         }
         return grayscale;
+    }
+    if (!bFirstFrame)
+    {
+        camServer = frc::CameraServer::PutVideo("Vision", image.cols, image.rows);
+        bFirstFrame = false;
     }
     if (mtxCamServer.try_lock())
     {
