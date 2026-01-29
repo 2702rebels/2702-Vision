@@ -65,13 +65,16 @@ int main(int argc, char** argv) {
 			imagePoints.push_back(corners);
 
 			// Draw and display the corners (optional)
+#if DESKTOP
 			drawChessboardCorners(image, patternSize, corners, found);
 			imshow("Corners", image);
 			waitKey(1);
+#endif
 		}
 	}
-
+#if DESKTOP
 	destroyAllWindows();
+#endif
 
 	// Calibrate the camera
 	Mat cameraMatrix, distCoeffs, rvecs, tvecs;
