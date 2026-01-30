@@ -328,7 +328,7 @@ int main(int argc, char** argv)
         {
             for (int p = panFov.first; p < panFov.second; p += PAN_STEP_SIZE)
             {
-                info("Step {}, {}% done", stepsDone, stepsDone / totalSteps * 100);
+                info("Step {}, {}% done", stepsDone, static_cast<double>(stepsDone) / static_cast<double>(totalSteps) * 100);
                 Tilt(t);
                 Pan(p);
                 if (!TakeCalibrationImage(dist))
