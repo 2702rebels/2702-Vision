@@ -157,8 +157,8 @@ bool TakeCalibrationImage(int dist)
     cv::imshow("Captured Image (Filtered)", debugImage);
     cv::waitKey(1);
 #endif
-    cv::imwrite((outdir / ("img-" + std::to_string(imageIndex) + "-" + std::to_string(dist) + ".png")).string(), grayscale);
-    cv::imwrite((outdir / "filtered" / ("img-" + std::to_string(imageIndex) + "-" + std::to_string(dist) + ".png")).string(), debugImage);
+    cv::imwrite((outdir / std::to_string(dist) / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
+    cv::imwrite((outdir / "filtered" / std::to_string(dist) / ("img-" + std::to_string(imageIndex) + ".png")).string(), debugImage);
     imageIndex++;
     return true;
 }
@@ -307,6 +307,7 @@ int main(int argc, char** argv)
         {
             break;
         }
+        fs::create_directories(outdir / std::to_string(dist));
         std::cout << "Waiting for chessboard..." << std::endl;
         bool foundChessboard = false;
         while (!foundChessboard)
