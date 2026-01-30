@@ -32,7 +32,6 @@ static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
 static constexpr int CAMERA_INDEX = 0;
 static constexpr int PAN_STEP_SIZE = 5;
 static constexpr int TILT_STEP_SIZE = 5;
-static cv::Size checkerboardPatternSize = cv::Size(9, 6);
 int imageIndex = 0;
 fs::path outdir;
 cs::CvSource camServer;
@@ -83,6 +82,8 @@ void Tilt(int deg)
     motorControllerPort.flushBuffers();
     std::this_thread::sleep_for(MC_WAITTIME);
 }
+
+cv::Size checkerboardPatternSize;
 
 imgProc proc{};
 
@@ -269,6 +270,13 @@ int main(int argc, char** argv)
     std::cin >> portname;
     std::cout << "Enter output directory of png files: ";
     std::cin >> outdir;
+    int checkerBoardWidth;
+    int checkerBoardHeight;
+    std::cout << "Enter width of checkerboard in # of squares: ";
+    std::cin >> checkerBoardWidth;
+    std::cout << "Enter height of checkerboard in # of squares: ";
+    std::cin >> checkerBoardHeight;
+    checkerboardPatternSize = cv::Size(checkerBoardWidth - 1, checkerBoardHeight - 1);
     if (!fs::exists(outdir) || !fs::is_directory(outdir))
     {
         fs::create_directories(outdir);
