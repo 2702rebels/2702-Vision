@@ -21,8 +21,8 @@ int chessboardWidth;
 int chessboardHeight;
 float squareSize;
 cv::Size chessboardPatternSize;
-volatile int nImagesDone = 0;
 cv::Size imageSize;
+int totalNImages;
 bool useSBMethod = false;
 
 void CalibratorThread(std::stop_token token)
@@ -36,6 +36,7 @@ void CalibratorThread(std::stop_token token)
 		}
 		fs::path imagePath = images.front();
 		images.pop();
+		info("{}% done", static_cast<double>(images.size()) / static_cast<double>(totalNImages) * 100);
 		queueLock.unlock();
 		cv::Mat img = cv::imread(imagePath.string(), cv::IMREAD_GRAYSCALE);
 		imageSize = img.size();
@@ -60,8 +61,6 @@ void CalibratorThread(std::stop_token token)
 		imagePoints.push_back(corners);
 		objectPoints.push_back(obj);
 		vectorLock.unlock();
-		nImagesDone++;
-		info("{}% done", static_cast<double>(nImagesDone) / static_cast<double>(images.size()) * 100);
 	}
 }
 
@@ -106,6 +105,7 @@ int main(int argc, char** argv)
 			}
 		}
 	}
+	totalNImages = images.size();
 	for (int i = 0; i < chessboardPatternSize.height; i++)
 	{
 		for (int j = 0; j < chessboardPatternSize.width; j++)
