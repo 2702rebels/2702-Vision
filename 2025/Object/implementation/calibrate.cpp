@@ -23,6 +23,7 @@ float squareSize;
 cv::Size chessboardPatternSize;
 volatile int nImagesDone = 0;
 cv::Size imageSize;
+bool useSBMethod = false;
 
 void CalibratorThread(std::stop_token token)
 {
@@ -39,8 +40,15 @@ void CalibratorThread(std::stop_token token)
 		cv::Mat img = cv::imread(imagePath.string(), cv::IMREAD_GRAYSCALE);
 		imageSize = img.size();
 		std::vector<cv::Point2f> corners;
-		bool foundChessboard = cv::findChessboardCorners(img, chessboardPatternSize, corners,
-		                                                 cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+		bool foundChessboard;
+		if (useSBMethod == false)
+		{
+			foundChessboard = cv::findChessboardCorners(img, chessboardPatternSize, corners,
+															 cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+		} else
+		{
+			foundChessboard = cv::findChessboardCornersSB(img, chessboardPatternSize, corners, cv::CALIB_CB_EXHAUSTIVE | cv::CALIB_CB_ACCURACY);
+		}
 		if (!foundChessboard)
 		{
 			std::cout << "WARN: Couldn't find chessboard for image" << imagePath.string() << std::endl;
@@ -67,6 +75,20 @@ int main(int argc, char** argv)
 	chessboardPatternSize = {chessboardWidth - 1, chessboardHeight - 1};
 	std::cout << "Enter square size in m: ";
 	std::cin >> squareSize;
+	std::cout << "Use regular corners method or SB method? (enter r or s): ";
+	std::string cornersMethod;
+	std::cin >> cornersMethod;
+	if (cornersMethod == "r")
+	{
+		useSBMethod = false;
+	} else if (cornersMethod == "s")
+	{
+		useSBMethod = true;
+	} else
+	{
+		std::cerr << "Failed to recognize corners method \"" << cornersMethod << "\"" << std::endl;
+		return -1;
+	}
 	while (true)
 	{
 		std::string imagesDir;
