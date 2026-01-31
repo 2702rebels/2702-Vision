@@ -149,8 +149,9 @@ bool TakeCalibrationImage(std::string dist)
     if (!cornersFound)
     {
         std::cout << "No checkerboard found!" << std::endl;
+    } else
+    {
         drawChessboardCorners(debugImage, checkerboardPatternSize, corners, cornersFound);
-        return false;
     }
 #if DESKTOP
     cv::imshow("Captured Image (Filtered)", debugImage);
@@ -159,7 +160,7 @@ bool TakeCalibrationImage(std::string dist)
     cv::imwrite((outdir / dist / ("img-" + std::to_string(imageIndex) + "-" + dist + ".png")).string(), grayscale);
     cv::imwrite((outdir / "filtered" / dist / ("img-" + std::to_string(imageIndex) + "-" + dist + ".png")).string(), debugImage);
     imageIndex++;
-    return true;
+    return cornersFound;
 }
 
 std::pair<int, int> GetTiltFOV()
@@ -279,6 +280,7 @@ int main(int argc, char** argv)
     if (!fs::exists(outdir) || !fs::is_directory(outdir))
     {
         fs::create_directories(outdir);
+        fs::create_directories(outdir / "filtered");
     }
     std::cout << "Using serial port " << portname << std::endl;
     motorControllerPort.init(
@@ -307,6 +309,7 @@ int main(int argc, char** argv)
             break;
         }
         fs::create_directories(outdir / dist);
+        fs::create_directories(outdir / "filtered" / dist);
         std::cout << "Waiting for chessboard..." << std::endl;
         bool foundChessboard = false;
         while (!foundChessboard)
