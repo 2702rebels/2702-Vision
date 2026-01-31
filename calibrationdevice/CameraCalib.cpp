@@ -156,8 +156,8 @@ bool TakeCalibrationImage(std::string dist)
     cv::imshow("Captured Image (Filtered)", debugImage);
     cv::waitKey(1);
 #endif
-    cv::imwrite((outdir / dist / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
-    cv::imwrite((outdir / "filtered" / dist / ("img-" + std::to_string(imageIndex) + ".png")).string(), debugImage);
+    cv::imwrite((outdir / dist / ("img-" + std::to_string(imageIndex) + "-" + dist + ".png")).string(), grayscale);
+    cv::imwrite((outdir / "filtered" / dist / ("img-" + std::to_string(imageIndex) + "-" + dist + ".png")).string(), debugImage);
     imageIndex++;
     return true;
 }
