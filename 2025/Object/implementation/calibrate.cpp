@@ -10,84 +10,106 @@ Loads all png images from /data/calibration/ to create these calibration values.
 #include <vector>
 #include "LoggingUtils.h"
 
-using namespace cv;
-using namespace std;
+namespace fs = std::filesystem;
+std::queue<fs::path> images;
+std::mutex mtxVectorLock;
+std::mutex mtxQueueLock;
+std::vector<std::vector<cv::Point2f>> imagePoints;
+std::vector<std::vector<cv::Point3f>> objectPoints;
+std::vector<cv::Point3f> obj;
+int chessboardWidth;
+int chessboardHeight;
+float squareSize;
+cv::Size chessboardPatternSize;
+volatile int nImagesDone = 0;
+cv::Size imageSize;
 
-int main(int argc, char** argv) {
-	// Define the checkerboard pattern size
-	SetupTextLogger();
-	Size patternSize(9, 6);  // 9x6 checkerboard
-	char const* inputDir = 0;
-	if (argc == 1 || argc > 2) {
-		error("Usage: ./calibrate inputDir, where inputDir is a path to a directory with imgs to calibrate");
-		error("Example: ./calibrate /media/sf_2702_Vision/2025/Object/good/");
-		return 1;
-	}
-	else {
-		inputDir = argv[1];
-	}
-	// Create vectors to store the object points and image points
-	vector<vector<Point3f>> objectPoints;
-	vector<vector<Point2f>> imagePoints;
-
-	// Define the world coordinates for 3D points
-	vector<Point3f> objp;
-	for (int i = 0; i < patternSize.height; ++i) {
-		for (int j = 0; j < patternSize.width; ++j) {
-			objp.push_back(Point3f(j, i, 0));
-		}
-	}
-
-	// Load the checkerboard images
-
-	// Detect checkerboard corners in each image
-	int nRows;
-	int nCols;
-	for (const auto& filename : std::filesystem::directory_iterator(inputDir)) {
-		if (!filename.is_regular_file())
+void CalibratorThread(std::stop_token token)
+{
+	while (!token.stop_requested())
+	{
+		std::unique_lock queueLock(mtxQueueLock);
+		if (images.empty())
 		{
+			return;
+		}
+		fs::path imagePath = images.front();
+		images.pop();
+		queueLock.unlock();
+		cv::Mat img = cv::imread(imagePath.string(), cv::IMREAD_GRAYSCALE);
+		imageSize = img.size();
+		std::vector<cv::Point2f> corners;
+		bool foundChessboard = cv::findChessboardCorners(img, chessboardPatternSize, corners,
+		                                                 cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+		if (!foundChessboard)
+		{
+			std::cout << "WARN: Couldn't find chessboard for image" << imagePath.string() << std::endl;
 			continue;
 		}
-		Mat image = imread(filename.path().string(), cv::IMREAD_GRAYSCALE);
-		nRows = image.rows;
-		nCols = image.cols;
-		vector<Point2f> corners;
-		bool found = findChessboardCorners(image, patternSize, corners,
-			CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE);
+		cv::cornerSubPix(img, corners, cv::Size(11, 11), cv::Size(-1, -1),
+		                 cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
+		std::unique_lock vectorLock(mtxVectorLock);
+		imagePoints.push_back(corners);
+		objectPoints.push_back(obj);
+		vectorLock.unlock();
+		nImagesDone++;
+		info("{}% done", static_cast<double>(nImagesDone) / static_cast<double>(images.size()) * 100);
+	}
+}
 
-		if (found) {
-			// Refine corner locations
-			cornerSubPix(image, corners, Size(11, 11), Size(-1, -1),
-				TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 30, 0.0001));
-
-			// Add object points and image points
-			objectPoints.push_back(objp);
-			imagePoints.push_back(corners);
-
-			// Draw and display the corners (optional)
-#if DESKTOP
-			drawChessboardCorners(image, patternSize, corners, found);
-			imshow("Corners", image);
-			waitKey(1);
-#endif
+int main(int argc, char** argv)
+{
+	SetupTextLogger();
+	std::cout << "Enter chessboard width: ";
+	std::cin >> chessboardWidth;
+	std::cout << "Enter chessboard height: ";
+	std::cin >> chessboardHeight;
+	chessboardPatternSize = {chessboardWidth - 1, chessboardHeight - 1};
+	std::cout << "Enter square size in m: ";
+	std::cin >> squareSize;
+	while (true)
+	{
+		std::string imagesDir;
+		std::cout << "Enter a directory to add images from(null to finish): ";
+		std::cin >> imagesDir;
+		if (imagesDir == "null")
+		{
+			break;
+		}
+		for (auto item : fs::directory_iterator(imagesDir))
+		{
+			if (item.is_regular_file())
+			{
+				images.push(item.path());
+			}
 		}
 	}
-#if DESKTOP
-	destroyAllWindows();
-#endif
-
-	// Calibrate the camera
-	Mat cameraMatrix, distCoeffs, rvecs, tvecs;
-	calibrateCamera(objectPoints, imagePoints, Size(nCols, nRows), cameraMatrix, distCoeffs, rvecs, tvecs);
-
-	// Print the camera parameters
-	info("Camera Matrix: {}, {}, {},\n{}, {}, {},\n{}, {}, {}",
-		cameraMatrix.at<float>(0, 0), cameraMatrix.at<float>(0, 1), cameraMatrix.at<float>(0, 2),
-		cameraMatrix.at<float>(1, 0), cameraMatrix.at<float>(1, 1), cameraMatrix.at<float>(1, 2),
-		cameraMatrix.at<float>(2, 0), cameraMatrix.at<float>(2, 1), cameraMatrix.at<float>(2, 2)
-	);
-	info("Distortion Coefficients : {}, {}, {}, {}, {}", 
-		distCoeffs.at<float>(0, 0), distCoeffs.at<float>(0, 1), distCoeffs.at<float>(0, 2), distCoeffs.at<float>(0, 3), distCoeffs.at<float>(0, 4)
-	);
+	for (int i = 0; i < chessboardPatternSize.height; i++)
+	{
+		for (int j = 0; j < chessboardPatternSize.width; j++)
+		{
+			obj.emplace_back(j * squareSize, i * squareSize, 0.0f);
+		}
+	}
+	std::vector<std::jthread> calibratorThreads;
+	int threadCount;
+	std::cout << "Enter # of threads to use: ";
+	std::cin >> threadCount;
+	for (int i = 0; i < threadCount; i++)
+	{
+		calibratorThreads.emplace_back(CalibratorThread);
+	}
+	info("Starting finding of chessboards");
+	for (std::jthread& thread : calibratorThreads)
+	{
+		thread.join();
+	}
+	info("Finished finding chessboards, now finding camera parameters");
+	cv::Mat cameraMatrix, distCoeffs;
+	std::vector<cv::Mat> rvecs, tvecs;
+	double rms = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
+	info("rms error: {}", rms);
+	std::cout << "Camera matrix:\n" << cameraMatrix << std::endl;
+	std::cout << "Distortion coefficients:\n" << distCoeffs << std::endl;
 	return 0;
 }
