@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 		{
 			break;
 		}
-		for (auto item : fs::directory_iterator(imagesDir))
+		for (auto item : fs::recursive_directory_iterator(imagesDir))
 		{
 			if (item.is_regular_file())
 			{
