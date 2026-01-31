@@ -138,7 +138,7 @@ cv::Size GetCaptureSize()
     return cv::Size(img.cols, img.rows);
 }
 
-bool TakeCalibrationImage(int dist)
+bool TakeCalibrationImage(std::string dist)
 {
     bool cornersFound = false;
     cv::Mat grayscale = CaptureGrayscaleImage();
@@ -149,16 +149,15 @@ bool TakeCalibrationImage(int dist)
     if (!cornersFound)
     {
         std::cout << "No checkerboard found!" << std::endl;
+        drawChessboardCorners(debugImage, checkerboardPatternSize, corners, cornersFound);
         return false;
     }
-
-    drawChessboardCorners(debugImage, checkerboardPatternSize, corners, cornersFound);
 #if DESKTOP
     cv::imshow("Captured Image (Filtered)", debugImage);
     cv::waitKey(1);
 #endif
-    cv::imwrite((outdir / std::to_string(dist) / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
-    cv::imwrite((outdir / "filtered" / std::to_string(dist) / ("img-" + std::to_string(imageIndex) + ".png")).string(), debugImage);
+    cv::imwrite((outdir / dist / ("img-" + std::to_string(imageIndex) + ".png")).string(), grayscale);
+    cv::imwrite((outdir / "filtered" / dist / ("img-" + std::to_string(imageIndex) + ".png")).string(), debugImage);
     imageIndex++;
     return true;
 }
@@ -300,14 +299,14 @@ int main(int argc, char** argv)
     Pan(90);
     while (true)
     {
-        int dist;
+        std::string dist;
         std::cout << "Enter distance(enter 0 to end / quit): ";
         std::cin >> dist;
-        if (dist == 0)
+        if (dist == "0")
         {
             break;
         }
-        fs::create_directories(outdir / std::to_string(dist));
+        fs::create_directories(outdir / dist);
         std::cout << "Waiting for chessboard..." << std::endl;
         bool foundChessboard = false;
         while (!foundChessboard)
