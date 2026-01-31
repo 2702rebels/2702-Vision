@@ -295,10 +295,10 @@ int main(int argc, char** argv)
         return 1;
     }
     std::this_thread::sleep_for(std::chrono::seconds(3));
-    Tilt(78);
-    Pan(90);
     while (true)
     {
+        Tilt(78);
+        Pan(90);
         std::string dist;
         std::cout << "Enter distance(enter 0 to end / quit): ";
         std::cin >> dist;
