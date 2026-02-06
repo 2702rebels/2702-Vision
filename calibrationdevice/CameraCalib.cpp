@@ -30,8 +30,8 @@ using namespace itas109;
 static constexpr int MC_BAUDRATE = 115200;
 static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
 static constexpr int CAMERA_INDEX = 0;
-static constexpr int PAN_STEP_SIZE = 10;
-static constexpr int TILT_STEP_SIZE = 10;
+static constexpr int PAN_STEP_SIZE = 5;
+static constexpr int TILT_STEP_SIZE = 5;
 int imageIndex = 0;
 fs::path outdir;
 cs::CvSource camServer;
@@ -162,6 +162,65 @@ bool TakeCalibrationImage(std::string dist)
     imageIndex++;
     return cornersFound;
 }
+int GetChessboardHeightDeg()
+{
+    Pan(90);
+    Tilt(90);
+    std::vector<cv::Point2f> corners;
+    bool foundChessboard = false;
+    while (!foundChessboard)
+    {
+        cv::Mat grayscale = CaptureGrayscaleImage();
+        foundChessboard = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
+    }
+    float topBound = corners[0].y;
+    float curBottom = -1;
+    int i = 91;
+    Pan(90);
+    while (topBound > curBottom)
+    {
+        Tilt(i);
+        cv::Mat grayscale = CaptureGrayscaleImage();
+        bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
+        if (found)
+        {
+            curBottom = corners[3].y;
+        }
+        i++;
+    }
+    i--;
+    return i;
+}
+
+int GetChessboardWidthDeg()
+{
+    Pan(90);
+    Tilt(90);
+    std::vector<cv::Point2f> corners;
+    bool foundChessboard = false;
+    while (!foundChessboard)
+    {
+        cv::Mat grayscale = CaptureGrayscaleImage();
+        foundChessboard = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
+    }
+    float rightBound = corners[1].x;
+    float curLeft = -1;
+    int i = 91;
+    Tilt(90);
+    while (rightBound > curLeft)
+    {
+        Pan(i);
+        cv::Mat grayscale = CaptureGrayscaleImage();
+        bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
+        if (found)
+        {
+            curLeft = corners[0].x;
+        }
+        i++;
+    }
+    i--;
+    return i;
+}
 
 std::pair<int, int> GetTiltFOV()
 {
@@ -277,6 +336,8 @@ int main(int argc, char** argv)
     std::cout << "Enter height of checkerboard in # of squares: ";
     std::cin >> checkerBoardHeight;
     checkerboardPatternSize = cv::Size(checkerBoardWidth - 1, checkerBoardHeight - 1);
+    int checkerboardWidthDeg = GetChessboardWidthDeg();
+    int checkerboardHeightDeg = GetChessboardHeightDeg();
     if (!fs::exists(outdir) || !fs::is_directory(outdir))
     {
         fs::create_directories(outdir);
@@ -324,12 +385,12 @@ int main(int argc, char** argv)
         info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
         std::pair<int, int> panFov = GetPanFOV();
         info("Pan FOV min: {}, Pan FOV max: {}", panFov.first, panFov.second);
-        int totalSteps = ((panFov.second - panFov.first) / PAN_STEP_SIZE) * ( (tiltFov.second - tiltFov.first) / TILT_STEP_SIZE);
+        int totalSteps = ((panFov.second - panFov.first) / checkerboardWidthDeg) * ( (tiltFov.second - tiltFov.first) / checkerboardHeightDeg);
         info("Total # of steps: {}", totalSteps);
         int stepsDone = 0;
-        for (int t = tiltFov.first; t < tiltFov.second; t += TILT_STEP_SIZE)
+        for (int t = tiltFov.first; t < tiltFov.second; t += checkerboardHeightDeg)
         {
-            for (int p = panFov.first; p < panFov.second; p += PAN_STEP_SIZE)
+            for (int p = panFov.first; p < panFov.second; p += checkerboardWidthDeg)
             {
                 info("Step {}, {}% done", stepsDone, static_cast<double>(stepsDone) / static_cast<double>(totalSteps) * 100);
                 Tilt(t);
