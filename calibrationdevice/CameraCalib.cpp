@@ -216,9 +216,9 @@ int GetChessboardWidthDeg()
         {
             curLeft = corners[0].x;
         }
-        i++;
+        i += 3;
     }
-    i--;
+    i-= 3;
     return i;
 }
 
@@ -336,8 +336,6 @@ int main(int argc, char** argv)
     std::cout << "Enter height of checkerboard in # of squares: ";
     std::cin >> checkerBoardHeight;
     checkerboardPatternSize = cv::Size(checkerBoardWidth - 1, checkerBoardHeight - 1);
-    int checkerboardWidthDeg = GetChessboardWidthDeg();
-    int checkerboardHeightDeg = GetChessboardHeightDeg();
     if (!fs::exists(outdir) || !fs::is_directory(outdir))
     {
         fs::create_directories(outdir);
@@ -380,7 +378,10 @@ int main(int argc, char** argv)
             foundChessboard = findChessboardCorners(img, checkerboardPatternSize, corners,
                                       cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
         }
-        std::cout << "Found chessboard, starting FOV calibration" << std::endl;
+        std::cout << "Found chessboard, starting chessboard size detection & FOV calibration" << std::endl;
+        int checkerboardWidthDeg = GetChessboardWidthDeg();
+        int checkerboardHeightDeg = GetChessboardHeightDeg();
+        info("chessboard width(deg): {}, chessboard height(deg): {}", checkerboardWidthDeg, checkerboardHeightDeg);
         std::pair<int, int> tiltFov = GetTiltFOV();
         info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
         std::pair<int, int> panFov = GetPanFOV();
