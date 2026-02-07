@@ -184,7 +184,7 @@ int GetChessboardHeightDeg()
         bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
         if (found)
         {
-            curBottom = corners[3].y;
+            curBottom = corners[corners.size() - 1].y;
         }
         i += 3;
     }
@@ -202,7 +202,7 @@ int GetChessboardWidthDeg()
         cv::Mat grayscale = CaptureGrayscaleImage();
         foundChessboard = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
     }
-    float rightBound = corners[1].x;
+    float rightBound = corners[corners.size() - 1].x;
     float curLeft = -1;
     int i = 90;
     Tilt(90);
