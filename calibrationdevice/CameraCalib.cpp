@@ -205,7 +205,7 @@ int GetChessboardWidthDeg()
     }
     float rightBound = corners[1].x;
     float curLeft = -1;
-    int i = 91;
+    int i = 90;
     Tilt(90);
     while (rightBound > curLeft)
     {
@@ -218,8 +218,7 @@ int GetChessboardWidthDeg()
         }
         i += 3;
     }
-    i-= 3;
-    return i;
+    return i - 90;
 }
 
 std::pair<int, int> GetTiltFOV()
