@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 	std::cin >> imagesDir;
 	for (const auto& item : fs::recursive_directory_iterator(imagesDir))
 	{
-		if (item.is_regular_file())
+		if (item.is_regular_file() && item.path().extension() != ".json")
 		{
 			images.push(item.path());
 		}
