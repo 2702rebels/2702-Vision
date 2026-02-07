@@ -198,12 +198,12 @@ int GetChessboardHeightDeg()
             cv::Point2f maxChessPt(-1e9, -1e9);
 
             for (const auto& p : corners) {
-                minPt.x = std::min(minPt.x, p.x);
-                minPt.y = std::min(minPt.y, p.y);
-                maxPt.x = std::max(maxPt.x, p.x);
-                maxPt.y = std::max(maxPt.y, p.y);
+                minChessPt.x = std::min(minChessPt.x, p.x);
+                minChessPt.y = std::min(minChessPt.y, p.y);
+                maxChessPt.x = std::max(maxChessPt.x, p.x);
+                maxChessPt.y = std::max(maxChessPt.y, p.y);
             }
-            cv::Rect curChess(minPt, maxPt);
+            cv::Rect curChess(minChessPt, maxChessPt);
             cv::Rect intersect = chessRect & curChess;
             if (intersect.area() <= 1e-6)
             {
@@ -249,12 +249,12 @@ int GetChessboardWidthDeg()
             cv::Point2f maxChessPt(-1e9, -1e9);
 
             for (const auto& p : corners) {
-                minPt.x = std::min(minPt.x, p.x);
-                minPt.y = std::min(minPt.y, p.y);
-                maxPt.x = std::max(maxPt.x, p.x);
-                maxPt.y = std::max(maxPt.y, p.y);
+                minChessPt.x = std::min(minChessPt.x, p.x);
+                minChessPt.y = std::min(minChessPt.y, p.y);
+                maxChessPt.x = std::max(maxChessPt.x, p.x);
+                maxChessPt.y = std::max(maxChessPt.y, p.y);
             }
-            cv::Rect curChess(minPt, maxPt);
+            cv::Rect curChess(minChessPt, maxChessPt);
             cv::Rect intersect = chessRect & curChess;
             if (intersect.area() <= 1e-6)
             {
