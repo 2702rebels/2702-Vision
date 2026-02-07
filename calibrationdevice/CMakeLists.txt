@@ -11,3 +11,6 @@ endif ()
 if(IS_DESKTOP)
     target_compile_definitions(cameracalib PRIVATE DESKTOP=1)
 endif ()
+
+add_executable(setpos setpos.cpp)
+add_package_to_target("cserialport" "setpos" TRUE)
