@@ -158,7 +158,6 @@ bool TakeCalibrationImage(std::string dist)
     cv::waitKey(1);
 #endif
     cv::imwrite((outdir / dist / ("img-" + std::to_string(imageIndex) + "-" + dist + ".png")).string(), grayscale);
-    cv::imwrite((outdir / "filtered" / dist / ("img-" + std::to_string(imageIndex) + "-" + dist + ".png")).string(), debugImage);
     imageIndex++;
     return cornersFound;
 }
