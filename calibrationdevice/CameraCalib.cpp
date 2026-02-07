@@ -175,7 +175,7 @@ int GetChessboardHeightDeg()
     }
     float topBound = corners[0].y;
     float curBottom = -1;
-    int i = 91;
+    int i = 90;
     Pan(90);
     while (topBound > curBottom)
     {
@@ -186,10 +186,9 @@ int GetChessboardHeightDeg()
         {
             curBottom = corners[3].y;
         }
-        i++;
+        i += 3;
     }
-    i--;
-    return i;
+    return i - 90;
 }
 
 int GetChessboardWidthDeg()
