@@ -205,8 +205,7 @@ int GetChessboardWidthDeg()
     float rightBound = corners[corners.size() - 1].x;
     float curLeft = -1;
     int i = 90;
-    Tilt(90);
-    while (rightBound > curLeft)
+    while (curLeft < rightBound)
     {
         Pan(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
