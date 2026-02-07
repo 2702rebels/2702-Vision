@@ -205,7 +205,7 @@ int GetChessboardHeightDeg()
             }
             cv::Rect curChess(minPt, maxPt);
             cv::Rect intersect = chessRect & curChess;
-            if (intersect.area() <= 0)
+            if (intersect.area() <= 1e-6)
             {
                 break;
             }
