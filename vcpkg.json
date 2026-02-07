@@ -53,6 +53,7 @@
         "allwpilib"
       ]
     },
-    "cserialport"
+    "cserialport",
+    "nlohmann-json"
   ]
 }

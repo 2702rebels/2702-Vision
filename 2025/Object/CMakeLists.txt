@@ -107,6 +107,13 @@ add_package_to_target("opencv" "calibrate" TRUE)
 
 target_link_libraries(calibrate PRIVATE 2702log)
 
+add_package_to_target("json" "calibrate" TRUE)
+
+add_executable(calib_deviation implementation/calib_deviation.cpp)
+target_include_directories(calib_deviation PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_package_to_target("json" "calib_deviation" TRUE)
+target_link_libraries(calib_deviation PRIVATE 2702log)
+
 if(IS_RPI)
 	add_executable(object ${CMAKE_CURRENT_SOURCE_DIR}/implementation/object.cpp)
 	target_link_libraries(object PRIVATE objectframeprocessor)

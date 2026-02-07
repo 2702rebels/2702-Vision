@@ -9,7 +9,10 @@ Loads all png images from /data/calibration/ to create these calibration values.
 #include <iostream>
 #include <vector>
 #include "LoggingUtils.h"
+#include <nlohmann/json.hpp>
+#include <fstream>
 
+using namespace nlohmann;
 namespace fs = std::filesystem;
 std::queue<fs::path> images;
 std::mutex mtxVectorLock;
@@ -36,7 +39,7 @@ void CalibratorThread(std::stop_token token)
 		}
 		fs::path imagePath = images.front();
 		images.pop();
-		info("{}% done", static_cast<double>(images.size()) / static_cast<double>(totalNImages) * 100);
+		info("{}% remaining", static_cast<double>(images.size()) / static_cast<double>(totalNImages) * 100);
 		queueLock.unlock();
 		cv::Mat img = cv::imread(imagePath.string(), cv::IMREAD_GRAYSCALE);
 		imageSize = img.size();
@@ -45,10 +48,12 @@ void CalibratorThread(std::stop_token token)
 		if (useSBMethod == false)
 		{
 			foundChessboard = cv::findChessboardCorners(img, chessboardPatternSize, corners,
-															 cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
-		} else
+			                                            cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+		}
+		else
 		{
-			foundChessboard = cv::findChessboardCornersSB(img, chessboardPatternSize, corners, cv::CALIB_CB_EXHAUSTIVE | cv::CALIB_CB_ACCURACY);
+			foundChessboard = cv::findChessboardCornersSB(img, chessboardPatternSize, corners,
+			                                              cv::CALIB_CB_EXHAUSTIVE | cv::CALIB_CB_ACCURACY);
 		}
 		if (!foundChessboard)
 		{
@@ -61,6 +66,18 @@ void CalibratorThread(std::stop_token token)
 		imagePoints.push_back(corners);
 		objectPoints.push_back(obj);
 		vectorLock.unlock();
+	}
+}
+
+void WriteMatToJson(json& object, const cv::Mat& mat, const std::string& keyName)
+{
+	object[keyName] = json::array();
+	for (int i = 0; i < mat.rows; i++)
+	{
+		for (int j = 0; j < mat.cols; j++)
+		{
+			object[keyName].push_back(mat.at<double>(i, j));
+		}
 	}
 }
 
@@ -80,29 +97,24 @@ int main(int argc, char** argv)
 	if (cornersMethod == "r")
 	{
 		useSBMethod = false;
-	} else if (cornersMethod == "s")
+	}
+	else if (cornersMethod == "s")
 	{
 		useSBMethod = true;
-	} else
+	}
+	else
 	{
 		std::cerr << "Failed to recognize corners method \"" << cornersMethod << "\"" << std::endl;
 		return -1;
 	}
-	while (true)
+	std::string imagesDir;
+	std::cout << "Enter a directory to add images from: ";
+	std::cin >> imagesDir;
+	for (const auto& item : fs::recursive_directory_iterator(imagesDir))
 	{
-		std::string imagesDir;
-		std::cout << "Enter a directory to add images from(null to finish): ";
-		std::cin >> imagesDir;
-		if (imagesDir == "null")
+		if (item.is_regular_file())
 		{
-			break;
-		}
-		for (auto item : fs::recursive_directory_iterator(imagesDir))
-		{
-			if (item.is_regular_file())
-			{
-				images.push(item.path());
-			}
+			images.push(item.path());
 		}
 	}
 	totalNImages = images.size();
@@ -133,5 +145,12 @@ int main(int argc, char** argv)
 	info("rms error: {}", rms);
 	std::cout << "Camera matrix:\n" << cameraMatrix << std::endl;
 	std::cout << "Distortion coefficients:\n" << distCoeffs << std::endl;
+	json configJson;
+	configJson["rms_error"] = rms;
+	WriteMatToJson(configJson, cameraMatrix, "camera_matrix");
+	WriteMatToJson(configJson, distCoeffs, "distortion_coeffs");
+	fs::path configWritePath = fs::path(imagesDir) / ("calib-result-" + cornersMethod + ".json");
+	std::ofstream configFile(configWritePath, std::ios::out | std::ios::trunc);
+	configFile << configJson.dump(4) << std::endl;
 	return 0;
 }
