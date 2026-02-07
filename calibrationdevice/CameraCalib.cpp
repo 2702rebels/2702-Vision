@@ -207,6 +207,7 @@ int GetChessboardWidthDeg()
     int i = 90;
     while (curLeft < rightBound)
     {
+        i -= 3;
         Pan(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
         bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
@@ -214,9 +215,8 @@ int GetChessboardWidthDeg()
         {
             curLeft = corners[0].x;
         }
-        i += 3;
     }
-    return i - 90;
+    return 90 - i;
 }
 
 std::pair<int, int> GetTiltFOV()
