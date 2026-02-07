@@ -18,22 +18,25 @@ std::string GetCurTimeStr() {
 }
 
 void SetupTextLogger() {
+	// Create a global thread pool (must be done once)
+	spdlog::init_thread_pool(16384, 2);
+
 	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("Logs/" + GetCurTimeStr() + "_" + "stdout.log", true);
-	console_sink->set_pattern("[%T] [%^%l%$] %v");
+	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+		"Logs/" + GetCurTimeStr() + "_stdout.log", true);
+
 	console_sink->set_pattern("[%Y-%m-%d %T] [%l] %v");
-	std::vector<sink_ptr> sinks{ console_sink, file_sink };
-	auto threadpool = std::make_shared<details::thread_pool>(16384, 1);
-	textLogsOutput = std::make_shared<async_logger>(
+
+	std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
+
+	auto logger = std::make_shared<spdlog::async_logger>(
 		"ObjDetection",
 		sinks.begin(),
 		sinks.end(),
-		// allow for 16384 messages in async queue, 1 async logging thread
-		std::weak_ptr<details::thread_pool>(threadpool),
+		spdlog::thread_pool(),   // <-- uses the global pool
 		spdlog::async_overflow_policy::block
-		// if async queue does get overloaded, we should probably just increase the size of it, we're less constricted on ram than cpu
-		// but data integrity is paramount, so block if it does somehow happen.
 	);
-	register_logger(textLogsOutput);
-	set_default_logger(textLogsOutput);
+
+	spdlog::register_logger(logger);
+	spdlog::set_default_logger(logger);
 }

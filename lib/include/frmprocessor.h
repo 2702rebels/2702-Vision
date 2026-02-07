@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 #include <chrono>
+#if WIN32
+#include <winsock2.h>
+#endif
 
 class CameraFrame
 {
@@ -10,7 +13,7 @@ protected:
 	int				m_nCols;
 	uint8_t			*m_pu8Img;
 
-	std::chrono::system_clock::time_point	m_ts;
+	struct timeval m_ts;
 public:
 	CameraFrame() :
 		m_pu8Img( 0 )
@@ -35,7 +38,7 @@ public:
 	{
 		return m_pu8Img;
 	}
-	virtual const std::chrono::system_clock::time_point *ts() const
+	virtual const struct timeval *ts() const
 	{
 		return &m_ts;
 	}

@@ -15,12 +15,10 @@ sudo apt install cmake -y
 echo "Downloading and compiling wpilib..."
 git clone https://github.com/wpilibsuite/allwpilib.git
 cd allwpilib
-git checkout 1efaaefd78a634599b522fc2420c7283722554fb #v2025.3.2
+git checkout c89401250fbd412ba050f595551d0a451b7307a2 #v2026.2.1
 cmake . --preset default -DBUILD_SHARED_LIBS=OFF -DWITH_GUI=OFF -DWITH_SIMULATION_MODULES=OFF -DWITH_TESTS=OFF
 cd build-cmake
 sudo cmake --build . --target install --parallel $(nproc)
-# remove add_dependency(wpilibj) which is still added even when wpilib wasn't built with wpilibj included.
-sudo sed -i '/find_dependency(wpilibj)/d' /usr/local/share/wpilib/wpilib-config.cmake
 cd ..
 cd ..
 sudo rm -rf allwpilib
@@ -46,4 +44,17 @@ sudo cmake --build . --target install --parallel $(nproc)
 cd ..
 cd ..
 sudo rm -rf spdlog
+echo "Downloading and compiling cserialport"
+git clone https://github.com/itas109/cserialport
+cd cserialport
+git checkout v4.3.3
+mkdir build
+cd build
+cmake .. -DCSERIALPORT_BUILD_EXAMPLES=OFF -DCSERIALPORT_BUILD_TEST=OFF -DCMAKE_BUILD_TYPE=Debug
+sudo cmake --build . --target install --parallel $(nproc)
+cmake .. -DCSERIALPORT_BUILD_EXAMPLES=OFF -DCSERIALPORT_BUILD_TEST=OFF -DCMAKE_BUILD_TYPE=Release
+sudo cmake --build . --target install --parallel $(nproc)
+cd ..
+cd ..
+rm -rf cserialport
 echo "Finished installing dependencies"

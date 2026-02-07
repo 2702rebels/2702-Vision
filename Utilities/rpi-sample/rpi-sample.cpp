@@ -7,8 +7,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <span>
-#include <iostream>
-#include <sstream>
 
 //#include <X11/Xlib.h>
 #include <linux/videodev2.h>
@@ -33,18 +31,6 @@
 using namespace std;
 
 #include <signal.h>
-#define DEFAULT_EXPOSURE 75000
-// waterloo comp #define FIXED_GAIN_VALUE 1.4
-#define DEFAULT_GAIN 5 // practice field 2025
-#if 0
-void printinfo( v4lcam &cam )
-{
-	cam.printCaps();
-	cam.printStandards();
-	cam.printControls();
-	printf( "---------------\n" );
-}
-#endif
 
 bool bStop = false;
 
@@ -64,7 +50,7 @@ class imgProc : public FrmProcessor
 public:
 	imgProc( char const *pszLogFile ) :
 		FrmProcessor(),
-		m_vl( pszLogFile, LogFrameType::RGB, 640, 480 )
+		m_vl( fs::path(pszLogFile), LogFrameType::RGB, 640, 480 )
 		
 	{
 	}
@@ -78,8 +64,7 @@ public:
 //		printf( "Have Frame from %d:%d\n", nCam, pcf->u32Sequence() );
 
 		if (m_mtxLog.try_lock()) {
-			cv::Mat img( pcf->nRows(), pcf->nCols(), CV_8UC3, (void *)pcf->pu8Image() );
-			m_vl.WriteFrame(img);
+			m_vl.WriteFrame(frame);
 			m_mtxLog.unlock();
 		}
 		if (m_mtxCS.try_lock()) { 
@@ -96,13 +81,15 @@ public:
 int main( int argc, char **argv )
 {
 	char szLog[1024] = "test.log";
-
-	if (access("/data/logs", F_OK) == 0) {
-		for( int i = 0; i < 1024; i++) {
-			sprintf( szLog, "/data/logs/test%05d.log", i );
-			if (access(szLog, F_OK) != 0)
-				break;
-		}
+	if (access("/data/logs", F_OK) != 0)
+	{
+		throw;
+	}
+	for( int i = 0; i < 1024; i++)
+	{
+		sprintf( szLog, "/data/logs/test%05d.log", i );
+		if (access(szLog, F_OK) != 0)
+			break;
 	}
 	printf( "Logging to %s\n", szLog );
 
@@ -110,36 +97,13 @@ int main( int argc, char **argv )
 	if (argc == 2) {
 		strcpy( szLog, argv[1] );
 	}
-
-#if 0
-	char szImgName[100];
-	sprintf( szImgName, "Testing" );
-	cv::namedWindow( szImgName, cv::WINDOW_AUTOSIZE );
-	cv::Mat img = cv::imread("img.png", cv::IMREAD_COLOR);
-	printf( "img size: %d x %d\n", img.rows, img.cols );
-	cv::imshow( szImgName, img );
-	cv::waitKey(0);
-#endif
 	try {
 		auto ntinst = nt::NetworkTableInstance::GetDefault();
 		ntinst.StartClient4( "2702" );
 		ntinst.StartServer();
 		imgProc proc( szLog );
 //		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
-		if(argc != 3) {
-			RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc, DEFAULT_EXPOSURE, DEFAULT_GAIN);
-		}
-		else {
-			stringstream strFixedExposure;
-			strFixedExposure << argv[1];
-			int fixedExposure;
-			strFixedExposure >> fixedExposure;
-			stringstream strFixedGain;
-			strFixedGain << argv[2];
-			double fixedGain;
-			strFixedGain >> fixedGain;
-			RPICamera mycam0("/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc, fixedExposure, fixedGain);
-		}
+		RPICamera mycam0( "/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc );
 
 		while( !bStop ) {
 			std::this_thread::sleep_for( std::chrono::milliseconds(200) );

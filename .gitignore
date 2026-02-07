@@ -4,6 +4,7 @@
 !lib/
 *.o
 *.a
+*.log
 /Logs
 /.vscode
 # Exclude persistent data from networktable server

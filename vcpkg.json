@@ -21,7 +21,23 @@
       "name": "opencv4",
       "features": [
         "calib3d",
-        "highgui"
+        "highgui",
+        {
+          "name": "dshow",
+          "platform": "windows & !uwp"
+        },
+        "ffmpeg",
+        {
+          "name": "msmf",
+          "platform": "windows & !uwp & !mingw"
+        },
+        "jpeg",
+        "jpegxl",
+        "opencl",
+        "openexr",
+        "openjpeg",
+        "openmp",
+        "png"
       ]
     },
     "protobuf",
@@ -36,6 +52,8 @@
         "wpimath",
         "allwpilib"
       ]
-    }
+    },
+    "cserialport",
+    "nlohmann-json"
   ]
 }

@@ -22,9 +22,6 @@
 #include "cambase.h"
 #include "frmprocessor.h"
 
-#include <thread>
-#include <condition_variable>
-
 // maximum # of managed exposure times.
 #define MAX_EXPOSURES	8
 #define NUM_WORKERS	4
@@ -47,8 +44,6 @@ class RPICamera : public CamBase
 	bool			m_bShutdown;
 	int				m_nCam;
 	int				m_nWorkersRunning;
-	int				m_fixedExposure;
-	double				m_fixedGain;
 	volatile int	m_nWorkersWaiting;
 
 #if DISPLAY
@@ -83,12 +78,11 @@ class RPICamera : public CamBase
 	RPIFrame 	*waitForWork();
 	void workerThreadFn();
 public:
-	RPICamera( char const *pszVid, int nCam, int nRows, int nCols, uint32_t u32PixFmt, FrmProcessor &nfp, int fixedExposure, double fixedGain);
+	RPICamera( char const *pszVid, int nCam, int nRows, int nCols, uint32_t u32PixFmt, FrmProcessor &nfp );
 	virtual ~RPICamera();
 	virtual bool bStart();
 	virtual bool bStop();
 
 	virtual void FrameComplete( RPIFrame *pFrame );
 };
-
 

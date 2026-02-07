@@ -407,6 +407,15 @@ void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObje
 	ProcessFrameWithRet(nCam, pcf);
 }
 
+static std::chrono::system_clock::time_point to_time_point(const timeval& tv) {
+	using namespace std::chrono;
+
+	auto sec  = seconds{tv.tv_sec};
+	auto usec = microseconds{tv.tv_usec};
+
+	return system_clock::time_point{sec + usec};
+}
+
 struct EmptyStruct
 {
 };
@@ -521,7 +530,7 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 			// Get current time since power on
 			std::chrono::system_clock::time_point tsCur = std::chrono::system_clock::now();
 			// Calculate delta between when frame was catured and now.
-			std::chrono::system_clock::duration frameProcDelta = tsCur - *pcf->ts();
+			std::chrono::system_clock::duration frameProcDelta = tsCur - to_time_point(*pcf->ts());
 			std::sort(corals.begin(), corals.end());
 			int count = corals.size();
 			while (corals.size() < 4)
@@ -541,7 +550,7 @@ cv::Mat ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleO
 	{
 		std::chrono::system_clock::time_point tsCur = std::chrono::system_clock::now();
 		// Calculate delta between when frame was catured and now.
-		std::chrono::system_clock::duration frameProcDelta = tsCur - *pcf->ts();
+		std::chrono::system_clock::duration frameProcDelta = tsCur - to_time_point(*pcf->ts());
 		m_nLastLatencyTopic.SetDefault(std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta).count());
 
 		if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON)

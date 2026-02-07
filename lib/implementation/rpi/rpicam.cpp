@@ -49,10 +49,8 @@ class RPIFrame : public CameraFrame
 	uint32_t	m_u32Exposure;
 	int			m_nRows = 0;
 	int			m_nCols = 0;
-	int			m_fixedExposure = -1;
-	double			m_fixedGain = -1;
-	std::chrono::system_clock::time_point m_ts;
-    static std::chrono::duration<long long, std::nano> m_steadyOffset;
+	struct timeval m_ts;
+
 	uint8_t	*m_pu8Img;
 
 	void vSetFrame( libcamera::Request *pReq )
@@ -69,10 +67,8 @@ class RPIFrame : public CameraFrame
 		auto rmd = pBuf->metadata();
 
 		m_u32Seq = rmd.sequence; //pReq->sequence();
-	    m_ts = std::chrono::time_point<std::chrono::system_clock>(
-	        std::chrono::nanoseconds(rmd.timestamp)
-	        + m_steadyOffset
-	    );
+		m_ts.tv_sec = rmd.timestamp / 1000000000;
+		m_ts.tv_usec = (rmd.timestamp - (m_ts.tv_sec * 1000000000)) / 1000;
 
 		auto cookie = pBuf->cookie();
 
@@ -142,29 +138,23 @@ public:
 	{
 		return m_pu8Img;
 	}
-	virtual const std::chrono::system_clock::time_point *ts() const
+	virtual const struct timeval *ts() const
 	{
 		return &m_ts;
 	}
 	virtual libcamera::Request *Req() {
 		return m_pReq;
 	}
+	
 };
 
-std::chrono::duration<long long, std::nano> RPIFrame::m_steadyOffset = std::chrono::nanoseconds(0);
-// If fixed exposure not set, use default auto-adjust exposure
-RPICamera::RPICamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, FrmProcessor &nfp, int fixedExposure = -1, double fixedGain = -1) :
+RPICamera::RPICamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, FrmProcessor &nfp ) :
 	m_bShutdown( false ),
 	m_nCam( nCam ),
 	m_nWorkersRunning( 0 ),
 	m_nWorkersWaiting( 0 ),
-	m_nfp( nfp ),
-	m_fixedExposure(fixedExposure),
-	m_fixedGain(fixedGain)
+	m_nfp( nfp )
 {
-    const std::chrono::system_clock::time_point sysNow = std::chrono::system_clock::now();
-    const std::chrono::steady_clock::time_point steadyNow = std::chrono::steady_clock::now();
-    RPIFrame::m_steadyOffset = sysNow.time_since_epoch() - steadyNow.time_since_epoch();
 	/* SPDX-License-Identifier: GPL-2.0-or-later */
 	/*
 	 * Copyright (C) 2020, Ideas on Board Oy.
@@ -428,7 +418,7 @@ bool RPICamera::bProcessFrame( v4l2_buffer &buf )
 	return QueueWork( buf );
 }
 #endif
-// Use fixed exposure if it is set
+
 bool RPICamera::bStart()
 {
 	/*
@@ -471,16 +461,7 @@ bool RPICamera::bStart()
 	 * For each delivered frame, the Slot connected to the
 	 * Camera::requestCompleted Signal is called.
 	 */
-	if(m_fixedExposure != -1){
-		libcamera::ControlList controls = libcamera::ControlList();
-		controls.set(libcamera::controls::AeEnable, false);
-		controls.set(libcamera::controls::ExposureTime, m_fixedExposure);
-		controls.set(libcamera::controls::AnalogueGain, m_fixedGain);
-		m_cam->start(&controls);
-	}
-	else{
-		m_cam->start();
-	}
+	m_cam->start();
 	for (std::unique_ptr<libcamera::Request> &request : m_vreq) {
 		m_cam->queueRequest(request.get());
 	}
@@ -652,5 +633,4 @@ void RPICamera::workerThreadFn()
 	m_nWorkersRunning--;
 	l.unlock();
 }
-
 

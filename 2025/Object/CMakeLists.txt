@@ -1,5 +1,5 @@
 add_library(2702log STATIC implementation/LoggingUtils.cpp)
-target_include_directories(2702log PRIVATE include)
+target_include_directories(2702log PUBLIC include)
 
 add_package_to_target("spdlog" "2702log" FALSE)
 target_include_directories(2702log PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
@@ -98,14 +98,6 @@ add_package_to_target("wpilib" "objectframeprocessor" TRUE)
 
 add_dependencies(objectframeprocessor copyconfigfile)
 target_compile_definitions(objectframeprocessor PRIVATE CONFIG_DIRECTORY="${CMAKE_CURRENT_BINARY_DIR}/cfg")
-
-
-add_executable(calibrate implementation/calibrate.cpp)
-target_include_directories(calibrate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-add_package_to_target("opencv" "calibrate" TRUE)
-
-target_link_libraries(calibrate PRIVATE 2702log)
 
 if(IS_RPI)
 	add_executable(object ${CMAKE_CURRENT_SOURCE_DIR}/implementation/object.cpp)
