@@ -164,6 +164,7 @@ bool TakeCalibrationImage(std::string dist)
 }
 int GetChessboardHeightDeg()
 {
+
     Pan(90);
     Tilt(90);
     std::vector<cv::Point2f> corners;
@@ -173,20 +174,42 @@ int GetChessboardHeightDeg()
         cv::Mat grayscale = CaptureGrayscaleImage();
         foundChessboard = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
     }
-    float topBound = corners[0].y;
-    float curBottom = -1;
+    cv::Point2f minPt(1e9, 1e9);
+    cv::Point2f maxPt(-1e9, -1e9);
+
+    for (const auto& p : corners) {
+        minPt.x = std::min(minPt.x, p.x);
+        minPt.y = std::min(minPt.y, p.y);
+        maxPt.x = std::max(maxPt.x, p.x);
+        maxPt.y = std::max(maxPt.y, p.y);
+    }
+
+    cv::Rect chessRect(minPt, maxPt);
     int i = 90;
-    Pan(90);
-    while (topBound > curBottom)
+    while (true)
     {
+        i += 3;
         Tilt(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
         bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
         if (found)
         {
-            curBottom = corners[corners.size() - 1].y;
+            cv::Point2f minChessPt(1e9, 1e9);
+            cv::Point2f maxChessPt(-1e9, -1e9);
+
+            for (const auto& p : corners) {
+                minPt.x = std::min(minPt.x, p.x);
+                minPt.y = std::min(minPt.y, p.y);
+                maxPt.x = std::max(maxPt.x, p.x);
+                maxPt.y = std::max(maxPt.y, p.y);
+            }
+            cv::Rect curChess(minPt, maxPt);
+            cv::Rect intersect = chessRect & curChess;
+            if (intersect.area() <= 0)
+            {
+                break;
+            }
         }
-        i += 3;
     }
     return i - 90;
 }
@@ -202,21 +225,44 @@ int GetChessboardWidthDeg()
         cv::Mat grayscale = CaptureGrayscaleImage();
         foundChessboard = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
     }
-    float rightBound = corners[corners.size() - 1].x;
-    float curLeft = -1;
+    cv::Point2f minPt(1e9, 1e9);
+    cv::Point2f maxPt(-1e9, -1e9);
+
+    for (const auto& p : corners) {
+        minPt.x = std::min(minPt.x, p.x);
+        minPt.y = std::min(minPt.y, p.y);
+        maxPt.x = std::max(maxPt.x, p.x);
+        maxPt.y = std::max(maxPt.y, p.y);
+    }
+
+    cv::Rect chessRect(minPt, maxPt);
     int i = 90;
-    while (curLeft < rightBound)
+    while (true)
     {
-        i -= 3;
+        i += 3;
         Pan(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
         bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
         if (found)
         {
-            curLeft = corners[0].x;
+            cv::Point2f minChessPt(1e9, 1e9);
+            cv::Point2f maxChessPt(-1e9, -1e9);
+
+            for (const auto& p : corners) {
+                minPt.x = std::min(minPt.x, p.x);
+                minPt.y = std::min(minPt.y, p.y);
+                maxPt.x = std::max(maxPt.x, p.x);
+                maxPt.y = std::max(maxPt.y, p.y);
+            }
+            cv::Rect curChess(minPt, maxPt);
+            cv::Rect intersect = chessRect & curChess;
+            if (intersect.area() <= 0)
+            {
+                break;
+            }
         }
     }
-    return 90 - i;
+    return i - 90;
 }
 
 std::pair<int, int> GetTiltFOV()
