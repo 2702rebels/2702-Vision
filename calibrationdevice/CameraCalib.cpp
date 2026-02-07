@@ -30,8 +30,8 @@ using namespace itas109;
 static constexpr int MC_BAUDRATE = 115200;
 static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
 static constexpr int CAMERA_INDEX = 0;
-static constexpr int PAN_STEP_SIZE = 5;
-static constexpr int TILT_STEP_SIZE = 5;
+static constexpr int PAN_STEP_SIZE = 2;
+static constexpr int TILT_STEP_SIZE = 2;
 int imageIndex = 0;
 fs::path outdir;
 cs::CvSource camServer;
@@ -188,7 +188,7 @@ int GetChessboardHeightDeg()
     int i = 90;
     while (true)
     {
-        i += 3;
+        i += TILT_STEP_SIZE;
         Tilt(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
         bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
@@ -239,7 +239,7 @@ int GetChessboardWidthDeg()
     int i = 90;
     while (true)
     {
-        i += 3;
+        i += PAN_STEP_SIZE;
         Pan(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
         bool found = cv::findChessboardCorners(grayscale, checkerboardPatternSize, corners);
