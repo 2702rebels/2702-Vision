@@ -10,6 +10,9 @@ CXXFLAGS+=$(shell pkg-config --cflags opencv4)
 LINKFLAGS+=$(shell pkg-config --libs opencv4)
 CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=-L$(shell pwd)
+LINKFLAGS+=-L../lib
+LINKFLAGS+=-l2702
+CXXFLAGS+=-I../lib
 
 all: libloggingutils.a cameracalib setpos
 
