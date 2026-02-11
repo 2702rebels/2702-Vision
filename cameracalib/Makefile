@@ -7,8 +7,9 @@ LINKFLAGS+=$(shell pkg-config --libs spdlog)
 LINKFLAGS+=-lcserialport
 CXXFLAGS+=-I/usr/local/include
 CXXFLAGS+=$(shell pkg-config --cflags opencv4)
-CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=$(shell pkg-config --libs opencv4)
+CXXFLAGS+=-I$(shell pwd)
+LINKFLAGS+=-L$(shell pwd)
 
 all: libloggingutils.a cameracalib setpos
 
@@ -31,4 +32,4 @@ cameracalib: cameracalib.o
 	$(CXX) $(CXXFLAGS) -o cameracalib cameracalib.o $(LINKFLAGS) -lloggingutils
 
 clean:
-	rm -rf *.o cameracalib setpos loggingutils.a
+	rm -rf *.o cameracalib setpos libloggingutils.a

@@ -9,11 +9,9 @@
 #include <spdlog/spdlog.h>
 
 #include <LoggingUtils.h>
-#include <frmprocessor.h>
 #include <VisionLog.h>
 #include <cscore/cscore_cv.h>
 #include <cameraserver/cameraserver/CameraServer.h>
-#include <rpicam.h>
 #include <drm/drm_fourcc.h>
 #include <linux/videodev2.h>
 namespace fs = std::filesystem;
@@ -32,33 +30,6 @@ std::mutex mtxCamServer;
 bool bFirstFrame = true;
 
 CSerialPort motorControllerPort;
-
-class imgProc : public FrmProcessor
-{
-    cv::Mat m_matLastFrame;
-    std::mutex m_mtxLastFrame;
-
-public:
-    virtual ~imgProc()
-    {
-    }
-
-    virtual void ProcessFrame(int nCam, CameraFrame const* pcf)
-    {
-        cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
-        if (m_mtxLastFrame.try_lock())
-        {
-            m_matLastFrame = frame;
-            m_mtxLastFrame.unlock();
-        }
-    }
-
-    void GetLastFrame(cv::Mat& frame)
-    {
-        std::unique_lock<std::mutex> mtx(m_mtxLastFrame);
-        frame = m_matLastFrame.clone();
-    }
-};
 
 void Pan(int deg)
 {
@@ -338,7 +309,6 @@ std::pair<int, int> GetPanFOV()
 int main(int argc, char** argv)
 {
     SetupTextLogger();
-    RPICamera mycam0("/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc);
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
     std::cin >> portname;
