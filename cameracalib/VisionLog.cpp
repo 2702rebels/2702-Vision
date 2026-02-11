@@ -1,4 +1,4 @@
-#include "VisionLogV2.h"
+#include "VisionLog.h"
 #include <cassert>
 
 constexpr int LOGFILE_HEADER_SIZE = 12;

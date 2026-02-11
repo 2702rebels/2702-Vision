@@ -9,7 +9,7 @@
 #include <spdlog/spdlog.h>
 
 #include <LoggingUtils.h>
-#include <VisionLogV2.h>
+#include <VisionLog.h>
 #include <cscore/cscore_cv.h>
 #include <cameraserver/cameraserver/CameraServer.h>
 #include <drm/drm_fourcc.h>

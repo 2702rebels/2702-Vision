@@ -12,11 +12,8 @@ CXXFLAGS+=$(shell pkg-config --cflags wpilib)
 CXXFLAGS+=$(shell pkg-config --libs wpilib)
 CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=-L$(shell pwd)
-LINKFLAGS+=-L../lib
-LINKFLAGS+=-l2702
-CXXFLAGS+=-I../lib
 
-all: libloggingutils.a cameracalib setpos
+all: libloggingutils.a  libvisionlog.a cameracalib setpos
 
 loggingutils.o: LoggingUtils.cpp
 	$(CXX) $(CXXFLAGS) -c LoggingUtils.cpp -o loggingutils.o $(LINKFLAGS)
@@ -24,8 +21,14 @@ loggingutils.o: LoggingUtils.cpp
 libloggingutils.a: loggingutils.o
 	ar rcs libloggingutils.a loggingutils.o
 
+visionlog.o: VisionLog.cpp VisionLog.h LogFrameType.h
+	$(CXX) $(CXXFLAGS) -c VisionLog.cpp -o visionlog.o $(LINKFLAGS)
+
+libvisionlog.a: visionlog.o
+	ar rcs libvisionlog.a visionlog.o
+
 cameracalib.o: cameracalib.cpp
-	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o $(LINKFLAGS) -lloggingutils
+	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o $(LINKFLAGS) -lloggingutils -lvisionlog
 
 setpos.o: setpos.cpp
 	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o $(LINKFLAGS) -lloggingutils
@@ -34,7 +37,7 @@ setpos: setpos.o
 	$(CXX) $(CXXFLAGS) -o setpos setpos.o $(LINKFLAGS) -lloggingutils
 
 cameracalib: cameracalib.o
-	$(CXX) $(CXXFLAGS) -o cameracalib cameracalib.o $(LINKFLAGS) -lloggingutils
+	$(CXX) $(CXXFLAGS) -o cameracalib cameracalib.o $(LINKFLAGS) -lloggingutils -lvisionlog
 
 clean:
-	rm -rf *.o cameracalib setpos libloggingutils.a
+	rm -rf *.o cameracalib setpos libloggingutils.a libvisionlog.a

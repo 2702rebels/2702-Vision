@@ -6,7 +6,7 @@ CXXFLAGS+=$(shell pkg-config --cflags opencv4)
 CXXFLAGS+=$(shell pkg-config --cflags camera)
 CXXFLAGS+=-g
 
-OBJS=VisLog.o Bayer2RGB.o 2702camera.o 2702math.o Bayer2Grey.o cammgr.o fbdisp.o LogPlayer.o genio.o 2702util.o VisionLogV2.cpp
+OBJS=VisLog.o Bayer2RGB.o 2702camera.o 2702math.o Bayer2Grey.o cammgr.o fbdisp.o LogPlayer.o genio.o 2702util.o
 
 TEGRA=$(shell uname -a | grep -oh tegra)
 ifeq "$(TEGRA)" "tegra"
