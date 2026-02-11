@@ -10,6 +10,7 @@ CXXFLAGS+=$(shell pkg-config --cflags opencv4)
 LINKFLAGS+=$(shell pkg-config --libs opencv4)
 CXXFLAGS+=$(shell pkg-config --cflags wpilib)
 CXXFLAGS+=$(shell pkg-config --libs wpilib)
+CXXFLAGS+=-I../2025/2025AprilTag/apriltags_cuda/build/wpilib/src/wpilib/wpiutil/src/main/native/thirdparty/llvm/include/
 CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=-L$(shell pwd)
 

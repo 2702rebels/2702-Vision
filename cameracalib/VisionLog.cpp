@@ -1,5 +1,6 @@
 #include "VisionLog.h"
 #include <cassert>
+#include <iostream>
 
 constexpr int LOGFILE_HEADER_SIZE = 12;
 
@@ -106,7 +107,7 @@ VisionLogWriter::VisionLogWriter(fs::path logPath, LogFrameType frameType, unsig
 		m_frameSize = m_resWidth * m_resHeight * 3;
 	}
 	else {
-		std::cerr << "unrecognized frame type: " << frameType << std::endl;
+		std::cerr << "unrecognized frame type: " << (unsigned int)frameType << std::endl;
 		throw;
 	}
 }
