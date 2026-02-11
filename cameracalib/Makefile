@@ -10,16 +10,16 @@ CXXFLAGS+=-I/usr/local/include
 all: libloggingutils.a cameracalib setpos
 
 loggingutils.o: LoggingUtils.cpp
-	$(CXX) $(CXXFLAGS) -c LoggingUtils.cpp $(LINKFLAGS)
+	$(CXX) $(CXXFLAGS) -c LoggingUtils.cpp -o loggingutils.o $(LINKFLAGS)
 
 libloggingutils.a: loggingutils.o
-	ar rcs loggingutils.a loggingutils.o $(LINKFLAGS)
+	ar rcs loggingutils.a loggingutils.o
 
 cameracalib.o: cameracalib.cpp
-	$(CXX) $(CXXFLAGS) -c cameracalib.cpp $(LINKFLAGS) -lloggingutils
+	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o $(LINKFLAGS) -lloggingutils
 
 setpos.o: setpos.cpp
-	$(CXX) $(CXXFLAGS) -c setpos.cpp $(LINKFLAGS) -lloggingutils
+	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o $(LINKFLAGS) -lloggingutils
 
 setpos: setpos.o
 	$(CXX) $(CXXFLAGS) -o setpos setpos.o $(LINKFLAGS) -lloggingutils
