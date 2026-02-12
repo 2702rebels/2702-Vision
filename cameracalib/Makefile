@@ -42,7 +42,7 @@ libvisionlog.a: visionlog.o
 	ar rcs libvisionlog.a visionlog.o
 
 cameracalib.o: cameracalib.cpp
-	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o $(LINKFLAGS) -lloggingutils -lvisionlog
+	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o -lloggingutils $(LINKFLAGS) -lvisionlog
 
 setpos.o: setpos.cpp
 	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o $(LINKFLAGS) -lloggingutils
