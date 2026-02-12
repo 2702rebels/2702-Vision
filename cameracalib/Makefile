@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-Wall -Wextra -std=c++23
+CXXFLAGS=-Wall -Wextra -std=c++20
 CXXFLAGS+=-O3
 LINKFLAGS=
 CXXFLAGS+=$(shell pkg-config --cflags spdlog)
