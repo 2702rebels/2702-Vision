@@ -82,7 +82,6 @@ class imgProc : public nvFrmProcessor
     cs::CvSource 	m_outputStream;
     cv::Mat m_lastFrame;
     std::mutex m_lastFrameMtx;
-    std::mutex m_lastFrameMtx;
 
     int				m_nCapture = 0;
 
