@@ -2,6 +2,7 @@
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortInfo.h>
 #include <string>
+using namespace std;
 #include <thread>
 #include <chrono>
 #include <opencv2/opencv.hpp>
@@ -26,7 +27,6 @@ extern "C" {
 namespace fs = std::filesystem;
 using namespace spdlog;
 using namespace itas109;
-using namespace std;
 
 static constexpr int MC_BAUDRATE = 115200;
 static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
