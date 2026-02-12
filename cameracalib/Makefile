@@ -24,10 +24,10 @@ CXXFLAGS+=-I../2025/2025AprilTag/apriltags_cuda/build/wpilib/src/wpilib/wpiutil/
 CXXFLAGS+=-I../2025/2025AprilTag/wpilib/include/cameraserver -I../2025/2025AprilTag/wpilib/include/cscore -I../2025/2025AprilTag/wpilib/include/hal -I../2025/2025AprilTag/wpilib/include/ntcore -I../2025/2025AprilTag/wpilib/include/romiVendordep -I../2025/2025AprilTag/wpilib/include/wpilibc -I../2025/2025AprilTag/wpilib/include/wpilibNewCommands -I../2025/2025AprilTag/wpilib/include/wpimath -I../2025/2025AprilTag/wpilib/include/wpinet -I../2025/2025AprilTag/wpilib/include/wpiutil -I../2025/2025AprilTag/wpilib/include/xrpVendordep
 LINKFLAGS+=-L../2025/2025AprilTag/wpilib/lib -L../2025/2025AprilTag/wpilib/lib -L../2025/2025AprilTag/lib
 
-LIBS+=$(shell pkg-config --libs cuda-12.6)
-LIBS+=$(shell pkg-config --libs cudart-12.6)
-LIBS+=$(shell pkg-config --cflags cuda-12.6)
-LIBS+=$(shell pkg-config --cflags cudart-12.6)
+LINKFLAGS+=$(shell pkg-config --libs cuda-12.6)
+LINKFLAGS+=$(shell pkg-config --libs cudart-12.6)
+LINKFLAGS+=$(shell pkg-config --cflags cuda-12.6)
+LINKFLAGS+=$(shell pkg-config --cflags cudart-12.6)
 CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=-L$(shell pwd)
 
