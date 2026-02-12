@@ -26,7 +26,7 @@ CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=-L$(shell pwd)
 CXXFLAGS+=-I../lib
 LINKFLAGS+=-L../lib
-LINKFLAGS+=-l2702
+LINKFLAGS+=-l2702 -lncurses
 
 all: libloggingutils.a  libvisionlog.a cameracalib setpos
 
