@@ -75,8 +75,6 @@ void Tilt(int deg)
     std::this_thread::sleep_for(MC_WAITTIME);
 }
 
-imgProc proc{};
-
 class imgProc : public nvFrmProcessor
 {
     std::mutex	m_mtxCS;
@@ -84,8 +82,8 @@ class imgProc : public nvFrmProcessor
     cs::CvSource 	m_outputStream;
     cv::Mat m_lastFrame;
     std::mutex m_lastFrameMtx;
+    std::mutex m_lastFrameMtx;
 
-    volatile bool	m_bCapture = false;
     int				m_nCapture = 0;
 
 public:
@@ -105,13 +103,6 @@ public:
                 m_bFirstVid = false;
             }
             m_outputStream.PutFrame(frame);
-
-            if (m_bCapture) {
-                m_bCapture = false;
-                char szTmp[128];
-                sprintf( szTmp, g_pszImagPat, ++m_nCapture );
-                cv::imwrite( szTmp, frame );
-            }
             m_mtxCS.unlock();
         }
         if (m_lastFrameMtx.try_lock())
@@ -119,10 +110,6 @@ public:
             m_lastFrame = cv::Mat(pcf->nRows(), pcf->nCols(), CV_8UC1, (void*)pcf->pu8Image());
             m_lastFrameMtx.unlock();
         }
-    }
-    void vCaptureFrame()
-    {
-        m_bCapture = true;
     }
     int nCaptures() const
     {
@@ -135,6 +122,8 @@ public:
         dest = m_lastFrame.clone();
     }
 };
+
+imgProc proc{};
 
 cv::Size checkerboardPatternSize;
 
@@ -415,7 +404,10 @@ std::pair<int, int> GetPanFOV()
 int main(int argc, char** argv)
 {
     SetupTextLogger();
-    nvCamera mycam0( pszVideoDev, 0, 1280, 720, V4L2_PIX_FMT_GREY, proc );
+    std::string cameraPath;
+    std::cout << "Enter camera path(eg /dev/video0): ";
+    std::cin >> cameraPath;
+    nvCamera mycam0( cameraPath.c_str(), 0, 1280, 720, V4L2_PIX_FMT_GREY, proc );
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
     std::cin >> portname;
