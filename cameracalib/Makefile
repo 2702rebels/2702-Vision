@@ -22,6 +22,7 @@ CXXFLAGS+=-I../2025/2025AprilTag/wpilib/include/cameraserver -I../2025/2025April
 LINKFLAGS+=-L../2025/2025AprilTag/wpilib/lib -L../2025/2025AprilTag/wpilib/lib -L../2025/2025AprilTag/lib
 LINKFLAGS+=$(shell pkg-config --libs cuda-12.6)
 LINKFLAGS+=$(shell pkg-config --libs cudart-12.6)
+LINKFLAGS+=-L/usr/local/cuda/lib64 -lcudart
 CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=-L$(shell pwd)
 CXXFLAGS+=-I../lib
