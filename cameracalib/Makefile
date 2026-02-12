@@ -45,13 +45,13 @@ cameracalib.o: cameracalib.cpp
 	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o -lloggingutils $(LINKFLAGS) -lvisionlog
 
 setpos.o: setpos.cpp
-	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o $(LINKFLAGS) -lloggingutils
+	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o -lloggingutils $(LINKFLAGS)
 
 setpos: setpos.o
-	$(CXX) $(CXXFLAGS) -o setpos setpos.o $(LINKFLAGS) -lloggingutils
+	$(CXX) $(CXXFLAGS) -o setpos setpos.o -lloggingutils $(LINKFLAGS)
 
 cameracalib: cameracalib.o
-	$(CXX) $(CXXFLAGS) -o cameracalib cameracalib.o $(LINKFLAGS) -lloggingutils -lvisionlog
+	$(CXX) $(CXXFLAGS) -o cameracalib cameracalib.o -lloggingutils $(LINKFLAGS) -lvisionlog
 
 clean:
 	rm -rf *.o cameracalib setpos libloggingutils.a libvisionlog.a
