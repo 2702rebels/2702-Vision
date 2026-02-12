@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
  * @brief Base class of @ref VisionLogReader and @ref VisionLogWriter , used to fetch common properties that they both share
  * @details Holds the header data of the logfile that is currently being read / written to
  * */
-class VisionLog {
+class VisionLogV2 {
 	friend class VisionLogReader;
 	friend class VisionLogWriter;
 private:
@@ -39,7 +39,7 @@ public:
  * @warning This class does NOT guarantee any thread safety
  * @warning This class will not stop you from calling ReadGrayscaleFrame when the log file is actually of type RGB or vice versa
  */
-class VisionLogReader : public VisionLog
+class VisionLogReader : public VisionLogV2
 {
 private:
     /** @brief File handle of the logfile being read */
@@ -88,7 +88,7 @@ public:
  * @warning This class will likely cause crashes if you provide invalid cv::Mat instances to @ref WriteFrame
  * @details This class follows RAII principles, logfile is closed when the writer instance is deleted
  */
-class VisionLogWriter : public VisionLog {
+class VisionLogWriter : public VisionLogV2 {
 private:
     /** @brief File handle to the logfile being written to */
 	std::ofstream m_logfile;

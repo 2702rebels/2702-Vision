@@ -4,15 +4,15 @@
 
 constexpr int LOGFILE_HEADER_SIZE = 12;
 
-unsigned int VisionLog::GetWidth() const {
+unsigned int VisionLogV2::GetWidth() const {
 	return m_resWidth;
 }
 
-unsigned int VisionLog::GetHeight() const {
+unsigned int VisionLogV2::GetHeight() const {
 	return m_resHeight;
 }
 
-const LogFrameType& VisionLog::GetLogType() const {
+const LogFrameType& VisionLogV2::GetLogType() const {
 	return m_logType;
 }
 
