@@ -2,6 +2,9 @@ CXX=g++
 CXXFLAGS=-Wall -Wextra -std=c++20
 CXXFLAGS+=-O3
 LINKFLAGS=
+CXXFLAGS+=-I../lib
+LINKFLAGS+=-L../lib
+LINKFLAGS+=-l2702 -lncurses
 CXXFLAGS+=$(shell pkg-config --cflags spdlog)
 LINKFLAGS+=$(shell pkg-config --libs spdlog)
 LINKFLAGS+=-lcserialport
@@ -20,9 +23,7 @@ CXXFLAGS+=-I../2025/2025AprilTag/apriltags_cuda/build/wpilib/src/wpilib/wpiutil/
 CXXFLAGS+=-I../2025/2025AprilTag/apriltags_cuda/build/wpilib/src/wpilib/wpiutil/src/main/native/thirdparty/sigslot/include/
 CXXFLAGS+=-I../2025/2025AprilTag/wpilib/include/cameraserver -I../2025/2025AprilTag/wpilib/include/cscore -I../2025/2025AprilTag/wpilib/include/hal -I../2025/2025AprilTag/wpilib/include/ntcore -I../2025/2025AprilTag/wpilib/include/romiVendordep -I../2025/2025AprilTag/wpilib/include/wpilibc -I../2025/2025AprilTag/wpilib/include/wpilibNewCommands -I../2025/2025AprilTag/wpilib/include/wpimath -I../2025/2025AprilTag/wpilib/include/wpinet -I../2025/2025AprilTag/wpilib/include/wpiutil -I../2025/2025AprilTag/wpilib/include/xrpVendordep
 LINKFLAGS+=-L../2025/2025AprilTag/wpilib/lib -L../2025/2025AprilTag/wpilib/lib -L../2025/2025AprilTag/lib
-CXXFLAGS+=-I../lib
-LINKFLAGS+=-L../lib
-LINKFLAGS+=-l2702 -lncurses
+
 LIBS+=$(shell pkg-config --libs cuda-12.6)
 LIBS+=$(shell pkg-config --libs cudart-12.6)
 LIBS+=$(shell pkg-config --cflags cuda-12.6)
