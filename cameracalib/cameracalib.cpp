@@ -14,6 +14,15 @@
 #include <cameraserver/cameraserver/CameraServer.h>
 #include <drm/drm_fourcc.h>
 #include <linux/videodev2.h>
+
+extern "C" {
+#include "genio.h"
+};
+
+#include "v4lcam.h"
+#include "fbdisp.h"
+#include "nvcam.h"
+
 namespace fs = std::filesystem;
 using namespace spdlog;
 using namespace itas109;
@@ -47,9 +56,68 @@ void Tilt(int deg)
     std::this_thread::sleep_for(MC_WAITTIME);
 }
 
-cv::Size checkerboardPatternSize;
-
 imgProc proc{};
+
+class imgProc : public nvFrmProcessor
+{
+    std::mutex	m_mtxCS;
+    bool		m_bFirstVid = true;
+    cs::CvSource 	m_outputStream;
+    cv::Mat m_lastFrame;
+    std::mutex m_lastFrameMtx;
+
+    volatile bool	m_bCapture = false;
+    int				m_nCapture = 0;
+
+public:
+    imgProc()
+    {
+    }
+    virtual ~imgProc()
+    {
+
+    }
+    virtual void ProcessFrame( nvCamera *pCam,  const nvFrame *pcf )
+    {
+        if (m_mtxCS.try_lock()) {
+            cv::Mat frame( pcf->nRows(), pcf->nCols(), CV_8UC1, (void *)pcf->pu8Image() );
+            if (m_bFirstVid) {
+                m_outputStream = frc::CameraServer::PutVideo("Vision", pcf->nCols(), pcf->nRows() );
+                m_bFirstVid = false;
+            }
+            m_outputStream.PutFrame(frame);
+
+            if (m_bCapture) {
+                m_bCapture = false;
+                char szTmp[128];
+                sprintf( szTmp, g_pszImagPat, ++m_nCapture );
+                cv::imwrite( szTmp, frame );
+            }
+            m_mtxCS.unlock();
+        }
+        if (m_lastFrameMtx.try_lock())
+        {
+            m_lastFrame = cv::Mat(pcf->nRows(), pcf->nCols(), CV_8UC1, (void*)pcf->pu8Image());
+            m_lastFrameMtx.unlock();
+        }
+    }
+    void vCaptureFrame()
+    {
+        m_bCapture = true;
+    }
+    int nCaptures() const
+    {
+        return m_nCapture;
+    }
+
+    void GetLastFrame(cv::Mat& dest)
+    {
+        std::unique_lock<std::mutex> lastFrameLock(m_lastFrameMtx);
+        dest = m_lastFrame.clone();
+    }
+};
+
+cv::Size checkerboardPatternSize;
 
 cv::Mat CaptureGrayscaleImage()
 {
@@ -81,6 +149,25 @@ cv::Mat CaptureGrayscaleImage()
     }
     return image;
 }
+
+void vSetIntegration( nvCamera &nvc )
+{
+    char szTmp[128];
+
+    GetNumber( szTmp, sizeof(szTmp), "Integration", "Please enter the integration Value" );
+    unsigned u = atoi(szTmp);
+    nvc.bSetExposure( u );
+}
+
+void vSetGain( nvCamera &nvc )
+{
+    char szTmp[128];
+
+    GetNumber( szTmp, sizeof(szTmp), "Gain", "Please enter the gain Value" );
+    unsigned u = atoi(szTmp);
+    nvc.bSetGain( u );
+}
+
 
 cv::Size GetCaptureSize()
 {
@@ -309,6 +396,7 @@ std::pair<int, int> GetPanFOV()
 int main(int argc, char** argv)
 {
     SetupTextLogger();
+    nvCamera mycam0( pszVideoDev, 0, 1280, 720, V4L2_PIX_FMT_GREY, proc );
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
     std::cin >> portname;

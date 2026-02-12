@@ -13,6 +13,9 @@ CXXFLAGS+=$(shell pkg-config --libs wpilib)
 CXXFLAGS+=-I../2025/2025AprilTag/apriltags_cuda/build/wpilib/src/wpilib/wpiutil/src/main/native/thirdparty/llvm/include/
 CXXFLAGS+=-I$(shell pwd)
 LINKFLAGS+=-L$(shell pwd)
+CXXFLAGS+=-I../lib
+LINKFLAGS+=-L../lib
+LINKFLAGS+=-l2702
 
 all: libloggingutils.a  libvisionlog.a cameracalib setpos
 
