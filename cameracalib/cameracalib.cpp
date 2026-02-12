@@ -2,7 +2,6 @@
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortInfo.h>
 #include <string>
-using namespace std;
 #include <thread>
 #include <chrono>
 #include <opencv2/opencv.hpp>
@@ -15,6 +14,23 @@ using namespace std;
 #include <cameraserver/cameraserver/CameraServer.h>
 #include <drm/drm_fourcc.h>
 #include <linux/videodev2.h>
+#include <linux/videodev2.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <thread>
+#include <vector>
+#include <mutex>
+#include <condition_variable>
+
+#include <string>
+#include <stdexcept>
+
+#include <cameraserver/CameraServer.h>
+#include <networktables/NetworkTableInstance.h>
+#include <drm/drm_fourcc.h>
+
+using namespace std;
 
 extern "C" {
 #include "genio.h"
@@ -23,6 +39,8 @@ extern "C" {
 #include "v4lcam.h"
 #include "fbdisp.h"
 #include "nvcam.h"
+
+#include <signal.h>
 
 namespace fs = std::filesystem;
 using namespace spdlog;
