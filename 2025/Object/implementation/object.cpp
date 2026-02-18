@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
                          ObjSendPackets::ON, ObjUseOutputFiltering::ON>
         proc(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
     //		RPICamera mycam0( "/dev/video0", 0, 800, 600,
-    //V4L2_PIX_FMT_RGB24, proc );
+    // V4L2_PIX_FMT_RGB24, proc );
     RPICamera mycam0("/dev/video0", 0, RESOLUTION_WIDTH, RESOLUTION_HEIGHT,
                      DRM_FORMAT_RGB888, proc);
     //	nvCamera mycam1( "/dev/video1", 4, 1 );

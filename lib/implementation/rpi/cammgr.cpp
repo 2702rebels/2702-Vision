@@ -140,9 +140,9 @@ void CameraManager::cameraThreadFn() {
       std::chrono::duration_cast<std::chrono::duration<float>>(
           std::chrono::steady_clock::now() - m_tpStart);
   //	std::chrono::duration_cast<std::chrono::milliseconds> tpDiff =
-  //std::chrono::steady_clock::now() - m_tpStart;
+  // std::chrono::steady_clock::now() - m_tpStart;
   //	std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>
-  //tpDiff = std::chrono::steady_clock::now() - m_tpStart;
+  // tpDiff = std::chrono::steady_clock::now() - m_tpStart;
   printf("Captured %d Frames in %f seconds -- %f fps\n", m_u32Frames,
          fs.count(), m_u32Frames / fs.count());
   bStop();

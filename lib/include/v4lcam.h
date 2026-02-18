@@ -177,7 +177,7 @@ public:
       if (EINVAL == errno) {
         printf("~v4lcam() EINVAL!!\n");
         //				throw invalid_argument( string("video
-        //device does not support memory mapping" ) );
+        // device does not support memory mapping" ) );
       }
 
       printf("~v4lcam() clearing buffers\n");

@@ -149,7 +149,7 @@ void Bayer2HalfRGB1(cv::Mat &matRGB, cv::Mat const &matBayer) {
 			*ppix++ = +p2++;
 #else
       //				ug = ((uint16_t)p[c] + p[c + m_nCols +
-      //1]) / 2; 				uint8_t ug = p[c];
+      // 1]) / 2; 				uint8_t ug = p[c];
       *ppix++ = *p2++;
       ug = ((uint16_t)*p++ + *p2++) / 2;
       *ppix++ = ug;
