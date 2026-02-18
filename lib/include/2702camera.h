@@ -28,22 +28,22 @@ class CamParm {
   /*! \brief Camera position as a \ref Point3d */
   Point3d m_camPos;
 
- public:
+public:
   CamParm();
   ~CamParm() {}
   float pinhole(int r, int c) const { return m_grfMat[r][c]; }
   float dist(int i) const {
     switch (i) {
-      case 0:
-        return m_fk1;
-      case 1:
-        return m_fk2;
-      case 2:
-        return m_fp1;
-      case 3:
-        return m_fp2;
-      case 4:
-        return m_fk3;
+    case 0:
+      return m_fk1;
+    case 1:
+      return m_fk2;
+    case 2:
+      return m_fp1;
+    case 3:
+      return m_fp2;
+    case 4:
+      return m_fk3;
     }
     return 0.;
   }
@@ -55,8 +55,10 @@ class CamParm {
   Point3d const &getOrigin() const { return m_camPos; }
 
   void UpdateResolution(int nURes, int nVRes);
-  void Undistort(float fU, float fV, float &fUndistU, float &fUnistV) const;			// normalized by focal length
-  void UndistortPixels(float fU, float fV, float &fUndistU, float &fUnistV) const;		// in Pixel units
+  void Undistort(float fU, float fV, float &fUndistU,
+                 float &fUnistV) const; // normalized by focal length
+  void UndistortPixels(float fU, float fV, float &fUndistU,
+                       float &fUnistV) const; // in Pixel units
   Point3d LOS(float fU, float fV) const;
 
   Point3d CalcTargetPosFromHeight(float fU, float fV, float fZ);
@@ -71,7 +73,7 @@ class StereoCam {
   Quaternion m_CamToRobotRot;
   Point3d m_CamToRobotXlat;
 
- public:
+public:
   StereoCam() {}
   StereoCam(CamParm const &c1, CamParm const &c2) {
     m_grCams[0] = c1;
@@ -91,6 +93,6 @@ class StereoCam {
   bool Save(char const *psz);
   void UpdateResolution(int nURes, int nVRes);
   float fCalc3D(Point2d const &p1, Point2d const &p2,
-                Point3d &res);  // returns line separation
+                Point3d &res); // returns line separation
 };
-};  // namespace Rebels
+}; // namespace Rebels

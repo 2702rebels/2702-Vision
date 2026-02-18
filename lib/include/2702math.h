@@ -15,20 +15,20 @@ class Point2d {
   /*! \brief Vertical component of point. */
   float m_fV;
 
- public:
+public:
   Point2d();
   Point2d(float fU, float fV);
   Point2d(Point2d const &src);
 
   Point2d &operator=(Point2d const &src);
-  constexpr bool operator==(const Point2d& other) const {
+  constexpr bool operator==(const Point2d &other) const {
     return other.m_fU == m_fU && other.m_fV == m_fV;
   }
 
-  /*! \brief Assign new values to point coordinates. 
-  * \param fU - new horizontal component of point.
-  * \param fV - new vertical component of point.
-  */
+  /*! \brief Assign new values to point coordinates.
+   * \param fU - new horizontal component of point.
+   * \param fV - new vertical component of point.
+   */
   inline void set(float fU, float fV) {
     m_fU = fU;
     m_fV = fV;
@@ -54,7 +54,7 @@ class Point3d {
   /*! \brief Z component of point. */
   float m_fZ;
 
- public:
+public:
   Point3d() : m_fX(0.F), m_fY(0.F), m_fZ(0.F) {}
   Point3d(float fX, float fY, float fZ) : m_fX(fX), m_fY(fY), m_fZ(fZ) {}
   Point3d(Point3d const &src);
@@ -69,7 +69,7 @@ class Point3d {
   Point3d &operator/=(float const scalar);
   Point3d &operator+=(Point3d const &other);
   Point3d &operator-=(Point3d const &other);
-  constexpr bool operator==(const Point3d& other) const {
+  constexpr bool operator==(const Point3d &other) const {
     return other.m_fX == m_fX && other.m_fY == m_fY && other.m_fZ == m_fZ;
   }
 
@@ -91,7 +91,7 @@ class RotationMatrix {
   friend class Quaternion;
   float m_grfMat[3][3];
 
- public:
+public:
   RotationMatrix() {
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
@@ -153,7 +153,7 @@ class Quaternion {
   /*! \brief Z component of rotation. */
   float m_fZ;
 
- public:
+public:
   Quaternion() : m_fQ0(1.0F), m_fX(0.F), m_fY(0.F), m_fZ(0.F) {}
   Quaternion(float fQ0, float fX, float fY, float fZ)
       : m_fQ0(fQ0), m_fX(fX), m_fY(fY), m_fZ(fZ) {}
@@ -170,8 +170,9 @@ class Quaternion {
 
   Point3d operator*(const Point3d &other) const;
 
-  constexpr bool operator==(const Quaternion& other) const {
-    return other.m_fQ0 == m_fQ0 && other.m_fX == m_fX && other.m_fY == m_fY && other.m_fZ == m_fZ;
+  constexpr bool operator==(const Quaternion &other) const {
+    return other.m_fQ0 == m_fQ0 && other.m_fX == m_fX && other.m_fY == m_fY &&
+           other.m_fZ == m_fZ;
   }
 
   /*! \brief Returns q component of rotation. */
@@ -188,18 +189,18 @@ class LinearSlope {
   double m_slope;
   double m_yIntercept;
 
-  public:
-    LinearSlope();
-    LinearSlope(double slope, double yIntercept);
-    LinearSlope(double x1, double y1, double x2, double y2);
-    double getSlope();
-    double getYIntercept();
-    void setSlope(double slope);
-    void setYIntercept(double yIntercept);
-    bool IsPointAboveLine(double x, double y);
-    bool IsPointBelowLine(double x, double y);
-    double CalculateY(double x);
-    double CalculateX(double y);
-}; 
+public:
+  LinearSlope();
+  LinearSlope(double slope, double yIntercept);
+  LinearSlope(double x1, double y1, double x2, double y2);
+  double getSlope();
+  double getYIntercept();
+  void setSlope(double slope);
+  void setYIntercept(double yIntercept);
+  bool IsPointAboveLine(double x, double y);
+  bool IsPointBelowLine(double x, double y);
+  double CalculateY(double x);
+  double CalculateX(double y);
+};
 
-};// namespace Rebels
+}; // namespace Rebels
