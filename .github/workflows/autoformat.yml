@@ -22,7 +22,7 @@ jobs:
 
       - name: Run clang-format
         run: |
-          FILES=$(find . -type f -regex '\./\(2025\|Utilities\|tests\|calibrationdevice\)/.*\.\(h\|cpp\)$')
+          FILES=$(find . -type f -regex '\./\(2025\|Utilities\|tests\|calibrationdevice\|lib\)/.*\.\(h\|cpp\)$')
           
           clang-format -i $FILES
 
