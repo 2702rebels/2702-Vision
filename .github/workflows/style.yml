@@ -17,7 +17,7 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
 
       - name: Update vcpkg submodule
-        run: git submodule update --remote vcpkg
+        run: git submodule update --init vcpkg
 
       - name: Install clang-tidy
         run: |
