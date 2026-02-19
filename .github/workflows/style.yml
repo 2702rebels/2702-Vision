@@ -11,11 +11,13 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v4
         with:
-          submodules: recursive
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
           ref: ${{github.event.pull_request.head.ref}}
+
+      - name: Update vcpkg submodule
+        run: git submodule update --remote vcpkg
 
       - name: Install clang-tidy
         run: |
