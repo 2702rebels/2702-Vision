@@ -7,9 +7,12 @@
     {
       "name": "ffmpeg",
       "features": [
-        "all",
-        "all-gpl",
-        "all-nonfree"
+        "avcodec",
+        "avdevice",
+        "avfilter",
+        "avformat",
+        "avresample",
+        "ffmpeg"
       ]
     },
     "gtest",
