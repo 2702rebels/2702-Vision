@@ -17,10 +17,6 @@
     },
     "gtest",
     {
-      "name": "libcamera",
-      "platform": "linux"
-    },
-    {
       "name": "opencv4",
       "features": [
         "calib3d",
