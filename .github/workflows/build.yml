@@ -14,8 +14,9 @@ jobs:
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Update vcpkg submodule
+        run: git submodule update --remote vcpkg
 
       - name: Install compiler
         run: |
@@ -82,8 +83,9 @@ jobs:
       steps:
         - name: Clone repo
           uses: actions/checkout@v4
-          with:
-            submodules: recursive
+
+        - name: Update vcpkg submodule
+          run: git submodule update --remote vcpkg
 
         - name: Install cmake (windows only)
           run: winget install -e --id Kitware.CMake --disable-interactivity --accept-source-agreements --accept-package-agreements
