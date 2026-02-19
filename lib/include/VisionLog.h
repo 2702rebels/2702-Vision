@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <optional>
 
 namespace fs = std::filesystem;
