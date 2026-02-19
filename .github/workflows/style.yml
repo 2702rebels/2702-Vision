@@ -35,11 +35,18 @@ jobs:
 
       - name: Cache vcpkg archives directory
         uses: actions/cache@v4
+        id: cachefetch
         with:
           path: ~/.cache/vcpkg/archives
           key: vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
             vcpkg-${{hashFiles('vcpkg/**')}}
+            
+      - name: Fail if cache not present
+        if: steps.cachefetch.outputs.cache-hit != 'true'
+        run: |
+          echo "Cache not found - failing. Please rerun this job after build-ubuntu finishes successfully."
+          exit 1
 
       - name: Configure
         run: |
