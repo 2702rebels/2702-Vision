@@ -83,8 +83,6 @@ class imgProc : public nvFrmProcessor
     cv::Mat m_lastFrame;
     std::mutex m_lastFrameMtx;
 
-    int				m_nCapture = 0;
-
 public:
     imgProc()
     {
@@ -109,10 +107,6 @@ public:
             m_lastFrame = cv::Mat(pcf->nRows(), pcf->nCols(), CV_8UC1, (void*)pcf->pu8Image());
             m_lastFrameMtx.unlock();
         }
-    }
-    int nCaptures() const
-    {
-        return m_nCapture;
     }
 
     void GetLastFrame(cv::Mat& dest)
@@ -155,24 +149,6 @@ cv::Mat CaptureGrayscaleImage()
         camServer.PutFrame(image);
     }
     return image;
-}
-
-void vSetIntegration( nvCamera &nvc )
-{
-    char szTmp[128];
-
-    GetNumber( szTmp, sizeof(szTmp), "Integration", "Please enter the integration Value" );
-    unsigned u = atoi(szTmp);
-    nvc.bSetExposure( u );
-}
-
-void vSetGain( nvCamera &nvc )
-{
-    char szTmp[128];
-
-    GetNumber( szTmp, sizeof(szTmp), "Gain", "Please enter the gain Value" );
-    unsigned u = atoi(szTmp);
-    nvc.bSetGain( u );
 }
 
 
@@ -407,6 +383,14 @@ int main(int argc, char** argv)
     std::cout << "Enter camera path(eg /dev/video0): ";
     std::cin >> cameraPath;
     nvCamera mycam0( cameraPath.c_str(), 0, 1280, 720, V4L2_PIX_FMT_GREY, proc );
+    std::cout << "Enter integration value: ";
+    unsigned int integrationValue;
+    mycam0.bSetExposure(integrationValue);
+    std::cin >> integrationValue;
+    std::cout << "Enter gain value: ";
+    unsigned int gain;
+    mycam0.bSetGain(gain);
+    std::cin >> gain;
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
     std::cin >> portname;
