@@ -1,6 +1,7 @@
 CXX=g++
 CXXFLAGS=-Wall -Wextra -std=c++20
-CXXFLAGS+=-O3
+CXXFLAGS+=-Og
+CXXFLAGS+=-g
 LINKFLAGS=
 CXXFLAGS+=-I../lib
 LINKFLAGS+=-L../lib
@@ -35,22 +36,22 @@ LINKFLAGS+=-L$(shell pwd)
 all: libloggingutils.a  libvisionlog.a cameracalib setpos
 
 loggingutils.o: LoggingUtils.cpp
-	$(CXX) $(CXXFLAGS) -c LoggingUtils.cpp -o loggingutils.o $(LINKFLAGS)
+	$(CXX) $(CXXFLAGS) -c LoggingUtils.cpp -o loggingutils.o
 
 libloggingutils.a: loggingutils.o
 	ar rcs libloggingutils.a loggingutils.o
 
 visionlog.o: VisionLog.cpp VisionLog.h LogFrameType.h
-	$(CXX) $(CXXFLAGS) -c VisionLog.cpp -o visionlog.o $(LINKFLAGS)
+	$(CXX) $(CXXFLAGS) -c VisionLog.cpp -o visionlog.o
 
 libvisionlog.a: visionlog.o
 	ar rcs libvisionlog.a visionlog.o
 
 cameracalib.o: cameracalib.cpp libloggingutils.a libvisionlog.a
-	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o -lloggingutils $(LINKFLAGS) -lvisionlog
+	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o
 
 setpos.o: setpos.cpp libloggingutils.a
-	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o -lloggingutils $(LINKFLAGS)
+	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o
 
 setpos: setpos.o libloggingutils.a
 	$(CXX) $(CXXFLAGS) -o setpos setpos.o -lloggingutils $(LINKFLAGS)
