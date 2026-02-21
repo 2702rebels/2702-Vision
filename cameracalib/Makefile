@@ -9,8 +9,9 @@ CXXFLAGS+=$(shell pkg-config --cflags spdlog)
 LINKFLAGS+=$(shell pkg-config --libs spdlog)
 LINKFLAGS+=-lcserialport
 CXXFLAGS+=-I/usr/local/include
-CXXFLAGS+=$(shell pkg-config --cflags opencv4)
-LINKFLAGS+=$(shell pkg-config --libs opencv4)
+CXXFLAGS+=-I../2025/2025AprilTag/include/opencv4
+LINKFLAGS+=-L../2025/2025AprilTag/lib/
+LINKFLAGS+=-lopencv_core -lopencv_imgproc -lopencv_imgcodecs -lopencv_videoio -lopencv_highgui -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_ml -lopencv_photo -lopencv_video -lopencv_dnn -lopencv_flann -lopencv_gapi -lopencv_stitching
 CXXFLAGS+=$(shell pkg-config --cflags wpilib)
 LINKFLAGS+=-L/usr/local/lib -lntcore -lcscore -lcameraserver -lwpilibc -lwpimath -lwpinet -lwpiutil
 CXXFLAGS+=-I../2025/2025AprilTag/apriltags_cuda/build/wpilib/src/wpilib/wpiutil/src/main/native/thirdparty/llvm/include/
@@ -45,16 +46,16 @@ visionlog.o: VisionLog.cpp VisionLog.h LogFrameType.h
 libvisionlog.a: visionlog.o
 	ar rcs libvisionlog.a visionlog.o
 
-cameracalib.o: cameracalib.cpp
+cameracalib.o: cameracalib.cpp libloggingutils.a libvisionlog.a
 	$(CXX) $(CXXFLAGS) -c cameracalib.cpp -o cameracalib.o -lloggingutils $(LINKFLAGS) -lvisionlog
 
-setpos.o: setpos.cpp
+setpos.o: setpos.cpp libloggingutils.a
 	$(CXX) $(CXXFLAGS) -c setpos.cpp -o setpos.o -lloggingutils $(LINKFLAGS)
 
-setpos: setpos.o
+setpos: setpos.o libloggingutils.a
 	$(CXX) $(CXXFLAGS) -o setpos setpos.o -lloggingutils $(LINKFLAGS)
 
-cameracalib: cameracalib.o
+cameracalib: cameracalib.o libvisionlog.a libloggingutils.a
 	$(CXX) $(CXXFLAGS) -o cameracalib cameracalib.o -lloggingutils $(LINKFLAGS) -lvisionlog
 
 clean:
