@@ -107,7 +107,8 @@ bool nvCamera::bSetExposure( uint64_t uExp )
 
 	memset( &ctrl, 0, sizeof(ctrl) );
 	memset( &ctrls, 0, sizeof(ctrls) );
-	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	ctrl.id = 0x009a200a;
+//	ctrl.id = V4L2_CID_EXPOSURE;
 	ctrl.value64 = uExp;
 
 	ctrls.count = 1;
@@ -128,7 +129,7 @@ int nvCamera::nGetExposure()
 	v4l2_ext_controls ctrls;
 
 	memset( &ctrl, 0, sizeof(ctrl) );
-	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	ctrl.id = 0x009a200a;
 
 	ctrls.which = V4L2_CTRL_WHICH_CUR_VAL;
 	ctrls.count = 1;
@@ -146,7 +147,7 @@ uint64_t nvCamera::u64GetExposure()
 	v4l2_ext_controls ctrls;
 
 	memset( &ctrl, 0, sizeof(ctrl) );
-	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	ctrl.id = 0x009a200a;
 
 	ctrls.which = V4L2_CTRL_WHICH_CUR_VAL;
 	ctrls.count = 1;
@@ -165,8 +166,8 @@ bool nvCamera::bSetGain( uint32_t uGain )
 
 	memset( &ctrl, 0, sizeof(ctrl) );
 	memset( &ctrls, 0, sizeof(ctrls) );
-	ctrl.id = V4L2_CID_ANALOGUE_GAIN;
-	ctrl.value = uGain;
+	ctrl.id = 0x009a2009;
+	ctrl.value64 = uGain;
 	printf( "Setting Gain to %u\n", uGain );
 
 	ctrls.count = 1;
