@@ -385,8 +385,8 @@ int main(int argc, char** argv)
     nvCamera mycam0( cameraPath.c_str(), 0, 1280, 720, V4L2_PIX_FMT_GREY, proc );
     std::cout << "Enter integration value: ";
     unsigned int integrationValue;
-    mycam0.bSetExposure(integrationValue);
     std::cin >> integrationValue;
+    mycam0.bSetExposure(integrationValue);
     std::cout << "Enter gain value: ";
     unsigned int gain;
     mycam0.bSetGain(gain);
