@@ -224,6 +224,9 @@ int GetChessboardHeightDeg()
             {
                 break;
             }
+        } else
+        {
+            break;
         }
     }
     return i - 90;
@@ -275,6 +278,9 @@ int GetChessboardWidthDeg()
             {
                 break;
             }
+        } else
+        {
+            break;
         }
     }
     return i - 90;
