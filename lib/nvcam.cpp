@@ -29,9 +29,9 @@
 #include <sys/resource.h>
 #include <sched.h>
 
-#define AUTO_GAIN	1
+#define AUTO_GAIN	0
 #define APRILTAGS	0
-#define ANNOTATE	1
+#define ANNOTATE	0
 
 using namespace std;
 
