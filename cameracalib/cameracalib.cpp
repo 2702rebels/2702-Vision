@@ -42,7 +42,6 @@ extern "C" {
 
 #include <signal.h>
 #include <cmath>
-#include "ChessboardPosition.h"
 
 namespace fs = std::filesystem;
 using namespace spdlog;
@@ -469,21 +468,21 @@ int main(int argc, char** argv)
         int heightUnusedSpace = tiltFovHeight - nChessboardsTall * checkerboardHeightDeg;
         int totalSteps = nChessboardsWide * nChessboardsTall;
         int stepsDone = 0;
-        std::vector<ChessboardPosition> boardPositions;
+        std::vector<cv::Point2i> boardPositions;
         int curLeftEdge = panFov.first;
         int curTopEdge = tiltFov.first;
 		for(int i = 0; i < nChessboardsWide; i++){
             for(int j = 0; j < nChessboardsTall; j++){
-				boardPositions.push_back(ChessboardPosition(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg)));
+				boardPositions.push_back(cv::Point2i(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg)));
                 curTopEdge += round(checkerboardHeightDeg + heightUnusedSpace / (nChessboardsTall - 1));
             }
             curTopEdge = tiltFov.first;
             curLeftEdge += round(checkerboardWidthDeg + widthUnusedSpace / (nChessboardsWide - 1));
 		}
-        for (ChessboardPosition& position : boardPositions)
+        for (cv::Point2i& position : boardPositions)
         {
-            Pan(position.panCenter);
-            Tilt(position.tiltCenter);
+            Pan(position.x);
+            Tilt(position.y);
         }
     }
     motorControllerPort.close();
