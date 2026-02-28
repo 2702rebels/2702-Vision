@@ -396,8 +396,8 @@ int main(int argc, char** argv)
     mycam0.bSetExposure(integrationValue);
     std::cout << "Enter gain value: ";
     unsigned int gain;
-    mycam0.bSetGain(gain);
     std::cin >> gain;
+    mycam0.bSetGain(gain);
     std::string portname;
     std::cout << "Enter port name(eg COM3): ";
     std::cin >> portname;
