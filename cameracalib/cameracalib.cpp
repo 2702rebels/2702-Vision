@@ -483,6 +483,9 @@ int main(int argc, char** argv)
         {
             Pan(position.x);
             Tilt(position.y);
+            if(!TakeCalibrationImage(dist)){
+				warn("Calibration image not found for board position p{} t{}", position.x, position.y);
+			}
         }
     }
     motorControllerPort.close();
