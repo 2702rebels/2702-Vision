@@ -21,7 +21,7 @@ jobs:
       - name: Install compiler
         run: |
           sudo apt update
-          sudo apt install -y build-essential ninja-build curl zip unzip tar autoconf autoconf-archive automake libtool linux-libc-dev pkg-config software-properties-common lsb-release nasm bison flex python3 python3.12-venv libx11-dev libxext-dev libxrender-dev libxtst-dev libxrandr-dev libltdl-dev
+          sudo apt install -y build-essential ninja-build curl zip unzip tar autoconf autoconf-archive automake libtool linux-libc-dev pkg-config software-properties-common lsb-release nasm bison flex python3 python3.12-venv libx11-dev libxext-dev libxrender-dev libxtst-dev libxrandr-dev libltdl-dev libxi-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libvulkan-dev libwayland-dev libxkbcommon-dev libssl-dev libbz2-dev liblzma-dev
           sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
           sudo apt-key adv --fetch-keys https://apt.kitware.com/keys/kitware-archive-latest.asc
           sudo apt-get update
@@ -31,9 +31,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/vcpkg/archives
-          key: vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
-            vcpkg-${{hashFiles('vcpkg/**')}}
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
 
       - name: Configure ${{matrix.build_type}} ${{matrix.os}}
         run: |
@@ -100,9 +100,9 @@ jobs:
           uses: actions/cache@v4
           with:
             path: ${{ steps.localappdata.outputs.value }}\vcpkg\archives
-            key: vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+            key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
             restore-keys: |
-              vcpkg-${{hashFiles('vcpkg/**')}}
+              ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
 
         - name: Configure and build ${{matrix.build_type}}
           if: matrix.build_type == 'debug'
