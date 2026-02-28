@@ -468,23 +468,24 @@ int main(int argc, char** argv)
         int heightUnusedSpace = tiltFovHeight - nChessboardsTall * checkerboardHeightDeg;
         std::vector<cv::Point2i> boardPositions;
 		int curLeftEdge = panFov.first;
-		int curTopEdge = panFov.second;
+		int curTopEdge = tiltFov.first;
         if(static_cast<int>(widthUnusedSpace / nChessboardsWide) < round(widthUnusedSpace / nChessboardsWide)){
              curLeftEdge += floor(widthUnusedSpace / nChessboardsWide);
 		} else {
 			curLeftEdge += ceil(widthUnusedSpace / nChessboardsWide);
 		}
 		if(static_cast<int>(heightUnusedSpace / nChessboardsTall) < round(heightUnusedSpace / nChessboardsTall)){
-			curTopEdge += floor(widthUnusedSpace / nChessboardsTall);
+			curTopEdge += floor(heightUnusedSpace / nChessboardsTall);
 		} else {
-			curTopEdge += ceil(widthUnusedSpace / nChessboardsTall);
+			curTopEdge += ceil(heightUnusedSpace / nChessboardsTall);
 		}
+        int initTopEdge = curTopEdge;
 		for(int i = 0; i < nChessboardsWide; i++){
             for(int j = 0; j < nChessboardsTall; j++){
 				boardPositions.push_back(cv::Point2i(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg)));
                 curTopEdge += round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall);
             }
-            curTopEdge = tiltFov.first;
+            curTopEdge = initTopEdge;
             curLeftEdge += round(checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide);
 		}
         int stepsDone = 0;
