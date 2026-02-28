@@ -399,7 +399,7 @@ int main(int argc, char** argv)
     std::cin >> gain;
     mycam0.bSetGain(gain);
     std::string portname;
-    std::cout << "Enter port name(eg COM3): ";
+    std::cout << "Enter USB port name(eg COM3 or /dev/ttyUSB0): ";
     std::cin >> portname;
     std::cout << "Enter output directory of png files: ";
     std::cin >> outdir;
@@ -413,7 +413,6 @@ int main(int argc, char** argv)
     if (!fs::exists(outdir) || !fs::is_directory(outdir))
     {
         fs::create_directories(outdir);
-        fs::create_directories(outdir / "filtered");
     }
     std::cout << "Using serial port " << portname << std::endl;
     motorControllerPort.init(
@@ -442,7 +441,6 @@ int main(int argc, char** argv)
             break;
         }
         fs::create_directories(outdir / dist);
-        fs::create_directories(outdir / "filtered" / dist);
         std::cout << "Waiting for chessboard..." << std::endl;
         bool foundChessboard = false;
         while (!foundChessboard)
@@ -453,11 +451,15 @@ int main(int argc, char** argv)
                                       cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
         }
         std::cout << "Found chessboard, starting chessboard size detection & FOV calibration" << std::endl;
+        info("Detecting chessboard width...");
         int checkerboardWidthDeg = GetChessboardWidthDeg();
+        info("Detecting chessboard height...");
         int checkerboardHeightDeg = GetChessboardHeightDeg();
         info("chessboard width(deg): {}, chessboard height(deg): {}", checkerboardWidthDeg, checkerboardHeightDeg);
+        info("Finding tilt fov...");
         std::pair<int, int> tiltFov = GetTiltFOV();
         info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
+        info("Finding pan fov...");
         std::pair<int, int> panFov = GetPanFOV();
         info("Pan FOV min: {}, Pan FOV max: {}", panFov.first, panFov.second);
         int panFovWidth = panFov.second - panFov.first;
