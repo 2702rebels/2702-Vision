@@ -153,10 +153,6 @@ bool TakeCalibrationImage(std::string dist)
     {
         drawChessboardCorners(debugImage, checkerboardPatternSize, corners, cornersFound);
     }
-#if DESKTOP
-    cv::imshow("Captured Image (Filtered)", debugImage);
-    cv::waitKey(1);
-#endif
     cv::imwrite((outdir / dist / ("img-" + std::to_string(imageIndex) + "-" + dist + ".png")).string(), grayscale);
     imageIndex++;
     return cornersFound;
@@ -208,6 +204,9 @@ int GetChessboardHeightDeg()
             {
                 break;
             }
+        } else
+        {
+            break;
         }
     }
     return i - 90;
@@ -259,6 +258,9 @@ int GetChessboardWidthDeg()
             {
                 break;
             }
+        } else
+        {
+            break;
         }
     }
     return i - 90;
@@ -363,11 +365,14 @@ std::pair<int, int> GetPanFOV()
 int main(int argc, char** argv)
 {
     SetupTextLogger();
+    std::string cameraPath;
+    std::cout << "Enter camera path(eg /dev/video0): ";
+    std::cin >> cameraPath;
 #ifndef DESKTOP
-    RPICamera mycam0("/dev/video0", 0, 640, 480, DRM_FORMAT_RGB888, proc);
+    RPICamera mycam0(cameraPath.c_str(), 0, 640, 480, DRM_FORMAT_RGB888, proc);
 #endif
     std::string portname;
-    std::cout << "Enter port name(eg COM3): ";
+    std::cout << "Enter USB port name(eg COM3 or /dev/ttyUSB0): ";
     std::cin >> portname;
     std::cout << "Enter output directory of png files: ";
     std::cin >> outdir;
@@ -381,7 +386,6 @@ int main(int argc, char** argv)
     if (!fs::exists(outdir) || !fs::is_directory(outdir))
     {
         fs::create_directories(outdir);
-        fs::create_directories(outdir / "filtered");
     }
     std::cout << "Using serial port " << portname << std::endl;
     motorControllerPort.init(
@@ -410,7 +414,6 @@ int main(int argc, char** argv)
             break;
         }
         fs::create_directories(outdir / dist);
-        fs::create_directories(outdir / "filtered" / dist);
         std::cout << "Waiting for chessboard..." << std::endl;
         bool foundChessboard = false;
         while (!foundChessboard)
@@ -421,34 +424,83 @@ int main(int argc, char** argv)
                                       cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
         }
         std::cout << "Found chessboard, starting chessboard size detection & FOV calibration" << std::endl;
+        info("Detecting chessboard width...");
         int checkerboardWidthDeg = GetChessboardWidthDeg();
+        info("Detecting chessboard height...");
         int checkerboardHeightDeg = GetChessboardHeightDeg();
         info("chessboard width(deg): {}, chessboard height(deg): {}", checkerboardWidthDeg, checkerboardHeightDeg);
+        info("Finding tilt fov...");
         std::pair<int, int> tiltFov = GetTiltFOV();
         info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
+        info("Finding pan fov...");
         std::pair<int, int> panFov = GetPanFOV();
         info("Pan FOV min: {}, Pan FOV max: {}", panFov.first, panFov.second);
-        int totalSteps = ((panFov.second - panFov.first) / checkerboardWidthDeg) * ( (tiltFov.second - tiltFov.first) / checkerboardHeightDeg);
-        info("Total # of steps: {}", totalSteps);
-        int stepsDone = 0;
-        for (int t = tiltFov.first; t < tiltFov.second; t += checkerboardHeightDeg)
-        {
-            for (int p = panFov.first; p < panFov.second; p += checkerboardWidthDeg)
-            {
-                info("Step {}, {}% done", stepsDone, static_cast<double>(stepsDone) / static_cast<double>(totalSteps) * 100);
-                Tilt(t);
-                Pan(p);
-                if (!TakeCalibrationImage(dist))
-                {
-                    warn("Failed to find checkerboard at p{} t{} which was inside of the pan and tilt fov", p, t);
-                }
-                stepsDone++;
+        int panFovWidth = panFov.second - panFov.first;
+        int tiltFovHeight = tiltFov.second - tiltFov.first;
+        int nChessboardsWide = floor(panFovWidth / checkerboardWidthDeg);
+        int nChessboardsTall = floor(tiltFovHeight / checkerboardHeightDeg);
+        int widthUnusedSpace = panFovWidth - nChessboardsWide * checkerboardWidthDeg;
+        int heightUnusedSpace = tiltFovHeight - nChessboardsTall * checkerboardHeightDeg;
+        std::vector<cv::Point2i> boardPositions;
+		int curLeftEdge = panFov.first;
+		int curTopEdge = tiltFov.first;
+        if(static_cast<int>(widthUnusedSpace / nChessboardsWide) < round(widthUnusedSpace / nChessboardsWide)){
+             curLeftEdge += floor(widthUnusedSpace / nChessboardsWide);
+		} else {
+			curLeftEdge += ceil(widthUnusedSpace / nChessboardsWide);
+		}
+		if(static_cast<int>(heightUnusedSpace / nChessboardsTall) < round(heightUnusedSpace / nChessboardsTall)){
+			curTopEdge += floor(heightUnusedSpace / nChessboardsTall);
+		} else {
+			curTopEdge += ceil(heightUnusedSpace / nChessboardsTall);
+		}
+        int initTopEdge = curTopEdge;
+        int initLeftEdge = curLeftEdge;
+		for(int i = 0; i < nChessboardsWide; i++){
+            for(int j = 0; j < nChessboardsTall; j++){
+				boardPositions.emplace_back(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg));
+                curTopEdge += static_cast<int>(std::round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall));
             }
+            curTopEdge = initTopEdge;
+            curLeftEdge += static_cast<int>(std::round((checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
+		}
+        int stepsDone = 0;
+        curLeftEdge = initLeftEdge + 1;
+        for (int i = 0; i < ceil(panFovWidth / checkerboardWidthDeg) + 1; i++)
+        {
+            boardPositions.emplace_back(curLeftEdge + 0.5 * checkerboardWidthDeg, tiltFov.first + 1);
+            curLeftEdge += static_cast<int>(std::round((checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
+        }
+        curLeftEdge = initLeftEdge + 1;
+        for (int i = 0; i < ceil(panFovWidth / checkerboardWidthDeg) + 1; i++)
+        {
+            boardPositions.emplace_back(curLeftEdge + 0.5 * checkerboardWidthDeg, tiltFov.second - 1);
+            curLeftEdge += static_cast<int>(std::round((checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
+        }
+        curTopEdge = initTopEdge + 1;
+        for (int i = 0; i < ceil(tiltFovHeight / checkerboardHeightDeg) + 1; i++)
+        {
+            boardPositions.emplace_back(panFov.first - 2, round(curTopEdge + 0.5 * checkerboardHeightDeg));
+            curTopEdge += static_cast<int>(std::round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall));
+        }
+        curTopEdge = initTopEdge + 1;
+        for (int i = 0; i < ceil(tiltFovHeight / checkerboardHeightDeg) + 1; i++)
+        {
+            boardPositions.emplace_back(panFov.second - 1, round(curTopEdge + 0.5 * checkerboardHeightDeg));
+            curTopEdge += static_cast<int>(std::round((checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall));
+        }
+        for (cv::Point2i& position : boardPositions)
+        {
+            info("Step {} out of {} steps, {}% done", stepsDone, boardPositions.size(), round(static_cast<double>(stepsDone) / static_cast<double>(boardPositions.size()) * 100));
+            Pan(position.x);
+            Tilt(position.y);
+            std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+            if(!TakeCalibrationImage(dist)){
+				warn("Calibration image not found for board position p{} t{}", position.x, position.y);
+			}
+            stepsDone++;
         }
     }
     motorControllerPort.close();
-#if DESKTOP
-    cv::destroyAllWindows();
-#endif
     return 0;
 }
