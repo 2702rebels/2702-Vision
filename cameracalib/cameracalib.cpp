@@ -41,6 +41,7 @@ extern "C" {
 #include "nvcam.h"
 
 #include <signal.h>
+#include <cmath>
 
 namespace fs = std::filesystem;
 using namespace spdlog;
@@ -459,19 +460,24 @@ int main(int argc, char** argv)
         info("Tilt FOV min: {}, Tilt FOV max: {}", tiltFov.first, tiltFov.second);
         std::pair<int, int> panFov = GetPanFOV();
         info("Pan FOV min: {}, Pan FOV max: {}", panFov.first, panFov.second);
-        int totalSteps = ((panFov.second - panFov.first) / checkerboardWidthDeg) * ( (tiltFov.second - tiltFov.first) / checkerboardHeightDeg);
-        info("Total # of steps: {}", totalSteps);
+        int panFovWidth = panFov.second - panFov.first;
+        int tiltFovHeight = tiltFov.second - tiltFov.first;
+        int nChessboardsWide = floor(panFovWidth / checkerboardWidthDeg);
+        int nChessboardsTall = floor(tiltFovHeight / checkerboardHeightDeg);
+        int widthUnusedSpace = panFovWidth - nChessboardsWide * checkerboardWidthDeg;
+        int heightUnusedSpace = tiltFovWidth - nChessboardsTall * checkerboardHeightDeg;
+        int totalSteps = nChessboardsWide * nChessboardsTall;
         int stepsDone = 0;
-        for (int t = tiltFov.first; t < tiltFov.second; t += checkerboardHeightDeg)
+        for (int i = tiltFov.first; i < tiltFov.second; i += (chessboardHeightDeg + round(heightUnusedSpace / nChessboardsTall)))
         {
-            for (int p = panFov.first; p < panFov.second; p += checkerboardWidthDeg)
+            Tilt(i);
+            for (int j = panFov.first; j < panFov.second; j += (chessboardWidthDeg + round(widthUnusedSpace / nChessboardsWide)))
             {
-                info("Step {}, {}% done", stepsDone, static_cast<double>(stepsDone) / static_cast<double>(totalSteps) * 100);
-                Tilt(t);
-                Pan(p);
+                info("Step {}, {}% done", stepsDone + 1, static_cast<double>(stepsDone) / static_cast<double>(totalSteps) * 100);
+                Pan(j);
                 if (!TakeCalibrationImage(dist))
                 {
-                    warn("Failed to find checkerboard at p{} t{} which was inside of the pan and tilt fov", p, t);
+                    warn("Failed to find checkerboard at p{} t{} which was inside of the pan and tilt fov", j, i);
                 }
                 stepsDone++;
             }
