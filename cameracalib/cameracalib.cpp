@@ -468,19 +468,21 @@ int main(int argc, char** argv)
         int heightUnusedSpace = tiltFovHeight - nChessboardsTall * checkerboardHeightDeg;
         int totalSteps = nChessboardsWide * nChessboardsTall;
         int stepsDone = 0;
-        for (int i = tiltFov.first; i < tiltFov.second; i += (checkerboardHeightDeg + round(heightUnusedSpace / nChessboardsTall)))
-        {
-            Tilt(i);
-            for (int j = panFov.first; j < panFov.second; j += (checkerboardWidthDeg + round(widthUnusedSpace / nChessboardsWide)))
-            {
-                info("Step {}, {}% done", stepsDone + 1, static_cast<double>(stepsDone) / static_cast<double>(totalSteps) * 100);
-                Pan(j);
-                if (!TakeCalibrationImage(dist))
-                {
-                    warn("Failed to find checkerboard at p{} t{} which was inside of the pan and tilt fov", j, i);
-                }
-                stepsDone++;
+        std::vector<ChessboardPosition> boardPositions;
+        int curLeftEdge = panFov.first;
+        int curTopEdge = tiltFov.first;
+		for(int i = 0; i < nChessboardsWide; i++){
+            for(int j = 0; j < nChessboardsTall; j++){
+				position.push_back(ChessboardPosition(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg)));
+                curTopEdge += round(checkerboardHeightDeg + heightUnusedSpace / (nChessboardsTall - 1));
             }
+            curTopEdge = tiltFov.first;
+            curLeftEdge += round(checkerboardWidthDeg + widthUnusedSpace / (nChessboardsWide - 1));
+		}
+        for (ChessboardPosition& position : boardPositions)
+        {
+            Pan(position.panCenter);
+            Tilt(position.tiltCenter);
         }
     }
     motorControllerPort.close();
