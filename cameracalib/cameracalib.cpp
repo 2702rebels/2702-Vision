@@ -474,7 +474,7 @@ int main(int argc, char** argv)
         int curTopEdge = tiltFov.first;
 		for(int i = 0; i < nChessboardsWide; i++){
             for(int j = 0; j < nChessboardsTall; j++){
-				position.push_back(ChessboardPosition(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg)));
+				boardPositions.push_back(ChessboardPosition(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg)));
                 curTopEdge += round(checkerboardHeightDeg + heightUnusedSpace / (nChessboardsTall - 1));
             }
             curTopEdge = tiltFov.first;
