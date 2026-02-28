@@ -480,6 +480,7 @@ int main(int argc, char** argv)
 			curTopEdge += ceil(heightUnusedSpace / nChessboardsTall);
 		}
         int initTopEdge = curTopEdge;
+        int initLeftEdge = curLeftEdge;
 		for(int i = 0; i < nChessboardsWide; i++){
             for(int j = 0; j < nChessboardsTall; j++){
 				boardPositions.push_back(cv::Point2i(round(curLeftEdge + 0.5 * checkerboardWidthDeg), round(curTopEdge + 0.5 * checkerboardHeightDeg)));
@@ -489,6 +490,24 @@ int main(int argc, char** argv)
             curLeftEdge += round(checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide);
 		}
         int stepsDone = 0;
+        curLeftEdge = initLeftEdge + 1;
+        curTopEdge = initTopEdge;
+        for (int s = 0; s < 2; s++)
+        {
+            for (int i = 0; i < ceil(panFovWidth / nChessboardsWide))
+            {
+                boardPositions.push_back(cv::Point2i(curLeftEdge + 0.5 * checkerboardWidthDeg, tiltFov.first + 1));
+                curLeftEdge += round(checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide);
+            }
+        }
+        for (int s = 0; s < 2; s++)
+        {
+            for (int i = 0; i < ceil(tiltFovHeight / nChessboardsTall))
+            {
+                boardPositions.push_back(cv::Point2i(panFov.first + 1, round(curTopEdge + 0.5 * checkerboardHeightDeg)));
+                curTopEdge += round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall);
+            }
+        }
         for (cv::Point2i& position : boardPositions)
         {
             info("Step {} out of {} steps, {}% done", stepsDone, boardPositions.size(), round(static_cast<double>(stepsDone) / static_cast<double>(boardPositions.size()) * 100));
