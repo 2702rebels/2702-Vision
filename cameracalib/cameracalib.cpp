@@ -42,6 +42,7 @@ extern "C" {
 
 #include <signal.h>
 #include <cmath>
+#include "ChessboardPosition.h"
 
 namespace fs = std::filesystem;
 using namespace spdlog;
