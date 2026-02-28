@@ -466,8 +466,6 @@ int main(int argc, char** argv)
         int nChessboardsTall = floor(tiltFovHeight / checkerboardHeightDeg);
         int widthUnusedSpace = panFovWidth - nChessboardsWide * checkerboardWidthDeg;
         int heightUnusedSpace = tiltFovHeight - nChessboardsTall * checkerboardHeightDeg;
-        int totalSteps = nChessboardsWide * nChessboardsTall;
-        int stepsDone = 0;
         std::vector<cv::Point2i> boardPositions;
         int curLeftEdge = panFov.first;
         int curTopEdge = tiltFov.first;
