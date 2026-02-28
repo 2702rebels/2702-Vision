@@ -1,5 +1,5 @@
 sudo apt update
-sudo apt install -y libprotobuf-dev libssh-dev libopencv-dev build-essential ffmpeg libavdevice-dev libavfilter-dev nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev protobuf-compiler
+sudo apt install -y libssh-dev libprotobuf-dev gcc g++ libc6-dev make libopencv-dev ffmpeg libavdevice-dev libavfilter-dev nlohmann-json3-dev libcamera-dev ninja-build doxygen pkg-config git protobuf-compiler libasio-dev
 echo "Downloading latest CMake"
 sudo apt remove --purge --auto-remove cmake -y
 sudo apt install -y ca-certificates gpg wget
@@ -9,7 +9,7 @@ echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://ap
 sudo apt update
 test -f /usr/share/doc/kitware-archive-keyring/copyright ||
 sudo rm /usr/share/keyrings/kitware-archive-keyring.gpg
-sudo apt install kitware-archive-keyring -y
+sudo apt install kitware-archive-keyring -yz
 sudo apt update
 sudo apt install cmake -y
 echo "Downloading and compiling wpilib..."
