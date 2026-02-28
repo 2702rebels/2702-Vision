@@ -505,13 +505,13 @@ int main(int argc, char** argv)
         curTopEdge = initTopEdge + 1;
         for (int i = 0; i < ceil(tiltFovHeight / checkerboardHeightDeg) + 1; i++)
         {
-            boardPositions.push_back(cv::Point2i(panFov.first - 1, round(curTopEdge + 0.5 * checkerboardHeightDeg)));
+            boardPositions.push_back(cv::Point2i(panFov.first - 2, round(curTopEdge + 0.5 * checkerboardHeightDeg)));
             curTopEdge += round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall);
         }
         curTopEdge = initTopEdge + 1;
         for (int i = 0; i < ceil(tiltFovHeight / checkerboardHeightDeg) + 1; i++)
         {
-            boardPositions.push_back(cv::Point2i(panFov.second + 1, round(curTopEdge + 0.5 * checkerboardHeightDeg)));
+            boardPositions.push_back(cv::Point2i(panFov.second - 1, round(curTopEdge + 0.5 * checkerboardHeightDeg)));
             curTopEdge += round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall);
         }
         for (cv::Point2i& position : boardPositions)
