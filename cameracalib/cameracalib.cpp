@@ -389,7 +389,7 @@ int main(int argc, char** argv)
     std::string cameraPath;
     std::cout << "Enter camera path(eg /dev/video0): ";
     std::cin >> cameraPath;
-    nvCamera mycam0( cameraPath.c_str(), 0, 1280, 720, V4L2_PIX_FMT_GREY, proc );
+    nvCamera mycam0( cameraPath.c_str(), 0, 1280, 800, V4L2_PIX_FMT_GREY, proc );
     std::cout << "Enter integration value: ";
     unsigned int integrationValue;
     std::cin >> integrationValue;
