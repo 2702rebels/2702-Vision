@@ -465,13 +465,13 @@ int main(int argc, char** argv)
         int nChessboardsWide = floor(panFovWidth / checkerboardWidthDeg);
         int nChessboardsTall = floor(tiltFovHeight / checkerboardHeightDeg);
         int widthUnusedSpace = panFovWidth - nChessboardsWide * checkerboardWidthDeg;
-        int heightUnusedSpace = tiltFovWidth - nChessboardsTall * checkerboardHeightDeg;
+        int heightUnusedSpace = tiltFovHeight - nChessboardsTall * checkerboardHeightDeg;
         int totalSteps = nChessboardsWide * nChessboardsTall;
         int stepsDone = 0;
-        for (int i = tiltFov.first; i < tiltFov.second; i += (chessboardHeightDeg + round(heightUnusedSpace / nChessboardsTall)))
+        for (int i = tiltFov.first; i < tiltFov.second; i += (checkerboardHeightDeg + round(heightUnusedSpace / nChessboardsTall)))
         {
             Tilt(i);
-            for (int j = panFov.first; j < panFov.second; j += (chessboardWidthDeg + round(widthUnusedSpace / nChessboardsWide)))
+            for (int j = panFov.first; j < panFov.second; j += (checkerboardWidthDeg + round(widthUnusedSpace / nChessboardsWide)))
             {
                 info("Step {}, {}% done", stepsDone + 1, static_cast<double>(stepsDone) / static_cast<double>(totalSteps) * 100);
                 Pan(j);
