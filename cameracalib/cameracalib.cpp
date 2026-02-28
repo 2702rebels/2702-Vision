@@ -479,13 +479,17 @@ int main(int argc, char** argv)
             curTopEdge = tiltFov.first;
             curLeftEdge += round(checkerboardWidthDeg + widthUnusedSpace / (nChessboardsWide - 1));
 		}
+        int stepsDone = 0;
         for (cv::Point2i& position : boardPositions)
         {
+            info("Step {} out of {} steps, {}% done", stepsDone, boardPositions.size(), round(static_cast<double>(stepsDone) / static_cast<double>(boardPositions.size()) * 100));
             Pan(position.x);
             Tilt(position.y);
+            std::this_thread::sleep_for(std::chrono::milliseconds(2500));
             if(!TakeCalibrationImage(dist)){
 				warn("Calibration image not found for board position p{} t{}", position.x, position.y);
 			}
+            stepsDone++;
         }
     }
     motorControllerPort.close();
