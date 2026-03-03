@@ -462,20 +462,20 @@ int main(int argc, char** argv)
                 curTopEdge += static_cast<int>(std::round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall));
             }
             curTopEdge = initTopEdge;
-            curLeftEdge += static_cast<int>(std::round((checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
+            curLeftEdge += static_cast<int>(std::round(checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
 		}
         int stepsDone = 0;
         curLeftEdge = initLeftEdge + 1;
         for (int i = 0; i < ceil(panFovWidth / checkerboardWidthDeg) + 1; i++)
         {
             boardPositions.emplace_back(curLeftEdge + 0.5 * checkerboardWidthDeg, tiltFov.first + 1);
-            curLeftEdge += static_cast<int>(std::round((checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
+            curLeftEdge += static_cast<int>(std::round(checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
         }
         curLeftEdge = initLeftEdge + 1;
         for (int i = 0; i < ceil(panFovWidth / checkerboardWidthDeg) + 1; i++)
         {
             boardPositions.emplace_back(curLeftEdge + 0.5 * checkerboardWidthDeg, tiltFov.second - 1);
-            curLeftEdge += static_cast<int>(std::round((checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
+            curLeftEdge += static_cast<int>(std::round(checkerboardWidthDeg + widthUnusedSpace / nChessboardsWide));
         }
         curTopEdge = initTopEdge + 1;
         for (int i = 0; i < ceil(tiltFovHeight / checkerboardHeightDeg) + 1; i++)
@@ -487,7 +487,7 @@ int main(int argc, char** argv)
         for (int i = 0; i < ceil(tiltFovHeight / checkerboardHeightDeg) + 1; i++)
         {
             boardPositions.emplace_back(panFov.second - 1, round(curTopEdge + 0.5 * checkerboardHeightDeg));
-            curTopEdge += static_cast<int>(std::round((checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall));
+            curTopEdge += static_cast<int>(std::round(checkerboardHeightDeg + heightUnusedSpace / nChessboardsTall));
         }
         for (cv::Point2i& position : boardPositions)
         {
