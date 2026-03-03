@@ -46,7 +46,7 @@ jobs:
       - name: build wpilib
         run: |
           rm vcpkg.json
-          vcpkg/vcpkg install wpilib[ntcore, protobuf, cameraserver, wpimath, allwpilib]
+          vcpkg/vcpkg install wpilib[ntcore,protobuf,cameraserver,wpimath,allwpilib]
       - name: upload faillog
         uses: actions/upload-artifact@v4
         with:
