@@ -18,8 +18,7 @@ class CamParm {
   int m_nURes;
   int m_nVRes;
 
-  Quaternion m_camRot;
-  Point3d m_camPos;
+  QXfrm m_qxm;
 
  public:
   CamParm();
@@ -42,21 +41,24 @@ class CamParm {
   }
   bool Load(char const *psz);
   bool Save(char const *psz);
-  void SetRotation(Quaternion const &q) { m_camRot = q; }
-  void SetOrigin(Point3d const &p) { m_camPos = p; }
-  Quaternion const &getRotation() const { return m_camRot; }
-  Point3d const &getOrigin() const { return m_camPos; }
+  void SetRotation(Quaternion const &q) { m_qxm.vSetRotation( q ); }
+  void SetOrigin(Point3d const &p) { m_qxm.vSetTranslation( p ); }
+  Quaternion const &getRotation() const { return m_qxm.Rotation(); }
+  Point3d const &getOrigin() const { return m_qxm.Translation(); }
+  QXfrm const &getXfrm() const { return m_qxm; }
 
   void UpdateResolution(int nURes, int nVRes);
   void Undistort(float fU, float fV, float &fUndistU, float &fUnistV) const;			// normalized by focal length
   void UndistortPixels(float fU, float fV, float &fUndistU, float &fUnistV) const;		// in Pixel units
   Point3d LOS(float fU, float fV) const;
 
+  Point2d ProjectPoint( Point3d const &p3d ) const;
+
   Point3d CalcTargetPosFromHeight(float fU, float fV, float fZ);
 
   CamParm &operator=(CamParm const &src);
 };
-
+#if 1
 class StereoCam {
   CamParm m_grCams[2];
   Quaternion m_CamToRobotRot;
@@ -83,5 +85,34 @@ class StereoCam {
   void UpdateResolution(int nURes, int nVRes);
   float fCalc3D(Point2d const &p1, Point2d const &p2,
                 Point3d &res);  // returns line separation
+};
+#endif
+// MultiCam stores the camera paramters and transformation for collection of
+// cameras.
+class MultiCam {
+	std::vector<CamParm>	m_vcp;
+	QXfrm					m_qxmR2C;		// Transformation from Robot Coordinates to Camera Coordinates
+public:
+	MultiCam() {}
+	MultiCam( std::vector<CamParm> vcp, QXfrm qxmR2C );
+	MultiCam( char const *pszFile );
+	~MultiCam();
+
+	bool bLoad( char const *psz );
+	bool bSave( char const *psz );
+
+	inline size_t nCam() const
+	{
+		return m_vcp.size();
+	}
+	inline CamParm const &operator[]( size_t n ) const
+	{
+		return m_vcp[n];
+	}
+
+	inline QXfrm const &qxmR2C() const
+	{
+		return m_qxmR2C;
+	}
 };
 };  // namespace Rebels

@@ -5,7 +5,8 @@ using namespace Rebels;
 
 Point3d::Point3d(Point3d const &src) { *this = src; }
 
-Point3d &Point3d::operator=(Point3d const &other) {
+Point3d &Point3d::operator=(Point3d const &other)
+{
   m_fX = other.m_fX;
   m_fY = other.m_fY;
   m_fZ = other.m_fZ;
@@ -13,14 +14,16 @@ Point3d &Point3d::operator=(Point3d const &other) {
   return *this;
 }
 
-Point3d Point3d::operator+(Point3d const &other) const {
+Point3d Point3d::operator+(Point3d const &other) const
+{
   float x = m_fX + other.x();
   float y = m_fY + other.y();
   float z = m_fZ + other.z();
   return Point3d(x, y, z);
 }
 
-Point3d &Point3d::operator+=(Point3d const &other) {
+Point3d &Point3d::operator+=(Point3d const &other)
+{
   m_fX += other.x();
   m_fY += other.y();
   m_fZ += other.z();
@@ -28,7 +31,8 @@ Point3d &Point3d::operator+=(Point3d const &other) {
   return *this;
 }
 
-Point3d &Point3d::operator-=(Point3d const &other) {
+Point3d &Point3d::operator-=(Point3d const &other)
+{
   m_fX -= other.x();
   m_fY -= other.y();
   m_fZ -= other.z();
@@ -36,32 +40,37 @@ Point3d &Point3d::operator-=(Point3d const &other) {
   return *this;
 }
 
-Point3d Point3d::operator-(Point3d const &other) const {
+Point3d Point3d::operator-(Point3d const &other) const
+{
   float x = m_fX - other.x();
   float y = m_fY - other.y();
   float z = m_fZ - other.z();
   return Point3d(x, y, z);
 }
 
-Point3d Point3d::operator*(float const scalar) const {
+Point3d Point3d::operator*(float const scalar) const
+{
   Point3d ret(m_fX * scalar, m_fY * scalar, m_fZ * scalar);
   return ret;
 }
 
-Point3d &Point3d::operator*=(float const scalar) {
+Point3d &Point3d::operator*=(float const scalar)
+{
   m_fX *= scalar;
   m_fY *= scalar;
   m_fZ *= scalar;
   return *this;
 }
 
-Point3d Point3d::operator/(float const scalar) const {
+Point3d Point3d::operator/(float const scalar) const
+{
   // todo: catch divide by 0
   Point3d ret(m_fX / scalar, m_fY / scalar, m_fZ / scalar);
   return ret;
 }
 
-Point3d &Point3d::operator/=(float const scalar) {
+Point3d &Point3d::operator/=(float const scalar)
+{
   // todo: catch divide by 0
   m_fX /= scalar;
   m_fY /= scalar;
@@ -69,11 +78,13 @@ Point3d &Point3d::operator/=(float const scalar) {
   return *this;
 }
 
-float Point3d::length() const {
+float Point3d::length() const
+{
   return sqrt(m_fX * m_fX + m_fY * m_fY + m_fZ * m_fZ);
 }
 
-Point3d Point3d::CrossProduct(Point3d const &v2) const {
+Point3d Point3d::CrossProduct(Point3d const &v2) const
+{
   float fI = m_fY * v2.m_fZ - v2.m_fY * m_fZ;
   float fJ = m_fZ * v2.m_fX - v2.m_fZ * m_fX;
   float fK = m_fX * v2.m_fY - v2.m_fX * m_fY;
@@ -81,11 +92,13 @@ Point3d Point3d::CrossProduct(Point3d const &v2) const {
   return Point3d(fI, fJ, fK);
 }
 
-float Point3d::DotProduct(Point3d const &v2) const {
+float Point3d::DotProduct(Point3d const &v2) const
+{
   return m_fX * v2.m_fX + m_fY * v2.m_fY + m_fZ * v2.m_fZ;
 }
 
-void Point3d::Normalize() {
+void Point3d::Normalize()
+{
   float fMag = sqrt(m_fX * m_fX + m_fY * m_fY + m_fZ * m_fZ);
   if (fMag == 0.F) {
     printf("Error - Point normalize->length = 0.\n");
@@ -158,7 +171,8 @@ RotationMatrix &RotationMatrix::operator=( Euler const &src )
 #endif
 #endif
 
-RotationMatrix &RotationMatrix::operator=(RotationMatrix const &src) {
+RotationMatrix &RotationMatrix::operator=(RotationMatrix const &src)
+{
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       m_grfMat[i][j] = src.m_grfMat[i][j];
@@ -167,7 +181,8 @@ RotationMatrix &RotationMatrix::operator=(RotationMatrix const &src) {
   return *this;
 }
 
-RotationMatrix RotationMatrix::operator*(RotationMatrix const &right) {
+RotationMatrix RotationMatrix::operator*(RotationMatrix const &right)
+{
   RotationMatrix res;
 
   for (int c = 0; c < 3; c++) {
@@ -180,7 +195,8 @@ RotationMatrix RotationMatrix::operator*(RotationMatrix const &right) {
   return res;
 }
 
-RotationMatrix &RotationMatrix::operator=(Quaternion const &quat) {
+RotationMatrix &RotationMatrix::operator=(Quaternion const &quat)
+{
   float fQ0X = quat.m_fQ0 * quat.m_fX;
   float fQ0Y = quat.m_fQ0 * quat.m_fY;
   float fQ0Z = quat.m_fQ0 * quat.m_fZ;
@@ -209,7 +225,8 @@ RotationMatrix &RotationMatrix::operator=(Quaternion const &quat) {
   return *this;
 }
 
-Point3d RotationMatrix::operator*(Point3d const &pt) const {
+Point3d RotationMatrix::operator*(Point3d const &pt) const
+{
   float fX = m_grfMat[0][0] * pt.x() + m_grfMat[0][1] * pt.y() +
              m_grfMat[0][2] * pt.z();
   float fY = m_grfMat[1][0] * pt.x() + m_grfMat[1][1] * pt.y() +
@@ -220,7 +237,60 @@ Point3d RotationMatrix::operator*(Point3d const &pt) const {
   return Point3d(fX, fY, fZ);
 }
 
-Quaternion &Quaternion::operator=(Quaternion const &src) {
+Euler::Euler( RotationMatrix const &r )
+{
+	// from matrix quaternion faq
+	float m_fRy = -asin( r.m_grfMat[0][2]);        /* Calculate Y-axis angle */
+    float C     =  cos( m_fRy );
+
+    if ( fabs( C ) > 0.005 )             /* Gimball lock? */
+      {
+      float ftrx      =  r.m_grfMat[2][2] / C;           /* No, so get X-axis angle */
+      float ftry      = -r.m_grfMat[1][1] / C;
+
+      m_fRx  = atan2( ftry, ftrx );
+
+      ftrx      =  r.m_grfMat[0][0] / C;            /* Get Z-axis angle */
+      ftry      = -r.m_grfMat[0][1] / C;
+
+      m_fRz  = atan2( ftry, ftrx );
+      }
+    else                                 /* Gimball lock has occurred */
+      {
+      m_fRx  = 0;                      /* Set X-axis angle to zero */
+
+      float ftrx      = r.m_grfMat[1][1];                 /* And calculate Z-axis angle */
+      float ftry      = r.m_grfMat[1][0];
+
+      m_fRz  = atan2( ftry, ftrx );
+      }
+
+}
+
+Euler::Euler( Quaternion const &q )
+{
+    // roll (x-axis rotation)
+    double sinr_cosp = 2 * (q.m_fQ0 * q.m_fX + q.m_fY * q.m_fZ);
+    double cosr_cosp = 1 - 2 * (q.m_fX * q.m_fX + q.m_fY * q.m_fY);
+    m_fRx = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    double sinp = 2 * (q.m_fQ0 * q.m_fY - q.m_fZ * q.m_fX);
+    if (std::abs(sinp) >= 1) {
+        m_fRy = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	}
+    else
+        m_fRy = std::asin(sinp);
+
+    // yaw (z-axis rotation)
+    double siny_cosp = 2 * (q.m_fQ0 * q.m_fZ + q.m_fX * q.m_fY);
+    double cosy_cosp = 1 - 2 * (q.m_fY * q.m_fY + q.m_fZ * q.m_fZ);
+    m_fRz = std::atan2(siny_cosp, cosy_cosp);
+}
+
+
+Quaternion &Quaternion::operator=(Quaternion const &src)
+{
   m_fQ0 = src.m_fQ0;
   m_fX = src.m_fX;
   m_fY = src.m_fY;
@@ -240,6 +310,24 @@ Quaternion::Quaternion(float fTheta, Point3d const &axis) {
   m_fY = normalizedAxis.y() * fSinTheta2;
   m_fZ = normalizedAxis.z() * fSinTheta2;
   Normalize();
+}
+
+Quaternion::Quaternion(Euler const &er)
+{
+    double cy = cos(er.m_fRz * 0.5);
+    double sy = sin(er.m_fRz * 0.5);
+    double cp = cos(er.m_fRy * 0.5);
+    double sp = sin(er.m_fRy * 0.5);
+    double cr = cos(er.m_fRx * 0.5);
+    double sr = sin(er.m_fRx * 0.5);
+
+    // Apply the ZYX conversion formula
+    m_fQ0 = cr * cp * cy + sr * sp * sy;
+    m_fX = sr * cp * cy - cr * sp * sy;
+    m_fY = cr * sp * cy + sr * cp * sy;
+    m_fZ = cr * cp * sy - sr * sp * cy;
+
+	Normalize();
 }
 
 Quaternion::Quaternion(Point3d const &rvec) {
@@ -304,7 +392,8 @@ Quaternion &Quaternion::operator=(RotationMatrix const &rm) {
   return *this;
 }
 
-Quaternion Quaternion::operator*(Quaternion const &other) {
+Quaternion Quaternion::operator*(Quaternion const &other) const
+{
   float fQ0 = m_fQ0 * other.m_fQ0 - m_fX * other.m_fX - m_fY * other.m_fY -
               m_fZ * other.m_fZ;
   float fX = m_fQ0 * other.m_fX + m_fX * other.m_fQ0 + m_fY * other.m_fZ -
@@ -316,6 +405,23 @@ Quaternion Quaternion::operator*(Quaternion const &other) {
   Quaternion res(fQ0, fX, fY, fZ);
   res.Normalize();
   return res;
+}
+
+Quaternion &Quaternion::operator*=(Quaternion const &other) {
+  float fQ0 = m_fQ0 * other.m_fQ0 - m_fX * other.m_fX - m_fY * other.m_fY -
+              m_fZ * other.m_fZ;
+  float fX = m_fQ0 * other.m_fX + m_fX * other.m_fQ0 + m_fY * other.m_fZ -
+             m_fZ * other.m_fY;
+  float fY = m_fQ0 * other.m_fY + m_fY * other.m_fQ0 + m_fZ * other.m_fX -
+             m_fX * other.m_fZ;
+  float fZ = m_fQ0 * other.m_fZ + m_fZ * other.m_fQ0 + m_fX * other.m_fY -
+             m_fY * other.m_fX;
+  m_fQ0 = fQ0;
+  m_fX  = fX;
+  m_fY  = fY;
+  m_fZ  = fZ;
+  Normalize();
+  return *this;
 }
 
 void Quaternion::Normalize() {
@@ -333,7 +439,8 @@ void Quaternion::Normalize() {
   }
 }
 
-Point3d Quaternion::operator*(Point3d const &pt) const {
+Point3d Quaternion::RotatePoint(Point3d const &pt) const
+{
   float UxV_x = m_fY * pt.z() - m_fZ * pt.y();
   float UxV_y = m_fZ * pt.x() - m_fX * pt.z();
   float UxV_z = m_fX * pt.y() - m_fY * pt.x();
@@ -346,18 +453,174 @@ Point3d Quaternion::operator*(Point3d const &pt) const {
   return res;
 }
 
-void Quaternion::Inverse() {
+void Quaternion::Invert()
+{
 	m_fQ0 = -m_fQ0;
 }
 
-Point2d::Point2d() : m_fU(0.F), m_fV(0.F) {}
+Quaternion Quaternion::Inverse() const
+{
+	return Quaternion( -m_fQ0, m_fX, m_fY, m_fZ );
+}
 
-Point2d::Point2d(float fU, float fV) : m_fU(fU), m_fV(fV) {}
+Point2d::Point2d() :
+	m_fU(0.F),
+	m_fV(0.F)
+{
+}
 
-Point2d::Point2d(Point2d const &src) : m_fU(src.m_fU), m_fV(src.m_fV) {}
+Point2d::Point2d(float fU, float fV) :
+	m_fU(fU),
+	m_fV(fV)
+{
+}
+
+Point2d::Point2d(Point2d const &src) :
+	m_fU(src.m_fU),
+	m_fV(src.m_fV)
+{
+}
 
 Point2d &Point2d::operator=(Point2d const &src) {
   m_fU = src.m_fU;
   m_fV = src.m_fV;
   return *this;
 }
+
+QXfrm QXfrm::operator*( QXfrm const &rhs ) const
+{
+	Quaternion q( m_q );
+	q *= rhs.m_q;
+	Point3d p = m_q.RotatePoint( rhs.m_p );
+	p += m_p;
+	return QXfrm( q, p );
+}
+
+QXfrm &QXfrm::operator*=( QXfrm const &rhs )
+{
+	Quaternion q = m_q * rhs.m_q;
+	Point3d p = m_q.RotatePoint( rhs.m_p );
+	p += rhs.m_p;
+	m_q = q;
+	m_p = p;
+
+	return *this;
+}
+
+Point3d QXfrm::TransformPoint( Point3d const &p ) const
+{
+	Point3d ret = m_q.RotatePoint( p );
+	ret += m_p;
+
+	return ret;
+}
+
+void QXfrm::vSetTranslation( Point3d const &p )
+{
+	m_p = p;
+}
+
+void QXfrm::vSetRotation( Quaternion const &q )
+{
+	m_q = q;
+}
+
+QXfrm::operator Point3d const &() const
+{
+	return m_p;
+}
+
+Point3d const &QXfrm::Translation() const
+{
+	return m_p;
+}
+
+QXfrm::operator Quaternion const &() const
+{
+	return m_q;
+}
+
+Quaternion const &QXfrm::Rotation() const
+{
+	return m_q;
+}
+
+void QXfrm::Invert()
+{
+	m_q = m_q.Inverse();
+	m_p = m_q.RotatePoint( m_p );
+}
+
+QXfrm QXfrm::Inverse() const
+{
+	Quaternion q = m_q.Inverse();
+	Point3d p = q.RotatePoint( m_p );
+
+	return QXfrm( q, p );
+}
+
+#if 0
+Rebels::QXfrm operator*( Rebels::QXfrm const &lhs, Rebels::QXfrm const &rhs )
+{
+	Quaternion q = lhs.m_q * rhs.m_q;
+	Point3d p = lhs.m_q * rhs.m_p;
+	p += lhs.m_p;
+
+	QXfrm res( q, p );
+	return res;
+}
+#endif
+
+#ifdef TESTING
+#define RADIANS (180 / PI)
+void PrintEuler( Euler const &e )
+{
+	printf( "e: %6.4f %6.4f %6.4f\n", e.fX(), e.fY(), e.fZ() );
+}
+
+void PrintQuat( Quaternion const &q )
+{
+	printf( "q: %6.4f %6.4f %6.4f %6.4f\n", q.q0(), q.x(), q.y(), q.z() );
+}
+
+int main( int argc, char **argv )
+{
+	Euler eu( 0., 0., 90. / RADIANS );
+	Quaternion q( eu );
+
+	for( float r = 0; r < 180; r += 1.0F ) {
+		for( float p = 0; p < 180; p += 1.0F ) {
+			for( float y = 0; y < 180; y += 1.0F ) {
+				Euler e( y / RADIANS, p / RADIANS, r / RADIANS );
+				Quaternion q( e );
+				Euler e1( q );
+#if 1
+				Quaternion q1( e1 );
+				if( fabs(q1.q0() - q.q0()) > 0.0001 ||
+					fabs(q1.x() - q.x()) > 0.0001 ||
+					fabs(q1.y() - q.y()) > 0.0001 ||
+					fabs(q1.z() - q.z()) > 0.0001 )
+				{
+					PrintQuat( q );
+					PrintQuat( q1 );
+				}
+#else
+				if (fabs(e.fX() - e1.fX()) > 0.0001 ||
+					fabs(e.fY() - e1.fY()) > 0.0001 ||
+					fabs(e.fZ() - e1.fZ()) > 0.0001) {
+					PrintEuler( e );
+					PrintEuler( e1 );
+				}
+#endif
+			}
+		}
+	}
+	PrintEuler( eu );
+	printf( "q: %6.4f %6.4f %6.4f %6.4f\n", q.q0(), q.x(), q.y(), q.z() );
+
+	Euler e1( q );
+
+	PrintEuler( e1 );
+	return 0;
+}
+#endif

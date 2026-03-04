@@ -48,6 +48,8 @@ using namespace std;
 #define JETSON_NANO	1
 #include "nvcam.h"
 
+#define TEGRA_CAMERA_CID_BASE   (V4L2_CTRL_CLASS_CAMERA | 0x2000)
+
 nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, nvFrmProcessor &nfp ) :
 	v4lcam( pszVid, v4lcam::eMTUserptr ),
 	m_pFrames( 0 ),
@@ -65,6 +67,7 @@ nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint3
 //	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_SGRBG8 );
 //	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_Y10 );
 	bSetRes( RES_COLS, RES_ROWS, u32PixFmt );
+	bSetMode( 3 );
 
 	m_u64MaxExp = MAX_EXP;
 	m_u64NextExp = MAX_EXP;
@@ -182,6 +185,31 @@ bool nvCamera::bSetGain( uint32_t uGain )
 	return true;
 }
 
+bool nvCamera::bSetMode( uint32_t u32Mode )
+{
+	v4l2_ext_control ctrl;
+	v4l2_ext_controls ctrls;
+
+	memset( &ctrl, 0, sizeof(ctrl) );
+	memset( &ctrls, 0, sizeof(ctrls) );
+	//ctrl.id = 0x009a2009;
+	//ctrl.id = TEGRA_CAMERA_CID_BASE + 8;
+	ctrl.id = 0x009a3000;
+	ctrl.value64 = u32Mode;
+	printf( "Setting Sensor Mode to %u\n", u32Mode );
+
+	ctrls.count = 1;
+	ctrls.controls = &ctrl;
+
+	if( ioctl( m_fd, VIDIOC_S_EXT_CTRLS, &ctrls ) ) {
+		char szTmp[1024];
+		sprintf( szTmp, "bSetMode(%u) failed: %d\n", u32Mode, errno );
+		throw invalid_argument( szTmp );
+	}
+
+	return true;
+}
+
 void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
 {
 	if( u64Exposure > m_u64MaxExp )
@@ -192,6 +220,27 @@ void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
 	m_u64NextExp = u64Exposure;
 }
 
+static uint64_t u64OffsetNs()
+{
+	uint64_t	u64RawNsec;
+	uint64_t	u64TscNs;
+	uint64_t	u64Cycles;
+	uint64_t	u64Freq;
+	struct timespec tp;
+
+	clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
+	asm volatile("mrs %0, cntfrq_el0" : "=r"(u64Freq));
+	asm volatile("mrs %0, cntvct_el0" : "=r"(u64Cycles));
+
+	u64TscNs = u64Cycles / u64Freq * 1000000000;
+	u64RawNsec = tp.tv_sec * 1000000000 + tp.tv_nsec;
+
+	uint64_t u64Offset = llabs(u64TscNs - u64RawNsec);
+
+	return u64Offset;
+}
+
+
 bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 {
 //	printf( "Process Frame: %d/%d\n", buf.index, buf.sequence );
@@ -201,6 +250,19 @@ bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 	m_pFrames[nIdx].m_u32Exp = m_u64NextExp; // thf get actual exposure
 #if 0
 	m_pFrames[nIdx].m_ts = buf.timestamp;
+	uint64_t u64Off = u64OffsetNs();
+
+	struct timespec tsCur;
+
+	// Get current time since power on
+	clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
+//	printf( "%lu.%09lu  -> %lu.%06lu   %lu\n", tsCur.tv_sec, tsCur.tv_nsec, buf.timestamp.tv_sec, buf.timestamp.tv_usec, u64Off );
+	
+	uint64_t u64TS = buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec - u64Off / 1000;
+	
+	m_pFrames[nIdx].m_ts.tv_sec = u64TS / 1000000;
+	m_pFrames[nIdx].m_ts.tv_usec = (u64TS - m_pFrames[nIdx].m_ts.tv_sec * 1000000);
+	printf( "%d: %lu.%09lu  -> %lu.%06lu  ->  %lu.%06lu ->  %lu\n", m_nCam, tsCur.tv_sec, tsCur.tv_nsec, buf.timestamp.tv_sec, buf.timestamp.tv_usec, m_pFrames[nIdx].m_ts.tv_sec, m_pFrames[nIdx].m_ts.tv_usec, u64Off );
 #else
 	struct timespec tsCur;
 
@@ -209,7 +271,6 @@ bool nvCamera::bProcessFrame( v4l2_buffer &buf )
 //clock_gettime(CLOCK_MONOTONIC, &tsCur );
 	TIMESPEC_TO_TIMEVAL( &m_pFrames[nIdx].m_ts, &tsCur );
 #endif
-timeval tv;
 //printf( "Have Frame %d:%u : %ld.%06ld\n", nCam(), buf.sequence, buf.timestamp.tv_sec, buf.timestamp.tv_usec );
 //printf( "                   %ld.%06ld\n", m_pFrames[nIdx].m_ts.tv_sec, m_pFrames[nIdx].m_ts.tv_usec );
 //printf( "                   %ld\n", buf.timestamp.tv_sec - m_pFrames[nIdx].m_ts.tv_sec );

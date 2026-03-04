@@ -23,3 +23,5 @@ lib2702.a: $(OBJS)
 
 cammgr.o: cammgr.cpp cammgr.h v4lcam.h
 nvcam.o: nvcam.cpp nvcam.h v4lcam.h
+2702math.o: 2702math.cpp 2702math.h
+2702camera.o: 2702camera.cpp 2702camera.h 2702math.h

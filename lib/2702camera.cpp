@@ -1,3 +1,6 @@
+#include <stdexcept>
+#include <vector>
+
 #include "2702camera.h"
 #include <stdio.h>
 #include <string.h>
@@ -77,7 +80,7 @@ bool CamParm::Load(char const *psz) {
       printf("Camfile '%s' - invalid rotation terms\n", psz);
       return false;
     }
-    m_camRot = Quaternion(fQ0, fX, fY, fZ);
+    m_qxm.vSetRotation(Quaternion(fQ0, fX, fY, fZ));
   }
   if (!flCam.getline(szTmp, sizeof(szTmp)).eof()) {
     float fX;
@@ -88,7 +91,8 @@ bool CamParm::Load(char const *psz) {
       printf("Camfile '%s' - invalid rotation terms\n", psz);
       return false;
     }
-    m_camPos = Point3d(fX, fY, fZ);
+    Point3d p(fX, fY, fZ);
+	m_qxm.vSetTranslation(p);
   }
   return true;
 }
@@ -112,10 +116,10 @@ bool CamParm::Save(char const *psz) {
   }
   sprintf(szTmp, "%.7f %.7f %.7f %.7f\n", m_fk1, m_fk2, m_fp1, m_fp2);
   of << szTmp;
-  sprintf(szTmp, "%.7f %.7f %.7f %.7f\n", m_camRot.q0(), m_camRot.x(),
-          m_camRot.y(), m_camRot.z());
+  sprintf(szTmp, "%.7f %.7f %.7f %.7f\n", m_qxm.Rotation().q0(), m_qxm.Rotation().x(),
+          m_qxm.Rotation().y(), m_qxm.Rotation().z());
   of << szTmp;
-  sprintf(szTmp, "%.3f %.3f %.3f\n", m_camPos.x(), m_camPos.y(), m_camPos.z());
+  sprintf(szTmp, "%.3f %.3f %.3f\n", m_qxm.Translation().x(), m_qxm.Translation().y(), m_qxm.Translation().z());
   of << szTmp;
 
   return true;
@@ -136,6 +140,55 @@ void CamParm::Undistort(float fU, float fV, float &fUndistU,
     fUndistV = (fV - deltaY) * icdist;
   }
 }
+
+Point2d CamParm::ProjectPoint( Point3d const &p3d ) const
+{
+	// Rotate the 3D point into Sensor space
+	Point3d p3InCam = m_qxm.TransformPoint( p3d );
+
+	// Normalize the pioints
+	float fXp = p3InCam.x() / p3InCam.z();
+	float fYp = p3InCam.y() / p3InCam.z();
+
+	float fR2 = fXp * fXp + fYp * fYp;
+
+	float linCoef = 1 + m_fk1 * fR2 + m_fk2 * fR2 * fR2 + m_fk3 * fR2 * fR2 * fR2;
+	float fXpp = fXp * linCoef + 2 * m_fp1 * fXp * fYp + m_fp2 * (fR2 + 2 * fXp * fXp);
+	float fYpp = fYp * linCoef + m_fp1 * (fR2 + 2 * fYp * fYp) + 2 * m_fp2 * fXp * fYp;
+
+	return Point2d( fXpp * m_fU + m_fU0, fYpp * m_fV + m_fV0 );
+}
+
+#if 0
+// Dewarps points from the image based on various constants
+// Algorithm mainly taken from
+// https://docs.opencv.org/4.0.0/d9/d0c/group__calib3d.html#ga7dfb72c9cf9780a347fbe3d1c47e5d5a
+void ReDistort(double *x, double *y, CameraMatrix *camera_matrix,
+               DistCoeffs *distortion_coefficients) {
+  double k1 = distortion_coefficients->k1;
+  double k2 = distortion_coefficients->k2;
+  double p1 = distortion_coefficients->p1;
+  double p2 = distortion_coefficients->p2;
+  double k3 = distortion_coefficients->k3;
+
+  double fx = camera_matrix->fx;
+  double cx = camera_matrix->cx;
+  double fy = camera_matrix->fy;
+  double cy = camera_matrix->cy;
+
+  double xP = (*x - cx) / fx;
+  double yP = (*y - cy) / fy;
+
+  double rSq = xP * xP + yP * yP;
+
+  double linCoef = 1 + k1 * rSq + k2 * rSq * rSq + k3 * rSq * rSq * rSq;
+  double xPP = xP * linCoef + 2 * p1 * xP * yP + p2 * (rSq + 2 * xP * xP);
+  double yPP = yP * linCoef + p1 * (rSq + 2 * yP * yP) + 2 * p2 * xP * yP;
+
+  *x = xPP * fx + cx;
+  *y = yPP * fy + cy;
+}
+#endif
 
 void CamParm::UndistortPixels(float fU, float fV, float &fUndistU, float &fUndistV) const
 {
@@ -171,7 +224,7 @@ Point3d CamParm::LOS(float fU, float fV) const {
   Undistort(fU1, fV1, fUUndist, fVUndist);
   Point3d lens(fUUndist, fVUndist, 1);
   lens.Normalize();
-  Point3d res = m_camRot * lens;
+  Point3d res = m_qxm.Rotation().RotatePoint( lens );
   return res;
 }
 
@@ -181,10 +234,10 @@ Point3d CamParm::CalcTargetPosFromHeight(float fU, float fV, float fZTarget) {
   Point3d los = LOS(fU, fV);
 
   //						z = mt + z0; t = (z - z0)/m
-  float fT = (fZTarget - m_camPos.z()) / los.z();
-  float fX = los.x() * fT + m_camPos.x();
-  float fY = los.y() * fT + m_camPos.y();
-  float fZ = los.z() * fT + m_camPos.z();
+  float fT = (fZTarget - m_qxm.Translation().z()) / los.z();
+  float fX = los.x() * fT + m_qxm.Translation().x();
+  float fY = los.y() * fT + m_qxm.Translation().y();
+  float fZ = los.z() * fT + m_qxm.Translation().z();
 
   return Point3d(fX, fY, fZ);
 }
@@ -207,8 +260,7 @@ CamParm &CamParm::operator=(CamParm const &src) {
   m_nURes = src.m_nURes;
   m_nVRes = src.m_nVRes;
 
-  m_camRot = src.m_camRot;
-  m_camPos = src.m_camPos;
+  m_qxm = src.m_qxm;
   return *this;
 }
 
@@ -287,7 +339,8 @@ bool StereoCam::bLoadCam(int nCam, char const *psz) {
   return m_grCams[nCam].Load(psz);
 }
 
-bool StereoCam::Save(char const *psz) {
+bool StereoCam::Save(char const *psz) 
+{
   char szTmp[1024];
 
   ofstream of;
@@ -359,4 +412,135 @@ float StereoCam::fCalc3D(Point2d const &uv1, Point2d const &uv2, Point3d &res) {
   res = mid;
 
   return fLineSep;
+}
+
+MultiCam::MultiCam( std::vector<CamParm> vcp, QXfrm qxmR2C ) :
+	m_vcp( vcp ),
+	m_qxmR2C( qxmR2C )
+{
+}
+
+MultiCam::MultiCam( char const *pszFile )
+{
+	if (!bLoad( pszFile )) {
+		throw std::runtime_error( "Unable to load CamParm" );
+	}
+}
+
+MultiCam::~MultiCam()
+{
+}
+
+bool MultiCam::bLoad( char const *psz )
+{
+  ifstream cfile;
+
+  char szTmp[1024];
+  sprintf(szTmp, "%s.sc", psz);
+  cfile.open(szTmp);
+  if (!cfile.is_open()) {
+    printf("Unable to open Stereo Camera Config File '%s'\n", psz);
+    return false;
+  }
+  if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+  	return false;
+  }
+  int nCams = atoi(szTmp);
+  for (int i = 0; i < nCams; i++) {
+    if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+      return false;
+    }
+    int nLen = strlen(szTmp);
+    while (nLen > 0 && isspace(szTmp[nLen - 1]))
+		nLen--;
+    szTmp[nLen] = '\0';
+	CamParm cp;
+    if (!cp.Load(szTmp)) {
+		return false;
+	}
+    if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+      return false;
+    }
+    float fQ0;
+    float fX;
+    float fY;
+    float fZ;
+    if (sscanf(szTmp, "%f,%f,%f,%f", &fQ0, &fX, &fY, &fZ) != 4) {
+      return false;
+    }
+
+    Quaternion q(fQ0, fX, fY, fZ);
+	cp.SetRotation(q);
+
+    if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+      return false;
+    }
+    if (sscanf(szTmp, "%f,%f,%f", &fX, &fY, &fZ) != 3) {
+      return false;
+    }
+    Point3d t(fX, fY, fZ);
+    cp.SetOrigin(t);
+
+	m_vcp.push_back(cp);
+  }
+
+  if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+    return false;
+  }
+  float fQ0;
+  float fX;
+  float fY;
+  float fZ;
+  if (sscanf(szTmp, "%f,%f,%f,%f", &fQ0, &fX, &fY, &fZ) != 4) {
+    return false;
+  }
+  Quaternion q(fQ0, fX, fY, fZ);
+  if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+    return false;
+  }
+  if (sscanf(szTmp, "%f,%f,%f", &fX, &fY, &fZ) != 3) {
+    return false;
+  }
+  Point3d p3d(fX, fY, fZ);
+
+  m_qxmR2C = QXfrm( q, p3d );
+  return true;
+}
+
+bool MultiCam::bSave( char const *psz )
+{
+  char szTmp[1024];
+
+  ofstream of;
+
+  sprintf(szTmp, "%s.sc", psz);
+  of.open(szTmp);
+
+  if (!of.is_open()) {
+    return false;
+  }
+  sprintf(szTmp, "%ld", m_vcp.size() );
+  of << szTmp << endl;
+  for (int i = 0; i < m_vcp.size(); i++) {
+    sprintf(szTmp, "%s-%d.cam", psz, i + 1);
+    of << szTmp << endl;
+
+    m_vcp[i].Save(szTmp);
+
+    Quaternion const &r = m_vcp[i].getRotation();
+    sprintf(szTmp, "%.7f,%.7f,%.7f,%.7f\n", r.q0(), r.x(), r.y(), r.z());
+    of << szTmp;
+    Point3d const &p = m_vcp[i].getOrigin();
+    sprintf(szTmp, "%.7f,%.7f,%.7f\n", p.x(), p.y(), p.z());
+    of << szTmp;
+  }
+
+  Quaternion const &r = m_qxmR2C.Rotation();
+  sprintf(szTmp, "%.7f,%.7f,%.7f,%.7f\n", r.q0(), r.x(), r.y(), r.z());
+  of << szTmp;
+  Point3d const &p = m_qxmR2C.Translation();
+  sprintf(szTmp, "%.7f,%.7f,%.7f\n", p.x(), p.y(), p.z());
+  of << szTmp;
+
+  return true;
 }
