@@ -1,11 +1,13 @@
 name: autoformat
 on:
-  pull_request:
-  push:
-    branches: [master]
+  #pull_request:
+  #push:
+    #branches: [master]
+  workflow_dispatch:
 jobs:
   clang-format:
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     permissions:
       contents: write
 

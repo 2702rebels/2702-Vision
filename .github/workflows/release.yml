@@ -5,7 +5,7 @@ on:
 
 jobs:
   attach-artifacts:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4

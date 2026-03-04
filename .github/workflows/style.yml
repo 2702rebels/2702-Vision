@@ -1,12 +1,13 @@
 name: style.yml
 on:
-  push:
-    branches: [master]
-  pull_request:
+  #push:
+  #  branches: [master]
+  #pull_request:
+  workflow_dispatch:
 
 jobs:
   clang-tidy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
