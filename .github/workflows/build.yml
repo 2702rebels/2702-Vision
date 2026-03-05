@@ -79,7 +79,7 @@ jobs:
 
         - name: Resolve LOCALAPPDATA
           id: localappdata
-          shell: pwsh
+          shell: powershell
           run: |
             echo "value=$env:LOCALAPPDATA" >> $env:GITHUB_OUTPUT
 
