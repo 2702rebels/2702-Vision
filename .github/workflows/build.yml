@@ -76,6 +76,8 @@ jobs:
               winget install -e --id Kitware.CMake --silent --accept-source-agreements --accept-package-agreements
             }
 
+        - name: Install ninja
+          uses: actions/setup-ninja@v1
 
         - name: Resolve LOCALAPPDATA
           id: localappdata
