@@ -1,6 +1,10 @@
 name: style.yml
 on:
-  workflow_dispatch:
+  pull_request:
+    branches-ignore:
+      - "terry-jetson"
+  push:
+    branches: [ main ]
 
 jobs:
   clang-tidy:

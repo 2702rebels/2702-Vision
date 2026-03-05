@@ -1,6 +1,10 @@
 name: build.yml
 on:
-  workflow_dispatch:
+  pull_request:
+    branches-ignore:
+      - "terry-jetson"
+  push:
+    branches: [ main ]
 
 jobs:
   build-ubuntu:
@@ -67,6 +71,7 @@ jobs:
 
         - name: Install cmake (windows only)
           run: winget upgrade -e --id Kitware.CMake --silent --accept-source-agreements --accept-package-agreements
+
 
         - name: Resolve LOCALAPPDATA
           id: localappdata

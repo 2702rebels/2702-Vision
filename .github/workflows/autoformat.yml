@@ -1,6 +1,10 @@
 name: autoformat
 on:
-  workflow_dispatch:
+  pull_request:
+    branches-ignore:
+      - "terry-jetson"
+  push:
+    branches: [main]
 jobs:
   clang-format:
     #runs-on: ubuntu-latest
