@@ -88,7 +88,7 @@ jobs:
         run: git submodule update --init vcpkg
 
       - name: Install cmake (windows only)
-        run: winget install -e --id Kitware.CMake --disable-interactivity --accept-source-agreements --accept-package-agreements
+        run: winget upgrade -e --id Kitware.CMake --silent --accept-source-agreements --accept-package-agreements
 
       - name: Resolve LOCALAPPDATA
         id: localappdata
