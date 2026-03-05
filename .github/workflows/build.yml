@@ -69,17 +69,17 @@ jobs:
         - name: Update vcpkg submodule
           run: git submodule update --init vcpkg
 
-        - name: Install cmake (windows only)
+        - name: Ensure CMake and Ninja are installed
           shell: powershell
           run: |
-            $cmake = winget list -e --id Kitware.CMake 2>$null
-            if (-not $cmake) {
-              winget install -e --id Kitware.CMake --silent --accept-source-agreements --accept-package-agreements
+            $cmake = winget list -e --id Kitware.CMake 2>$null | Out-String
+            if ($cmake -notmatch "Kitware\.CMake") {
+                winget install -e --id Kitware.CMake --silent --accept-source-agreements --accept-package-agreements
             }
-        
-            $ninja = winget list -e --id Ninja-build.Ninja 2>$null
-            if (-not $ninja) {
-              winget install -e --id Ninja-build.Ninja --silent --accept-source-agreements --accept-package-agreements
+
+            $ninja = winget list -e --id Ninja-build.Ninja 2>$null | Out-String
+            if ($ninja -notmatch "Ninja-build\.Ninja") {
+                winget install -e --id Ninja-build.Ninja --silent --accept-source-agreements --accept-package-agreements
             }
 
         - name: Resolve LOCALAPPDATA
