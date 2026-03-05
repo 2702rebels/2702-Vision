@@ -4,20 +4,136 @@ on:
     types: [published]
 
 jobs:
-  attach-artifacts:
+  attach-artifacts-linux:
     runs-on: [self-hosted, linux]
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Update vcpkg submodule
+        run: git submodule update --init vcpkg
+
+      - name: Install compiler
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential ninja-build curl zip unzip tar autoconf autoconf-archive automake libtool linux-libc-dev pkg-config software-properties-common lsb-release nasm bison flex python3 python3.12-venv libx11-dev libxext-dev libxrender-dev libxtst-dev libxrandr-dev libltdl-dev libxi-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libvulkan-dev libwayland-dev libxkbcommon-dev libssl-dev libbz2-dev liblzma-dev libudev-dev libdrm-dev libglfw3-dev libgtk-3-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev curl
+          sudo curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc -o /usr/share/keyrings/kitware-archive-keyring.asc
+          echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.asc] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/kitware.list  
+          sudo apt-get update
+          sudo apt-get install -y cmake
+
+      - name: Cache vcpkg archives directory
+        uses: actions/cache@v4
         with:
-          name: |
-            x64-release-win
-            x64-release-linux
-          path: artifacts/
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
+
+      - name: Configure release
+        run: |
+          /usr/bin/cmake . --preset x64-release-linux
+
+      - name: Build Release linux
+        run: /usr/bin/cmake --build out/build/x64-release-linux
+
+      - name: Clean up vcpkg folder
+        shell: bash
+        run: |
+          rm -rf ./vcpkg/buildtrees
+          rm -rf ./vcpkg/downloads
+          rm -rf ./vcpkg/packages
+
+      - name: Create artifact
+        run: |
+          mkdir package
+          cp -r out/build/x64-release-linux/* package
+          rm package/2025/Object/*.h
+          rm package/2025/Object/*.cc
+          rm package/2025/Object/*.cmake
+          rm -rf package/2025/Object/CMakeFiles
+          rm -rf package/calibrationdevice/CMakeFiles
+          rm package/calibrationdevice/*.cmake
+          rm package/Utilities/*.cmake
+          rm -rf package/Utilities/CMakeFiles
+          rm package/lib/*.cmake
+          rm -rf package/lib/CMakeFiles
+          rm package/*.log
+          rm -rf package/CMakeFiles
+          rm -rf package/tests/CMakeFiles
+          rm -rf package/tests/*.cmake
+          rm package/tests/*.json
+          rm -rf package/vcpkg_installed
+          rm package/build.ninja
+          rm package/*.cmake
+          rm package/CMakeCache.txt
 
       - name: Upload assets to release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
+          files: package/**/*
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  attach-artifacts-windows:
+    runs-on: [self-hosted, windows]
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Update vcpkg submodule
+        run: git submodule update --init vcpkg
+
+      - name: Install cmake (windows only)
+        run: winget install -e --id Kitware.CMake --disable-interactivity --accept-source-agreements --accept-package-agreements
+
+      - name: Resolve LOCALAPPDATA
+        id: localappdata
+        shell: pwsh
+        run: |
+          echo "value=$env:LOCALAPPDATA" >> $env:GITHUB_OUTPUT
+
+      - name: Cache vcpkg archives directory
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.localappdata.outputs.value }}\vcpkg\archives
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
+
+      - name: Configure and build rel
+        run: cmake -S . -B out/build/x64-release-win -A x64 -T host=x64 -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="./vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
+
+      - name: Build release
+        run: cmake --build out/build/x64-release-win
+
+      - name: Package artifact
+        shell: bash
+        run: |
+          mkdir package
+          cp -r out/build/x64-release-win/* package
+          rm package/2025/Object/*.h
+          rm package/2025/Object/*.cc
+          rm package/2025/Object/*.cmake
+          rm -rf package/2025/Object/CMakeFiles
+          rm -rf package/calibrationdevice/CMakeFiles
+          rm package/calibrationdevice/*.cmake
+          rm package/Utilities/*.cmake
+          rm -rf package/Utilities/CMakeFiles
+          rm package/lib/*.cmake
+          rm -rf package/lib/CMakeFiles
+          rm package/*.log
+          rm -rf package/CMakeFiles
+          rm -rf package/tests/CMakeFiles
+          rm -rf package/tests/*.cmake
+          rm package/tests/*.json
+          rm -rf package/vcpkg_installed
+          rm package/build.ninja
+          rm package/*.cmake
+          rm package/CMakeCache.txt
+
+      - name: Clean up vcpkg folder
+        shell: bash
+        run: |
+          rm -rf ./vcpkg/buildtrees
+          rm -rf ./vcpkg/downloads
+          rm -rf ./vcpkg/packages
