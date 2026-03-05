@@ -84,8 +84,8 @@ jobs:
             echo "value=$env:LOCALAPPDATA" >> $env:GITHUB_OUTPUT
 
         - name: Get vcpkg commit
-          shell: bash
-          run: git submodule status vcpkg > vcpkgcommit.txt
+          shell: powershell
+          run: git submodule status vcpkg | Out-File -Encoding utf8 vcpkgcommit.txt
 
         - name: Cache vcpkg archives directory
           uses: actions/cache@v4
