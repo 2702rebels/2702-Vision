@@ -30,13 +30,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake
 
+      - name: Get vcpkg commit
+        run: git submodule status vcpkg > vcpkgcommit.txt
+
       - name: Cache vcpkg archives directory
         uses: actions/cache@v4
         with:
           path: ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
 
       - name: Configure ${{matrix.build_type}} ${{matrix.os}}
         run: |
@@ -75,13 +78,17 @@ jobs:
           run: |
             echo "value=$env:LOCALAPPDATA" >> $env:GITHUB_OUTPUT
 
+        - name: Get vcpkg commit
+          shell: bash
+          run: git submodule status vcpkg > vcpkgcommit.txt
+
         - name: Cache vcpkg archives directory
           uses: actions/cache@v4
           with:
-            path: ${{ steps.localappdata.outputs.value }}\vcpkg\archives
-            key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+            path: ~/.cache/vcpkg/archives
+            key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
             restore-keys: |
-              ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
+              ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
 
         - name: Configure and build ${{matrix.build_type}}
           if: matrix.build_type == 'debug'

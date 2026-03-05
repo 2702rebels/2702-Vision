@@ -22,13 +22,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake
 
+      - name: Get vcpkg commit
+        shell: bash
+        run: git submodule status vcpkg > vcpkgcommit.txt
+
       - name: Cache vcpkg archives directory
         uses: actions/cache@v4
         with:
           path: ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
 
       - name: Configure release
         run: |
@@ -92,13 +96,17 @@ jobs:
         run: |
           echo "value=$env:LOCALAPPDATA" >> $env:GITHUB_OUTPUT
 
+      - name: Get vcpkg commit
+        shell: bash
+        run: git submodule status vcpkg > vcpkgcommit.txt
+
       - name: Cache vcpkg archives directory
         uses: actions/cache@v4
         with:
-          path: ${{ steps.localappdata.outputs.value }}\vcpkg\archives
-          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkg/**')}}
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
 
       - name: Configure and build rel
         run: cmake -S . -B out/build/x64-release-win -A x64 -T host=x64 -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="./vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows

@@ -35,14 +35,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake
 
+      - name: Get vcpkg commit
+        shell: bash
+        run: git submodule status vcpkg > vcpkgcommit.txt
+
       - name: Cache vcpkg archives directory
         uses: actions/cache@v4
-        id: cachefetch
         with:
           path: ~/.cache/vcpkg/archives
-          key: vcpkg-${{hashFiles('vcpkg/**')}}-${{hashFiles('vcpkg.json')}}
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
-            vcpkg-${{hashFiles('vcpkg/**')}}
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
             
       - name: Fail if cache not present
         if: steps.cachefetch.outputs.cache-hit != 'true'
