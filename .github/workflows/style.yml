@@ -39,9 +39,6 @@ jobs:
         shell: bash
         run: git submodule status vcpkg > vcpkgcommit.txt
 
-      - name: Install ninja
-        uses: actions/setup-ninja@v1
-
       - name: Cache vcpkg archives directory
         id: cachefetch
         uses: actions/cache@v4
