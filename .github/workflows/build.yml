@@ -112,8 +112,7 @@ jobs:
             Remove-Item ./vcpkg/downloads -Recurse -Force
             Remove-Item ./vcpkg/packages -Recurse -Force
 
-
-test-ubuntu:
+  test-ubuntu:
     needs: build-ubuntu
     runs-on: [self-hosted, linux]
     strategy:
