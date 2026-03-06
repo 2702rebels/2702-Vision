@@ -135,7 +135,7 @@ jobs:
         build_type: [debug, release]
     steps:
       - name: Run tests
-        shell: cmd
+        shell: powershell
         run: |
-          cd out\build\x64-${{matrix.build_type}}\tests\Debug\
+          cd out\build\x64-${{matrix.build_type}}\tests\
           .\tests.exe
