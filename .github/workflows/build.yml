@@ -89,6 +89,7 @@ jobs:
             if (Test-Path "$ninjaPath\ninja.exe") {
                 echo "$ninjaPath" >> $env:GITHUB_PATH
             }
+            ninja.exe --version
 
         - name: Resolve LOCALAPPDATA
           id: localappdata
