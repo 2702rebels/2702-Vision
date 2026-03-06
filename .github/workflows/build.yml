@@ -137,5 +137,5 @@ jobs:
       - name: Run tests
         shell: powershell
         run: |
-          cd out\build\x64-${{matrix.build_type}}\tests\
+          cd out\build\x64-${{matrix.build_type}}-win\tests\
           .\tests.exe
