@@ -76,6 +76,11 @@ jobs:
             echo "C:\Program Files\CMake\bin" >> $GITHUB_PATH
             echo "C:\ProgramData\chocolatey\bin" >> $GITHUB_PATH
 
+        - name: Setup MSVC
+          uses: ilammy/msvc-dev-cmd@v1
+          with:
+            arch: x64
+
         - name: Resolve LOCALAPPDATA
           id: localappdata
           shell: powershell
