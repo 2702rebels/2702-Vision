@@ -82,6 +82,14 @@ jobs:
                 winget install -e --id Ninja-build.Ninja --silent --accept-source-agreements --accept-package-agreements
             }
 
+        - name: Add Ninja to PATH
+          shell: powershell
+          run: |
+            $ninjaPath = "C:\Program Files\Ninja"
+            if (Test-Path "$ninjaPath\ninja.exe") {
+                echo "$ninjaPath" >> $env:GITHUB_PATH
+            }
+
         - name: Resolve LOCALAPPDATA
           id: localappdata
           shell: powershell
