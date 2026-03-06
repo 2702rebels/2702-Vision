@@ -47,12 +47,7 @@ jobs:
           key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
             ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
-            
-      - name: Fail if cache not present
-        if: steps.cachefetch.outputs.cache-hit != 'true'
-        run: |
-          echo "Cache not found - failing. Please rerun this job after build-ubuntu finishes successfully."
-          exit 1
+          fail-on-cache-miss: true
 
       - name: Configure
         run: |
@@ -63,7 +58,7 @@ jobs:
 
       - name: Run clang tidy
         run: |
-          FILES=$(find . -type -regex '\./\(2025\|Utilities\|tests\|calibrationdevice\)/.*\.\(h\|cpp\)$')
+          FILES=$(find . -type f -regex '\./\(2025\|Utilities\|tests\|calibrationdevice\)/.*\.\(h\|cpp\)$')
           
           run-clang-tidy $FILES -fix -p out/build/x64-debug-linux -extra-arg=-Werror
 

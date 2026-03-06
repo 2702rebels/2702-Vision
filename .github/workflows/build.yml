@@ -40,6 +40,7 @@ jobs:
           key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
           restore-keys: |
             ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
+          fail-on-cache-miss: ${{ runner.environment != 'self-hosted' }}
 
       - name: Configure ${{matrix.build_type}} ${{matrix.os}}
         run: |
@@ -104,6 +105,7 @@ jobs:
             key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
             restore-keys: |
               ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
+            fail-on-cache-miss: ${{ runner.environment != 'self-hosted' }}
 
         - name: Configure and build ${{matrix.build_type}}
           run: cmake . --preset x64-${{matrix.build_type}}-win
