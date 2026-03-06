@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
 
   /* encode 1 second of video */
   std::optional<cv::Mat> frm;
-  while (frm = vl.TryReadFrame()) {
+  while ((frm = vl.TryReadFrame())) {
     int i = 0;
     if (!frm) {
       break;

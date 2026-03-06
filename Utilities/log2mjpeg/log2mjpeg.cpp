@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 
   int nSeq = 0;
   std::optional<cv::Mat> img;
-  while (img = vl.TryReadFrame()) {
+  while ((img = vl.TryReadFrame())) {
     if (!img.has_value()) {
       break;
     }
