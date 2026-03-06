@@ -55,6 +55,12 @@ jobs:
           rm -rf ./vcpkg/downloads
           rm -rf ./vcpkg/packages
 
+      - name: Run tests
+        run: |
+          chmod +x out/build/x64-${{matrix.build_type}}-linux/tests/tests
+          cd out/build/x64-${{matrix.build_type}}-linux/tests
+          ./tests
+
   build-windows:
       #runs-on: windows-latest
       runs-on: [self-hosted, windows]
@@ -112,30 +118,8 @@ jobs:
             Remove-Item ./vcpkg/downloads -Recurse -Force
             Remove-Item ./vcpkg/packages -Recurse -Force
 
-  test-ubuntu:
-    needs: build-ubuntu
-    runs-on: [self-hosted, linux]
-    strategy:
-      fail-fast: false
-      matrix:
-        build_type: [debug, release]
-    steps:
-      - name: Run tests
-        run: |
-          chmod +x out/build/x64-${{matrix.build_type}}-linux/tests/tests
-          cd out/build/x64-${{matrix.build_type}}-linux/tests
-          ./tests
-
-  test-windows:
-    needs: build-windows
-    runs-on: [self-hosted, windows]
-    strategy:
-      fail-fast: false
-      matrix:
-        build_type: [debug, release]
-    steps:
-      - name: Run tests
-        shell: powershell
-        run: |
-          cd out\build\x64-${{matrix.build_type}}-win\tests\
-          .\tests.exe
+        - name: Run tests
+          shell: powershell
+          run: |
+            cd out\build\x64-${{matrix.build_type}}-win\tests\
+            .\tests.exe
