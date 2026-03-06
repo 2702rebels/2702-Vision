@@ -106,13 +106,14 @@ jobs:
           run: cmake --build out/build/x64-${{matrix.build_type}}-win
 
         - name: Clean up vcpkg folder
-          shell: bash
+          shell: powershell
           run: |
-            rm -rf ./vcpkg/buildtrees
-            rm -rf ./vcpkg/downloads
-            rm -rf ./vcpkg/packages
+            Remove-Item ./vcpkg/buildtrees -Recurse -Force
+            Remove-Item ./vcpkg/downloads -Recurse -Force
+            Remove-Item ./vcpkg/packages -Recurse -Force
 
-  test-ubuntu:
+
+test-ubuntu:
     needs: build-ubuntu
     runs-on: [self-hosted, linux]
     strategy:
