@@ -23,7 +23,27 @@ class CamParm {
  public:
   CamParm();
   ~CamParm() {}
-  float pinhole(int r, int c) const { return m_grfMat[r][c]; }
+  float pinhole(int r, int c) const
+  {
+  	return m_grfMat[r][c];
+  }
+  float fFU() const
+  {
+  	return m_fU;
+  }
+  float fFV() const
+  {
+  	return m_fV;
+  }
+  float fU0() const
+  {
+  	return m_fU0;
+  }
+  float fV0() const
+  {
+  	return m_fV0;
+  }
+  
   float dist(int i) const {
     switch (i) {
       case 0:

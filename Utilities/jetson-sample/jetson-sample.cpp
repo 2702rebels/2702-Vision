@@ -150,7 +150,7 @@ int main( int argc, char **argv )
 	//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
 		imgProc proc;
 //		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_RGB24, proc );
-		nvCamera mycam0( pszVideoDev, 0, 1280, 800, V4L2_PIX_FMT_GREY, proc );
+		nvCamera mycam0( pszVideoDev, 0, 1280, 800, V4L2_PIX_FMT_GREY, 0, proc );
 	//	nvCamera mycam1( "/dev/video1", 4, 1 );
 
 		printinfo( mycam0 );

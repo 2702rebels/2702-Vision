@@ -50,7 +50,7 @@ using namespace std;
 
 #define TEGRA_CAMERA_CID_BASE   (V4L2_CTRL_CLASS_CAMERA | 0x2000)
 
-nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, nvFrmProcessor &nfp ) :
+nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, uint32_t u32SyncMode, nvFrmProcessor &nfp ) :
 	v4lcam( pszVid, v4lcam::eMTUserptr ),
 	m_pFrames( 0 ),
 	m_bShutdown( false ),
@@ -67,7 +67,7 @@ nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint3
 //	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_SGRBG8 );
 //	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_Y10 );
 	bSetRes( RES_COLS, RES_ROWS, u32PixFmt );
-	bSetMode( 3 );
+	bSetMode( u32SyncMode );
 
 	m_u64MaxExp = MAX_EXP;
 	m_u64NextExp = MAX_EXP;

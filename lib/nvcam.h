@@ -121,7 +121,7 @@ class nvCamera : public v4lcam
 	uint32_t		m_u32Frames = 0;
 	std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds> m_tpStart;
 public:
-	nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, nvFrmProcessor &nfp );
+	nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint32_t u32PixFmt, uint32_t u32SyncMode, nvFrmProcessor &nfp );
 	virtual ~nvCamera();
 	virtual int nCam();
 	virtual bool bSetExposure( uint64_t uExp );

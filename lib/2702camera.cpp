@@ -65,7 +65,11 @@ bool CamParm::Load(char const *psz) {
   m_fV0 = m_grfMat[1][2];
 
   if (!flCam.getline(szTmp, sizeof(szTmp)).eof()) {
-    if (sscanf(szTmp, "%f %f %f %f", &m_fk1, &m_fk2, &m_fp1, &m_fp2) != 4) {
+    int nParm = sscanf(szTmp, "%f %f %f %f %f", &m_fk1, &m_fk2, &m_fp1, &m_fp2, &m_fk3);
+	if (nParm == 4) {
+		m_fk3 = 0.;
+	}
+	else if (nParm != 5) {
       printf("Camfile '%s' - invalid distortion terms\n", psz);
       return false;
     }
@@ -436,10 +440,10 @@ bool MultiCam::bLoad( char const *psz )
   ifstream cfile;
 
   char szTmp[1024];
-  sprintf(szTmp, "%s.sc", psz);
+  sprintf(szTmp, "%s.mc", psz);
   cfile.open(szTmp);
   if (!cfile.is_open()) {
-    printf("Unable to open Stereo Camera Config File '%s'\n", psz);
+    printf("Unable to open Multi-Camera Config File '%s'\n", szTmp);
     return false;
   }
   if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
@@ -465,7 +469,7 @@ bool MultiCam::bLoad( char const *psz )
     float fX;
     float fY;
     float fZ;
-    if (sscanf(szTmp, "%f,%f,%f,%f", &fQ0, &fX, &fY, &fZ) != 4) {
+    if (sscanf(szTmp, "%f %f %f %f", &fQ0, &fX, &fY, &fZ) != 4) {
       return false;
     }
 
@@ -475,7 +479,7 @@ bool MultiCam::bLoad( char const *psz )
     if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
       return false;
     }
-    if (sscanf(szTmp, "%f,%f,%f", &fX, &fY, &fZ) != 3) {
+    if (sscanf(szTmp, "%f %f %f", &fX, &fY, &fZ) != 3) {
       return false;
     }
     Point3d t(fX, fY, fZ);
@@ -491,14 +495,14 @@ bool MultiCam::bLoad( char const *psz )
   float fX;
   float fY;
   float fZ;
-  if (sscanf(szTmp, "%f,%f,%f,%f", &fQ0, &fX, &fY, &fZ) != 4) {
+  if (sscanf(szTmp, "%f %f %f %f", &fQ0, &fX, &fY, &fZ) != 4) {
     return false;
   }
   Quaternion q(fQ0, fX, fY, fZ);
   if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
     return false;
   }
-  if (sscanf(szTmp, "%f,%f,%f", &fX, &fY, &fZ) != 3) {
+  if (sscanf(szTmp, "%f %f %f", &fX, &fY, &fZ) != 3) {
     return false;
   }
   Point3d p3d(fX, fY, fZ);
@@ -513,7 +517,7 @@ bool MultiCam::bSave( char const *psz )
 
   ofstream of;
 
-  sprintf(szTmp, "%s.sc", psz);
+  sprintf(szTmp, "%s.mc", psz);
   of.open(szTmp);
 
   if (!of.is_open()) {
@@ -528,18 +532,18 @@ bool MultiCam::bSave( char const *psz )
     m_vcp[i].Save(szTmp);
 
     Quaternion const &r = m_vcp[i].getRotation();
-    sprintf(szTmp, "%.7f,%.7f,%.7f,%.7f\n", r.q0(), r.x(), r.y(), r.z());
+    sprintf(szTmp, "%.7f %.7f %.7f %.7f\n", r.q0(), r.x(), r.y(), r.z());
     of << szTmp;
     Point3d const &p = m_vcp[i].getOrigin();
-    sprintf(szTmp, "%.7f,%.7f,%.7f\n", p.x(), p.y(), p.z());
+    sprintf(szTmp, "%.7f %.7f %.7f\n", p.x(), p.y(), p.z());
     of << szTmp;
   }
 
   Quaternion const &r = m_qxmR2C.Rotation();
-  sprintf(szTmp, "%.7f,%.7f,%.7f,%.7f\n", r.q0(), r.x(), r.y(), r.z());
+  sprintf(szTmp, "%.7f % 7f %.7f %.7f\n", r.q0(), r.x(), r.y(), r.z());
   of << szTmp;
   Point3d const &p = m_qxmR2C.Translation();
-  sprintf(szTmp, "%.7f,%.7f,%.7f\n", p.x(), p.y(), p.z());
+  sprintf(szTmp, "%.7f %.7f %.7f\n", p.x(), p.y(), p.z());
   of << szTmp;
 
   return true;

@@ -21,5 +21,6 @@ public:
 	PoseSolver( Field const &fld, MultiCam const &mc );
 	~PoseSolver();
 
+	bool bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf );
 	bool bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf );
 };

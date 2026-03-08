@@ -45,12 +45,19 @@ using namespace std;
 #include "ATFrame.h"
 #include "field.h"
 #include "udpsender.h"
+#include "cfgfile.h"
+#include "PoseSolver.h"
 
 #include "ApriltagReport.h"
+#include "FrameLogger.h"
 
 #include "syncgen.h"
 
-#define NUM_CAMERAS	2
+Rebels::MultiCam mcCam;
+Field g_field;
+ConfigFile cf;
+
+//#define NUM_CAMERAS	2
 
 static bool grbUseTag[23] =
 {
@@ -104,21 +111,38 @@ void sighandler( int nSig )
 //#include "third_party/apriltag/apriltag.h"
 //#include "third_party/apriltag/tag36h11.h"
 frc971::apriltag::CameraMatrix create_camera_matrix( int nCam ) {
-	if (nCam == 0) {
-		return frc971::apriltag::CameraMatrix{ 1139.15, 628.77, 1137.01, 338.60 };
+	char szTmp[20];
+
+	sprintf( szTmp, "sensor%d", nCam );
+	std::string str;
+
+	if (!cf.bGetSetting( szTmp, str )) {
+		fprintf( stderr, "Unable to get setting '%s'\n", szTmp );
+		exit(1);
 	}
-	else {
-		return frc971::apriltag::CameraMatrix{ 1114.92, 655.70, 1112.39, 331.96 };
-	}
+	int nSen = atoi( str.c_str() );
+
+	CamParm const &cp = mcCam[nSen];
+
+	printf( "%.4f %.4f %.4f %.4f\n", cp.fFU(), cp.fU0(), cp.fFV(), cp.fV0() );
+	return frc971::apriltag::CameraMatrix{ cp.fFU(), cp.fU0(), cp.fFV(), cp.fV0() };
 }
 
 frc971::apriltag::DistCoeffs create_distortion_coefficients( int nCam ) {
-	if (nCam == 0) {
-		return frc971::apriltag::DistCoeffs{ -0.453151, 0.209991, -0.000833, 0.000511, 0 };
+	char szTmp[20];
+
+	sprintf( szTmp, "sensor%d", nCam );
+	std::string str;
+
+	if (!cf.bGetSetting( szTmp, str )) {
+		fprintf( stderr, "Unable to get setting '%s'\n", szTmp );
+		exit(1);
 	}
-	else {
-		return frc971::apriltag::DistCoeffs{ -0.437922, 0.204096, 0.001379, 0.001860, 0 };
-	}
+	int nSen = atoi( str.c_str() );
+
+	CamParm const &cp = mcCam[nSen];
+
+	return frc971::apriltag::DistCoeffs{ cp.dist(0), cp.dist(1), cp.dist(2), cp.dist(3), 0.F };
 }
 
 cv::Mat camMatrix( int nCam )
@@ -190,7 +214,6 @@ struct detectorstruct {
 	frc971::apriltag::DistCoeffs dist_coeffs;
 };
 
-Field g_field;
 #define LOG_DIR		"/data/logs"
 
 class imgProc : public nvFrmProcessor
@@ -235,6 +258,58 @@ public:
 
 		pCam->bSetExposure( u64Exp );
 #endif
+		// The highest priority is to compute the Apriltag as we want this to have the lowest latency possible.
+		// The GPU apriltag library is not thread safe, so try to acquire the mutex... if it is busy, simply skip
+		// processing this frame.
+		if (m_mtxAT.try_lock()) {
+			if (m_bFirstAT) {
+				pCam->bSetGain( 500 );
+				pCam->bSetExposure( 100000 );
+				pCam->bSetGain( 250 );
+				pCam->bSetExposure( 10000 );
+				detector.camera_matrix = create_camera_matrix( pCam->nCam() );
+				detector.dist_coeffs = create_distortion_coefficients( pCam->nCam() );
+				detector.apriltag_detector_ = maketagdetector(tag36h11_create());
+				detector.gpu_detector_ = 
+					new frc971::apriltag::GpuDetector(pcf->nCols(), pcf->nRows(), 
+					 detector.apriltag_detector_, 
+					 detector.camera_matrix, detector.dist_coeffs);
+				m_bFirstAT = false;
+			}
+			
+			ATFrame *patf = new ATFrame( pCam->nCam(), pcf->u32Sequence(), pcf->ts() );
+			detector.gpu_detector_->DetectGray((uint8_t *)pcf->pu8Image());
+
+			const zarray_t *detections = detector.gpu_detector_->Detections();
+
+			for (int i = 0; i < zarray_size(detections); ++i) {
+				//std::cout << "971 library has " << zarray_size(detections) << " detections" << std::endl;
+				apriltag_detection_t *gpu_detection;
+				zarray_get(detections, i, &gpu_detection);
+				int nId = gpu_detection->id;
+//				if (nId >= 1 && nId <= 22 && grbUseTag[nId] )
+				if (1) 
+				{
+					ATDetection atd( gpu_detection->id, gpu_detection->p );
+					patf->vAddDetection( atd );
+#if 1
+					for (int c = 0; c < 4; c++) {
+						cv::circle( frame, atd[c], c * 4, cv::Scalar( 0 ) );
+					}
+#endif
+				}
+			}
+
+			detector.gpu_detector_->ReinitializeDetections();
+			m_mb.post( patf );
+
+			m_mtxAT.unlock();
+		}
+		else {
+			printf( "Skipping %d:%d\n", pCam->nCam(), pcf->u32Sequence() );
+		}
+
+		// We only log and send every 2nd frame to the camera server
 		if (pcf->u32Sequence() % 2) {
 			if (m_mtxLog.try_lock()) {
 				if (m_bLoggingDone) {
@@ -273,6 +348,7 @@ public:
 				}		
 				m_mtxLog.unlock();
 			}
+			// Send the frame to the camera server...
 			if (m_mtxCS.try_lock()) { 
 				if (m_bFirstVid) {
 					char szTmp[64];
@@ -282,12 +358,12 @@ public:
 					printf( "Cam %d: OutputStream set\n", pCam->nCam() );
 				}
 				
-#if 0
+	#if 0
 				char szTmp[128];
 				sprintf( szTmp, "Exp: %lu", u64Exp );
 				cv::putText( frame, szTmp, cv::Point( 10, 20 ), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar( 255, 0, 0) );
-#endif
-#if 1
+	#endif
+	#if 0
 				uint8_t *pu8 = (uint8_t *)pcf->pu8Image();
 				for( int r = 0; r < 10; r++ ) {
 					for( int c = 0; c < 640; c++ ) {
@@ -299,51 +375,11 @@ public:
 						pu8[r * 1280 + c] = 0;
 					}
 				}
-#endif
+	#endif
 				m_outputStream.PutFrame(frame);
 				m_mtxCS.unlock();
 			}
 			return;
-		}
-		if (m_mtxAT.try_lock()) {
-			if (m_bFirstAT) {
-				pCam->bSetGain( 500 );
-				pCam->bSetExposure( 100000 );
-				pCam->bSetGain( 250 );
-				pCam->bSetExposure( 10000 );
-				detector.camera_matrix = create_camera_matrix( pCam->nCam() );
-				detector.dist_coeffs = create_distortion_coefficients( pCam->nCam() );
-				detector.apriltag_detector_ = maketagdetector(tag36h11_create());
-				detector.gpu_detector_ = 
-					new frc971::apriltag::GpuDetector(pcf->nCols(), pcf->nRows(), 
-					 detector.apriltag_detector_, 
-					 detector.camera_matrix, detector.dist_coeffs);
-				m_bFirstAT = false;
-			}
-			
-			ATFrame *patf = new ATFrame( pCam->nCam(), pcf->u32Sequence(), pcf->ts() );
-			detector.gpu_detector_->DetectGray((uint8_t *)pcf->pu8Image());
-
-			const zarray_t *detections = detector.gpu_detector_->Detections();
-
-			for (int i = 0; i < zarray_size(detections); ++i) {
-				//std::cout << "971 library has " << zarray_size(detections) << " detections" << std::endl;
-				apriltag_detection_t *gpu_detection;
-				zarray_get(detections, i, &gpu_detection);
-				int nId = gpu_detection->id;
-				if (nId >= 1 && nId <= 22 && grbUseTag[nId] ) {
-					ATDetection atd( gpu_detection->id, gpu_detection->p );
-					patf->vAddDetection( atd );
-				}
-			}
-
-			detector.gpu_detector_->ReinitializeDetections();
-			m_mb.post( patf );
-
-			m_mtxAT.unlock();
-		}
-		else {
-			printf( "Skipping %d:%d\n", pCam->nCam(), pcf->u32Sequence() );
 		}
 	}
 };
@@ -368,7 +404,7 @@ Rebels::Point3d grCorners[] =
 
 void Usage()
 {
-	printf( "Usage: 2025AprilTag [-s]\n" );
+	printf( "Usage: 2025AprilTag cfgfile [-s]\n" );
 	printf( "    -s            run as NetTables Server\n" );
 	exit(1);
 }
@@ -398,6 +434,7 @@ void tscb( nt::Event const &e )
 	}
 }
 
+#if 0
 bool bSolvePose( int nCam, cv::Mat &objPoints, cv::Mat &imgPoints, CUDPSender &udpSend, timeval const &ts  )
 {
 	bool bHaveSolution = false;
@@ -485,55 +522,7 @@ bool bSolvePose( int nCam, cv::Mat &objPoints, cv::Mat &imgPoints, CUDPSender &u
 
 	return bHaveSolution;
 }
-
-class CFrameLogger
-{
-	FILE 		*m_fp = 0;
-public:
-	CFrameLogger()
-	{
-	}
-	~CFrameLogger()
-	{
-		if (m_fp) {
-			fclose( m_fp );
-			m_fp = 0;
-		}
-	}
-
-	bool bOpenLog( char const *psz )
-	{
-		m_fp = fopen( psz, "wt" );
-		if (!m_fp) {
-			fprintf( stderr, "Unable to open log file '%s'\n", psz );
-			return false;
-		}
-		return true;
-	}
-
-	void vLogFrame( std::vector<ATFrame> const &vaf )
-	{
-		if (m_fp) {
-			fprintf( m_fp, "S:%u\n", vaf[0].u32Seq() );
-			fprintf( m_fp, "Cams:%lu\n", vaf.size() );
-			for( size_t s = 0; s < vaf.size(); s++ ) {
-				auto f = vaf[s];
-				fprintf( m_fp, "T:%lu\n", f.sTags() );
-				// Loop through Tags
-				for (size_t sT = 0; sT < f.sTags(); sT++) {
-					ATDetection const &atd = f[sT];
-					fprintf( m_fp, "%d", atd.uId() );
-					for( int i = 0; i < 4; i++ ) {
-						fprintf( m_fp, ",%8.3f,%8.3f", atd[i].x, atd[i].y );
-					}
-					fprintf( m_fp, "\n" );
-				}
-			}
-		}
-	}
-};
-
-Rebels::MultiCam mc_cam;
+#endif
 
 int main( int argc, char **argv )
 {
@@ -543,29 +532,27 @@ int main( int argc, char **argv )
 	bool bLogStarted = false;
 	int nSyncFreq = -1;
 	char const *pszLog = 0;
-	char const *pszCamFile = 0;
-	CFrameLogger	cfl;
+	CFrameLogger	fl;
+	int nCamMode = 0;
+	int nSyncMode = 0;
 
 	bool bNetTableServer = false;
 
 	signal( SIGINT, sighandler );
 
-	for (int n = 1; n < argc; n++) {
+	if (argc < 2) {
+		Usage();
+		return 1;
+	}
+	for (int n = 2; n < argc; n++) {
 		if (argv[n][0] == '-') {
 			switch (argv[n][1]) {
-			case 'f':
-				nSyncFreq = atoi( argv[n] + 2 );
-//				printf( "Freq = %d\n", nSyncFreq );
-				break;
 			case 's':
 				bNetTableServer = true;
 				break;
 			case 'l':
 				pszLog = argv[n] + 2;
-				cfl.bOpenLog( pszLog );
-				break;
-			case 'c':
-				pszCamFile = argv[n] + 2;
+				fl.bCreateLog( pszLog );
 				break;
 			default:
 				Usage();
@@ -574,14 +561,34 @@ int main( int argc, char **argv )
 		}
 	}
 
-	if( !pszCamFile ) {
-		Usage();
+	if (!cf.bLoad( argv[1] )) {
 		return 1;
 	}
-
 	MailBox<ATFrame *>	mbFrame;
 
-	g_field = Field( "2026-rebuilt-welded.json" );
+	try {
+		g_field = Field( cf["FieldFile"].c_str() );
+		if( !mcCam.bLoad( cf["camfile"].c_str() ) ) {
+			return 1;
+		}
+
+		nSyncFreq = atoi( cf["FrameFreq"].c_str() );
+		nSyncMode = atoi( cf["SyncMode"].c_str() );
+		if (nSyncFreq > 0) {
+			nCamMode = 3;
+		}
+		std::string strSyncModule;
+		if (cf.bGetSetting("SyncModule", strSyncModule)) {
+			if( !sg.bConnect( strSyncModule.c_str() )) {
+				printf( "Unable to connect to SyncGenerator at '%s'\n", strSyncModule.c_str() );
+				return 1;
+			}
+		}
+	}
+	catch( std::exception &e ) {
+		fprintf( stderr, "Error: %s\n", e.what() );
+		return 1;
+	}
 	for( int i = 0; i < g_field.nTags(); i++ ) {
 		Rebels::QXfrm const &q = g_field[i];
 		
@@ -634,25 +641,23 @@ int main( int argc, char **argv )
 	bpLogging.Set( false );
 
 	try {
+		PoseSolver ps( g_field, mcCam );
 		CUDPSender udpSend;
 
-	//	auto ntinst = nt::NetworkTableInstance::GetDefault();
-	//	ntinst.StartClientTeam( 2702 );
-	//	ntinst.StartServer();
-	//		RPICamera mycam0( "/dev/video0", 0, 800, 600, DRM_FORMAT_BGR888, proc );
-	//		RPICamera mycam0( "/dev/video0", 0, 800, 600, V4L2_PIX_FMT_RGB24, proc );
+		// stop sync generation.  This can always be done as the SyncGen class won't try to send
+		// if it hasn't been connected to a SyncModule Arduino
+		sg.vStop();
+
 		imgProc proc0(mbFrame);
 		imgProc proc1(mbFrame);
-		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_GREY, proc0 );
-		nvCamera mycam1( "/dev/video1", 1, 1280, 800, V4L2_PIX_FMT_GREY, proc1 );
+		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc0 );
+		nvCamera mycam1( "/dev/video1", 1, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc1 );
 
+		// If we are setting up the SyncGenerator,
+		// stop the frame clocks.
 		if (nSyncFreq > 0) {
-			std::this_thread::sleep_for( std::chrono::milliseconds(100) );
-			if( !sg.bConnect( "/dev/ttyUSB0" )) {
-				printf( "Unable to connect to SyncGenerator\n" );
-				return 1;
-			}
-			sg.vStop();
+			std::this_thread::yield();
+			std::this_thread::sleep_for( std::chrono::milliseconds(5) );
 			sg.vStart( nSyncFreq );
 		}
 //		mycam0.bSetExposure( 10000 );
@@ -662,7 +667,10 @@ int main( int argc, char **argv )
 
 		printinfo( mycam0 );
 
-		ATFrame *grpFrms[NUM_CAMERAS] = { 0 };
+		std::vector<ATFrame *> vCamFrames;
+		for (int i = 0; i < mcCam.nCam(); i++) {
+			vCamFrames.push_back( 0 );
+		}
 
 		while( !bStop ) {
 			ATFrame *patf;
@@ -670,18 +678,19 @@ int main( int argc, char **argv )
 			if (mbFrame.waitfor( patf, 100 )) {
 				int nCam = patf->nCam();
 
-				delete grpFrms[nCam];
-				grpFrms[nCam] = patf;
+				// delete previous frame
+				delete vCamFrames[nCam];
+				vCamFrames[nCam] = patf;
 
 				bool bHaveAllCams = false;
 				// If Frame from Camera 0 is valid, see if frames from
 				// all other cameras are valid and match the sequence number
-				if (grpFrms[0]) {
-					uint32_t u32Seq = grpFrms[0]->u32Seq();
+				if (vCamFrames[0]) {
+					uint32_t u32Seq = vCamFrames[0]->u32Seq();
 
 					bHaveAllCams = true;
-					for (int i = 1; i < NUM_CAMERAS; i++) {
-						if (!grpFrms[i] || grpFrms[i]->u32Seq() != u32Seq) {
+					for (int i = 1; i < mcCam.nCam(); i++) {
+						if (!vCamFrames[i] || vCamFrames[i]->u32Seq() != u32Seq) {
 							bHaveAllCams = false;
 							break;
 						}
@@ -689,11 +698,22 @@ int main( int argc, char **argv )
 				}
 
 				if (bHaveAllCams) {
+#if 0					
 					std::vector<ATFrame> vfrms;
 
 					for (int nCam = 0; nCam < NUM_CAMERAS; nCam++ ) {
-						vfrms.push_back( *grpFrms[nCam] );
+						vfrms.push_back( *vCamFrames[nCam] );
 					}
+#endif					
+					QXfrm qx;
+					
+#if 1
+					if( ps.bSolve( qx, vCamFrames ) ) {
+
+					}
+#endif
+					fl.vLogFrame( vCamFrames );
+#if 0
 					bool bHaveSolution = false;
 					for (int nCam = 0; !bHaveSolution && nCam < NUM_CAMERAS; nCam++) {
 						int nTags = grpFrms[nCam]->sTags();
@@ -740,8 +760,8 @@ int main( int argc, char **argv )
 							bHaveSolution = bSolvePose( nCam, objPoints, imgPoints, udpSend, grpFrms[nCam]->ts() );
 						}
 					}
+#endif
 				}
-
 				if (!bLogStarted) {
 					auto bLog = bsIsLogging.Get();
 					if (bLog) {

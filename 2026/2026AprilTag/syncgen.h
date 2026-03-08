@@ -52,8 +52,8 @@ public:
 
 	void vStart( int freq )
 	{
-		char szTmp[128];
 		if (m_fd >= 0) {
+			char szTmp[128];
 			sprintf( szTmp, "%d\n", freq );
 			write( m_fd, szTmp, strlen(szTmp) );
 			int n = read( m_fd, szTmp, sizeof(szTmp) - 1 );
@@ -63,7 +63,7 @@ public:
 			}
 			else {
 				printf( "Failed reading from SG\n" );
-				exit(1);
+				_exit(1);
 			}
 		}
 	}

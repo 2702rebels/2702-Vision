@@ -1,3 +1,9 @@
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/highgui.hpp>
+
 #include "PoseSolver.h"
 
 #define __cminpack_float__
@@ -23,6 +29,7 @@ int PoseSolver::eval( void *p, int m, int n, float const *x, float *fv, int ifla
 
 int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 {
+	printf( "%.4f %.4f %.4f : %.4f %.4f %.4f\n", px[0], px[1], px[2], px[3], px[4], px[5] );
 	Euler e( px[0], px[1], px[2] );
 	Quaternion q( e );
 	Point3d p( px[3], px[4], px[5] );
@@ -43,20 +50,14 @@ int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 			for (int i = 0; i < 4; i++ ) {
 				// Transform the corner point into the "Multi-Camera" frame of reference.
 				Point3d p3dCam = qxF2C.TransformPoint( pCorners[i] );
-#if 0
-				// Transform the corner point into the "Sensor's" frame of reference
-				// and compute the undistorted point on the sensor
-				Point3d p3dSen = cp.getXfrm().TransformPoint( p3dCam );
-				float fU = (p3dSen.x() / p3dSen.z()) * m_fU + m_fU0;
-				float fV = (p3dSen.y() / p3dSen.z()) * m_fV + m_fV0;
-#else
-				Point2d p2d = cp.ProjectPoint( p3dCam );
-#endif
+				printf( "p2dCam -> %.4f %.4f %.4f\n", p3dCam.x(), p3dCam.y(), p3dCam.z() );
 
-				// Get the U/V position of this corner point.  Note that the
-				// Apriltag Library "UnDistorts" the corners
+				Point2d p2d = cp.ProjectPoint( p3dCam );
+
+				// Get the U/V position of this corner point.
 				auto p2f = atd[i];
 				
+				printf( "%.4f -> %.4f  ,  %.4f -> %.4f\n", p2d.u(), p2f.x, p2d.v(), p2f.y );
 				*pv++ = p2d.u() - p2f.x;
 				*pv++ = p2d.v() - p2f.y;
 			}
@@ -65,9 +66,136 @@ int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 	return 1;
 }
 
+#if 1
+#if 0
+static Rebels::Point3d grCorners[] =
+{
+	{ -3.25,  3.25, 0. },
+	{  3.25,  3.25, 0. },
+	{  3.25, -3.25, 0. },
+	{ -3.25, -3.25, 0. }
+};
+#else
+#if 1
+static Rebels::Point3d grCorners[] =
+{
+	{ 0.,  3.25, -3.25 },
+	{ 0., -3.25, -3.25 },
+	{ 0., -3.25,  3.25 },
+	{ 0.,  3.25,  3.25 }
+};
+#else
+static Rebels::Point3d grCorners[] =
+{
+	{ 0., -3.25, -3.25 },
+	{ 0.,  3.25, -3.25 },
+	{ 0.,  3.25,  3.25 },
+	{ 0., -3.25,  3.25 }
+};
+#endif
+#endif
+#else
+static Rebels::Point3d grCorners[] =
+{
+	{ -3.25,  3.25, 0. },
+	{  3.25,  3.25, 0. },
+	{  3.25, -3.25, 0. },
+	{ -3.25, -3.25, 0. }
+};
+
+#endif
+
+bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
+{
+	// Find the Sensor with the most AprilTags in view
+	int nMost = 0;
+	int nMostIdx = 0;
+	for (int i = 0; i < vatf.size(); i++) {
+		if (vatf[i]->sTags() > nMost) {
+			nMost = vatf[i]->sTags();
+			nMostIdx = i;
+		}
+	}
+
+	if (nMost == 0 ) {
+		return false;
+	}
+
+	ATFrame *patf = vatf[nMostIdx];
+	cv::Mat objPoints(4 * nMost, 1, CV_32FC3);
+	cv::Mat imgPoints(4 * nMost, 1, CV_32FC2);
+
+	int idx = 0;
+	for (size_t t = 0; t < vatf[nMostIdx]->sTags(); t++ )
+	{
+		ATDetection const &d = (*vatf[nMostIdx])[t];
+		Rebels::QXfrm const &xfm = m_Field[d.uId() - 1];
+printf( "Have Detection %d\n", d.uId() );
+		for (int c = 0; c < 4; c++, idx++ ) {
+			Rebels::Point3d pn = xfm.TransformPoint(grCorners[c]);
+//			Rebels::Point3d pn = grCorners[c];
+printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), d[c].x, d[c].y );
+			objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
+			imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
+		}
+	}
+
+	bool bHaveSolution = false;
+
+	cv::Mat rvec( 3, 1, CV_64F );
+	cv::Mat tvec( 3, 1, CV_64F );
+
+	cv::Mat m( 3, 3, CV_32F );
+	auto cp = m_mc[nMostIdx];
+	for( int nR = 0; nR < 3; nR++ ) {
+		for( int nC = 0; nC < 3; nC++ ) {
+			m.at<float>( nR, nC ) = cp.pinhole( nR, nC );
+		}
+	}
+
+	cv::Mat md( 4, 1, CV_64F );
+	for (int i = 0; i < 4; i++) {
+		md.at<double>(i) = cp.dist(i);
+	}
+
+	if (solvePnP( objPoints, imgPoints, m, md, rvec, tvec )) {
+		cv::Mat reprojectPoints( objPoints.rows, 1, CV_32FC2);
+		cv::projectPoints(objPoints, rvec, tvec, m, md, reprojectPoints);
+
+		float sum = 0.;
+		sum = cv::norm(reprojectPoints, imgPoints);
+
+		Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
+		Rebels::Point3d p3Tvec( tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2) );
+		Rebels::Quaternion qRot( p3Rvec );
+		Rebels::QXfrm qx( qRot, p3Tvec );
+
+		for (int c =0; c < 4; c++ ) {
+			Rebels::Point3d p3Tmp = qx.TransformPoint( grCorners[c] );
+			Rebels::Point2d p2Tmp = cp.ProjectPoint( p3Tmp );
+			printf( "%.2f %.2f %.2f -> %.4f %.4f\n", p3Tmp.x(), p3Tmp.y(), p3Tmp.z(), p2Tmp.u(), p2Tmp.v() );
+		}
+		bool bUseSolve = sum < 10.;
+		return true;
+	}
+
+	return false;
+}
+
 bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 {
+	// count the number of unknowns...
+	int m = 0;
+	for (auto f : vatf ) {
+		m += f->sTags() * 8;  // there are 4 corners per tag and a u,v coordinate pair per corner
+	}
+
+	if (!m) {
+		return false;
+	}
+
 	m_pvatf = &vatf;
+
 
 	// The transform we want is from Robot to Field, but for solving
 	// we need the Field to Robot xfrm
@@ -84,14 +212,8 @@ bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	grfX[4] = qxInv.Translation().y();
 	grfX[5] = qxInv.Translation().z();
 
-	// count the number of unknowns...
-	int m = 0;
-	for (auto f : vatf ) {
-		m += f->sTags() * 8;  // there are 4 corners per tag and a u,v coordinate pair per corner
-	}
-
-	float *pfVals = new float[n];
-	int *pniwa = new int[n];
+	float *pfVals = new float[m];
+	int *pniwa = new int[m];
 	int wa = m * n + 5 * n + m;
 	float *plwa = new float[wa];
 
