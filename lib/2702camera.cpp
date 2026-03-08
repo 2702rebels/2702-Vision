@@ -447,11 +447,13 @@ bool MultiCam::bLoad( char const *psz )
     return false;
   }
   if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+	  fprintf( stderr, "Unable to read # cameras\n" );
   	return false;
   }
   int nCams = atoi(szTmp);
   for (int i = 0; i < nCams; i++) {
     if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+	  fprintf( stderr, "Unable to read cam%d name\n", i );
       return false;
     }
     int nLen = strlen(szTmp);
@@ -460,9 +462,11 @@ bool MultiCam::bLoad( char const *psz )
     szTmp[nLen] = '\0';
 	CamParm cp;
     if (!cp.Load(szTmp)) {
+		fprintf( stderr, "Unable to load Cam Parms from %s\n", szTmp );
 		return false;
 	}
     if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+	  fprintf( stderr, "Unable to read cam %d Quat\n", i );
       return false;
     }
     float fQ0;
@@ -470,6 +474,7 @@ bool MultiCam::bLoad( char const *psz )
     float fY;
     float fZ;
     if (sscanf(szTmp, "%f %f %f %f", &fQ0, &fX, &fY, &fZ) != 4) {
+	  fprintf( stderr, "Unable to parse cam %d Quat\n", i );
       return false;
     }
 
@@ -477,9 +482,11 @@ bool MultiCam::bLoad( char const *psz )
 	cp.SetRotation(q);
 
     if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+	  fprintf( stderr, "Unable to read Cam %d Trans\n", i );
       return false;
     }
     if (sscanf(szTmp, "%f %f %f", &fX, &fY, &fZ) != 3) {
+	  fprintf( stderr, "Unable to parse cam %d Trans\n", i );
       return false;
     }
     Point3d t(fX, fY, fZ);
@@ -489,6 +496,7 @@ bool MultiCam::bLoad( char const *psz )
   }
 
   if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+	fprintf( stderr, "Unable to read Bench Quat\n" );
     return false;
   }
   float fQ0;
@@ -496,13 +504,16 @@ bool MultiCam::bLoad( char const *psz )
   float fY;
   float fZ;
   if (sscanf(szTmp, "%f %f %f %f", &fQ0, &fX, &fY, &fZ) != 4) {
+	fprintf( stderr, "Unable to parse Bench Quat\n" );
     return false;
   }
   Quaternion q(fQ0, fX, fY, fZ);
   if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
+	fprintf( stderr, "Unable to read Bench Trans\n" );
     return false;
   }
   if (sscanf(szTmp, "%f %f %f", &fX, &fY, &fZ) != 3) {
+	fprintf( stderr, "Unable to parse Bench Trans\n" );
     return false;
   }
   Point3d p3d(fX, fY, fZ);

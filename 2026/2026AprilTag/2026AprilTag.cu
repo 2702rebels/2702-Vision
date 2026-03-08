@@ -89,6 +89,9 @@ static bool grbUseTag[23] =
 using ApriltagReportStructType = wpi::Struct<ApriltagReport>; // Structure class that will contain the serialization and deserialization functions for the object detection packet
 #define MAX_EXP	0x18000
 
+uint32_t g_u32Gain = 45;
+uint32_t g_u32Exposure = 1000;
+
 void printinfo( v4lcam &cam )
 {
 	cam.printCaps();
@@ -263,10 +266,10 @@ public:
 		// processing this frame.
 		if (m_mtxAT.try_lock()) {
 			if (m_bFirstAT) {
-				pCam->bSetGain( 500 );
-				pCam->bSetExposure( 100000 );
-				pCam->bSetGain( 250 );
-				pCam->bSetExposure( 10000 );
+				pCam->bSetGain( 50 );
+				pCam->bSetExposure( 1001 );
+				pCam->bSetGain( g_u32Gain );
+				pCam->bSetExposure( g_u32Exposure );
 				detector.camera_matrix = create_camera_matrix( pCam->nCam() );
 				detector.dist_coeffs = create_distortion_coefficients( pCam->nCam() );
 				detector.apriltag_detector_ = maketagdetector(tag36h11_create());
@@ -572,6 +575,8 @@ int main( int argc, char **argv )
 			return 1;
 		}
 
+		g_u32Gain = atoi( cf["Gain"].c_str() );
+		g_u32Exposure = atoi( cf["Exposure"].c_str() );
 		nSyncFreq = atoi( cf["FrameFreq"].c_str() );
 		nSyncMode = atoi( cf["SyncMode"].c_str() );
 		if (nSyncFreq > 0) {
@@ -672,6 +677,8 @@ int main( int argc, char **argv )
 			vCamFrames.push_back( 0 );
 		}
 
+		QXfrm qxRobot;
+		bool bHavePose = false;
 		while( !bStop ) {
 			ATFrame *patf;
 
@@ -697,7 +704,7 @@ int main( int argc, char **argv )
 					}
 				}
 
-				if (bHaveAllCams) {
+				if (bHaveAllCams && !(vCamFrames[0]->u32Seq() % 4))  {
 #if 0					
 					std::vector<ATFrame> vfrms;
 
@@ -705,11 +712,19 @@ int main( int argc, char **argv )
 						vfrms.push_back( *vCamFrames[nCam] );
 					}
 #endif					
-					QXfrm qx;
 					
 #if 1
-					if( ps.bSolve( qx, vCamFrames ) ) {
-
+					if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
+						if( ps.bSolve( qxRobot, vCamFrames ) ) {
+							Quaternion const &q = qxRobot.Rotation();
+							Point3d const &p = qxRobot.Translation();
+							printf( "(%.4f %.4f %.4f %.4f) : (%.3f %.3f %.3f)\n",
+								q.q0(), q.x(), q.y(), q.z(), p.x(), p.y(), p.z() );
+							bHavePose = true;
+						}
+						else {
+							bHavePose = false;
+						}
 					}
 #endif
 					fl.vLogFrame( vCamFrames );

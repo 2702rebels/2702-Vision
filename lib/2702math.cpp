@@ -330,11 +330,13 @@ Quaternion::Quaternion(Euler const &er)
 	Normalize();
 }
 
+// Quaternion from Rodrigues
 Quaternion::Quaternion(Point3d const &rvec) {
 	double dX = rvec.x();
 	double dY = rvec.y();
 	double dZ = rvec.z();
 
+	// fMag = theta
 	double fMag = sqrt( dX * dX + dY * dY + dZ * dZ );
 
 	if (fMag == 0.) {
@@ -353,6 +355,8 @@ Quaternion::Quaternion(Point3d const &rvec) {
 		m_fY = dY * fFac;
 		m_fZ = dZ * fFac;
 	}
+
+	Normalize();
 }
 
 Quaternion &Quaternion::operator=(RotationMatrix const &rm) {
@@ -460,7 +464,7 @@ void Quaternion::Invert()
 
 Quaternion Quaternion::Inverse() const
 {
-	return Quaternion( -m_fQ0, m_fX, m_fY, m_fZ );
+	return Quaternion( m_fQ0, -m_fX, -m_fY, -m_fZ );
 }
 
 Point2d::Point2d() :
@@ -548,7 +552,7 @@ Quaternion const &QXfrm::Rotation() const
 void QXfrm::Invert()
 {
 	m_q = m_q.Inverse();
-	m_p = m_q.RotatePoint( m_p );
+	m_p = m_q.RotatePoint( m_p ) * -1;
 }
 
 QXfrm QXfrm::Inverse() const
@@ -556,7 +560,7 @@ QXfrm QXfrm::Inverse() const
 	Quaternion q = m_q.Inverse();
 	Point3d p = q.RotatePoint( m_p );
 
-	return QXfrm( q, p );
+	return QXfrm( q, p * -1 );
 }
 
 #if 0

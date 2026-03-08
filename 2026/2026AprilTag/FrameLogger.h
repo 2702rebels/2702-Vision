@@ -22,7 +22,7 @@ public:
 	{
 		m_fp = fopen( psz, "wt" );
 		if (!m_fp) {
-			fprintf( stderr, "Unable to open log file '%s'\n", psz );
+			fprintf( stderr, "Unable to open log file '%s' for writing\n", psz );
 			return false;
 		}
 		m_bWrite = true;

@@ -52,13 +52,21 @@ int main( int argc, char **argv )
 		}
 
 		std::vector<ATFrame *> vatf;
+		bool bHaveSolve = false;
+		Rebels::QXfrm qxfm;
 		while( fl.bReadFrame( vatf ) ) {
 			printf( "%u\n", vatf[0]->u32Seq() );
-			Rebels::QXfrm qxfm;
-			if (ps.bEstimate( qxfm, vatf )) {
+
+			if (bHaveSolve || ps.bEstimate( qxfm, vatf )) {
 				printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
-				ps.bSolve( qxfm, vatf );
-				printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
+				if (ps.bSolve( qxfm, vatf )) {
+					bHaveSolve = true;
+					printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
+				}
+				else {
+					bHaveSolve = false;
+					printf( "Lost Tracking\n" );
+				}
 			}
 		}
 		
