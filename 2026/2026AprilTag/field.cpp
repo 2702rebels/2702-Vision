@@ -7,23 +7,22 @@
 
 using namespace rapidjson;
 
-//static const float s_fTagSize = 6.5 * .0254;
+#define FIELD_UNITS_INCHES 1
+#if FIELD_UNITS_INCHES
 static const float s_fTagSize = 6.5;
+#else
+static const float s_fTagSize = 6.5 * .0254;
+#endif
 
-FieldTag::FieldTag( int nId, Rebels::QXfrm const &q ) :
-	m_nId( nId ),
-	m_bIgnore( false ),
-	m_qfm( q )
-{
 #if 0
-	static Rebels::Point3d grCorners[4] = {
+Rebels::Point3d FieldTag::m_grBaseCorners[4] = {
 		Rebels::Point3d( s_fTagSize/2,  s_fTagSize/2, 0 ),
 		Rebels::Point3d(-s_fTagSize/2,  s_fTagSize/2, 0 ),
 		Rebels::Point3d(-s_fTagSize/2, -s_fTagSize/2, 0 ),
 		Rebels::Point3d( s_fTagSize/2, -s_fTagSize/2, 0 )
 	};
 #else
-	static Rebels::Point3d grCorners[4] = {
+Rebels::Point3d FieldTag::m_grBaseCorners[4] = {
 		Rebels::Point3d( 0., -s_fTagSize/2, -s_fTagSize/2 ),
 		Rebels::Point3d( 0.,  s_fTagSize/2, -s_fTagSize/2 ),
 		Rebels::Point3d( 0.,  s_fTagSize/2,  s_fTagSize/2 ),
@@ -31,9 +30,14 @@ FieldTag::FieldTag( int nId, Rebels::QXfrm const &q ) :
 	};
 #endif
 
+FieldTag::FieldTag( int nId, Rebels::QXfrm const &q ) :
+	m_nId( nId ),
+	m_bIgnore( false ),
+	m_qfm( q )
+{
 	// compute corners
 	for( int i = 0; i < 4; i++ ) {
-		m_grCorners[i] = m_qfm.TransformPoint( grCorners[i] );
+		m_grCorners[i] = m_qfm.TransformPoint( m_grBaseCorners[i] );
 	}
 	
 }
@@ -77,6 +81,16 @@ FieldTag::operator int() const
 	return m_nId;
 }
 
+Rebels::Point3d const *FieldTag::RawCorners()
+{
+	return m_grBaseCorners;
+}
+
+Rebels::Point3d const &FieldTag::RawCorner(int i)
+{
+	return m_grBaseCorners[i];
+}
+
 Field::Field()
 {
 }
@@ -102,9 +116,15 @@ Field::Field( char const *pszJson )
 		const Value& quat = pose["rotation"]["quaternion"];
 
 		int n = tags[i]["ID"].GetInt();
+#if FIELD_UNITS_INCHES
 		double fX = trans["x"].GetDouble() * 1000. / 25.4;
 		double fY = trans["y"].GetDouble() * 1000. / 25.4;
 		double fZ = trans["z"].GetDouble() * 1000. / 25.4;
+#else
+		double fX = trans["x"].GetDouble();
+		double fY = trans["y"].GetDouble();
+		double fZ = trans["z"].GetDouble();
+#endif
 		double q0 = quat["W"].GetDouble();
 		double qx = quat["X"].GetDouble();
 		double qy = quat["Y"].GetDouble();

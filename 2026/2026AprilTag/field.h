@@ -9,6 +9,8 @@ class FieldTag
 	bool				m_bIgnore;
 	Rebels::QXfrm		m_qfm;
 	Rebels::Point3d		m_grCorners[4];	// 4 corners of the Tag in Field Coordinate System
+
+static Rebels::Point3d m_grBaseCorners[4];
 public:
 	FieldTag( int nId, Rebels::QXfrm const &q );
 	FieldTag( FieldTag const &ft );
@@ -21,6 +23,9 @@ public:
 
 	operator int() const;
 	operator Rebels::QXfrm const &() const;
+
+	static Rebels::Point3d const *RawCorners();
+	static Rebels::Point3d const &RawCorner(int i);
 };
 
 class Field

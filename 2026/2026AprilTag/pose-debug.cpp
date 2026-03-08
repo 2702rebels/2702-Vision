@@ -13,7 +13,7 @@ Field g_field;
 int main( int argc, char **argv )
 {
 	char const *pszCfg = "jane.cfg";
-	char const *pszFrm = "foo";
+	char const *pszFrm = "f2";
 #if 0
 	if (argc != 3) {
 		fprintf( stderr, "Usage: %s config-file infile\n", argv[0] );
@@ -56,7 +56,9 @@ int main( int argc, char **argv )
 			printf( "%u\n", vatf[0]->u32Seq() );
 			Rebels::QXfrm qxfm;
 			if (ps.bEstimate( qxfm, vatf )) {
+				printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
 				ps.bSolve( qxfm, vatf );
+				printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
 			}
 		}
 		

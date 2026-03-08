@@ -11,17 +11,17 @@ CXXFLAGS+=-I/usr/local/include/wpiutil
 CXXFLAGS+=-I/usr/local/include/cscore
 CXXFLAGS+=-I/usr/local/include/ntcore
 #CXXFLAGS+=$(shell pkg-config --cflags opencv4)
-CXXFLAGS+=-I../../2025/2025AprilTag/wpilib/include/cameraserver
-CXXFLAGS+=-I../../2025/2025AprilTag/wpilib/include/wpiutil
-CXXFLAGS+=-I../../2025/2025AprilTag/wpilib/include/cscore
-CXXFLAGS+=-I../../2025/2025AprilTag/wpilib/include/ntcore
-CXXFLAGS+=-I../../2025/2025AprilTag/include/opencv4
+CXXFLAGS+=-I../../2026/2026AprilTag/wpilib/include/cameraserver
+CXXFLAGS+=-I../../2026/2026AprilTag/wpilib/include/wpiutil
+CXXFLAGS+=-I../../2026/2026AprilTag/wpilib/include/cscore
+CXXFLAGS+=-I../../2026/2026AprilTag/wpilib/include/ntcore
+CXXFLAGS+=-I../../2026/2026AprilTag/include/opencv4
 CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 #CXXFLAGS+=-O2
 CXXFLAGS+=-g
 #LIBS+=$(shell pkg-config -libs libcamera)
-LDFLAGS+=-L../../2025/2025AprilTag/wpilib/lib -L../../2025/2025AprilTag/lib
+LDFLAGS+=-L../../2026/2026AprilTag/wpilib/lib -L../../2026/2026AprilTag/lib
 LIBS+=-lntcore -lcscore -lcameraserver -lwpiutil -lcurses
 
 jetson-sample: $(OBJS)

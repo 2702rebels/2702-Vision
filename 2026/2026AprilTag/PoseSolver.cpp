@@ -29,11 +29,14 @@ int PoseSolver::eval( void *p, int m, int n, float const *x, float *fv, int ifla
 
 int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 {
-	printf( "%.4f %.4f %.4f : %.4f %.4f %.4f\n", px[0], px[1], px[2], px[3], px[4], px[5] );
+//	printf( "%.4f %.4f %.4f : %.4f %.4f %.4f\n", px[0], px[1], px[2], px[3], px[4], px[5] );
 	Euler e( px[0], px[1], px[2] );
 	Quaternion q( e );
 	Point3d p( px[3], px[4], px[5] );
 
+	float fErr;
+	float fErr2 = 0.;
+	int nCnt = 0;
 	QXfrm qxF2R( q, p );  // 
 	QXfrm qxF2C = m_mc.qxmR2C()* qxF2R;
 	for (auto f : *m_pvatf ) {
@@ -50,60 +53,27 @@ int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 			for (int i = 0; i < 4; i++ ) {
 				// Transform the corner point into the "Multi-Camera" frame of reference.
 				Point3d p3dCam = qxF2C.TransformPoint( pCorners[i] );
-				printf( "p2dCam -> %.4f %.4f %.4f\n", p3dCam.x(), p3dCam.y(), p3dCam.z() );
+//				printf( "p2dCam -> %.4f %.4f %.4f\n", p3dCam.x(), p3dCam.y(), p3dCam.z() );
 
 				Point2d p2d = cp.ProjectPoint( p3dCam );
 
 				// Get the U/V position of this corner point.
 				auto p2f = atd[i];
 				
-				printf( "%.4f -> %.4f  ,  %.4f -> %.4f\n", p2d.u(), p2f.x, p2d.v(), p2f.y );
-				*pv++ = p2d.u() - p2f.x;
-				*pv++ = p2d.v() - p2f.y;
+//				printf( "%.4f -> %.4f  ,  %.4f -> %.4f\n", p2d.u(), p2f.x, p2d.v(), p2f.y );
+				fErr = p2d.u() - p2f.x;
+				fErr2 += fErr * fErr;
+				*pv++ = fErr;
+				fErr = p2d.v() - p2f.y;
+				fErr2 += fErr * fErr;
+				*pv++ = fErr;
+				nCnt++;
 			}
 		}
 	}
+	printf( "iflag: %d -> %f\n", iflag, sqrt(fErr2/nCnt) );
 	return 1;
 }
-
-#if 1
-#if 0
-static Rebels::Point3d grCorners[] =
-{
-	{ -3.25,  3.25, 0. },
-	{  3.25,  3.25, 0. },
-	{  3.25, -3.25, 0. },
-	{ -3.25, -3.25, 0. }
-};
-#else
-#if 1
-static Rebels::Point3d grCorners[] =
-{
-	{ 0.,  3.25, -3.25 },
-	{ 0., -3.25, -3.25 },
-	{ 0., -3.25,  3.25 },
-	{ 0.,  3.25,  3.25 }
-};
-#else
-static Rebels::Point3d grCorners[] =
-{
-	{ 0., -3.25, -3.25 },
-	{ 0.,  3.25, -3.25 },
-	{ 0.,  3.25,  3.25 },
-	{ 0., -3.25,  3.25 }
-};
-#endif
-#endif
-#else
-static Rebels::Point3d grCorners[] =
-{
-	{ -3.25,  3.25, 0. },
-	{  3.25,  3.25, 0. },
-	{  3.25, -3.25, 0. },
-	{ -3.25, -3.25, 0. }
-};
-
-#endif
 
 bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 {
@@ -129,11 +99,10 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	for (size_t t = 0; t < vatf[nMostIdx]->sTags(); t++ )
 	{
 		ATDetection const &d = (*vatf[nMostIdx])[t];
-		Rebels::QXfrm const &xfm = m_Field[d.uId() - 1];
+		FieldTag const &ft = m_Field[d.uId() - 1];
 printf( "Have Detection %d\n", d.uId() );
 		for (int c = 0; c < 4; c++, idx++ ) {
-			Rebels::Point3d pn = xfm.TransformPoint(grCorners[c]);
-//			Rebels::Point3d pn = grCorners[c];
+			Rebels::Point3d pn = ft.Corners()[c];
 printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), d[c].x, d[c].y );
 			objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
 			imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
@@ -168,14 +137,36 @@ printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), d[c].x, d[c].y 
 		Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
 		Rebels::Point3d p3Tvec( tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2) );
 		Rebels::Quaternion qRot( p3Rvec );
-		Rebels::QXfrm qx( qRot, p3Tvec );
+		Rebels::QXfrm qxmF2S( qRot, p3Tvec );
 
-		for (int c =0; c < 4; c++ ) {
-			Rebels::Point3d p3Tmp = qx.TransformPoint( grCorners[c] );
-			Rebels::Point2d p2Tmp = cp.ProjectPoint( p3Tmp );
-			printf( "%.2f %.2f %.2f -> %.4f %.4f\n", p3Tmp.x(), p3Tmp.y(), p3Tmp.z(), p2Tmp.u(), p2Tmp.v() );
+		for (size_t t = 0; t < vatf[nMostIdx]->sTags(); t++ )
+		{
+			ATDetection const &d = (*vatf[nMostIdx])[t];
+			FieldTag const &ft = m_Field[d.uId() - 1];
+	printf( "For Tag %d\n", d.uId() );
+			for (int c = 0; c < 4; c++, idx++ ) {
+				Rebels::Point3d pn = qxmF2S.TransformPoint(ft.Corners()[c]);
+				Rebels::Point2d p2 = cp.ProjectPoint( pn );
+
+	printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), p2.u(), p2.v() );
+			}
 		}
+
 		bool bUseSolve = sum < 10.;
+		if (bUseSolve) {
+#if 0
+			// the xfrm we have just computed goes from the Field coordinate system to the sensor's.
+			// We need the coordinate system from the Robot to the Field
+			// We can get that by inverting the computed xfrm to get Sensor->Field
+			// We can combine that with the Camera->Sensor and then the Robot->Camera
+			QXfrm qxmS2F = qxmF2S.Inverse();
+			QXfrm qxmC2F = qxmS2F*cp.getXfrm();
+			QXfrm qxmR2F = qxmC2F*m_mc.qxmR2C();
+			xfm = qxmR2F;
+#else
+			xfm = qxmF2S.Inverse();
+#endif
+		}
 		return true;
 	}
 
@@ -209,15 +200,15 @@ bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	grfX[1] = eu.fY(); // Pitch
 	grfX[2] = eu.fZ(); // Yaww
 	grfX[3] = qxInv.Translation().x();
-	grfX[4] = qxInv.Translation().y();
-	grfX[5] = qxInv.Translation().z();
+	grfX[4] = qxInv.Translation().y() + 5;
+	grfX[5] = qxInv.Translation().z() + 10;
 
 	float *pfVals = new float[m];
 	int *pniwa = new int[m];
 	int wa = m * n + 5 * n + m;
 	float *plwa = new float[wa];
 
-	slmdif1( eval, static_cast<void *>(this), m, n, grfX, pfVals, .1, pniwa, plwa, wa  );
+	slmdif1( eval, static_cast<void *>(this), m, n, grfX, pfVals, .0001, pniwa, plwa, wa  );
 
 	delete plwa;
 	delete pniwa;
