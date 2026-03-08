@@ -5,6 +5,7 @@
  */
 
 #include "ObjectDetectionStruct.h"
+
 #include <iostream>
 #include <span>
 #include <wpi/struct/Struct.h>
@@ -52,10 +53,10 @@ ObjectDetectionInfo::ObjectDetectionInfo(double distance, double angle,
  * \brief Creates an empty \ref ObjectDetectionInfo with all values set to 0.
  */
 ObjectDetectionInfo::ObjectDetectionInfo() {
-  m_distance = 0.0f;
-  m_angle = 0.0f;
-  m_quality = 0;
-  m_type = ObjectDetectionType::CORAL;
+    m_distance = 0.0f;
+    m_angle = 0.0f;
+    m_quality = 0;
+    m_type = ObjectDetectionType::CORAL;
 }
 
 using ObjectDetectionInfoStructType = wpi::Struct<ObjectDetectionInfo>;
@@ -68,14 +69,14 @@ using ObjectDetectionInfoStructType = wpi::Struct<ObjectDetectionInfo>;
  */
 ObjectDetectionInfo
 ObjectDetectionInfoStructType::Unpack(std::span<const uint8_t> data) {
-  // Unpack the data into the span using the type and the offsets found at the
-  // top of this file
-  auto type = static_cast<ObjectDetectionType>(
-      wpi::UnpackStruct<uint8_t, typeOff>(data));
-  auto dist = wpi::UnpackStruct<double, distOff>(data);
-  auto angle = wpi::UnpackStruct<double, angleOff>(data);
-  auto quality = wpi::UnpackStruct<uint8_t, qualityOff>(data);
-  return ObjectDetectionInfo(dist, angle, quality, type);
+    // Unpack the data into the span using the type and the offsets found at the
+    // top of this file
+    auto type = static_cast<ObjectDetectionType>(
+        wpi::UnpackStruct<uint8_t, typeOff>(data));
+    auto dist = wpi::UnpackStruct<double, distOff>(data);
+    auto angle = wpi::UnpackStruct<double, angleOff>(data);
+    auto quality = wpi::UnpackStruct<uint8_t, qualityOff>(data);
+    return ObjectDetectionInfo(dist, angle, quality, type);
 }
 
 /*! \brief Serializes an ObjectDetectionInfo into a span of bytes to be sent as
@@ -83,27 +84,27 @@ ObjectDetectionInfoStructType::Unpack(std::span<const uint8_t> data) {
  * serialized data(see \ref ObjectDetectionInfoStructType::GetSize() ). \param
  * value - The ObjectDetectionInfo class to serialize. */
 void ObjectDetectionInfoStructType::Pack(std::span<uint8_t> data,
-                                         const ObjectDetectionInfo &value) {
-  // Pack the data into the span using the offsets found at the top of this
-  // file, detects the type automatically from the inputted value
-  wpi::PackStruct<typeOff>(data, static_cast<uint8_t>(value.m_type));
-  wpi::PackStruct<distOff>(data, value.m_distance);
-  wpi::PackStruct<angleOff>(data, value.m_angle);
-  wpi::PackStruct<qualityOff>(data, value.m_quality);
+                                         const ObjectDetectionInfo& value) {
+    // Pack the data into the span using the offsets found at the top of this
+    // file, detects the type automatically from the inputted value
+    wpi::PackStruct<typeOff>(data, static_cast<uint8_t>(value.m_type));
+    wpi::PackStruct<distOff>(data, value.m_distance);
+    wpi::PackStruct<angleOff>(data, value.m_angle);
+    wpi::PackStruct<qualityOff>(data, value.m_quality);
 }
 
 /*!
  * \brief Initializes an empty ObjectDetectionPacket
  */
 ObjectDetectionPacket::ObjectDetectionPacket() {
-  m_key = 0;
-  m_versionNumber = -1;
-  m_time = -1L;
-  m_count = 0;
-  m_coral1 = ObjectDetectionInfo();
-  m_coral2 = ObjectDetectionInfo();
-  m_coral3 = ObjectDetectionInfo();
-  m_coral4 = ObjectDetectionInfo();
+    m_key = 0;
+    m_versionNumber = -1;
+    m_time = -1L;
+    m_count = 0;
+    m_coral1 = ObjectDetectionInfo();
+    m_coral2 = ObjectDetectionInfo();
+    m_coral3 = ObjectDetectionInfo();
+    m_coral4 = ObjectDetectionInfo();
 }
 
 /*!
@@ -139,16 +140,16 @@ using ObjectDetectionPacketStructType = wpi::Struct<ObjectDetectionPacket>;
  */
 ObjectDetectionPacket
 ObjectDetectionPacketStructType::Unpack(std::span<const uint8_t> data) {
-  int key = wpi::UnpackStruct<int, keyOff>(data);
-  int versionNumber = wpi::UnpackStruct<int, versionOff>(data);
-  auto time = wpi::UnpackStruct<int64_t, timeOff>(data);
-  auto count = wpi::UnpackStruct<uint8_t, countOff>(data);
-  auto coral1 = wpi::UnpackStruct<ObjectDetectionInfo, coral1Off>(data);
-  auto coral2 = wpi::UnpackStruct<ObjectDetectionInfo, coral2Off>(data);
-  auto coral3 = wpi::UnpackStruct<ObjectDetectionInfo, coral3Off>(data);
-  auto coral4 = wpi::UnpackStruct<ObjectDetectionInfo, coral4Off>(data);
-  return ObjectDetectionPacket(key, versionNumber, time, count, coral1, coral2,
-                               coral3, coral4);
+    int key = wpi::UnpackStruct<int, keyOff>(data);
+    int versionNumber = wpi::UnpackStruct<int, versionOff>(data);
+    auto time = wpi::UnpackStruct<int64_t, timeOff>(data);
+    auto count = wpi::UnpackStruct<uint8_t, countOff>(data);
+    auto coral1 = wpi::UnpackStruct<ObjectDetectionInfo, coral1Off>(data);
+    auto coral2 = wpi::UnpackStruct<ObjectDetectionInfo, coral2Off>(data);
+    auto coral3 = wpi::UnpackStruct<ObjectDetectionInfo, coral3Off>(data);
+    auto coral4 = wpi::UnpackStruct<ObjectDetectionInfo, coral4Off>(data);
+    return ObjectDetectionPacket(key, versionNumber, time, count, coral1, coral2,
+                                 coral3, coral4);
 }
 
 /*! \brief Serializes an ObjectDetectionPacket into the provided byte span.
@@ -157,13 +158,13 @@ ObjectDetectionPacketStructType::Unpack(std::span<const uint8_t> data) {
  * \param value - ObjectDetectionPacket to be serialized.
  */
 void ObjectDetectionPacketStructType::Pack(std::span<uint8_t> data,
-                                           const ObjectDetectionPacket &value) {
-  wpi::PackStruct<keyOff>(data, value.m_key);
-  wpi::PackStruct<versionOff>(data, value.m_versionNumber);
-  wpi::PackStruct<timeOff>(data, value.m_time);
-  wpi::PackStruct<countOff>(data, value.m_count);
-  wpi::PackStruct<coral1Off>(data, value.m_coral1);
-  wpi::PackStruct<coral2Off>(data, value.m_coral2);
-  wpi::PackStruct<coral3Off>(data, value.m_coral3);
-  wpi::PackStruct<coral4Off>(data, value.m_coral4);
+                                           const ObjectDetectionPacket& value) {
+    wpi::PackStruct<keyOff>(data, value.m_key);
+    wpi::PackStruct<versionOff>(data, value.m_versionNumber);
+    wpi::PackStruct<timeOff>(data, value.m_time);
+    wpi::PackStruct<countOff>(data, value.m_count);
+    wpi::PackStruct<coral1Off>(data, value.m_coral1);
+    wpi::PackStruct<coral2Off>(data, value.m_coral2);
+    wpi::PackStruct<coral3Off>(data, value.m_coral3);
+    wpi::PackStruct<coral4Off>(data, value.m_coral4);
 }

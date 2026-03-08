@@ -17,7 +17,7 @@ allwpilib/
 *.png
 *.txt
 !CMakeLists.txt
-
+actions-runner/
 .idea/
 vcpkg_installed/
 *~

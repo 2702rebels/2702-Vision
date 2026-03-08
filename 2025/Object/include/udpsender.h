@@ -4,12 +4,12 @@
 #include <stdexcept>
 
 class UDPSender {
-  asio::io_context io;
-  asio::ip::udp::socket sock;
-  asio::ip::udp::endpoint endpoint;
+    asio::io_context io;
+    asio::ip::udp::socket sock;
+    asio::ip::udp::endpoint endpoint;
 
-public:
-  UDPSender(const std::string &ipStr, const unsigned short port);
+  public:
+    UDPSender(const std::string& ipStr, const unsigned short port);
 
-  bool bSend(std::span<uint8_t> const &spBuf);
+    bool bSend(const std::span<uint8_t>& spBuf);
 };

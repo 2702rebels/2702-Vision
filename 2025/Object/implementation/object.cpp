@@ -9,17 +9,16 @@
  *  - config.h
  */
 #include "LoggingUtils.h"
+
 #include <errno.h>
 
 // #include <X11/Xlib.h>
 // #include <cameraserver/CameraServer.h>
 // #include <networktables/NetworkTableInstance.h>
-#include <drm/drm_fourcc.h>
-
-#include <linux/videodev2.h>
-
 #include "rpicam.h"
 
+#include <drm/drm_fourcc.h>
+#include <linux/videodev2.h>
 #include <signal.h>
 
 bool bStop = false;
@@ -44,54 +43,54 @@ bool bStop = false;
 /*! \brief Handles Ctrl+C interrupts.
  * \param nSig - Should always be equal to \ref SIGINT.*/
 void sighandler(int nSig) {
-  info("Received Signal {}", nSig);
-  bStop = true;
+    info("Received Signal {}", nSig);
+    bStop = true;
 }
 
-int main(int argc, char *argv[]) {
-  SetupTextLogger();
-  signal(SIGINT, sighandler);
-  try {
-    ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON,
-                         ObjUseGui::OFF, ObjMultipleObjectDetection::OFF,
-                         ObjSendPackets::ON, ObjUseOutputFiltering::ON>
-        proc(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
-    //		RPICamera mycam0( "/dev/video0", 0, 800, 600,
-    // V4L2_PIX_FMT_RGB24, proc );
-    RPICamera mycam0("/dev/video0", 0, RESOLUTION_WIDTH, RESOLUTION_HEIGHT,
-                     DRM_FORMAT_RGB888, proc);
-    //	nvCamera mycam1( "/dev/video1", 4, 1 );
+int main(int argc, char* argv[]) {
+    SetupTextLogger();
+    signal(SIGINT, sighandler);
+    try {
+        ObjectFrameProcessor<ObjLatencyReporting::ON, ObjVideoDebuggingInfo::ON,
+                             ObjUseGui::OFF, ObjMultipleObjectDetection::OFF,
+                             ObjSendPackets::ON, ObjUseOutputFiltering::ON>
+            proc(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
+        //		RPICamera mycam0( "/dev/video0", 0, 800, 600,
+        // V4L2_PIX_FMT_RGB24, proc );
+        RPICamera mycam0("/dev/video0", 0, RESOLUTION_WIDTH, RESOLUTION_HEIGHT,
+                         DRM_FORMAT_RGB888, proc);
+        //	nvCamera mycam1( "/dev/video1", 4, 1 );
 
-    //	printinfo( mycam0 );
+        //	printinfo( mycam0 );
 #if USE_NETWORK_TABLES
-    auto networkTableManager = nt::NetworkTableInstance::GetDefault();
-    auto visionTable = networkTableManager.GetTable("Vision");
-    nt::BooleanSubscriber isLoggingTopic =
-        visionTable->GetBooleanTopic("IsLogging").Subscribe(false);
-    bool bLogStarted = false;
-    networkTableManager.StartClient4("networkTableClient");
-    networkTableManager.SetServerTeam(2702);
+        auto networkTableManager = nt::NetworkTableInstance::GetDefault();
+        auto visionTable = networkTableManager.GetTable("Vision");
+        nt::BooleanSubscriber isLoggingTopic =
+            visionTable->GetBooleanTopic("IsLogging").Subscribe(false);
+        bool bLogStarted = false;
+        networkTableManager.StartClient4("networkTableClient");
+        networkTableManager.SetServerTeam(2702);
 #if IS_ROBOT
-    networkTableManager.StartDSClient();
+        networkTableManager.StartDSClient();
 #endif
-    while (!bStop) {
-      info("Connection status of NetworkTables: {}",
-           networkTableManager.IsConnected());
-      if (networkTableManager.IsConnected()) {
-        proc.m_config.UpdateFromNetworkTables();
-        if (!bLogStarted) {
-          if (isLoggingTopic.Get()) {
-            proc.vStartLogging();
-            bLogStarted = true;
-          }
+        while (!bStop) {
+            info("Connection status of NetworkTables: {}",
+                 networkTableManager.IsConnected());
+            if (networkTableManager.IsConnected()) {
+                proc.m_config.UpdateFromNetworkTables();
+                if (!bLogStarted) {
+                    if (isLoggingTopic.Get()) {
+                        proc.vStartLogging();
+                        bLogStarted = true;
+                    }
+                }
+            }
+#endif
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
-      }
-#endif
-      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    } catch (std::exception& e) {
+        error("Exception: {}", e.what());
     }
-  } catch (std::exception &e) {
-    error("Exception: {}", e.what());
-  }
 
-  return 0;
+    return 0;
 }
