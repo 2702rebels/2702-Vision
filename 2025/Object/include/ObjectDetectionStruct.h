@@ -142,8 +142,8 @@ class ObjectDetectionPacket {
      * @param coral4 The fourth detection
      */
     ObjectDetectionPacket(int key, int versionNumber, int64_t time, uint8_t count,
-                          ObjectDetectionInfo coral1, ObjectDetectionInfo coral2,
-                          ObjectDetectionInfo coral3, ObjectDetectionInfo coral4);
+                          const ObjectDetectionInfo& coral1, const ObjectDetectionInfo& coral2,
+                          const ObjectDetectionInfo& coral3, const ObjectDetectionInfo& coral4);
     /** @brief Magic number used to check for corruption or invalid packet, set
      * using @ref PACKET_KEY */
     int32_t m_key;

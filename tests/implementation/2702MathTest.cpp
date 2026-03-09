@@ -2,20 +2,20 @@
 #include <gtest/gtest.h>
 
 TEST(Point2d, Set) {
-    Rebels::Point2d point(1, 1.5f);
+    Rebels::Point2d point(1, 1.5F);
     EXPECT_EQ(point.u(), 1);
-    EXPECT_EQ(point.v(), 1.5f);
-    point.set(-2.3f, 15.4f);
-    EXPECT_NEAR(point.u(), -2.3f, 1e-6);
-    EXPECT_NEAR(point.v(), 15.4f, 1e-6);
+    EXPECT_EQ(point.v(), 1.5F);
+    point.set(-2.3F, 15.4F);
+    EXPECT_NEAR(point.u(), -2.3F, 1e-6);
+    EXPECT_NEAR(point.v(), 15.4F, 1e-6);
 }
 
 TEST(Point2d, EqOp) {
-    EXPECT_EQ(Rebels::Point2d(1, 1.5f), Rebels::Point2d(1, 1.5f));
+    EXPECT_EQ(Rebels::Point2d(1, 1.5F), Rebels::Point2d(1, 1.5F));
 }
 
 TEST(Point2d, FromExisting) {
-    Rebels::Point2d point1(1.5f, 2.5f);
+    Rebels::Point2d point1(1.5F, 2.5F);
     Rebels::Point2d point2(point1);
     EXPECT_EQ(point1, point2);
 }
@@ -26,16 +26,16 @@ TEST(Point2d, Len) {
 }
 
 TEST(Point3d, Set) {
-    Rebels::Point3d point(0.75f, 0.2f, 0.5f);
-    EXPECT_FLOAT_EQ(point.x(), 0.75f);
-    EXPECT_FLOAT_EQ(point.y(), 0.2f);
-    EXPECT_FLOAT_EQ(point.z(), 0.5f);
+    Rebels::Point3d point(0.75F, 0.2F, 0.5F);
+    EXPECT_FLOAT_EQ(point.x(), 0.75F);
+    EXPECT_FLOAT_EQ(point.y(), 0.2F);
+    EXPECT_FLOAT_EQ(point.z(), 0.5F);
 }
 
 TEST(Point3d, EqOp) {
-    EXPECT_EQ(Rebels::Point3d(0.75f, 0.2f, 0.5f),
-              Rebels::Point3d(0.75f, 0.2f, 0.5f));
-    EXPECT_NE(Rebels::Point3d(1, 0.25f, 3), Rebels::Point3d(1, 0.25f, 3.5f));
+    EXPECT_EQ(Rebels::Point3d(0.75F, 0.2F, 0.5F),
+              Rebels::Point3d(0.75F, 0.2F, 0.5F));
+    EXPECT_NE(Rebels::Point3d(1, 0.25F, 3), Rebels::Point3d(1, 0.25F, 3.5F));
 }
 
 TEST(Point3d, Len) {
@@ -49,7 +49,7 @@ TEST(Point3d, LenNegative) {
 }
 
 TEST(Point3d, Copy) {
-    Rebels::Point3d point1(0.25f, 0.5f, 0.75f);
+    Rebels::Point3d point1(0.25F, 0.5F, 0.75F);
     Rebels::Point3d point2 = point1;
     EXPECT_EQ(point1, point2);
 }
@@ -73,7 +73,7 @@ TEST(Point3d, OpMinus) {
 }
 
 TEST(Point3d, OpMul) {
-    Rebels::Point3d point(0.5f, 2, 0);
+    Rebels::Point3d point(0.5F, 2, 0);
     Rebels::Point3d ans(1, 4, 0);
     EXPECT_EQ(point * 2, ans);
     point *= 2;
@@ -119,8 +119,8 @@ TEST(Point3d, Normalize) {
 }
 
 TEST(LinearSlope, InitMxB) {
-    Rebels::LinearSlope slope(0.5f, 2);
-    EXPECT_FLOAT_EQ(slope.getSlope(), 0.5f);
+    Rebels::LinearSlope slope(0.5F, 2);
+    EXPECT_FLOAT_EQ(slope.getSlope(), 0.5F);
     EXPECT_FLOAT_EQ(slope.getYIntercept(), 2);
 }
 
@@ -159,23 +159,23 @@ TEST(LinearSlope, PointTest) {
 }
 
 TEST(Quaternion, SetQXYZ) {
-    Rebels::Quaternion rot(1, 0.25f, 0.4f, 0.8f);
+    Rebels::Quaternion rot(1, 0.25F, 0.4F, 0.8F);
     EXPECT_FLOAT_EQ(rot.q0(), 1);
-    EXPECT_FLOAT_EQ(rot.x(), 0.25f);
-    EXPECT_FLOAT_EQ(rot.y(), 0.4f);
-    EXPECT_FLOAT_EQ(rot.z(), 0.8f);
+    EXPECT_FLOAT_EQ(rot.x(), 0.25F);
+    EXPECT_FLOAT_EQ(rot.y(), 0.4F);
+    EXPECT_FLOAT_EQ(rot.z(), 0.8F);
 }
 
 TEST(Quaternion, EqOperator) {
-    Rebels::Quaternion rot1(1, 0.25f, 0.4f, 0.8f);
-    Rebels::Quaternion rot2(1, 0.25f, 0.4f, 0.8f);
-    Rebels::Quaternion rot3(0.25f, 0.25f, 0.4f, 0.8f);
+    Rebels::Quaternion rot1(1, 0.25F, 0.4F, 0.8F);
+    Rebels::Quaternion rot2(1, 0.25F, 0.4F, 0.8F);
+    Rebels::Quaternion rot3(0.25F, 0.25F, 0.4F, 0.8F);
     EXPECT_EQ(rot1, rot2);
     EXPECT_NE(rot1, rot3);
 }
 
 TEST(Quaternion, CopyQuaternion) {
-    Rebels::Quaternion rot(1, 0.25f, 0.4f, 0.8f);
+    Rebels::Quaternion rot(1, 0.25F, 0.4F, 0.8F);
     Rebels::Quaternion rot2(rot);
     Rebels::Quaternion rot3 = rot;
     EXPECT_EQ(rot, rot2);
@@ -188,8 +188,8 @@ TEST(Quaternion, Normalize) {
     EXPECT_EQ(rot, Rebels::Quaternion(1, 0, 0, 0));
     Rebels::Quaternion rot2(1, 2, 2, 4);
     rot2.Normalize();
-    EXPECT_FLOAT_EQ(rot2.q0(), 0.2f);
-    EXPECT_FLOAT_EQ(rot2.x(), 0.4f);
-    EXPECT_FLOAT_EQ(rot2.y(), 0.4f);
-    EXPECT_FLOAT_EQ(rot2.z(), 0.8f);
+    EXPECT_FLOAT_EQ(rot2.q0(), 0.2F);
+    EXPECT_FLOAT_EQ(rot2.x(), 0.4F);
+    EXPECT_FLOAT_EQ(rot2.y(), 0.4F);
+    EXPECT_FLOAT_EQ(rot2.z(), 0.8F);
 }

@@ -52,11 +52,8 @@ ObjectDetectionInfo::ObjectDetectionInfo(double distance, double angle,
 /*!
  * \brief Creates an empty \ref ObjectDetectionInfo with all values set to 0.
  */
-ObjectDetectionInfo::ObjectDetectionInfo() {
-    m_distance = 0.0f;
-    m_angle = 0.0f;
-    m_quality = 0;
-    m_type = ObjectDetectionType::CORAL;
+ObjectDetectionInfo::ObjectDetectionInfo() : m_type(ObjectDetectionType::CORAL), m_distance(0.0F), m_angle(0.0F), m_quality(0) {
+
 }
 
 using ObjectDetectionInfoStructType = wpi::Struct<ObjectDetectionInfo>;
@@ -96,15 +93,7 @@ void ObjectDetectionInfoStructType::Pack(std::span<uint8_t> data,
 /*!
  * \brief Initializes an empty ObjectDetectionPacket
  */
-ObjectDetectionPacket::ObjectDetectionPacket() {
-    m_key = 0;
-    m_versionNumber = -1;
-    m_time = -1L;
-    m_count = 0;
-    m_coral1 = ObjectDetectionInfo();
-    m_coral2 = ObjectDetectionInfo();
-    m_coral3 = ObjectDetectionInfo();
-    m_coral4 = ObjectDetectionInfo();
+ObjectDetectionPacket::ObjectDetectionPacket() : m_key(0), m_versionNumber(-1), m_time(-1L), m_count(0) {
 }
 
 /*!
@@ -123,10 +112,10 @@ ObjectDetectionPacket::ObjectDetectionPacket() {
  */
 ObjectDetectionPacket::ObjectDetectionPacket(int key, int versionNumber,
                                              int64_t timestamp, uint8_t count,
-                                             ObjectDetectionInfo coral1,
-                                             ObjectDetectionInfo coral2,
-                                             ObjectDetectionInfo coral3,
-                                             ObjectDetectionInfo coral4)
+                                             const ObjectDetectionInfo& coral1,
+                                             const ObjectDetectionInfo& coral2,
+                                             const ObjectDetectionInfo& coral3,
+                                             const ObjectDetectionInfo& coral4)
     : m_key(key), m_versionNumber(versionNumber), m_time(timestamp),
       m_count(count), m_coral1(coral1), m_coral2(coral2), m_coral3(coral3),
       m_coral4(coral4) {}

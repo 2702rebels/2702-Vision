@@ -7,16 +7,16 @@
 
 namespace fs = std::filesystem;
 
-void WriteNewLogHeader(std::ofstream& logfile, unsigned int width,
+static void WriteNewLogHeader(std::ofstream& logfile, unsigned int width,
                        unsigned int height, LogFrameType logFrameType) {
-    logfile.write((char*)&logFrameType, sizeof(LogFrameType));
-    logfile.write((char*)&width, sizeof(width));
-    logfile.write((char*)&height, sizeof(height));
+    logfile.write(reinterpret_cast<const char*>(&logFrameType), sizeof(LogFrameType));
+    logfile.write(reinterpret_cast<char*>(&width), sizeof(width));
+    logfile.write(reinterpret_cast<char*>(&height), sizeof(height));
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) { // NOLINT
     if (argc != 3) {
-        std::cerr << "Format: " << argv[0] << " /oldlogdir /newlogdir" << std::endl;
+        std::cerr << "Format: " << argv[0] << " /oldlogdir /newlogdir" << '\n';
         return 1;
     }
 
@@ -25,15 +25,15 @@ int main(int argc, char* argv[]) {
 
     if (oldLogDirectory == newLogDirectory) {
         std::cerr << "Old log directory cannot be the same as the new log directory"
-                  << std::endl;
+                  << '\n';
         return 1;
     }
     if (!fs::is_directory(oldLogDirectory)) {
-        std::cerr << "Old log directory must be a path to a directory" << std::endl;
+        std::cerr << "Old log directory must be a path to a directory" << '\n';
         return 1;
     }
     if (!fs::is_directory(newLogDirectory)) {
-        std::cerr << "New log directory must be a path to a directory" << std::endl;
+        std::cerr << "New log directory must be a path to a directory" << '\n';
         return 1;
     }
 
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         if (entry.path().extension() != ".log") {
             continue;
         }
-        std::cout << "Converting log file at: " << entry.path() << std::endl;
+        std::cout << "Converting log file at: " << entry.path() << '\n';
         cv::Mat frame;
         std::ifstream curLogFile(entry.path(), std::ios::in | std::ios::binary);
         std::ofstream outputLogFile(newLogDirectory / entry.path().filename(),
@@ -60,14 +60,15 @@ int main(int argc, char* argv[]) {
                 std::getline(curLogFile, tmp);
                 std::getline(curLogFile, tmp);
                 // get height and width of frame
-                int height, width;
+                int height{};
+                int width{};
                 std::getline(curLogFile, tmp);
                 height = stoi(tmp);
                 std::getline(curLogFile, tmp);
                 width = stoi(tmp);
                 char* frameData = new char[width * height * 3];
                 if (!curLogFile.read(frameData, width * height * 3)) {
-                    std::cerr << "Failed to read frame data of RGB frame" << std::endl;
+                    std::cerr << "Failed to read frame data of RGB frame" << '\n';
                     continue;
                 }
                 if (!haveWrittenHeader) {
@@ -82,7 +83,8 @@ int main(int argc, char* argv[]) {
                 std::getline(curLogFile, tmp);
                 std::getline(curLogFile, tmp);
                 // get height and width of frame
-                int height, width;
+                int height{};
+                int width{};
                 std::getline(curLogFile, tmp);
                 height = atoi(tmp.c_str());
                 std::getline(curLogFile, tmp);
@@ -105,12 +107,12 @@ int main(int argc, char* argv[]) {
                 // discard u32Seq and u32Exp
                 std::getline(curLogFile, tmp);
                 std::getline(curLogFile, tmp);
-                int dataSize;
+                int dataSize = 0;
                 std::getline(curLogFile, tmp);
                 dataSize = atoi(tmp.c_str());
                 char* pngBuf = new char[dataSize];
                 if (!curLogFile.read(pngBuf, dataSize)) {
-                    std::cerr << "Failed to read frame data of PNG frame" << std::endl;
+                    std::cerr << "Failed to read frame data of PNG frame" << '\n';
                     continue;
                 }
                 cv::Mat pngImage;
@@ -122,18 +124,16 @@ int main(int argc, char* argv[]) {
                     haveWrittenHeader = true;
                 }
                 int newFrameDataSize = pngImage.dataend - pngImage.data;
-                outputLogFile.write((char*)pngImage.data, newFrameDataSize);
+                outputLogFile.write(reinterpret_cast<char*>(pngImage.data), newFrameDataSize);
                 delete[] pngBuf;
             } else {
-                std::cerr << "Unrecognized frame type" << std::endl;
-                continue;
+                std::cerr << "Unrecognized frame type" << '\n';
             }
         }
         std::cout << "Translated log file at " << entry.path()
                   << " to new log file at "
-                  << newLogDirectory / entry.path().filename() << std::endl;
-        continue;
-    }
-    std::cout << "Translated all log files successfully" << std::endl;
+                  << newLogDirectory / entry.path().filename() << '\n';
+   }
+    std::cout << "Translated all log files successfully" << '\n';
     return 0;
 }
