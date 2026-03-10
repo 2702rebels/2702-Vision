@@ -14,9 +14,11 @@
 #include <string>
 using asio::ip::udp;
 
-#define SERVER_PORT 27021
-#define OBJECT_DETECTION_PACKET_SIZE 4 + 4 + 8 + 1 + 18 * 4
-#define SIGINT 2
+enum {
+SERVER_PORT = 27021,
+OBJECT_DETECTION_PACKET_SIZE = (4 + 4 + 8 + 1 + 18 * 4),
+SIGINT = 2
+};
 
 // This is the structure types where the serialization and deserialization
 // functions are defined
@@ -26,27 +28,27 @@ using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 std::vector<long> timestamps;
 bool bStop = false;
 
-void signalhandler(int nSig) {
+void Signalhandler(int nSig) {
     info("Got exit signal: {}", nSig);
-    for (int i = 0; i < timestamps.size(); i++) {
-        info("{}", timestamps[i]);
+    for (long & timestamp : timestamps) {
+        info("{}", timestamp);
     }
     bStop = true;
 }
 
 int main() {
     SetupTextLogger();
-    signal(SIGINT, signalhandler);
-    asio::io_context io_context;
-    udp::socket socket(io_context, udp::endpoint(udp::v4(), SERVER_PORT));
+    signal(SIGINT, Signalhandler);
+    asio::io_context ioContext;
+    udp::socket socket(ioContext, udp::endpoint(udp::v4(), SERVER_PORT));
     info("program booted");
 
     while (!bStop) {
-        std::array<char, OBJECT_DETECTION_PACKET_SIZE> receiving_buffer;
+        std::array<char, OBJECT_DETECTION_PACKET_SIZE> receivingBuffer{};
         udp::endpoint remoteEndpoint;
         size_t packetLen =
-            socket.receive_from(asio::buffer(receiving_buffer), remoteEndpoint);
-        auto bytesBuf = receiving_buffer.data();
+            socket.receive_from(asio::buffer(receivingBuffer), remoteEndpoint);
+        auto bytesBuf = receivingBuffer.data();
         std::vector<uint8_t> packetVec(OBJECT_DETECTION_PACKET_SIZE);
         std::memcpy(packetVec.data(), bytesBuf, OBJECT_DETECTION_PACKET_SIZE);
         std::span<uint8_t> packetSpan(packetVec.data(), packetVec.size());
@@ -62,19 +64,19 @@ int main() {
         info("distance1: {}", unpackedPacket.m_coral1.m_distance);
         info("angle1: {}", unpackedPacket.m_coral1.m_angle);
         info("quality1: {}", unpackedPacket.m_coral1.m_quality);
-        info("type1: {}", (uint8_t)unpackedPacket.m_coral1.m_type);
+        info("type1: {}", static_cast<uint8_t>(unpackedPacket.m_coral1.m_type));
         info("distance2: {}", unpackedPacket.m_coral2.m_distance);
         info("angle2: {}", unpackedPacket.m_coral2.m_angle);
         info("quality2: {}", unpackedPacket.m_coral2.m_quality);
-        info("type2: {}", (uint8_t)unpackedPacket.m_coral2.m_type);
+        info("type2: {}", static_cast<uint8_t>(unpackedPacket.m_coral2.m_type));
         info("distance: {}", unpackedPacket.m_coral3.m_distance);
         info("angle3: {}", unpackedPacket.m_coral3.m_angle);
         info("quality3: {}", unpackedPacket.m_coral3.m_quality);
-        info("type3: {}", (uint8_t)unpackedPacket.m_coral3.m_type);
+        info("type3: {}", static_cast<uint8_t>(unpackedPacket.m_coral3.m_type));
         info("distance4: {}", unpackedPacket.m_coral4.m_distance);
         info("angle4: {}", unpackedPacket.m_coral4.m_angle);
         info("quality4: {}", unpackedPacket.m_coral4.m_quality);
-        info("type4: {}", (uint8_t)unpackedPacket.m_coral4.m_type);
+        info("type4: {}", static_cast<uint8_t>(unpackedPacket.m_coral4.m_type));
         timestamps.push_back(unpackedPacket.m_time);
     }
     return 0;

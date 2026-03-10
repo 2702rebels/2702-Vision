@@ -17,12 +17,12 @@ template class ObjectDetectionConfig<TestConfigurationSettings>;
 
 // gcc magic trick, see else branches
 template <typename>
-inline constexpr bool always_false_v = false;
+inline constexpr bool alwaysFalseV = false;
 
 template <typename T>
-ObjectDetectionConfig<T>::ObjectDetectionConfig(std::string configFilePath,
+ObjectDetectionConfig<T>::ObjectDetectionConfig(const std::string& configFilePath,
                                                 T defaultConfigSettings,
-                                                std::string configName)
+                                                const std::string& configName)
     : m_configPath(configFilePath),
       reflection(currentConfigStructure.GetReflection()) {
     const pbuf::Descriptor* messageClass = defaultConfigSettings.GetDescriptor();
@@ -279,7 +279,7 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() {
                                                     ObjectDetectionConfigValue<
                                                         std::vector<std::string>>>) {
                     reflection->ClearField(&currentConfigStructure, field);
-                    for (std::string val : value.GetValue()) {
+                    for (const std::string& val : value.GetValue()) {
                         reflection->AddString(&currentConfigStructure, field, val);
                     }
                 } else if constexpr (std::is_same_v<ValueType,

@@ -150,14 +150,14 @@ TEST(ConfigurationSyncer, SaveToConfigurationFile) {
     newConfigFile.close();
     std::regex hueminrx(".*hueMin\":252.*");
     std::regex cameraoffsetrx(".*cameraOffsetX\":23.2.*");
-    std::regex logdirectoryrx(".*logDirectory\":\"test2\".*");
-    std::regex boolArrRx(".*repeatedBool\":\\[true,true\\].*");
-    std::regex repeatedIntRx(".*repeatedInt\":\\[10,6\\].*");
+    std::regex logdirectoryrx(R"(.*logDirectory":"test2".*)");
+    std::regex boolArrRx(R"(.*repeatedBool":\[true,true\].*)");
+    std::regex repeatedIntRx(R"(.*repeatedInt":\[10,6\].*)");
     // int64s are represented as strings in json due to JS's Number class only
     // having 53 bits of precision
-    std::regex repeatedInt2Rx(".*repeatedInt2\":\\[\"8\",\"9\"\\].*");
-    std::regex repeatedStrRx(".*repeatedStr\":\\[\"test1\",\"test2\"\\].*");
-    std::regex repeatedDoubleRx(".*repeatedDouble\":\\[5.5,1.1\\].*");
+    std::regex repeatedInt2Rx(R"(.*repeatedInt2":\["8","9"\].*)");
+    std::regex repeatedStrRx(R"(.*repeatedStr":\["test1","test2"\].*)");
+    std::regex repeatedDoubleRx(R"(.*repeatedDouble":\[5.5,1.1\].*)");
     ASSERT_TRUE(std::regex_match(newConfigStr, hueminrx));
     ASSERT_TRUE(std::regex_match(newConfigStr, cameraoffsetrx));
     ASSERT_TRUE(std::regex_match(newConfigStr, logdirectoryrx));
@@ -352,7 +352,7 @@ TEST(ConfigurationSyncer, NetworkTableSyncFetch) {
 
 static int setterIntValueReceived = -1;
 static double setterDoubleValueReceived = -1;
-static std::string setterStringValueReceived = "";
+static std::string setterStringValueReceived;
 static std::vector<int32_t> setterIntsReceived;
 static std::vector<int64_t> setterInts2Received;
 static std::vector<double> setterDoublesReceived;

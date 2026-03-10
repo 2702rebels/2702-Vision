@@ -72,8 +72,8 @@ class ObjectDetectionConfig {
      * @warning Assumes that the file at configFilePath is a valid configuration
      * file if it exists
      */
-    ObjectDetectionConfig(std::string configFilePath, T defaultConfigSettings,
-                          std::string configName);
+    ObjectDetectionConfig(const std::string& configFilePath, T defaultConfigSettings,
+                          const std::string& configName);
     /** @brief Load the configuration written in a file at @ref m_configPath into
      * memory and sync it with networktables */
     void LoadConfigFromFile();
@@ -144,6 +144,6 @@ class ObjectDetectionConfig {
      * @warning Assumes that there is actually a field at the specified index
      */
     template <typename O>
-    void AttachSetterFunction(int valueIndex,
+    void AttachSetterFunction(int fieldIndex,
                               std::function<void(const O&)> setterFunction);
 };

@@ -15,9 +15,9 @@ template <ObjLatencyReporting LatencyReporting,
           ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
           ObjMultipleObjectDetection MultipleObjectDetection,
           ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
-int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
-                             MultipleObjectDetection, SendPackets,
-                             UseOutputFiltering>::m_i64TimeOffset;
+int64_t ObjectFrameProcessor<static_cast<>(LatencyReporting), static_cast<>(VideoDebugging), static_cast<>(UseGui),
+                             static_cast<>(MultipleObjectDetection), static_cast<>(SendPackets),
+                             static_cast<>(UseOutputFiltering)>::m_i64TimeOffset;
 
 template <ObjLatencyReporting LatencyReporting,
           ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
@@ -164,7 +164,7 @@ template <ObjLatencyReporting LatencyReporting,
           ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                           MultipleObjectDetection, SendPackets,
-                          UseOutputFiltering>::vStartLogging() {
+                          UseOutputFiltering>::VStartLogging() {
     fs::path logDir(m_config.Get().logdirectory());
     int nWriterThreads = m_config.Get().nlogwriterthreads();
     for (int i = 0;; i++) {
@@ -194,8 +194,8 @@ template <ObjLatencyReporting LatencyReporting,
           ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<
     LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection,
-    SendPackets, UseOutputFiltering>::timesynccallback(const nt::Event& e) {
-    if (e.flags & NT_EVENT_TIMESYNC) {
+    SendPackets, UseOutputFiltering>::Timesynccallback(const nt::Event& e) {
+    if ((e.flags & NT_EVENT_TIMESYNC) != 0u) {
         spdlog::info("tscb::: Have TIMESYNC\n");
         const nt::TimeSyncEventData* ptsed = e.GetTimeSyncEventData();
         m_i64TimeOffset = ptsed->serverTimeOffset;
@@ -231,33 +231,33 @@ template <ObjLatencyReporting LatencyReporting,
           ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 cv::Mat ObjectFrameProcessor<
     LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection,
-    SendPackets, UseOutputFiltering>::filter_hsv_inverted(const cv::Mat& frame,
-                                                          int pv_hue_min,
-                                                          int pv_hue_max,
-                                                          int saturation_min,
-                                                          int saturation_max,
-                                                          int value_min,
-                                                          int value_max) {
+    SendPackets, UseOutputFiltering>::FilterHsvInverted(const cv::Mat& frame,
+                                                          int pvHueMin,
+                                                          int pvHueMax,
+                                                          int saturationMin,
+                                                          int saturationMax,
+                                                          int valueMin,
+                                                          int valueMax) {
     cv::Mat hsv;
     cv::Mat mask;
     cv::cvtColor(frame, hsv,
                  cv::COLOR_BGR2HSV); // heavy hitter, 5.99% of cpu time
 
-    auto invert_and_scale_hue = [](int pv_hue) {
-        int inverted_hue = (pv_hue != 0) ? 360 - pv_hue : 0;
-        return inverted_hue / 2;
+    auto invertAndScaleHue = [](int pvHue) {
+        int invertedHue = (pvHue != 0) ? 360 - pvHue : 0;
+        return invertedHue / 2;
     };
 
-    int cv_hue_min = invert_and_scale_hue(pv_hue_min);
-    int cv_hue_max = invert_and_scale_hue(pv_hue_max);
+    int cvHueMin = invertAndScaleHue(pvHueMin);
+    int cvHueMax = invertAndScaleHue(pvHueMax);
 
-    if (cv_hue_min > cv_hue_max) {
-        std::swap(cv_hue_min, cv_hue_max);
+    if (cvHueMin > cvHueMax) {
+        std::swap(cvHueMin, cvHueMax);
     }
 
-    cv::Scalar lower_bound(cv_hue_min, saturation_min, value_min);
-    cv::Scalar upper_bound(cv_hue_max, saturation_max, value_max);
-    cv::inRange(hsv, lower_bound, upper_bound,
+    cv::Scalar lowerBound(cvHueMin, saturationMin, valueMin);
+    cv::Scalar upperBound(cvHueMax, saturationMax, valueMax);
+    cv::inRange(hsv, lowerBound, upperBound,
                 mask); // heavy hitter, 6.45% of cpu time
     return mask;
 }
@@ -269,7 +269,7 @@ template <ObjLatencyReporting LatencyReporting,
 Rebels::Point2d
 ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                      MultipleObjectDetection, SendPackets, UseOutputFiltering>::
-    calculate_coral_vector(const std::vector<cv::Point>& contour,
+    CalculateCoralVector(const std::vector<cv::Point>& contour,
                            double focal_length, double actual_diameter,
                            const cv::Point2d& camera_center) {
     cv::RotatedRect rect = cv::fitEllipse(contour);
@@ -340,7 +340,7 @@ template <ObjLatencyReporting LatencyReporting,
 std::tuple<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>, cv::Point>
 ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                      MultipleObjectDetection, SendPackets, UseOutputFiltering>::
-    fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask) {
+    FitCylinderContour(const std::vector<cv::Point>& contour, cv::Mat mask) {
     if (contour.size() < 5) {
         return {{}, {}, {}};
     }
@@ -405,7 +405,7 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
             }
         }
     }
-    double detectpercent = (double)validPixels / (double)pixels;
+    double detectpercent = static_cast<double>(validPixels) / static_cast<double>(pixels);
     spdlog::info("detectpercent: {}", detectpercent);
     spdlog::info("npixels: {}", pixels);
     spdlog::info("validpixels: {}", validPixels);
@@ -444,7 +444,7 @@ void ObjectFrameProcessor<
     ProcessFrameWithRet(nCam, pcf);
 }
 
-static std::chrono::system_clock::time_point to_time_point(const timeval& tv) {
+static std::chrono::system_clock::time_point ToTimePoint(const timeval& tv) {
     using namespace std::chrono;
 
     auto sec = seconds{tv.tv_sec};
@@ -472,21 +472,21 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
     if constexpr (UseGui == ObjUseGui::ON) {
         cv::imshow("Raw", frame);
     }
-    cv::Mat mask = filter_hsv_inverted(
+    cv::Mat mask = FilterHsvInverted(
         frame, m_config.Get().huemin(), m_config.Get().huemax(),
         m_config.Get().saturationmin(), m_config.Get().saturationmax(),
         m_config.Get().valuemin(), m_config.Get().valuemax());
     std::conditional_t<VideoDebugging == ObjVideoDebuggingInfo::ON, cv::Mat,
                        EmptyStruct>
-        filtered_frame;
+        filteredFrame;
     // A little ugly, but the idea is that anything trying to use filtered_frame
     // when video debugging is not enabled will fail
     std::conditional_t<VideoDebugging == ObjVideoDebuggingInfo::ON, int,
                        EmptyStruct>
         heightPaintAt;
     if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
-        filtered_frame = cv::Mat::zeros(pcf->nRows(), pcf->nCols(), CV_8UC3);
-        cv::bitwise_and(frame, frame, filtered_frame,
+        filteredFrame = cv::Mat::zeros(pcf->nRows(), pcf->nCols(), CV_8UC3);
+        cv::bitwise_and(frame, frame, filteredFrame,
                         mask); // BIG STALL, 9.3% of cpu time spent here
         heightPaintAt = 60;
     }
@@ -497,26 +497,26 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
         for (int i = 0; i < contours.size(); i++) {
             // Fit a contour and get endpoints
             if (MultipleObjectDetection == ObjMultipleObjectDetection::OFF) {
-                auto largest_contour =
+                auto largestContour =
                     std::max_element(contours.begin(), contours.end(),
                                      [](const std::vector<cv::Point>& a,
                                         const std::vector<cv::Point>& b) {
                                          return cv::contourArea(a) < cv::contourArea(b);
                                      });
-                contours[i] = *largest_contour;
+                contours[i] = *largestContour;
             }
             auto [fitted_contour, endpoints, center] =
-                fit_cylinder_contour(contours[i], mask);
+                FitCylinderContour(contours[i], mask);
             if (!fitted_contour.empty()) {
                 if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
                     std::string uvtext = "(" + std::to_string(center.x) + ", " +
                                          std::to_string(center.y) + ")";
-                    cv::putText(filtered_frame, uvtext, cv::Point(10, heightPaintAt),
+                    cv::putText(filteredFrame, uvtext, cv::Point(10, heightPaintAt),
                                 cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2,
                                 cv::LINE_AA);
                     heightPaintAt += 30;
                 }
-                Rebels::Point2d coralVec = calculate_coral_vector(
+                Rebels::Point2d coralVec = CalculateCoralVector(
                     contours[i], m_focalLen, m_config.Get().fcdiam(), CAMERA_CENTER);
                 double distance = coralVec.length();
                 // u = x, v = y
@@ -531,38 +531,38 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                     }
                     m_nLastCoralDistanceTopic.SetDefault(distance);
                     m_nLastCoralAngleTopic.SetDefault(angle);
-                    corals.push_back(ObjectDetectionInfo(distance, angle, (uint8_t)20,
-                                                         ObjectDetectionType::CORAL));
+                    corals.emplace_back(distance, angle, static_cast<uint8_t>(20),
+                                                         ObjectDetectionType::CORAL);
                     // Draw the fitted contour
                     if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
-                        std::string coral_vec_text = "(" + std::to_string(coralVec.u()) +
+                        std::string coralVecText = "(" + std::to_string(coralVec.u()) +
                                                      ", " + std::to_string(coralVec.v()) +
                                                      ")";
-                        std::string distance_text =
+                        std::string distanceText =
                             "Distance: " + std::to_string(distance / 0.0254) + "in";
-                        std::string angle_text =
+                        std::string angleText =
                             "Angle: " + std::to_string(angle * (180 / std::numbers::pi)) +
                             "deg";
-                        cv::putText(filtered_frame, coral_vec_text,
+                        cv::putText(filteredFrame, coralVecText,
                                     cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX,
                                     1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                         heightPaintAt += 30;
-                        cv::putText(filtered_frame, distance_text,
+                        cv::putText(filteredFrame, distanceText,
                                     cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX,
                                     1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                         heightPaintAt += 30;
-                        cv::putText(filtered_frame, angle_text,
+                        cv::putText(filteredFrame, angleText,
                                     cv::Point(10, heightPaintAt), cv::FONT_HERSHEY_SIMPLEX,
                                     1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
                         heightPaintAt += 30;
                         cv::drawContours(
-                            filtered_frame,
+                            filteredFrame,
                             std::vector<std::vector<cv::Point>>{fitted_contour}, -1,
                             cv::Scalar(0, 255, 0), 2);
                         // Draw the major axis line if endpoints are valid
                         if (endpoints.first.x != 0 || endpoints.first.y != 0 ||
                             endpoints.second.x != 0 || endpoints.second.y != 0) {
-                            cv::line(filtered_frame, endpoints.first, endpoints.second,
+                            cv::line(filteredFrame, endpoints.first, endpoints.second,
                                      cv::Scalar(255, 0, 0), 2);
                         }
                     }
@@ -579,11 +579,11 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                 std::chrono::system_clock::now();
             // Calculate delta between when frame was catured and now.
             std::chrono::system_clock::duration frameProcDelta =
-                tsCur - to_time_point(*pcf->ts());
+                tsCur - ToTimePoint(*pcf->ts());
             std::sort(corals.begin(), corals.end());
             int count = corals.size();
             while (corals.size() < 4) {
-                corals.push_back(ObjectDetectionInfo());
+                corals.emplace_back();
             }
             long time =
                 nt::Now() + m_i64TimeOffset -
@@ -603,20 +603,20 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
             std::chrono::system_clock::now();
         // Calculate delta between when frame was catured and now.
         std::chrono::system_clock::duration frameProcDelta =
-            tsCur - to_time_point(*pcf->ts());
+            tsCur - ToTimePoint(*pcf->ts());
         m_nLastLatencyTopic.SetDefault(
             std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta)
                 .count());
 
         if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
             // Display distance and angle (only if valid values were calculated)
-            std::string latency_text =
+            std::string latencyText =
                 "Latency: " +
                 std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(
                                    frameProcDelta)
                                    .count()) +
                 "us";
-            cv::putText(filtered_frame, latency_text, cv::Point(10, heightPaintAt),
+            cv::putText(filteredFrame, latencyText, cv::Point(10, heightPaintAt),
                         cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2,
                         cv::LINE_AA);
             heightPaintAt += 30;
@@ -628,7 +628,7 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                         "VisionRaw", pcf->nCols(), pcf->nRows());
                     m_bFirstVid = false;
                 }
-                m_outputStream.PutFrame(filtered_frame);
+                m_outputStream.PutFrame(filteredFrame);
                 m_outputStreamRaw.PutFrame(frame);
                 m_mtxCS.unlock();
             }
@@ -638,7 +638,7 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
     if constexpr (UseGui == ObjUseGui::ON) {
         // Display the results
         if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
-            cv::imshow("Filtered Video", filtered_frame);
+            cv::imshow("Filtered Video", filteredFrame);
         }
         cv::imshow("Mask", mask);
 
@@ -648,7 +648,7 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
         }
     }
     if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
-        return filtered_frame;
+        return filteredFrame;
     } else {
         return {};
     }

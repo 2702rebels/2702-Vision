@@ -14,7 +14,9 @@ bool bStop = false;
 
 #include "LogPlayer.h"
 
-#define IMGPROC_GUI 1
+enum {
+IMGPROC_GUI = 1
+};
 
 #include "ObjectFrameProcessor.h"
 

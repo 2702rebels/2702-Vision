@@ -26,11 +26,11 @@ namespace fs = std::filesystem;
 using namespace spdlog;
 using namespace itas109;
 
-static constexpr int MC_BAUDRATE = 115200;
-static constexpr auto MC_WAITTIME = std::chrono::milliseconds(750);
-static constexpr int CAMERA_INDEX = 0;
-static constexpr int PAN_STEP_SIZE = 2;
-static constexpr int TILT_STEP_SIZE = 2;
+static constexpr int mcBaudrate = 115200;
+static constexpr auto mcWaittime = std::chrono::milliseconds(750);
+static constexpr int cameraIndex = 0;
+static constexpr int panStepSize = 2;
+static constexpr int tiltStepSize = 2;
 int imageIndex = 0;
 fs::path outdir;
 cs::CvSource camServer;
@@ -39,24 +39,24 @@ bool bFirstFrame = true;
 
 CSerialPort motorControllerPort;
 
-class imgProc : public FrmProcessor {
-    cv::Mat m_matLastFrame;
-    std::mutex m_mtxLastFrame;
+class ImgProc : public FrmProcessor {
+    cv::Mat mMatLastFrame;
+    std::mutex mMtxLastFrame;
 
   public:
-    virtual ~imgProc() {}
+    ~ImgProc() override = default;
 
-    virtual void ProcessFrame(int nCam, const CameraFrame* pcf) {
+    void ProcessFrame(int  /*nCam*/, const CameraFrame* pcf) override {
         cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
-        if (m_mtxLastFrame.try_lock()) {
-            m_matLastFrame = frame;
-            m_mtxLastFrame.unlock();
+        if (mMtxLastFrame.try_lock()) {
+            mMatLastFrame = frame;
+            mMtxLastFrame.unlock();
         }
     }
 
     void GetLastFrame(cv::Mat& frame) {
-        std::unique_lock<std::mutex> mtx(m_mtxLastFrame);
-        frame = m_matLastFrame.clone();
+        std::unique_lock<std::mutex> mtx(mMtxLastFrame);
+        frame = mMatLastFrame.clone();
     }
 };
 
@@ -64,26 +64,26 @@ void Pan(int deg) {
     std::string panMsg = "p" + std::to_string(deg) + "\n";
     motorControllerPort.writeData(panMsg.data(), panMsg.size());
     motorControllerPort.flushBuffers();
-    std::this_thread::sleep_for(MC_WAITTIME);
+    std::this_thread::sleep_for(mcWaittime);
 }
 
 void Tilt(int deg) {
     std::string tiltMsg = "t" + std::to_string(deg) + "\n";
     motorControllerPort.writeData(tiltMsg.data(), tiltMsg.size());
     motorControllerPort.flushBuffers();
-    std::this_thread::sleep_for(MC_WAITTIME);
+    std::this_thread::sleep_for(mcWaittime);
 }
 
 cv::Size checkerboardPatternSize;
 
-imgProc proc{};
+ImgProc proc{};
 
 cv::Mat CaptureGrayscaleImage() {
     cv::Mat image;
 #if DESKTOP
-    cv::VideoCapture camCapture(CAMERA_INDEX);
+    cv::VideoCapture camCapture(cameraIndex);
     if (!camCapture.isOpened()) {
-        std::cerr << "Failed to open camera" << std::endl;
+        std::cerr << "Failed to open camera" << '\n';
         throw std::runtime_error("Failed to open camera");
     }
     camCapture >> image;
@@ -121,7 +121,7 @@ cv::Size GetCaptureSize() {
     return cv::Size(img.cols, img.rows);
 }
 
-bool TakeCalibrationImage(std::string dist) {
+bool TakeCalibrationImage(const std::string& dist) {
     bool cornersFound = false;
     cv::Mat grayscale = CaptureGrayscaleImage();
     cv::Mat debugImage = grayscale.clone();
@@ -130,7 +130,7 @@ bool TakeCalibrationImage(std::string dist) {
         grayscale, checkerboardPatternSize, corners,
         cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
     if (!cornersFound) {
-        std::cout << "No checkerboard found!" << std::endl;
+        std::cout << "No checkerboard found!" << '\n';
     } else {
         drawChessboardCorners(debugImage, checkerboardPatternSize, corners,
                               cornersFound);
@@ -166,7 +166,7 @@ int GetChessboardHeightDeg() {
     cv::Rect chessRect(minPt, maxPt);
     int i = 90;
     while (true) {
-        i += TILT_STEP_SIZE;
+        i += tiltStepSize;
         Tilt(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
         bool found =
@@ -216,7 +216,7 @@ int GetChessboardWidthDeg() {
     cv::Rect chessRect(minPt, maxPt);
     int i = 90;
     while (true) {
-        i += PAN_STEP_SIZE;
+        i += panStepSize;
         Pan(i);
         cv::Mat grayscale = CaptureGrayscaleImage();
         bool found =
@@ -247,14 +247,14 @@ std::pair<int, int> GetTiltFOV() {
     Pan(90);
     Tilt(90);
     int minTilt = -1;
-    for (int i = 90; i > 0; i -= TILT_STEP_SIZE) {
+    for (int i = 90; i > 0; i -= tiltStepSize) {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                    cv::CALIB_CB_ADAPTIVE_THRESH +
                                        cv::CALIB_CB_NORMALIZE_IMAGE)) {
-            minTilt = i + TILT_STEP_SIZE;
+            minTilt = i + tiltStepSize;
             break;
         }
     }
@@ -263,14 +263,14 @@ std::pair<int, int> GetTiltFOV() {
     }
     Tilt(90);
     int maxTilt = 181;
-    for (int i = 90; i < 180; i += TILT_STEP_SIZE) {
+    for (int i = 90; i < 180; i += tiltStepSize) {
         Tilt(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                    cv::CALIB_CB_ADAPTIVE_THRESH +
                                        cv::CALIB_CB_NORMALIZE_IMAGE)) {
-            maxTilt = i - TILT_STEP_SIZE;
+            maxTilt = i - tiltStepSize;
             break;
         }
     }
@@ -289,14 +289,14 @@ std::pair<int, int> GetPanFOV() {
     Pan(90);
     Tilt(90);
     int minPan = -1;
-    for (int i = 90; i > 0; i -= PAN_STEP_SIZE) {
+    for (int i = 90; i > 0; i -= panStepSize) {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                    cv::CALIB_CB_ADAPTIVE_THRESH +
                                        cv::CALIB_CB_NORMALIZE_IMAGE)) {
-            minPan = i + PAN_STEP_SIZE;
+            minPan = i + panStepSize;
             break;
         }
     }
@@ -305,14 +305,14 @@ std::pair<int, int> GetPanFOV() {
     }
     Pan(90);
     int maxPan = 181;
-    for (int i = 90; i < 180; i += PAN_STEP_SIZE) {
+    for (int i = 90; i < 180; i += panStepSize) {
         Pan(i);
         cv::Mat img = CaptureGrayscaleImage();
         std::vector<cv::Point2f> corners;
         if (!findChessboardCorners(img, checkerboardPatternSize, corners,
                                    cv::CALIB_CB_ADAPTIVE_THRESH +
                                        cv::CALIB_CB_NORMALIZE_IMAGE)) {
-            maxPan = i - PAN_STEP_SIZE;
+            maxPan = i - panStepSize;
             break;
         }
     }
@@ -327,7 +327,7 @@ std::pair<int, int> GetPanFOV() {
     return {minPan, maxPan};
 }
 
-int main(int argc, char** argv) {
+int main(int  /*argc*/, char**  /*argv*/) {
     SetupTextLogger();
     std::string cameraPath;
     std::cout << "Enter camera path(eg /dev/video0): ";
@@ -340,8 +340,8 @@ int main(int argc, char** argv) {
     std::cin >> portname;
     std::cout << "Enter output directory of png files: ";
     std::cin >> outdir;
-    int checkerBoardWidth;
-    int checkerBoardHeight;
+    int checkerBoardWidth = 0;
+    int checkerBoardHeight = 0;
     std::cout << "Enter width of checkerboard in # of squares: ";
     std::cin >> checkerBoardWidth;
     std::cout << "Enter height of checkerboard in # of squares: ";
@@ -351,12 +351,12 @@ int main(int argc, char** argv) {
     if (!fs::exists(outdir) || !fs::is_directory(outdir)) {
         fs::create_directories(outdir);
     }
-    std::cout << "Using serial port " << portname << std::endl;
-    motorControllerPort.init(portname.data(), MC_BAUDRATE, ParityNone, DataBits8,
+    std::cout << "Using serial port " << portname << '\n';
+    motorControllerPort.init(portname.data(), mcBaudrate, ParityNone, DataBits8,
                              StopOne, FlowNone);
     if (!motorControllerPort.open()) {
         std::cerr << "Failed to open serial connection to motor controller"
-                  << std::endl;
+                  << '\n';
         return 1;
     }
     std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -370,7 +370,7 @@ int main(int argc, char** argv) {
             break;
         }
         fs::create_directories(outdir / dist);
-        std::cout << "Waiting for chessboard..." << std::endl;
+        std::cout << "Waiting for chessboard..." << '\n';
         bool foundChessboard = false;
         while (!foundChessboard) {
             cv::Mat img = CaptureGrayscaleImage();
@@ -381,7 +381,7 @@ int main(int argc, char** argv) {
         }
         std::cout << "Found chessboard, starting chessboard size detection & FOV "
                      "calibration"
-                  << std::endl;
+                  << '\n';
         info("Detecting chessboard width...");
         int checkerboardWidthDeg = GetChessboardWidthDeg();
         info("Detecting chessboard height...");
@@ -405,13 +405,13 @@ int main(int argc, char** argv) {
         std::vector<cv::Point2i> boardPositions;
         int curLeftEdge = panFov.first;
         int curTopEdge = tiltFov.first;
-        if (static_cast<int>(widthUnusedSpace / nChessboardsWide) <
+        if ((widthUnusedSpace / nChessboardsWide) <
             round(widthUnusedSpace / nChessboardsWide)) {
             curLeftEdge += floor(widthUnusedSpace / nChessboardsWide);
         } else {
             curLeftEdge += ceil(widthUnusedSpace / nChessboardsWide);
         }
-        if (static_cast<int>(heightUnusedSpace / nChessboardsTall) <
+        if ((heightUnusedSpace / nChessboardsTall) <
             round(heightUnusedSpace / nChessboardsTall)) {
             curTopEdge += floor(heightUnusedSpace / nChessboardsTall);
         } else {

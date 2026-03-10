@@ -22,13 +22,13 @@ void SetupTextLogger() {
     // Create a global thread pool (must be done once)
     spdlog::init_thread_pool(16384, 2);
 
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+    auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
         "Logs/" + GetCurTimeStr() + "_stdout.log", true);
 
-    console_sink->set_pattern("[%Y-%m-%d %T] [%l] %v");
+    consoleSink->set_pattern("[%Y-%m-%d %T] [%l] %v");
 
-    std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
+    std::vector<spdlog::sink_ptr> sinks{consoleSink, fileSink};
 
     auto logger = std::make_shared<spdlog::async_logger>(
         "ObjDetection", sinks.begin(), sinks.end(),

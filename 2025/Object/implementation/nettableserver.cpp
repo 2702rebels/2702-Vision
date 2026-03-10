@@ -3,12 +3,13 @@
  * - wpilib's ntcore
  */
 
-// TODO, some of this should be converted to a class so it can be better
+// TODO(ohm): , some of this should be converted to a class so it can be better
 // documented
 
 #include "LoggingUtils.h"
 
 #include <chrono>
+#include <csignal>
 #include <future>
 #include <iostream>
 #include <map>
@@ -18,7 +19,7 @@
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/Topic.h>
-#include <signal.h>
+#include <print>
 #include <thread>
 
 using namespace std::literals;
@@ -59,13 +60,13 @@ nt::GenericPublisher genPublisher;
  * \param nSig - The signal code that was interrupted, should always be 2 for
  * Ctrl+C
  */
-void sighandler(int nSig) {
-    printf("Received Signal: %d\n", nSig);
+void Sighandler(int nSig) {
+    std::println("Received Signal: {}", nSig);
     std::cout << "Can't use Ctrl+C to exit, use stop command\n";
 }
 
 /*! \brief Prints the help text to console */
-void showHelp() {
+void ShowHelp() {
     std::cout
         << "Valid commands are: \n"
         << "print - logs all current topic values\n"
@@ -95,23 +96,23 @@ void showHelp() {
 
 /*! \brief Shuts down the server. Note that this is not immediate, and the
  * program will walk through one more tick before exiting.*/
-void shutdownServer() {
+void ShutdownServer() {
     bStop = true;
 }
 
 /*! \brief Prints the network table values to console. This does not auto-update
  * as more topics are added, so this should be updated when a new topic is added
  */
-void printNetworkTableValues() {
-    printf("Last received coral distance: %.6f\n",
-           coralDistanceTopic.GetAtomic(0.0f).value);
-    printf("Last received coral angle: %.6f\n",
-           coralAngleTopic.GetAtomic(0.0f).value);
+void PrintNetworkTableValues() {
+    std::println("Last received coral distance: {:.6f}",
+           coralDistanceTopic.GetAtomic(0.0F).value);
+    std::println("Last received coral angle: {:.6f}",
+           coralAngleTopic.GetAtomic(0.0F).value);
 }
 
 /*! \brief Pushes a new hue min value to the associated networktable topic.
  * Value is provided through cin input */
-void pushHueMin() {
+void PushHueMin() {
     std::string value;
     std::cout << "Please enter a value: ";
     std::cin >> value;
@@ -120,7 +121,7 @@ void pushHueMin() {
 
 /*! \brief Pushes a new hue max value to the associated networktable topic.
  * Value is provided through cin input */
-void pushHueMax() {
+void PushHueMax() {
     std::string value;
     std::cout << "Please enter a value: ";
     std::cin >> value;
@@ -129,7 +130,7 @@ void pushHueMax() {
 
 /*! \brief Pushes a new saturation min value to the associated networktable
  * topic. Value is provided through cin input */
-void pushSaturationMin() {
+void PushSaturationMin() {
     std::string value;
     std::cout << "Please enter a value: ";
     std::cin >> value;
@@ -138,7 +139,7 @@ void pushSaturationMin() {
 
 /*! \brief Pushes a new saturation max value to the associated networktable
  * topic. Value is provided through cin input */
-void pushSaturationMax() {
+void PushSaturationMax() {
     std::string value;
     std::cout << "Please enter a value: ";
     std::cin >> value;
@@ -147,7 +148,7 @@ void pushSaturationMax() {
 
 /*! \brief Pushes a new value min value to the associated networktable topic.
  * Value is provided through cin input */
-void pushValueMin() {
+void PushValueMin() {
     std::string value;
     std::cout << "Please enter a value: ";
     std::cin >> value;
@@ -156,7 +157,7 @@ void pushValueMin() {
 
 /*! \brief Pushes a new value max value to the associated networktable topic.
  * Value is provided through cin input */
-void pushValueMax() {
+void PushValueMax() {
     std::string value;
     std::cout << "Please enter a value: ";
     std::cin >> value;
@@ -164,7 +165,7 @@ void pushValueMax() {
 }
 
 /*! \brief Push a min pixel width. */
-void pushMinWidth() {
+void PushMinWidth() {
     std::string value;
     std::cout << "Please enter a value in pixels: ";
     std::cin >> value;
@@ -172,7 +173,7 @@ void pushMinWidth() {
 }
 
 /*! \brief Push a max pixel width. */
-void pushMaxWidth() {
+void PushMaxWidth() {
     std::string value;
     std::cout << "Please enter a value in pixels: ";
     std::cin >> value;
@@ -180,7 +181,7 @@ void pushMaxWidth() {
 }
 
 /*! \brief Push a min pixel height. */
-void pushMinHeight() {
+void PushMinHeight() {
     std::string value;
     std::cout << "Please enter a value in pixels: ";
     std::cin >> value;
@@ -188,7 +189,7 @@ void pushMinHeight() {
 }
 
 /*! \brief Push a max pixel height. */
-void pushMaxHeight() {
+void PushMaxHeight() {
     std::string value;
     std::cout << "Please enter a value in pixels: ";
     std::cin >> value;
@@ -196,7 +197,7 @@ void pushMaxHeight() {
 }
 
 /*! \brief Push a min pixel area. */
-void pushMinArea() {
+void PushMinArea() {
     std::string value;
     std::cout << "Please enter a value in pixels: ";
     std::cin >> value;
@@ -204,7 +205,7 @@ void pushMinArea() {
 }
 
 /*! \brief Push a max pixel area. */
-void pushMaxArea() {
+void PushMaxArea() {
     std::string value;
     std::cout << "Please enter a value in pixels: ";
     std::cin >> value;
@@ -212,7 +213,7 @@ void pushMaxArea() {
 }
 
 /*! \brief Push a min percent fill. */
-void pushMinPercentFill() {
+void PushMinPercentFill() {
     std::string value;
     std::cout << "Please enter a value as a float(eg 0.8): ";
     std::cin >> value;
@@ -220,7 +221,7 @@ void pushMinPercentFill() {
 }
 
 /*! \brief Push a cam offset X. */
-void pushOffsetX() {
+void PushOffsetX() {
     std::string value;
     std::cout << "Please enter a value in meters: ";
     std::cin >> value;
@@ -228,7 +229,7 @@ void pushOffsetX() {
 }
 
 /*! \brief Push a cam offset Y. */
-void pushOffsetY() {
+void PushOffsetY() {
     std::string value;
     std::cout << "Please enter a value in meters: ";
     std::cin >> value;
@@ -236,7 +237,7 @@ void pushOffsetY() {
 }
 
 /*! \brief Push a cam height. */
-void pushCamHeight() {
+void PushCamHeight() {
     std::string value;
     std::cout << "Please enter a value in meters: ";
     std::cin >> value;
@@ -244,7 +245,7 @@ void pushCamHeight() {
 }
 
 /*! \brief Push a cam angle. */
-void pushCamAngle() {
+void PushCamAngle() {
     std::string value;
     std::cout << "Please enter a value in radians: ";
     std::cin >> value;
@@ -252,45 +253,45 @@ void pushCamAngle() {
 }
 
 /*! \brief Push a new filter window. */
-void pushFilterWindow() {
+void PushFilterWindow() {
     std::string value;
     std::cout << "Please enter a value: ";
     std::cin >> value;
     filterWindowTopic.SetDefault(stoi(value));
 }
 
-void pushgenstring() {
+void Pushgenstring() {
     std::string val;
     std::cout << "Enter a value: ";
     std::cin >> val;
     genPublisher.SetString(val);
 }
 
-int main(int argc, char** argv) {
-    signal(SIGINT, sighandler); // Handles Ctrl+C interrupts
+int main(int  /*argc*/, char**  /*argv*/) {
+    signal(SIGINT, Sighandler); // Handles Ctrl+C interrupts
     // Assign commands
-    commandMap["help"] = showHelp;
-    commandMap["stop"] = shutdownServer;
-    commandMap["print"] = printNetworkTableValues;
-    commandMap["pushhuemin"] = pushHueMin;
-    commandMap["pushhuemax"] = pushHueMax;
-    commandMap["pushsaturationmin"] = pushSaturationMin;
-    commandMap["pushsaturationmax"] = pushSaturationMax;
-    commandMap["pushvaluemin"] = pushValueMin;
-    commandMap["pushvaluemax"] = pushValueMax;
-    commandMap["pushminwidth"] = pushMinWidth;
-    commandMap["pushmaxwidth"] = pushMaxWidth;
-    commandMap["pushminheight"] = pushMinHeight;
-    commandMap["pushmaxheight"] = pushMaxHeight;
-    commandMap["pushminarea"] = pushMinArea;
-    commandMap["pushmaxarea"] = pushMaxArea;
-    commandMap["pushminpercentfill"] = pushMinPercentFill;
-    commandMap["pushcamoffsetx"] = pushOffsetX;
-    commandMap["pushcamoffsety"] = pushOffsetY;
-    commandMap["pushcamheight"] = pushCamHeight;
-    commandMap["pushcamangle"] = pushCamAngle;
-    commandMap["pushfilterwindow"] = pushFilterWindow;
-    commandMap["pushstrgen"] = pushgenstring;
+    commandMap["help"] = ShowHelp;
+    commandMap["stop"] = ShutdownServer;
+    commandMap["print"] = PrintNetworkTableValues;
+    commandMap["pushhuemin"] = PushHueMin;
+    commandMap["pushhuemax"] = PushHueMax;
+    commandMap["pushsaturationmin"] = PushSaturationMin;
+    commandMap["pushsaturationmax"] = PushSaturationMax;
+    commandMap["pushvaluemin"] = PushValueMin;
+    commandMap["pushvaluemax"] = PushValueMax;
+    commandMap["pushminwidth"] = PushMinWidth;
+    commandMap["pushmaxwidth"] = PushMaxWidth;
+    commandMap["pushminheight"] = PushMinHeight;
+    commandMap["pushmaxheight"] = PushMaxHeight;
+    commandMap["pushminarea"] = PushMinArea;
+    commandMap["pushmaxarea"] = PushMaxArea;
+    commandMap["pushminpercentfill"] = PushMinPercentFill;
+    commandMap["pushcamoffsetx"] = PushOffsetX;
+    commandMap["pushcamoffsety"] = PushOffsetY;
+    commandMap["pushcamheight"] = PushCamHeight;
+    commandMap["pushcamangle"] = PushCamAngle;
+    commandMap["pushfilterwindow"] = PushFilterWindow;
+    commandMap["pushstrgen"] = Pushgenstring;
     nt::NetworkTableInstance netTableManager =
         nt::NetworkTableInstance::GetDefault();
     netTableManager.StartServer(); // Server will accept requests using either the
@@ -306,9 +307,9 @@ int main(int argc, char** argv) {
     valueMinTopic = objectDetectionTable->GetIntegerTopic("ValueMin").Publish();
     valueMaxTopic = objectDetectionTable->GetIntegerTopic("ValueMax").Publish();
     coralDistanceTopic =
-        objectDetectionTable->GetDoubleTopic("CoralDistance").Subscribe(0.0f);
+        objectDetectionTable->GetDoubleTopic("CoralDistance").Subscribe(0.0F);
     coralAngleTopic =
-        objectDetectionTable->GetDoubleTopic("CoralAngle").Subscribe(0.0f);
+        objectDetectionTable->GetDoubleTopic("CoralAngle").Subscribe(0.0F);
     minWidthTopic =
         objectDetectionTable->GetIntegerTopic("MinPixelWidth").Publish();
     maxHeightTopic =
@@ -333,7 +334,7 @@ int main(int argc, char** argv) {
         objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Publish();
     genPublisher =
         objectDetectionTable->GetTopic("testString").GenericPublish("string");
-    showHelp();
+    ShowHelp();
     // Start an async thread to handle user input, this allows the server to keep
     // responding to requests while waiting for input
     auto commandInputThread = std::async(std::launch::async, [] {
@@ -353,7 +354,7 @@ int main(int argc, char** argv) {
         // If the input thread has received its input, handle it
         if (commandInputThread.wait_for(0.5s) == std::future_status::ready) {
             std::string commandInput = commandInputThread.get();
-            if (commandMap[commandInput] != NULL) {
+            if (commandMap[commandInput] != nullptr) {
                 commandMap[commandInput]();
             } else {
                 std::cout << "Command not recognized\n";

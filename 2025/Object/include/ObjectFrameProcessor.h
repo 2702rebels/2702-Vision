@@ -114,7 +114,7 @@ class ObjectFrameProcessor : public FrmProcessor {
 
     nt::NetworkTableListener ntl =
         nt::NetworkTableListener::CreateTimeSyncListener(
-            nt::NetworkTableInstance::GetDefault(), true, timesynccallback);
+            nt::NetworkTableInstance::GetDefault(), true, Timesynccallback);
 
     /** @brief Thread lock for the camera server output. */
     std::mutex m_mtxCS;

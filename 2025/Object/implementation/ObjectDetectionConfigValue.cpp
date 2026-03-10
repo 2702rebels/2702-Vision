@@ -17,7 +17,7 @@ template class ObjectDetectionConfigValue<std::vector<int64_t>>;
 
 // gcc magic trick, see else branches
 template <typename>
-inline constexpr bool always_false_v = false;
+inline constexpr bool alwaysFalseV = false;
 
 template <typename T>
 ObjectDetectionConfigValue<T>::ObjectDetectionConfigValue(

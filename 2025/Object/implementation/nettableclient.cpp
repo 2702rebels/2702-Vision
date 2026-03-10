@@ -7,6 +7,7 @@
 #include "LoggingUtils.h"
 
 #include <chrono>
+#include <csignal>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -15,7 +16,6 @@
 #include <networktables/IntegerTopic.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
-#include <signal.h>
 #include <thread>
 
 using namespace std::literals;
@@ -46,13 +46,13 @@ nt::DoubleSubscriber camAngleTopic;
 nt::IntegerSubscriber filterWindowTopic;
 
 /*! \brief Handle Ctrl+C interrupts */
-void sighandler(int nSig) {
+void Sighandler(int nSig) {
     info("Received Signal: {}", nSig);
     info("Can't use Ctrl+C to exit, use stop command");
 }
 
 /*! \brief Print the list of commands to the console */
-void showHelp() {
+void ShowHelp() {
     info("Valid commands are: \nprint - logs all current topic values\npushdist "
          "- push a new distance value\npushangle - push a new angle value\nstop "
          "- shuts the server down\nhelp - displays this text");
@@ -60,7 +60,7 @@ void showHelp() {
 
 /*! \brief Shuts down the client. Note that this is not an immediate effect,
  * program will run for another tick before exiting. */
-void shutdownClient() {
+void ShutdownClient() {
     bStop = true;
 }
 
@@ -68,30 +68,30 @@ void shutdownClient() {
 This function does not automatically update as new topics are added and will
 need to be modified if new topics are added
 */
-void printNetworkTableValues() {
-    info("huemin: {}", hueMinTopic.GetAtomic(0.0f).value);
-    info("huemax: {}", hueMaxTopic.GetAtomic(0.0f).value);
-    info("satmin: {}", saturationMinTopic.GetAtomic(0.0f).value);
-    info("satmax: {}", saturationMaxTopic.GetAtomic(0.0f).value);
-    info("valmin: {}", valueMinTopic.GetAtomic(0.0f).value);
-    info("valmax: {}", valueMaxTopic.GetAtomic(0.0f).value);
+void PrintNetworkTableValues() {
+    info("huemin: {}", hueMinTopic.GetAtomic(0.0F).value);
+    info("huemax: {}", hueMaxTopic.GetAtomic(0.0F).value);
+    info("satmin: {}", saturationMinTopic.GetAtomic(0.0F).value);
+    info("satmax: {}", saturationMaxTopic.GetAtomic(0.0F).value);
+    info("valmin: {}", valueMinTopic.GetAtomic(0.0F).value);
+    info("valmax: {}", valueMaxTopic.GetAtomic(0.0F).value);
     info("minwidth: {}", minWidthTopic.GetAtomic(0).value);
     info("maxwidth: {}", maxWidthTopic.GetAtomic(0).value);
     info("minheight: {}", minHeightTopic.GetAtomic(0).value);
     info("maxheight: {}", maxHeightTopic.GetAtomic(0).value);
     info("minarea: {}", minAreaTopic.GetAtomic(0).value);
     info("maxarea: {}", maxAreaTopic.GetAtomic(0).value);
-    info("minpercentfill: {}", minPercentFillTopic.GetAtomic(0.0f).value);
-    info("offsetx: {}", camOffsetXTopic.GetAtomic(0.0f).value);
-    info("offsety: {}", camOffsetYTopic.GetAtomic(0.0f).value);
-    info("camheight: {}", camHeightTopic.GetAtomic(0.0f).value);
-    info("camangle: {}", camAngleTopic.GetAtomic(0.0f).value);
+    info("minpercentfill: {}", minPercentFillTopic.GetAtomic(0.0F).value);
+    info("offsetx: {}", camOffsetXTopic.GetAtomic(0.0F).value);
+    info("offsety: {}", camOffsetYTopic.GetAtomic(0.0F).value);
+    info("camheight: {}", camHeightTopic.GetAtomic(0.0F).value);
+    info("camangle: {}", camAngleTopic.GetAtomic(0.0F).value);
 }
 
 /*! \brief Pushes a new coral distance value. User input is obtained through
  * cin, which pauses execution so the client may disconnect from the server for
  * a short time*/
-void pushDistanceValue() {
+void PushDistanceValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
@@ -101,22 +101,22 @@ void pushDistanceValue() {
 /*! \brief Pushes a new coral angle value. User input is obtained through cin,
  * which pauses execution so the client may disconnect from the server for a
  * short time*/
-void pushAngleValue() {
+void PushAngleValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
     coralAngleTopic.SetDefault(stof(value));
 }
 
-int main(int argc, char** argv) {
+int main(int  /*argc*/, char**  /*argv*/) {
     SetupTextLogger();
-    signal(SIGINT, sighandler); // Handles Ctrl+C interrupts
+    signal(SIGINT, Sighandler); // Handles Ctrl+C interrupts
     // Initialize the commands
-    commandMap["help"] = showHelp;
-    commandMap["stop"] = shutdownClient;
-    commandMap["print"] = printNetworkTableValues;
-    commandMap["pushdist"] = pushDistanceValue;
-    commandMap["pushangle"] = pushAngleValue;
+    commandMap["help"] = ShowHelp;
+    commandMap["stop"] = ShutdownClient;
+    commandMap["print"] = PrintNetworkTableValues;
+    commandMap["pushdist"] = PushDistanceValue;
+    commandMap["pushangle"] = PushAngleValue;
     nt::NetworkTableInstance netTableManager =
         nt::NetworkTableInstance::GetDefault();
     netTableManager.StartClient4("testnettableclient");
@@ -150,18 +150,18 @@ int main(int argc, char** argv) {
     maxAreaTopic =
         objectDetectionTable->GetIntegerTopic("MaxPixelArea").Subscribe(0);
     minPercentFillTopic =
-        objectDetectionTable->GetDoubleTopic("MinPercentFill").Subscribe(0.0f);
+        objectDetectionTable->GetDoubleTopic("MinPercentFill").Subscribe(0.0F);
     camOffsetXTopic =
-        objectDetectionTable->GetDoubleTopic("CamOffsetX").Subscribe(0.0f);
+        objectDetectionTable->GetDoubleTopic("CamOffsetX").Subscribe(0.0F);
     camOffsetYTopic =
-        objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(0.0f);
+        objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(0.0F);
     camAngleTopic =
-        objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(0.0f);
+        objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(0.0F);
     camHeightTopic =
-        objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(0.0f);
+        objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(0.0F);
     filterWindowTopic =
         objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Subscribe(0);
-    showHelp(); // Print the available commands to the console
+    ShowHelp(); // Print the available commands to the console
     auto commandInputThread = std::async(std::launch::async, [] {
         std::string input;
         std::cin >> input;
@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
         // If the async thread has gotten the input, process it
         if (commandInputThread.wait_for(0.5s) == std::future_status::ready) {
             std::string commandInput = commandInputThread.get();
-            if (commandMap[commandInput] != NULL) {
+            if (commandMap[commandInput] != nullptr) {
                 commandMap[commandInput]();
             } else {
                 info("Command not recognized");

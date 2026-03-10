@@ -37,7 +37,7 @@ class ObjectDetectionConfigValue {
      * @warning Assumes the field exists within the message
      * @returns The config value from the message
      */
-    T GetConfigValueFromMessage(const pbuf::Message& topic);
+    T GetConfigValueFromMessage(const pbuf::Message& settingStruct);
     /** @brief Update this configuration value from a protobuf config structure
      * @warning Assumes the field exists within the message
      */

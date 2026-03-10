@@ -100,9 +100,9 @@ int main(int argc, char** argv) {
                 procmode = pmode::pmgrey;
             } else if (strcmp(argv[i], "-grey2") == 0) {
                 procmode = pmode::pmgrey2;
-            } else if (strcmp(argv[i], "-bayer") == 0)
+            } else if (strcmp(argv[i], "-bayer") == 0) {
                 procmode = pmode::pmbayer;
-            else if (strcmp(argv[i], "-red") == 0) {
+            } else if (strcmp(argv[i], "-red") == 0) {
                 procmode = pmode::pmred;
             } else if (strcmp(argv[i], "-green") == 0) {
                 procmode = pmode::pmgreen;

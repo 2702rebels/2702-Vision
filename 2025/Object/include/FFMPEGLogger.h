@@ -14,7 +14,7 @@ extern "C" {
  */
 class FFMPEGLogger {
   private:
-    AVFormatContext* m_logCtx;
+    AVFormatContext* m_logCtx{};
     const AVCodec* m_logCodec;
     AVStream* m_logStream;
     AVCodecContext* m_logCodecCtx;
