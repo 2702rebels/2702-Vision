@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 template <ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,//NOLINT
           ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering //NOLINT
           UseOutputFiltering> //NOLINT
-int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets,
+int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, //NOLINT
                              UseOutputFiltering>::m_i64TimeOffset; //NOLINT
 
 template <ObjLatencyReporting LatencyReporting,

@@ -16,7 +16,7 @@ bool bStop = false;
 
 #include "ObjectFrameProcessor.h"
 
-void OnInterrupt(int signal)
+void OnInterrupt(int /*signal*/)
 {
     bStop = true;
 }

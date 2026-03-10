@@ -75,7 +75,7 @@ void FFMPEGLogger::LogFrame(const cv::Mat& originalFrame) {
     av_frame_get_buffer(curFrame, 32);
     uint8_t* srcSlices[1] = {frame.data}; //NOLINT
     int srcStride[1] = {static_cast<int>(frame.step)}; //NOLINT
-    sws_scale(swsCtx, srcSlices, srcStride, 0, frame.rows, curFrame->data,
+    sws_scale(swsCtx, srcSlices, srcStride, 0, frame.rows, curFrame->data, //NOLINT
               curFrame->linesize); //NOLINT
     curFrame->pts = m_frameIndex++;
     AVPacket packet;

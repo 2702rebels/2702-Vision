@@ -25,7 +25,7 @@ using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 static std::vector<std::int64_t> timestamps;
 static bool bStop = false;
 
-static void Signalhandler(int nSig) {
+static void SignalHandler(int nSig) {
     info("Got exit signal: {}", nSig);
     for (std::int64_t& timestamp : timestamps) {
         info("{}", timestamp);
@@ -35,7 +35,7 @@ static void Signalhandler(int nSig) {
 
 int main() { //NOLINT
     SetupTextLogger();
-    (void)signal(2, Signalhandler);
+    (void)signal(2, SignalHandler);
     asio::io_context ioContext;
     udp::socket socket(ioContext, udp::endpoint(udp::v4(), serverPort));
     info("program booted");
