@@ -78,8 +78,7 @@ void FFMPEGLogger::LogFrame(const cv::Mat& originalFrame) {
     sws_scale(swsCtx, srcSlices, srcStride, 0, frame.rows, curFrame->data, //NOLINT
               curFrame->linesize); //NOLINT
     curFrame->pts = m_frameIndex++;
-    AVPacket packet;
-    av_init_packet(&packet); //NOLINT
+    AVPacket packet{};
     avcodec_send_frame(m_logCodecCtx, curFrame);
     while (avcodec_receive_packet(m_logCodecCtx, &packet) == 0) {
         av_interleaved_write_frame(m_logCtx, &packet);
