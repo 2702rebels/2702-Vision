@@ -38,7 +38,7 @@ Checks: >
   -readability-avoid-return-with-void-value,
   -portability-avoid-pragma-once,
   -bugprone-throwing-static-initialization,
-  -bugprone-branch-clone
+  -bugprone-branch-clone,
   -bugprone-implicit-widening-of-multiplication-result
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
