@@ -104,9 +104,9 @@ void ShutdownServer() {
  */
 void PrintNetworkTableValues() {
     fmt::println("Last received coral distance: {:.6f}",
-           coralDistanceTopic.GetAtomic(0.0F).value);
+                 coralDistanceTopic.GetAtomic(0.0F).value);
     fmt::println("Last received coral angle: {:.6f}",
-           coralAngleTopic.GetAtomic(0.0F).value);
+                 coralAngleTopic.GetAtomic(0.0F).value);
 }
 
 /*! \brief Pushes a new hue min value to the associated networktable topic.
@@ -266,7 +266,7 @@ void Pushgenstring() {
     genPublisher.SetString(val);
 }
 
-int main(int  /*argc*/, char**  /*argv*/) {
+int main(int /*argc*/, char** /*argv*/) {
     (void)signal(2, Sighandler); // Handles Ctrl+C interrupts
     // Assign commands
     commandMap["help"] = ShowHelp;

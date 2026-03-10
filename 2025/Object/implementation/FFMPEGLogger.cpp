@@ -1,7 +1,7 @@
 #include <FFMPEGLogger.h>
+#include <LoggingUtils.h>
 #include <opencv2/imgproc.hpp>
 #include <spdlog/spdlog.h>
-#include <LoggingUtils.h>
 
 FFMPEGLogger::FFMPEGLogger(const std::string& filepath, int width, int height,
                            int fps, int bitrate) {
@@ -42,7 +42,7 @@ FFMPEGLogger::FFMPEGLogger(const std::string& filepath, int width, int height,
 
     if ((m_logCtx->oformat->flags & AVFMT_GLOBALHEADER) != 0) {
         m_logCodecCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-}
+    }
 
     avcodec_open2(m_logCodecCtx, m_logCodec, nullptr);
     avcodec_parameters_from_context(m_logStream->codecpar, m_logCodecCtx);
@@ -56,8 +56,7 @@ FFMPEGLogger::FFMPEGLogger(const std::string& filepath, int width, int height,
     }
 
     // Write header
-    if (avformat_write_header(m_logCtx, nullptr) < 0)
-    {
+    if (avformat_write_header(m_logCtx, nullptr) < 0) {
         throw std::runtime_error("Could not write header");
     }
     swsCtx = sws_getContext(width, height, AV_PIX_FMT_RGB24, width, height,
@@ -73,10 +72,10 @@ void FFMPEGLogger::LogFrame(const cv::Mat& originalFrame) {
     curFrame->width = frame.cols;
     curFrame->height = frame.rows;
     av_frame_get_buffer(curFrame, 32);
-    uint8_t* srcSlices[1] = {frame.data}; //NOLINT
-    int srcStride[1] = {static_cast<int>(frame.step)}; //NOLINT
-    sws_scale(swsCtx, srcSlices, srcStride, 0, frame.rows, curFrame->data, //NOLINT
-              curFrame->linesize); //NOLINT
+    uint8_t* srcSlices[1] = {frame.data};                                  // NOLINT
+    int srcStride[1] = {static_cast<int>(frame.step)};                     // NOLINT
+    sws_scale(swsCtx, srcSlices, srcStride, 0, frame.rows, curFrame->data, // NOLINT
+              curFrame->linesize);                                         // NOLINT
     curFrame->pts = m_frameIndex++;
     AVPacket packet{};
     avcodec_send_frame(m_logCodecCtx, curFrame);

@@ -17,7 +17,7 @@ template class ObjectDetectionConfig<TestConfigurationSettings>;
 
 // gcc magic trick, see else branches
 template <typename>
-inline constexpr bool alwaysFalseV = false;
+inline constexpr bool ALWAYS_FALSE_V = false;
 
 template <typename T>
 ObjectDetectionConfig<T>::ObjectDetectionConfig(const std::string& configFilePath,
@@ -212,7 +212,7 @@ const T& ObjectDetectionConfig<T>::Get() {
 }
 
 template <typename T>
-void ObjectDetectionConfig<T>::RefreshConfigStructure() { //NOLINT
+void ObjectDetectionConfig<T>::RefreshConfigStructure() { // NOLINT
     for (auto& configValue : m_configValues) {
         std::visit(
             [&](auto& value) {

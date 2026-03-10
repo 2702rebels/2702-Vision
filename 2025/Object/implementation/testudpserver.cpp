@@ -14,8 +14,8 @@
 #include <string>
 using asio::ip::udp;
 
-constexpr static unsigned int serverPort = 27021;
-constexpr static unsigned int objectDetectionPacketSize = (4 + 4 + 8 + 1 + 18 * 4);
+constexpr static unsigned int SERVER_PORT = 27021;
+constexpr static unsigned int OBJECT_DETECTION_PACKET_SIZE = (4 + 4 + 8 + 1 + 18 * 4);
 
 // This is the structure types where the serialization and deserialization
 // functions are defined
@@ -33,21 +33,21 @@ static void SignalHandler(int nSig) {
     bStop = true;
 }
 
-int main() { //NOLINT
+int main() { // NOLINT
     SetupTextLogger();
     (void)signal(2, SignalHandler);
     asio::io_context ioContext;
-    udp::socket socket(ioContext, udp::endpoint(udp::v4(), serverPort));
+    udp::socket socket(ioContext, udp::endpoint(udp::v4(), SERVER_PORT));
     info("program booted");
 
-    while (!bStop) { //NOLINT
-        std::array<char, objectDetectionPacketSize> receivingBuffer{};
+    while (!bStop) { // NOLINT
+        std::array<char, OBJECT_DETECTION_PACKET_SIZE> receivingBuffer{};
         udp::endpoint remoteEndpoint;
         size_t packetLen =
             socket.receive_from(asio::buffer(receivingBuffer), remoteEndpoint);
         auto bytesBuf = receivingBuffer.data();
-        std::vector<uint8_t> packetVec(objectDetectionPacketSize);
-        std::memcpy(packetVec.data(), bytesBuf, objectDetectionPacketSize);
+        std::vector<uint8_t> packetVec(OBJECT_DETECTION_PACKET_SIZE);
+        std::memcpy(packetVec.data(), bytesBuf, OBJECT_DETECTION_PACKET_SIZE);
         std::span<uint8_t> packetSpan(packetVec.data(), packetVec.size());
         info("Got packet");
         info("packet len: {}", packetVec.size());

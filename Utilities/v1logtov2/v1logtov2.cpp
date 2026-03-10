@@ -7,10 +7,10 @@
 namespace fs = std::filesystem;
 
 static void WriteNewLogHeader(std::ofstream& logfile, unsigned int width,
-                       unsigned int height, LogFrameType logFrameType) {
-    logfile.write(reinterpret_cast<const char*>(&logFrameType), sizeof(LogFrameType)); //NOLINT
-    logfile.write(reinterpret_cast<char*>(&width), sizeof(width)); //NOLINT
-    logfile.write(reinterpret_cast<char*>(&height), sizeof(height)); //NOLINT
+                              unsigned int height, LogFrameType logFrameType) {
+    logfile.write(reinterpret_cast<const char*>(&logFrameType), sizeof(LogFrameType)); // NOLINT
+    logfile.write(reinterpret_cast<char*>(&width), sizeof(width));                     // NOLINT
+    logfile.write(reinterpret_cast<char*>(&height), sizeof(height));                   // NOLINT
 }
 
 int main(int argc, char* argv[]) { // NOLINT
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) { // NOLINT
         std::cout << "Translated log file at " << entry.path()
                   << " to new log file at "
                   << newLogDirectory / entry.path().filename() << '\n';
-   }
+    }
     std::cout << "Translated all log files successfully" << '\n';
     return 0;
 }

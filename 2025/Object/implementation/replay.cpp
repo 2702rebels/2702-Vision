@@ -13,11 +13,9 @@
 bool bStop = false;
 
 #include "LogPlayer.h"
-
 #include "ObjectFrameProcessor.h"
 
-void OnInterrupt(int /*signal*/)
-{
+void OnInterrupt(int /*signal*/) {
     bStop = true;
 }
 
@@ -35,7 +33,7 @@ int main(int argc, char** argv) {
                          ObjSendPackets::OFF, ObjUseOutputFiltering::ON>
         ip(width, height);
     LogPlayer lp(argv[1], ip);
-    while (!bStop) { //NOLINT
+    while (!bStop) { // NOLINT
         if (!lp.bNextFrame()) {
             info("About to rewind");
             lp.vRewind();

@@ -169,8 +169,8 @@ class ObjectFrameProcessor : public FrmProcessor {
      * @returns The filtered frame as a @ref cv::Mat.
      */
     cv::Mat FilterHSVInverted(const cv::Mat& frame, int pvHueMin,
-                                int pvHueMax, int saturationMin,
-                                int saturationMax, int valueMin, int valueMax);
+                              int pvHueMax, int saturationMin,
+                              int saturationMax, int valueMin, int valueMax);
 
     /*!
      * @brief Returns object distance on the floor to the center of the robot in
@@ -184,9 +184,9 @@ class ObjectFrameProcessor : public FrmProcessor {
      * @param cameraCenter - The center of the camera as a Point2d, a constant.
      */
     Rebels::Point2d CalculateCoralVector(const std::vector<cv::Point>& contour,
-                                           double focalLength,
-                                           double actualDiamater,
-                                           const cv::Point2d& cameraCenter);
+                                         double focalLength,
+                                         double actualDiamater,
+                                         const cv::Point2d& cameraCenter);
 
     /*!
      * @brief Takes a C-style array of 4 points and orders them starting from

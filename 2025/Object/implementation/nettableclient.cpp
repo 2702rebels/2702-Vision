@@ -7,6 +7,7 @@
 #include "LoggingUtils.h"
 
 #include <chrono>
+#include <csignal>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -15,7 +16,6 @@
 #include <networktables/IntegerTopic.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
-#include <csignal>
 #include <thread>
 
 using namespace std::literals;

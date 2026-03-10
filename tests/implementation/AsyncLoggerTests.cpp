@@ -9,7 +9,7 @@ TEST(AsyncVisionLog, RGBFramesQueueSync) {
     std::vector<cv::Mat> rgbFrames;
     {
         AsyncVisionLog writer(fs::path("./asyncLogRGBSync.log"),
-                                                    640, 480, LogFrameType::RGB, 1);
+                              640, 480, LogFrameType::RGB, 1);
         rgbFrames.reserve(nFrames);
         for (int i = 0; i < nFrames; i++) {
             rgbFrames.emplace(rgbFrames.begin() + i, 480, 640, CV_8UC3);

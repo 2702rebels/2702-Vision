@@ -112,14 +112,14 @@ int main(int argc, char** argv) {
                 procmode = pmode::pminput;
             } else {
                 Usage();
-}
+            }
         } else if (pszIn == nullptr) {
             pszIn = argv[i];
         } else if (pszOut == nullptr) {
             pszOut = argv[i];
         } else {
             Usage();
-}
+        }
     }
     if (pszOut == nullptr) {
         Usage();
@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
         cv::imencode(".jpg", imgOut, vJPEG);
         std::ofstream outfile(std::string(pszOut) + "/" + std::to_string(nSeq) +
                               ".jpg");
-        outfile.write(reinterpret_cast<const char*>(vJPEG.data()), vJPEG.size()); //NOLINT
+        outfile.write(reinterpret_cast<const char*>(vJPEG.data()), vJPEG.size()); // NOLINT
         nSeq++;
     }
     return 0;

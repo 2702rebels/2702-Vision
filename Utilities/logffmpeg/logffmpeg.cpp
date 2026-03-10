@@ -37,11 +37,11 @@ static void Encode(AVCodecContext* encCtx, AVFrame* frame, AVPacket* pkt,
     /* send the frame to the encoder */
     if (frame != nullptr) {
         fmt::println("Send frame {:3}", frame->pts);
-}
+    }
 
     ret = avcodec_send_frame(encCtx, frame);
     if (ret < 0) {
-        fmt::println( "Error sending a frame for encoding");
+        fmt::println("Error sending a frame for encoding");
         exit(1);
     }
 
@@ -49,7 +49,8 @@ static void Encode(AVCodecContext* encCtx, AVFrame* frame, AVPacket* pkt,
         ret = avcodec_receive_packet(encCtx, pkt);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             return;
-        } if (ret < 0) {
+        }
+        if (ret < 0) {
             fmt::println("Error during encoding");
             exit(1);
         }
@@ -60,7 +61,7 @@ static void Encode(AVCodecContext* encCtx, AVFrame* frame, AVPacket* pkt,
     }
 }
 
-int main(int argc, char** argv) { //NOLINT
+int main(int argc, char** argv) { // NOLINT
     const char* infile = nullptr;
     const char* filename = nullptr;
     const char* codecName = nullptr;
@@ -75,7 +76,7 @@ int main(int argc, char** argv) { //NOLINT
 
     if (argc <= 3) {
         fmt::println("Usage: {} <input file> <output file> <codec name>",
-                argv[0]);
+                     argv[0]);
         exit(0);
     }
     infile = argv[1];
@@ -100,7 +101,7 @@ int main(int argc, char** argv) { //NOLINT
     pkt = av_packet_alloc();
     if (pkt == nullptr) {
         exit(1);
-}
+    }
 
     /* put sample parameters */
     c->bit_rate = 6000000;
@@ -108,8 +109,8 @@ int main(int argc, char** argv) { //NOLINT
     c->width = 1280;
     c->height = 720;
     /* frames per second */
-    c->time_base = AVRational{.num=1, .den=72};
-    c->framerate = AVRational{.num=72, .den=1};
+    c->time_base = AVRational{.num = 1, .den = 72};
+    c->framerate = AVRational{.num = 72, .den = 1};
 
     /* emit one intra frame every ten frames
      * check frame pict_type before passing frame
@@ -123,7 +124,7 @@ int main(int argc, char** argv) { //NOLINT
 
     if (codec->id == AV_CODEC_ID_H264) {
         av_opt_set(c->priv_data, "preset", "slow", 0);
-}
+    }
 
     /* open it */
     int ret = avcodec_open2(c, codec, nullptr);
@@ -134,7 +135,7 @@ int main(int argc, char** argv) { //NOLINT
         exit(1);
     }
 
-    f = fopen(filename, "wb"); //NOLINT
+    f = fopen(filename, "wb"); // NOLINT
     if (f == nullptr) {
         fmt::println("Could not open {}", filename);
         exit(1);
@@ -177,7 +178,7 @@ int main(int argc, char** argv) { //NOLINT
         ret = av_frame_make_writable(frame);
         if (ret < 0) {
             exit(1);
-}
+        }
 
         /* Convert greyscal to YUV using
                 |Y|   |  0.29900  0.58700  0.11400 | |R|
@@ -225,8 +226,8 @@ int main(int argc, char** argv) { //NOLINT
     if (codec->id == AV_CODEC_ID_MPEG1VIDEO ||
         codec->id == AV_CODEC_ID_MPEG2VIDEO) {
         (void)fwrite(endcode.data(), 1, sizeof(endcode), f);
-}
-    (void)fclose(f);//NOLINT
+    }
+    (void)fclose(f); // NOLINT
 
     avcodec_free_context(&c);
     av_frame_free(&frame);

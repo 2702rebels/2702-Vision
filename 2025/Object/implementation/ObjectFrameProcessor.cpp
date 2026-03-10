@@ -11,11 +11,11 @@
 namespace fs = std::filesystem;
 
 // instantiate static var
-template <ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,//NOLINT
-          ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering //NOLINT
-          UseOutputFiltering> //NOLINT
-int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets, //NOLINT
-                             UseOutputFiltering>::m_i64TimeOffset; //NOLINT
+template <ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,           // NOLINT
+          ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering   // NOLINT
+                                                                                              UseOutputFiltering> // NOLINT
+int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets,      // NOLINT
+                             UseOutputFiltering>::m_i64TimeOffset;                                                // NOLINT
 
 template <ObjLatencyReporting LatencyReporting,
           ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
@@ -230,12 +230,12 @@ template <ObjLatencyReporting LatencyReporting,
 cv::Mat ObjectFrameProcessor<
     LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection,
     SendPackets, UseOutputFiltering>::FilterHSVInverted(const cv::Mat& frame,
-                                                          int pvHueMin,
-                                                          int pvHueMax,
-                                                          int saturationMin,
-                                                          int saturationMax,
-                                                          int valueMin,
-                                                          int valueMax) {
+                                                        int pvHueMin,
+                                                        int pvHueMax,
+                                                        int saturationMin,
+                                                        int saturationMax,
+                                                        int valueMin,
+                                                        int valueMax) {
     cv::Mat hsv;
     cv::Mat mask;
     cv::cvtColor(frame, hsv,
@@ -268,8 +268,8 @@ Rebels::Point2d
 ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                      MultipleObjectDetection, SendPackets, UseOutputFiltering>::
     CalculateCoralVector(const std::vector<cv::Point>& contour,
-                           double /*focalLength*/, double /*actualDiamater*/,
-                           const cv::Point2d& /*cameraCenter*/) {
+                         double /*focalLength*/, double /*actualDiamater*/,
+                         const cv::Point2d& /*cameraCenter*/) {
     cv::RotatedRect rect = cv::fitEllipse(contour);
     // Calculate the vector from the sensor to the object
     Rebels::Point3d v(
@@ -459,7 +459,7 @@ template <ObjLatencyReporting LatencyReporting,
 cv::Mat
 ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                      MultipleObjectDetection, SendPackets, UseOutputFiltering>::
-    ProcessFrameWithRet(int nCam, const CameraFrame* pcf) { //NOLINT
+    ProcessFrameWithRet(int nCam, const CameraFrame* pcf) { // NOLINT
     spdlog::info("Have Frame from cam {}: {}x{}", nCam, pcf->nRows(),
                  pcf->nCols());
     cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, pcf->pu8Image());
@@ -529,12 +529,12 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                     m_nLastCoralDistanceTopic.SetDefault(distance);
                     m_nLastCoralAngleTopic.SetDefault(angle);
                     corals.emplace_back(distance, angle, static_cast<uint8_t>(20),
-                                                         ObjectDetectionType::CORAL);
+                                        ObjectDetectionType::CORAL);
                     // Draw the fitted contour
                     if constexpr (VideoDebugging == ObjVideoDebuggingInfo::ON) {
                         std::string coralVecText = "(" + std::to_string(coralVec.u()) +
-                                                     ", " + std::to_string(coralVec.v()) +
-                                                     ")";
+                                                   ", " + std::to_string(coralVec.v()) +
+                                                   ")";
                         std::string distanceText =
                             "Distance: " + std::to_string(distance / 0.0254) + "in";
                         std::string angleText =

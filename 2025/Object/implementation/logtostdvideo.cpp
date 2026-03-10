@@ -8,10 +8,10 @@
 
 #include <LoggingUtils.h>
 
-static constexpr int width = 640;
-static constexpr int height = 480;
-static constexpr int frameRate = 30;
-static constexpr int bitrate = 40000;
+static constexpr int WIDTH = 640;
+static constexpr int HEIGHT = 480;
+static constexpr int FRAME_RATE = 30;
+static constexpr int BITRATE = 40000;
 
 #include "LogPlayer.h"
 #include "logtostdvideo.h"
@@ -40,7 +40,7 @@ void StdVideoLogProc::ProcessFrame(int nCam, const CameraFrame* pcf) {
     m_frameCount++;
 }
 
-int main(int argc, char** argv) { //NOLINT
+int main(int argc, char** argv) { // NOLINT
     SetupTextLogger();
     if (argc != 2) {
         error("Usage: {} inputdir|inputfile", argv[0]);
@@ -57,7 +57,7 @@ int main(int argc, char** argv) { //NOLINT
                     (entry.path().parent_path() /
                      (entry.path().filename().string() + "filtered.mp4"))
                         .string(),
-                    width, height, frameRate, bitrate);
+                    WIDTH, HEIGHT, FRAME_RATE, BITRATE);
                 LogPlayer lp(entry.path().c_str(), videoLogProc);
                 while (true) {
                     if (bStop) {
@@ -80,7 +80,7 @@ int main(int argc, char** argv) { //NOLINT
             (fs::path(argv[1]).parent_path() /
              ((fs::path(argv[1]).filename().string() + "filtered.mp4")))
                 .string(),
-            width, height, frameRate, bitrate);
+            WIDTH, HEIGHT, FRAME_RATE, BITRATE);
         LogPlayer lp(argv[1], videoLogProc);
         while (true) {
             if (bStop) {

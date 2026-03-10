@@ -19,7 +19,7 @@ TEST(FrameLog, GrayscaleHeader) {
 TEST(FrameLog, RGBHeader) {
     {
         VisionLogWriter writer(fs::path("./rgbHeader.log"),
-                                                      LogFrameType::RGB, 1920, 1080);
+                               LogFrameType::RGB, 1920, 1080);
         EXPECT_EQ(writer.GetLogType(), LogFrameType::RGB);
         EXPECT_EQ(writer.GetWidth(), 1920);
         EXPECT_EQ(writer.GetHeight(), 1080);
@@ -30,12 +30,12 @@ TEST(FrameLog, RGBHeader) {
     EXPECT_EQ(reader.GetHeight(), 1080);
 }
 
-TEST(FrameLog, RGBFrames) { //NOLINT
+TEST(FrameLog, RGBFrames) { // NOLINT
     int nFrames = 3;
     std::vector<cv::Mat> rgbFrames;
     {
         VisionLogWriter writer(fs::path("./rgbFrames.log"),
-                                                      LogFrameType::RGB, 640, 480);
+                               LogFrameType::RGB, 640, 480);
         rgbFrames.reserve(nFrames);
         for (int i = 0; i < nFrames; i++) {
             rgbFrames.emplace(rgbFrames.begin() + i, 480, 640, CV_8UC3);
@@ -67,7 +67,7 @@ TEST(FrameLog, RGBFrames) { //NOLINT
     EXPECT_TRUE(frame.has_value());
 }
 
-TEST(FrameLog, GrayscaleFrames) { //NOLINT
+TEST(FrameLog, GrayscaleFrames) { // NOLINT
     int nFrames = 3;
     std::vector<cv::Mat> grayscaleFrames;
     {
