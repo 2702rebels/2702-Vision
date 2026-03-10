@@ -7,7 +7,6 @@
 #include "LoggingUtils.h"
 
 #include <chrono>
-#include <csignal>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -16,43 +15,44 @@
 #include <networktables/IntegerTopic.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
+#include <csignal>
 #include <thread>
 
 using namespace std::literals;
 
-std::map<std::string, std::function<void()>> commandMap;
-bool bStop = false;
-bool readyForNewCmdThread = false;
+static std::map<std::string, std::function<void()>> commandMap;
+static bool bStop = false;
+static bool readyForNewCmdThread = false;
 
-nt::IntegerSubscriber hueMinTopic;
-nt::IntegerSubscriber hueMaxTopic;
-nt::IntegerSubscriber saturationMinTopic;
-nt::IntegerSubscriber saturationMaxTopic;
-nt::IntegerSubscriber valueMinTopic;
-nt::IntegerSubscriber valueMaxTopic;
-nt::DoublePublisher coralDistanceTopic;
-nt::DoublePublisher coralAngleTopic;
-nt::IntegerSubscriber minWidthTopic;
-nt::IntegerSubscriber maxWidthTopic;
-nt::IntegerSubscriber minHeightTopic;
-nt::IntegerSubscriber maxHeightTopic;
-nt::IntegerSubscriber minAreaTopic;
-nt::IntegerSubscriber maxAreaTopic;
-nt::DoubleSubscriber minPercentFillTopic;
-nt::DoubleSubscriber camOffsetXTopic;
-nt::DoubleSubscriber camOffsetYTopic;
-nt::DoubleSubscriber camHeightTopic;
-nt::DoubleSubscriber camAngleTopic;
-nt::IntegerSubscriber filterWindowTopic;
+static nt::IntegerSubscriber hueMinTopic;
+static nt::IntegerSubscriber hueMaxTopic;
+static nt::IntegerSubscriber saturationMinTopic;
+static nt::IntegerSubscriber saturationMaxTopic;
+static nt::IntegerSubscriber valueMinTopic;
+static nt::IntegerSubscriber valueMaxTopic;
+static nt::DoublePublisher coralDistanceTopic;
+static nt::DoublePublisher coralAngleTopic;
+static nt::IntegerSubscriber minWidthTopic;
+static nt::IntegerSubscriber maxWidthTopic;
+static nt::IntegerSubscriber minHeightTopic;
+static nt::IntegerSubscriber maxHeightTopic;
+static nt::IntegerSubscriber minAreaTopic;
+static nt::IntegerSubscriber maxAreaTopic;
+static nt::DoubleSubscriber minPercentFillTopic;
+static nt::DoubleSubscriber camOffsetXTopic;
+static nt::DoubleSubscriber camOffsetYTopic;
+static nt::DoubleSubscriber camHeightTopic;
+static nt::DoubleSubscriber camAngleTopic;
+static nt::IntegerSubscriber filterWindowTopic;
 
 /*! \brief Handle Ctrl+C interrupts */
-void Sighandler(int nSig) {
+static void Sighandler(int nSig) {
     info("Received Signal: {}", nSig);
     info("Can't use Ctrl+C to exit, use stop command");
 }
 
 /*! \brief Print the list of commands to the console */
-void ShowHelp() {
+static void ShowHelp() {
     info("Valid commands are: \nprint - logs all current topic values\npushdist "
          "- push a new distance value\npushangle - push a new angle value\nstop "
          "- shuts the server down\nhelp - displays this text");
@@ -60,7 +60,7 @@ void ShowHelp() {
 
 /*! \brief Shuts down the client. Note that this is not an immediate effect,
  * program will run for another tick before exiting. */
-void ShutdownClient() {
+static void ShutdownClient() {
     bStop = true;
 }
 
@@ -68,7 +68,7 @@ void ShutdownClient() {
 This function does not automatically update as new topics are added and will
 need to be modified if new topics are added
 */
-void PrintNetworkTableValues() {
+static void PrintNetworkTableValues() {
     info("huemin: {}", hueMinTopic.GetAtomic(0.0F).value);
     info("huemax: {}", hueMaxTopic.GetAtomic(0.0F).value);
     info("satmin: {}", saturationMinTopic.GetAtomic(0.0F).value);
@@ -91,7 +91,7 @@ void PrintNetworkTableValues() {
 /*! \brief Pushes a new coral distance value. User input is obtained through
  * cin, which pauses execution so the client may disconnect from the server for
  * a short time*/
-void PushDistanceValue() {
+void pushDistanceValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
@@ -101,22 +101,22 @@ void PushDistanceValue() {
 /*! \brief Pushes a new coral angle value. User input is obtained through cin,
  * which pauses execution so the client may disconnect from the server for a
  * short time*/
-void PushAngleValue() {
+void pushAngleValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
     coralAngleTopic.SetDefault(stof(value));
 }
 
-int main(int  /*argc*/, char**  /*argv*/) {
+int main(int argc, char** argv) {
     SetupTextLogger();
     signal(SIGINT, Sighandler); // Handles Ctrl+C interrupts
     // Initialize the commands
     commandMap["help"] = ShowHelp;
     commandMap["stop"] = ShutdownClient;
     commandMap["print"] = PrintNetworkTableValues;
-    commandMap["pushdist"] = PushDistanceValue;
-    commandMap["pushangle"] = PushAngleValue;
+    commandMap["pushdist"] = pushDistanceValue;
+    commandMap["pushangle"] = pushAngleValue;
     nt::NetworkTableInstance netTableManager =
         nt::NetworkTableInstance::GetDefault();
     netTableManager.StartClient4("testnettableclient");

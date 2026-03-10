@@ -61,7 +61,7 @@ TEST(FrameLog, RGBFrames) { //NOLINT
     EXPECT_TRUE(frame.has_value());
 }
 
-TEST(FrameLog, GrayscaleFrames) {
+TEST(FrameLog, GrayscaleFrames) { //NOLINT
     int nFrames = 3;
     VisionLogWriter writer(
         fs::path("./grayscaleFrames.log"), LogFrameType::GRAYSCALE, 640, 480);

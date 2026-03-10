@@ -8,7 +8,7 @@
 
 std::shared_ptr<spdlog::logger> textLogsOutput;
 
-std::string GetCurTimeStr() {
+static std::string GetCurTimeStr() {
     auto now = std::chrono::system_clock::now();
     std::time_t timeNow = std::chrono::system_clock::to_time_t(now);
     std::tm localTime = *std::localtime(&timeNow);

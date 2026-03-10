@@ -46,7 +46,7 @@ static void Bayer2Blue(cv::Mat& matBlue, const cv::Mat& matBayer) {
     assert((matBayer.rows & 1) == 0 && (matBayer.cols & 1) == 0);
 
     for (int r = 0; r < matBlue.rows; r++) {
-        const uint8_t* pu8Bayer = matBayer.ptr(r * 2 + 1);
+        const uint8_t* pu8Bayer = matBayer.ptr((r * 2) + 1);
         uint8_t* pu8Blue = matBlue.ptr(r);
         for (int c = 0; c < matBlue.cols; c++) {
             *pu8Blue++ = *pu8Bayer;
