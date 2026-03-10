@@ -107,7 +107,7 @@ T ObjectDetectionConfigValue<T>::GetConfigValueFromMessage(
         }
         return vec;
     } else {
-        static_assert(always_false_v<T>,
+        static_assert(alwaysFalseV<T>,
                       "Type not supported by "
                       "ObjectDetectionConfigValue::UpdateFromConfigMessage");
     }

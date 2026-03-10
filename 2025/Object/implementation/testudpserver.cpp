@@ -14,23 +14,20 @@
 #include <string>
 using asio::ip::udp;
 
-enum {
-SERVER_PORT = 27021,
-OBJECT_DETECTION_PACKET_SIZE = (4 + 4 + 8 + 1 + 18 * 4),
-SIGINT = 2
-};
+constexpr static unsigned int serverPort = 27021;
+constexpr static unsigned int objectDetectionPacketSize = (4 + 4 + 8 + 1 + 18 * 4);
 
 // This is the structure types where the serialization and deserialization
 // functions are defined
 using StructTypeObjectDetectionInfo = wpi::Struct<ObjectDetectionInfo>;
 using StructTypeObjectDetectionPacket = wpi::Struct<ObjectDetectionPacket>;
 
-std::vector<long> timestamps;
-bool bStop = false;
+static std::vector<std::int64_t> timestamps;
+static bool bStop = false;
 
-void Signalhandler(int nSig) {
+static void Signalhandler(int nSig) {
     info("Got exit signal: {}", nSig);
-    for (long & timestamp : timestamps) {
+    for (std::int64_t& timestamp : timestamps) {
         info("{}", timestamp);
     }
     bStop = true;
@@ -38,19 +35,19 @@ void Signalhandler(int nSig) {
 
 int main() {
     SetupTextLogger();
-    signal(SIGINT, Signalhandler);
+    (void)signal(2, Signalhandler);
     asio::io_context ioContext;
-    udp::socket socket(ioContext, udp::endpoint(udp::v4(), SERVER_PORT));
+    udp::socket socket(ioContext, udp::endpoint(udp::v4(), serverPort));
     info("program booted");
 
-    while (!bStop) {
-        std::array<char, OBJECT_DETECTION_PACKET_SIZE> receivingBuffer{};
+    while (!bStop) { //NOLINT
+        std::array<char, objectDetectionPacketSize> receivingBuffer{};
         udp::endpoint remoteEndpoint;
         size_t packetLen =
             socket.receive_from(asio::buffer(receivingBuffer), remoteEndpoint);
         auto bytesBuf = receivingBuffer.data();
-        std::vector<uint8_t> packetVec(OBJECT_DETECTION_PACKET_SIZE);
-        std::memcpy(packetVec.data(), bytesBuf, OBJECT_DETECTION_PACKET_SIZE);
+        std::vector<uint8_t> packetVec(objectDetectionPacketSize);
+        std::memcpy(packetVec.data(), bytesBuf, objectDetectionPacketSize);
         std::span<uint8_t> packetSpan(packetVec.data(), packetVec.size());
         info("Got packet");
         info("packet len: {}", packetVec.size());
