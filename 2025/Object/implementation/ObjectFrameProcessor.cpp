@@ -11,13 +11,11 @@
 namespace fs = std::filesystem;
 
 // instantiate static var
-template <ObjLatencyReporting LatencyReporting,
-          ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
-          ObjMultipleObjectDetection MultipleObjectDetection,
-          ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
-int64_t ObjectFrameProcessor<static_cast<>(LatencyReporting), static_cast<>(VideoDebugging), static_cast<>(UseGui),
-                             static_cast<>(MultipleObjectDetection), static_cast<>(SendPackets),
-                             static_cast<>(UseOutputFiltering)>::m_i64TimeOffset;
+template <ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
+          ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering
+          UseOutputFiltering>
+int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets,
+                             UseOutputFiltering>::m_i64TimeOffset;
 
 template <ObjLatencyReporting LatencyReporting,
           ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
@@ -164,7 +162,7 @@ template <ObjLatencyReporting LatencyReporting,
           ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                           MultipleObjectDetection, SendPackets,
-                          UseOutputFiltering>::VStartLogging() {
+                          UseOutputFiltering>::StartLogging() {
     fs::path logDir(m_config.Get().logdirectory());
     int nWriterThreads = m_config.Get().nlogwriterthreads();
     for (int i = 0;; i++) {
@@ -194,7 +192,7 @@ template <ObjLatencyReporting LatencyReporting,
           ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 void ObjectFrameProcessor<
     LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection,
-    SendPackets, UseOutputFiltering>::Timesynccallback(const nt::Event& e) {
+    SendPackets, UseOutputFiltering>::OnTimeSync(const nt::Event& e) {
     if ((e.flags & NT_EVENT_TIMESYNC) != 0u) {
         spdlog::info("tscb::: Have TIMESYNC\n");
         const nt::TimeSyncEventData* ptsed = e.GetTimeSyncEventData();
@@ -231,7 +229,7 @@ template <ObjLatencyReporting LatencyReporting,
           ObjSendPackets SendPackets, ObjUseOutputFiltering UseOutputFiltering>
 cv::Mat ObjectFrameProcessor<
     LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection,
-    SendPackets, UseOutputFiltering>::FilterHsvInverted(const cv::Mat& frame,
+    SendPackets, UseOutputFiltering>::FilterHSVInverted(const cv::Mat& frame,
                                                           int pvHueMin,
                                                           int pvHueMax,
                                                           int saturationMin,
@@ -472,7 +470,7 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
     if constexpr (UseGui == ObjUseGui::ON) {
         cv::imshow("Raw", frame);
     }
-    cv::Mat mask = FilterHsvInverted(
+    cv::Mat mask = FilterHSVInverted(
         frame, m_config.Get().huemin(), m_config.Get().huemax(),
         m_config.Get().saturationmin(), m_config.Get().saturationmax(),
         m_config.Get().valuemin(), m_config.Get().valuemax());

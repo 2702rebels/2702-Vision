@@ -19,7 +19,6 @@
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/Topic.h>
-#include <print>
 #include <thread>
 
 using namespace std::literals;
@@ -61,7 +60,7 @@ nt::GenericPublisher genPublisher;
  * Ctrl+C
  */
 void Sighandler(int nSig) {
-    std::println("Received Signal: {}", nSig);
+    fmt::println("Received Signal: {}", nSig);
     std::cout << "Can't use Ctrl+C to exit, use stop command\n";
 }
 
@@ -104,9 +103,9 @@ void ShutdownServer() {
  * as more topics are added, so this should be updated when a new topic is added
  */
 void PrintNetworkTableValues() {
-    std::println("Last received coral distance: {:.6f}",
+    fmt::println("Last received coral distance: {:.6f}",
            coralDistanceTopic.GetAtomic(0.0F).value);
-    std::println("Last received coral angle: {:.6f}",
+    fmt::println("Last received coral angle: {:.6f}",
            coralAngleTopic.GetAtomic(0.0F).value);
 }
 
@@ -268,7 +267,7 @@ void Pushgenstring() {
 }
 
 int main(int  /*argc*/, char**  /*argv*/) {
-    signal(SIGINT, Sighandler); // Handles Ctrl+C interrupts
+    (void)signal(2, Sighandler); // Handles Ctrl+C interrupts
     // Assign commands
     commandMap["help"] = ShowHelp;
     commandMap["stop"] = ShutdownServer;

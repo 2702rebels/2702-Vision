@@ -23,8 +23,8 @@
  * - Fix error when outputting calibration coefficients
  */
 namespace fs = std::filesystem;
-using namespace spdlog;
-using namespace itas109;
+using namespace spdlog; //NOLINT
+using SerialPort = itas109::CSerialPort;
 
 static constexpr int mcBaudrate = 115200;
 static constexpr auto mcWaittime = std::chrono::milliseconds(750);
@@ -37,7 +37,7 @@ cs::CvSource camServer;
 std::mutex mtxCamServer;
 bool bFirstFrame = true;
 
-CSerialPort motorControllerPort;
+SerialPort motorControllerPort;
 
 class ImgProc : public FrmProcessor {
     cv::Mat mMatLastFrame;
@@ -352,8 +352,8 @@ int main(int  /*argc*/, char**  /*argv*/) {
         fs::create_directories(outdir);
     }
     std::cout << "Using serial port " << portname << '\n';
-    motorControllerPort.init(portname.data(), mcBaudrate, ParityNone, DataBits8,
-                             StopOne, FlowNone);
+    motorControllerPort.init(portname.data(), mcBaudrate, itas109::ParityNone, itas109::DataBits8,
+                             itas109::StopOne, itas109::FlowNone);
     if (!motorControllerPort.open()) {
         std::cerr << "Failed to open serial connection to motor controller"
                   << '\n';

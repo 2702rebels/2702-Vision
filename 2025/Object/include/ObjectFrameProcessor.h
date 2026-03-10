@@ -114,7 +114,7 @@ class ObjectFrameProcessor : public FrmProcessor {
 
     nt::NetworkTableListener ntl =
         nt::NetworkTableListener::CreateTimeSyncListener(
-            nt::NetworkTableInstance::GetDefault(), true, Timesynccallback);
+            nt::NetworkTableInstance::GetDefault(), true, OnTimeSync);
 
     /** @brief Thread lock for the camera server output. */
     std::mutex m_mtxCS;
@@ -135,14 +135,14 @@ class ObjectFrameProcessor : public FrmProcessor {
     ObjectFrameProcessor(int frameWidth, int frameHeight);
 
     /** @brief Start logging frames to logfile. */
-    void vStartLogging();
+    void StartLogging();
 
     ~ObjectFrameProcessor() override;
     /** @brief Handles a time sync event from networkTables.
      * @param e - The networktables event.
      * @returns Nothing.
      */
-    static void timesynccallback(const nt::Event& e);
+    static void OnTimeSync(const nt::Event& e);
 
     /** @brief Send an @ref ObjectDetectionPacket .
      * @param packet - Packet to send.
@@ -168,7 +168,7 @@ class ObjectFrameProcessor : public FrmProcessor {
      * be valid.
      * @returns The filtered frame as a @ref cv::Mat.
      */
-    cv::Mat filter_hsv_inverted(const cv::Mat& frame, int pv_hue_min,
+    cv::Mat FilterHSVInverted(const cv::Mat& frame, int pv_hue_min,
                                 int pv_hue_max, int saturation_min,
                                 int saturation_max, int value_min, int value_max);
 
@@ -183,7 +183,7 @@ class ObjectFrameProcessor : public FrmProcessor {
      * the coral).
      * @param camera_center - The center of the camera as a Point2d, a constant.
      */
-    Rebels::Point2d calculate_coral_vector(const std::vector<cv::Point>& contour,
+    Rebels::Point2d CalculateCoralVector(const std::vector<cv::Point>& contour,
                                            double focal_length,
                                            double actual_diameter,
                                            const cv::Point2d& camera_center);
@@ -208,7 +208,7 @@ class ObjectFrameProcessor : public FrmProcessor {
      * center point of the ellipse.
      */
     std::tuple<std::vector<cv::Point>, std::pair<cv::Point, cv::Point>, cv::Point>
-    fit_cylinder_contour(const std::vector<cv::Point>& contour, cv::Mat mask);
+    FitCylinderContour(const std::vector<cv::Point>& contour, cv::Mat mask);
 
     /** @brief Processes each frame, logs it to the logfile if @ref m_bIsLogging
      * is set to true, runs the object detection on it, pushes the value to
@@ -220,7 +220,7 @@ class ObjectFrameProcessor : public FrmProcessor {
      * @param pcf - A pointer to the @ref CameraFrame to be processed.
      * @returns Nothing.
      */
-    virtual void ProcessFrame(int nCam, const CameraFrame* pcf);
+    void ProcessFrame(int nCam, const CameraFrame* pcf) override;
 
     /** @brief Processes each frame, logs it to the logfile if @ref m_bIsLogging
      * is set to true, runs the object detection on it, pushes the value to
