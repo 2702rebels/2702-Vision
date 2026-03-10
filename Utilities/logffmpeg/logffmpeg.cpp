@@ -21,9 +21,7 @@
  */
 
 #include <cstdio>
-#include <cstdlib>
-#include <print>
-#include <string>
+#include <fmt/format.h>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -38,12 +36,12 @@ static void Encode(AVCodecContext* encCtx, AVFrame* frame, AVPacket* pkt,
 
     /* send the frame to the encoder */
     if (frame != nullptr) {
-        std::println("Send frame {:3}", frame->pts);
+        fmt::println("Send frame {:3}", frame->pts);
 }
 
     ret = avcodec_send_frame(encCtx, frame);
     if (ret < 0) {
-        std::println(stderr, "Error sending a frame for encoding");
+        fmt::println( "Error sending a frame for encoding");
         exit(1);
     }
 
@@ -52,11 +50,11 @@ static void Encode(AVCodecContext* encCtx, AVFrame* frame, AVPacket* pkt,
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             return;
         } if (ret < 0) {
-            std::println(stderr, "Error during encoding");
+            fmt::println("Error during encoding");
             exit(1);
         }
 
-        std::println("Write packet {:3} (size={:5})", pkt->pts, pkt->size);
+        fmt::println("Write packet {:3} (size={:5})", pkt->pts, pkt->size);
         (void)fwrite(pkt->data, 1, pkt->size, outfile);
         av_packet_unref(pkt);
     }
@@ -76,7 +74,7 @@ int main(int argc, char** argv) { //NOLINT
     std::array<unsigned int, 4> endcode = {0, 0, 1, 0xb7};
 
     if (argc <= 3) {
-        std::println(stderr, "Usage: {} <input file> <output file> <codec name>",
+        fmt::println("Usage: {} <input file> <output file> <codec name>",
                 argv[0]);
         exit(0);
     }
@@ -89,13 +87,13 @@ int main(int argc, char** argv) { //NOLINT
     /* find the mpeg1video encoder */
     codec = avcodec_find_encoder_by_name(codecName);
     if (codec == nullptr) {
-        std::println(stderr, "Codec '{}' not found", codecName);
+        fmt::println("Codec '{}' not found", codecName);
         exit(1);
     }
 
     c = avcodec_alloc_context3(codec);
     if (c == nullptr) {
-        std::println(stderr, "Could not allocate video codec context");
+        fmt::println("Could not allocate video codec context");
         exit(1);
     }
 
@@ -132,19 +130,19 @@ int main(int argc, char** argv) { //NOLINT
     if (ret < 0) {
         std::array<char, AV_ERROR_MAX_STRING_SIZE> szErr{};
         av_make_error_string(szErr.data(), sizeof(szErr), ret);
-        std::println(stderr, "Could not open codec: {}", szErr);
+        fmt::println("Could not open codec: {}", szErr.data());
         exit(1);
     }
 
     f = fopen(filename, "wb"); //NOLINT
     if (f == nullptr) {
-        std::println(stderr, "Could not open {}", filename);
+        fmt::println("Could not open {}", filename);
         exit(1);
     }
 
     frame = av_frame_alloc();
     if (frame == nullptr) {
-        std::println(stderr, "Could not allocate video frame");
+        fmt::println("Could not allocate video frame");
         exit(1);
     }
     frame->format = c->pix_fmt;
@@ -153,7 +151,7 @@ int main(int argc, char** argv) { //NOLINT
 
     ret = av_frame_get_buffer(frame, 0);
     if (ret < 0) {
-        std::println(stderr, "Could not allocate the video frame data");
+        fmt::println("Could not allocate the video frame data");
         exit(1);
     }
 
@@ -197,7 +195,7 @@ int main(int argc, char** argv) { //NOLINT
         for (y = 0; y < c->height; y++) {
             for (x = 0; x < c->width; x++) {
                 uint8_t u8I = frm->at<uint8_t>(y, x);
-                frame->data[0][y * frame->linesize[0] + x] = frm->at<uint8_t>(y, x);
+                frame->data[0][(y * frame->linesize[0]) + x] = frm->at<uint8_t>(y, x);
             }
         }
 
@@ -228,7 +226,7 @@ int main(int argc, char** argv) { //NOLINT
         codec->id == AV_CODEC_ID_MPEG2VIDEO) {
         (void)fwrite(endcode.data(), 1, sizeof(endcode), f);
 }
-    (void)fclose(f);
+    (void)fclose(f);//NOLINT
 
     avcodec_free_context(&c);
     av_frame_free(&frame);
