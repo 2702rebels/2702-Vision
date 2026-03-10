@@ -1,5 +1,4 @@
 #include <LogFrameType.h>
-#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -9,9 +8,9 @@ namespace fs = std::filesystem;
 
 static void WriteNewLogHeader(std::ofstream& logfile, unsigned int width,
                        unsigned int height, LogFrameType logFrameType) {
-    logfile.write(reinterpret_cast<const char*>(&logFrameType), sizeof(LogFrameType));
-    logfile.write(reinterpret_cast<char*>(&width), sizeof(width));
-    logfile.write(reinterpret_cast<char*>(&height), sizeof(height));
+    logfile.write(reinterpret_cast<const char*>(&logFrameType), sizeof(LogFrameType)); //NOLINT
+    logfile.write(reinterpret_cast<char*>(&width), sizeof(width)); //NOLINT
+    logfile.write(reinterpret_cast<char*>(&height), sizeof(height)); //NOLINT
 }
 
 int main(int argc, char* argv[]) { // NOLINT
@@ -66,8 +65,8 @@ int main(int argc, char* argv[]) { // NOLINT
                 height = stoi(tmp);
                 std::getline(curLogFile, tmp);
                 width = stoi(tmp);
-                char* frameData = new char[width * height * 3];
-                if (!curLogFile.read(frameData, width * height * 3)) {
+                std::vector<char> frameData(width * height * 3);
+                if (!curLogFile.read(frameData.data(), width * height * 3)) {
                     std::cerr << "Failed to read frame data of RGB frame" << '\n';
                     continue;
                 }
@@ -75,8 +74,7 @@ int main(int argc, char* argv[]) { // NOLINT
                     WriteNewLogHeader(outputLogFile, width, height, LogFrameType::RGB);
                     haveWrittenHeader = true;
                 }
-                outputLogFile.write(frameData, width * height * 3);
-                delete[] frameData;
+                outputLogFile.write(frameData.data(), frameData.size());
             } else if (frameType == "<<FRM>>") {
                 std::string tmp;
                 // discard u32Seq and u32Exp
@@ -86,13 +84,13 @@ int main(int argc, char* argv[]) { // NOLINT
                 int height{};
                 int width{};
                 std::getline(curLogFile, tmp);
-                height = atoi(tmp.c_str());
+                height = std::stoi(tmp);
                 std::getline(curLogFile, tmp);
-                width = atoi(tmp.c_str());
-                char* frameData = new char[width * height];
-                if (!curLogFile.read(frameData, width * height)) {
+                width = std::stoi(tmp);
+                std::vector<char> frameData(width * height);
+                if (!curLogFile.read(frameData.data(), width * height)) {
                     std::cerr << "Failed to read frame data of grayscale frame"
-                              << std::endl;
+                              << '\n';
                     continue;
                 }
                 if (!haveWrittenHeader) {
@@ -100,8 +98,7 @@ int main(int argc, char* argv[]) { // NOLINT
                                       LogFrameType::GRAYSCALE);
                     haveWrittenHeader = true;
                 }
-                outputLogFile.write(frameData, width * height);
-                delete[] frameData;
+                outputLogFile.write(frameData.data(), width * height);
             } else if (frameType == "<<FRMPNG>>") {
                 std::string tmp;
                 // discard u32Seq and u32Exp
@@ -109,14 +106,14 @@ int main(int argc, char* argv[]) { // NOLINT
                 std::getline(curLogFile, tmp);
                 int dataSize = 0;
                 std::getline(curLogFile, tmp);
-                dataSize = atoi(tmp.c_str());
-                char* pngBuf = new char[dataSize];
-                if (!curLogFile.read(pngBuf, dataSize)) {
+                dataSize = std::stoi(tmp);
+                std::vector<char> pngBuf(dataSize);
+                if (!curLogFile.read(pngBuf.data(), dataSize)) {
                     std::cerr << "Failed to read frame data of PNG frame" << '\n';
                     continue;
                 }
                 cv::Mat pngImage;
-                pngImage = cv::imdecode(cv::Mat(1, dataSize, CV_8UC1, pngBuf),
+                pngImage = cv::imdecode(cv::Mat(1, dataSize, CV_8UC1, pngBuf.data()),
                                         cv::IMREAD_UNCHANGED);
                 if (!haveWrittenHeader) {
                     WriteNewLogHeader(outputLogFile, pngImage.cols, pngImage.rows,
@@ -124,8 +121,7 @@ int main(int argc, char* argv[]) { // NOLINT
                     haveWrittenHeader = true;
                 }
                 int newFrameDataSize = pngImage.dataend - pngImage.data;
-                outputLogFile.write(reinterpret_cast<char*>(pngImage.data), newFrameDataSize);
-                delete[] pngBuf;
+                outputLogFile.write(reinterpret_cast<char*>(pngImage.data), newFrameDataSize); // NOLINT
             } else {
                 std::cerr << "Unrecognized frame type" << '\n';
             }

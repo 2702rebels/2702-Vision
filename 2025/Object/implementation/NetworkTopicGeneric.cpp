@@ -19,10 +19,10 @@ template class NetworkTopicGeneric<std::vector<std::string>>;
 template class NetworkTopicGeneric<std::vector<int64_t>>;
 // gcc magic trick, see else branches
 template <typename>
-inline constexpr bool always_false_v = false;
+inline constexpr bool alwaysFalseV = false;
 
 template <typename T>
-static std::string type_name() {
+static std::string TypeName() {
     if constexpr (std::is_same_v<T, int32_t>) {
         return "int";
     } else if constexpr (std::is_same_v<T, double>) {
@@ -50,16 +50,15 @@ static std::string type_name() {
     } else {
         // gcc magic trick, this is now dependent on the type and won't be evaluated
         // when first reading the function
-        static_assert(always_false_v<T>,
+        static_assert(alwaysFalseV<T>,
                       "Type not supported by NetworkTopicGeneric::type_name()");
     }
 }
 
 template <typename T>
 NetworkTopicGeneric<T>::NetworkTopicGeneric(nt::Topic& topic, T defaultValue)
-    : m_defaultValue(defaultValue) {
+    : m_publisher(topic.GenericPublish(TypeName<T>())), m_defaultValue(defaultValue) {
     m_subscriber = topic.GenericSubscribe();
-    m_publisher = topic.GenericPublish(type_name<T>());
 }
 
 template <typename T>
@@ -112,14 +111,14 @@ T NetworkTopicGeneric<T>::GetValue() const {
     } else {
         // gcc magic trick, this is now dependent on the type and won't be evaluated
         // when first reading the function
-        static_assert(always_false_v<T>,
+        static_assert(alwaysFalseV<T>,
                       "Type not supported by NetworkTopicGeneric::GetValue()");
     }
 }
 
 template <typename T>
 void NetworkTopicGeneric<T>::PushValue(const T& value) {
-    if constexpr (std::is_same_v<T, int32_t>) {
+    if constexpr (std::is_same_v<T, int32_t>) { // NOLINT
         m_publisher.SetInteger(value);
     } else if constexpr (std::is_same_v<T, double>) {
         m_publisher.SetDouble(value);
@@ -152,7 +151,7 @@ void NetworkTopicGeneric<T>::PushValue(const T& value) {
     } else {
         // gcc magic trick, this is now dependent on the type and won't be evaluated
         // when first reading the function
-        static_assert(always_false_v<T>,
+        static_assert(alwaysFalseV<T>,
                       "Type not supported by NetworkTopicGeneric::PushValue()");
     }
 }

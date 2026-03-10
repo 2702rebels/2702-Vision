@@ -16,7 +16,7 @@ TEST(Point2d, EqOp) {
 
 TEST(Point2d, FromExisting) {
     Rebels::Point2d point1(1.5F, 2.5F);
-    Rebels::Point2d point2(point1);
+    Rebels::Point2d point2(point1); //NOLINT
     EXPECT_EQ(point1, point2);
 }
 
@@ -50,7 +50,7 @@ TEST(Point3d, LenNegative) {
 
 TEST(Point3d, Copy) {
     Rebels::Point3d point1(0.25F, 0.5F, 0.75F);
-    Rebels::Point3d point2 = point1;
+    Rebels::Point3d point2 = point1; //NOLINT
     EXPECT_EQ(point1, point2);
 }
 
@@ -176,8 +176,8 @@ TEST(Quaternion, EqOperator) {
 
 TEST(Quaternion, CopyQuaternion) {
     Rebels::Quaternion rot(1, 0.25F, 0.4F, 0.8F);
-    Rebels::Quaternion rot2(rot);
-    Rebels::Quaternion rot3 = rot;
+    Rebels::Quaternion rot2(rot); //NOLINT
+    Rebels::Quaternion rot3 = rot; //NOLINT
     EXPECT_EQ(rot, rot2);
     EXPECT_EQ(rot, rot3);
 }

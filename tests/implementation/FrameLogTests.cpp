@@ -3,12 +3,11 @@
 #include <opencv2/opencv.hpp>
 
 TEST(FrameLog, GrayscaleHeader) {
-    VisionLogWriter* writer = new VisionLogWriter(
+    VisionLogWriter writer(
         fs::path("./grayscaleHeader.log"), LogFrameType::GRAYSCALE, 250, 750);
-    EXPECT_EQ(writer->GetLogType(), LogFrameType::GRAYSCALE);
-    EXPECT_EQ(writer->GetWidth(), 250);
-    EXPECT_EQ(writer->GetHeight(), 750);
-    delete writer;
+    EXPECT_EQ(writer.GetLogType(), LogFrameType::GRAYSCALE);
+    EXPECT_EQ(writer.GetWidth(), 250);
+    EXPECT_EQ(writer.GetHeight(), 750);
     VisionLogReader reader(fs::path("./grayscaleHeader.log"));
     EXPECT_EQ(reader.GetLogType(), LogFrameType::GRAYSCALE);
     EXPECT_EQ(reader.GetWidth(), 250);
@@ -16,30 +15,28 @@ TEST(FrameLog, GrayscaleHeader) {
 }
 
 TEST(FrameLog, RGBHeader) {
-    VisionLogWriter* writer = new VisionLogWriter(fs::path("./rgbHeader.log"),
+    VisionLogWriter writer(fs::path("./rgbHeader.log"),
                                                   LogFrameType::RGB, 1920, 1080);
-    EXPECT_EQ(writer->GetLogType(), LogFrameType::RGB);
-    EXPECT_EQ(writer->GetWidth(), 1920);
-    EXPECT_EQ(writer->GetHeight(), 1080);
-    delete writer;
+    EXPECT_EQ(writer.GetLogType(), LogFrameType::RGB);
+    EXPECT_EQ(writer.GetWidth(), 1920);
+    EXPECT_EQ(writer.GetHeight(), 1080);
     VisionLogReader reader(fs::path("./rgbHeader.log"));
     EXPECT_EQ(reader.GetLogType(), LogFrameType::RGB);
     EXPECT_EQ(reader.GetWidth(), 1920);
     EXPECT_EQ(reader.GetHeight(), 1080);
 }
 
-TEST(FrameLog, RGBFrames) {
+TEST(FrameLog, RGBFrames) { //NOLINT
     int nFrames = 3;
-    VisionLogWriter* writer = new VisionLogWriter(fs::path("./rgbFrames.log"),
+    VisionLogWriter writer(fs::path("./rgbFrames.log"),
                                                   LogFrameType::RGB, 640, 480);
     std::vector<cv::Mat> rgbFrames;
     rgbFrames.reserve(nFrames);
     for (int i = 0; i < nFrames; i++) {
         rgbFrames.emplace(rgbFrames.begin() + i, 480, 640, CV_8UC3);
         cv::randu(rgbFrames[i], cv::Scalar::all(0), cv::Scalar::all(255));
-        writer->WriteFrame(rgbFrames[i]);
+        writer.WriteFrame(rgbFrames[i]);
     }
-    delete writer;
     VisionLogReader reader(fs::path("./rgbFrames.log"));
     for (int i = 0; i < nFrames; i++) {
         std::optional<cv::Mat> curFrame = reader.TryReadFrame();
@@ -66,16 +63,15 @@ TEST(FrameLog, RGBFrames) {
 
 TEST(FrameLog, GrayscaleFrames) {
     int nFrames = 3;
-    VisionLogWriter* writer = new VisionLogWriter(
+    VisionLogWriter writer(
         fs::path("./grayscaleFrames.log"), LogFrameType::GRAYSCALE, 640, 480);
     std::vector<cv::Mat> grayscaleFrames;
     grayscaleFrames.reserve(nFrames);
     for (int i = 0; i < nFrames; i++) {
         grayscaleFrames.emplace(grayscaleFrames.begin() + i, 480, 640, CV_8UC1);
         cv::randu(grayscaleFrames[i], cv::Scalar::all(0), cv::Scalar::all(255));
-        writer->WriteFrame(grayscaleFrames[i]);
+        writer.WriteFrame(grayscaleFrames[i]);
     }
-    delete writer;
     VisionLogReader reader(fs::path("./grayscaleFrames.log"));
     for (int i = 0; i < nFrames; i++) {
         std::optional<cv::Mat> curFrame = reader.TryReadFrame();

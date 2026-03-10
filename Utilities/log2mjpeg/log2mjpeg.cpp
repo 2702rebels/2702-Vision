@@ -8,7 +8,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <vector>
 
-enum pmode {
+enum class pmode : std::uint8_t {
     pmcolor,
     pmcolor2,
     pmgrey,
@@ -22,9 +22,9 @@ enum pmode {
 
 namespace fs = std::filesystem;
 
-pmode procmode = pminput;
+static pmode procmode = pmode::pminput;
 
-void Bayer2Red(cv::Mat& matRed, const cv::Mat& matBayer) {
+static void Bayer2Red(cv::Mat& matRed, const cv::Mat& matBayer) {
     assert(matRed.rows == matBayer.rows / 2 && matRed.cols == matBayer.cols / 2);
     assert(matRed.type() == CV_8UC1 && matBayer.type() == CV_8UC1);
     assert((matBayer.rows & 1) == 0 && (matBayer.cols & 1) == 0);
@@ -39,7 +39,7 @@ void Bayer2Red(cv::Mat& matRed, const cv::Mat& matBayer) {
     }
 }
 
-void Bayer2Blue(cv::Mat& matBlue, const cv::Mat& matBayer) {
+static void Bayer2Blue(cv::Mat& matBlue, const cv::Mat& matBayer) {
     assert(matBlue.rows == matBayer.rows / 2 &&
            matBlue.cols == matBayer.cols / 2);
     assert(matBlue.type() == CV_8UC1 && matBayer.type() == CV_8UC1);
@@ -55,7 +55,7 @@ void Bayer2Blue(cv::Mat& matBlue, const cv::Mat& matBayer) {
     }
 }
 
-void Bayer2Green(cv::Mat& matGreen, const cv::Mat& matBayer) {
+static void Bayer2Green(cv::Mat& matGreen, const cv::Mat& matBayer) {
     assert(matGreen.rows == matBayer.rows / 2 &&
            matGreen.cols == matBayer.cols / 2);
     assert(matGreen.type() == CV_8UC1 && matBayer.type() == CV_8UC1);
@@ -72,7 +72,7 @@ void Bayer2Green(cv::Mat& matGreen, const cv::Mat& matBayer) {
     }
 }
 
-void Usage() {
+static void Usage() {
     std::cerr << "Usage: log2mjpeg "
                  "[-colour|colour2|grey|grey2|bayer|red|green|blue|input] infile "
                  "outdir\n";
@@ -88,38 +88,40 @@ void Usage() {
 }
 
 int main(int argc, char** argv) {
-    const char* pszIn = 0;
-    const char* pszOut = 0;
+    const char* pszIn = nullptr;
+    const char* pszOut = nullptr;
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
-            if (!strcmp(argv[i], "-colour"))
-                procmode = pmcolor;
-            else if (!strcmp(argv[i], "-colour2"))
-                procmode = pmcolor2;
-            else if (!strcmp(argv[i], "-grey"))
-                procmode = pmgrey;
-            else if (!strcmp(argv[i], "-grey2"))
-                procmode = pmgrey2;
-            else if (!strcmp(argv[i], "-bayer"))
-                procmode = pmbayer;
-            else if (!strcmp(argv[i], "-red"))
-                procmode = pmred;
-            else if (!strcmp(argv[i], "-green"))
-                procmode = pmgreen;
-            else if (!strcmp(argv[i], "-blue"))
-                procmode = pmblue;
-            else if (!strcmp(argv[i], "-input"))
-                procmode = pminput;
-            else
+            if (strcmp(argv[i], "-colour") == 0) {
+                procmode = pmode::pmcolor;
+            } else if (strcmp(argv[i], "-colour2") == 0) {
+                procmode = pmode::pmcolor2;
+            } else if (strcmp(argv[i], "-grey") == 0) {
+                procmode = pmode::pmgrey;
+            } else if (strcmp(argv[i], "-grey2") == 0) {
+                procmode = pmode::pmgrey2;
+            } else if (strcmp(argv[i], "-bayer") == 0)
+                procmode = pmode::pmbayer;
+            else if (strcmp(argv[i], "-red") == 0) {
+                procmode = pmode::pmred;
+            } else if (strcmp(argv[i], "-green") == 0) {
+                procmode = pmode::pmgreen;
+            } else if (strcmp(argv[i], "-blue") == 0) {
+                procmode = pmode::pmblue;
+            } else if (strcmp(argv[i], "-input") == 0) {
+                procmode = pmode::pminput;
+            } else {
                 Usage();
-        } else if (!pszIn)
+}
+        } else if (pszIn == nullptr) {
             pszIn = argv[i];
-        else if (!pszOut)
+        } else if (pszOut == nullptr) {
             pszOut = argv[i];
-        else
+        } else {
             Usage();
+}
     }
-    if (!pszOut) {
+    if (pszOut == nullptr) {
         Usage();
         return 1;
     }
@@ -137,43 +139,43 @@ int main(int argc, char** argv) {
         }
         cv::Mat imgOut;
         switch (procmode) {
-        case pminput:
+        case pmode::pminput:
             imgOut = img.value();
             break;
-        case pmgrey: {
+        case pmode::pmgrey: {
             cv::Mat matGrey(img.value().rows, img.value().cols, CV_8UC1);
             Bayer2Grey(matGrey, img.value());
             imgOut = matGrey;
         } break;
-        case pmgrey2: {
+        case pmode::pmgrey2: {
             cv::Mat matGrey(img.value().rows / 2, img.value().cols / 2, CV_8UC1);
             Bayer2HalfGrey(matGrey, img.value());
             imgOut = matGrey;
         } break;
-        case pmbayer:
+        case pmode::pmbayer:
             imgOut = img.value();
             break;
-        case pmred: {
+        case pmode::pmred: {
             cv::Mat matRed(img.value().rows / 2, img.value().cols / 2, CV_8UC1);
             Bayer2Red(matRed, img.value());
             imgOut = matRed;
         } break;
-        case pmgreen: {
+        case pmode::pmgreen: {
             cv::Mat matGreen(img.value().rows / 2, img.value().cols / 2, CV_8UC1);
             Bayer2Green(matGreen, img.value());
             imgOut = matGreen;
         } break;
-        case pmblue: {
+        case pmode::pmblue: {
             cv::Mat matBlue(img.value().rows / 2, img.value().cols / 2, CV_8UC1);
             Bayer2Blue(matBlue, img.value());
             imgOut = matBlue;
         } break;
-        case pmcolor2: {
+        case pmode::pmcolor2: {
             cv::Mat matRGB(img.value().rows / 2, img.value().cols / 2, CV_8UC3);
             Bayer2HalfRGB(matRGB, img.value());
             imgOut = matRGB;
         } break;
-        case pmcolor:
+        case pmode::pmcolor:
         default: {
             cv::Mat matRGB(img.value().rows, img.value().cols, CV_8UC3);
             Bayer2RGB(matRGB, img.value());
@@ -184,7 +186,7 @@ int main(int argc, char** argv) {
         cv::imencode(".jpg", imgOut, vJPEG);
         std::ofstream outfile(std::string(pszOut) + "/" + std::to_string(nSeq) +
                               ".jpg");
-        outfile.write((const char*)vJPEG.data(), vJPEG.size());
+        outfile.write(reinterpret_cast<const char*>(vJPEG.data()), vJPEG.size()); //NOLINT
         nSeq++;
     }
     return 0;
