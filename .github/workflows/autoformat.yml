@@ -9,9 +9,9 @@ jobs:
   clang-format:
     #runs-on: ubuntu-latest
     runs-on: [self-hosted, linux]
-    permissions:
-      contents: write
-
+    concurrency:
+      group: ${{github.workflow}}-${{github.ref}}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
         with:
