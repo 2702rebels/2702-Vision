@@ -39,7 +39,7 @@ bool bFirstFrame = true;
 
 SerialPort motorControllerPort;
 
-class ImgProc : public FrmProcessor {
+class ImgProc : public FrmProcessor { //NOLINT
     cv::Mat mMatLastFrame;
     std::mutex mMtxLastFrame;
 

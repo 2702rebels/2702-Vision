@@ -8,10 +8,10 @@
 
 #include <LoggingUtils.h>
 
-static constexpr int WIDTH = 640;
-static constexpr int HEIGHT = 480;
-static constexpr int FRAME_RATE = 30;
-static constexpr int BITRATE = 40000;
+static constexpr int width = 640;
+static constexpr int height = 480;
+static constexpr int frameRate = 30;
+static constexpr int bitrate = 40000;
 
 #include "LogPlayer.h"
 #include "logtostdvideo.h"
@@ -57,7 +57,7 @@ int main(int argc, char** argv) { //NOLINT
                     (entry.path().parent_path() /
                      (entry.path().filename().string() + "filtered.mp4"))
                         .string(),
-                    WIDTH, HEIGHT, FRAME_RATE, BITRATE);
+                    width, height, frameRate, bitrate);
                 LogPlayer lp(entry.path().c_str(), videoLogProc);
                 while (true) {
                     if (bStop) {
@@ -80,7 +80,7 @@ int main(int argc, char** argv) { //NOLINT
             (fs::path(argv[1]).parent_path() /
              ((fs::path(argv[1]).filename().string() + "filtered.mp4")))
                 .string(),
-            WIDTH, HEIGHT, FRAME_RATE, BITRATE);
+            width, height, frameRate, bitrate);
         LogPlayer lp(argv[1], videoLogProc);
         while (true) {
             if (bStop) {

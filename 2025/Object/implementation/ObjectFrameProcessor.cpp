@@ -11,9 +11,9 @@
 namespace fs = std::filesystem;
 
 // instantiate static var
-template <ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
-          ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering
-          UseOutputFiltering>
+template <ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,//NOLINT
+          ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering //NOLINT
+          UseOutputFiltering> //NOLINT
 int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets,
                              UseOutputFiltering>::m_i64TimeOffset; //NOLINT
 
@@ -268,8 +268,8 @@ Rebels::Point2d
 ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                      MultipleObjectDetection, SendPackets, UseOutputFiltering>::
     CalculateCoralVector(const std::vector<cv::Point>& contour,
-                           double focalLength, double actualDiamater,
-                           const cv::Point2d& cameraCenter) {
+                           double /*focalLength*/, double /*actualDiamater*/,
+                           const cv::Point2d& /*cameraCenter*/) {
     cv::RotatedRect rect = cv::fitEllipse(contour);
     // Calculate the vector from the sensor to the object
     Rebels::Point3d v(
@@ -443,12 +443,11 @@ void ObjectFrameProcessor<
 }
 
 static std::chrono::system_clock::time_point ToTimePoint(const timeval& tv) {
-    using namespace std::chrono;
 
-    auto sec = seconds{tv.tv_sec};
-    auto usec = microseconds{tv.tv_usec};
+    auto sec = std::chrono::seconds{tv.tv_sec};
+    auto usec = std::chrono::microseconds{tv.tv_usec};
 
-    return system_clock::time_point{sec + usec};
+    return std::chrono::system_clock::time_point{sec + usec};
 }
 
 struct EmptyStruct {};
@@ -460,7 +459,7 @@ template <ObjLatencyReporting LatencyReporting,
 cv::Mat
 ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                      MultipleObjectDetection, SendPackets, UseOutputFiltering>::
-    ProcessFrameWithRet(int nCam, const CameraFrame* pcf) {
+    ProcessFrameWithRet(int nCam, const CameraFrame* pcf) { //NOLINT
     spdlog::info("Have Frame from cam {}: {}x{}", nCam, pcf->nRows(),
                  pcf->nCols());
     cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, pcf->pu8Image());

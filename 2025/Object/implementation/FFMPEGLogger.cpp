@@ -56,7 +56,10 @@ FFMPEGLogger::FFMPEGLogger(const std::string& filepath, int width, int height,
     }
 
     // Write header
-    avformat_write_header(m_logCtx, nullptr);
+    if (avformat_write_header(m_logCtx, nullptr) < 0)
+    {
+        throw std::runtime_error("Could not write header");
+    }
     swsCtx = sws_getContext(width, height, AV_PIX_FMT_RGB24, width, height,
                             AV_PIX_FMT_YUV420P, SWS_BILINEAR, nullptr, nullptr,
                             nullptr);

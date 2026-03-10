@@ -33,7 +33,7 @@ static void Signalhandler(int nSig) {
     bStop = true;
 }
 
-int main() {
+int main() { //NOLINT
     SetupTextLogger();
     (void)signal(2, Signalhandler);
     asio::io_context ioContext;

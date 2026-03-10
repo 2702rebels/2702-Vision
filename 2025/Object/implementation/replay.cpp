@@ -14,13 +14,15 @@ bool bStop = false;
 
 #include "LogPlayer.h"
 
-enum {
-IMGPROC_GUI = 1
-};
-
 #include "ObjectFrameProcessor.h"
 
+void OnInterrupt(int signal)
+{
+    bStop = true;
+}
+
 int main(int argc, char** argv) {
+    signal(2, OnInterrupt);
     if (argc != 4) {
         error("Usage: {} inputfile width height", argv[0]);
         error("try 640x480 for width and height");
@@ -33,7 +35,7 @@ int main(int argc, char** argv) {
                          ObjSendPackets::OFF, ObjUseOutputFiltering::ON>
         ip(width, height);
     LogPlayer lp(argv[1], ip);
-    while (true) {
+    while (!bStop) { //NOLINT
         if (!lp.bNextFrame()) {
             info("About to rewind");
             lp.vRewind();
