@@ -1,8 +1,7 @@
 #include <FFMPEGLogger.h>
 #include <opencv2/imgproc.hpp>
 #include <spdlog/spdlog.h>
-
-using namespace spdlog;
+#include <LoggingUtils.h>
 
 FFMPEGLogger::FFMPEGLogger(const std::string& filepath, int width, int height,
                            int fps, int bitrate) {
@@ -71,13 +70,13 @@ void FFMPEGLogger::LogFrame(const cv::Mat& originalFrame) {
     curFrame->width = frame.cols;
     curFrame->height = frame.rows;
     av_frame_get_buffer(curFrame, 32);
-    uint8_t* srcSlices[1] = {frame.data};
-    int srcStride[1] = {static_cast<int>(frame.step)};
+    uint8_t* srcSlices[1] = {frame.data}; //NOLINT
+    int srcStride[1] = {static_cast<int>(frame.step)}; //NOLINT
     sws_scale(swsCtx, srcSlices, srcStride, 0, frame.rows, curFrame->data,
-              curFrame->linesize);
+              curFrame->linesize); //NOLINT
     curFrame->pts = m_frameIndex++;
     AVPacket packet;
-    av_init_packet(&packet);
+    av_init_packet(&packet); //NOLINT
     avcodec_send_frame(m_logCodecCtx, curFrame);
     while (avcodec_receive_packet(m_logCodecCtx, &packet) == 0) {
         av_interleaved_write_frame(m_logCtx, &packet);

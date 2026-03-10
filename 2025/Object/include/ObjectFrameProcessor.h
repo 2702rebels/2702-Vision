@@ -154,23 +154,23 @@ class ObjectFrameProcessor : public FrmProcessor {
      * part of a valid detection(white) or not(black). To tune these values,
      * change them in the processorSettings.txt file.
      * @param frame - The raw input frame from the camera.
-     * @param pv_hue_min - If a pixel's hue is lower than this, it will be not
+     * @param pvHueMin - If a pixel's hue is lower than this, it will be not
      * valid.
-     * @param pv_hue_max - If a pixel's hue is higher than this, it will not be
+     * @param pvHueMin - If a pixel's hue is higher than this, it will not be
      * valid.
-     * @param saturation_min - If a pixel's saturation is lower than this, it will
+     * @param saturationMin - If a pixel's saturation is lower than this, it will
      * not be valid.
-     * @param saturation_min - If a pixel's saturation is higher than this, it
+     * @param saturationMax - If a pixel's saturation is higher than this, it
      * will not be valid.
-     * @param value_min - If a pixel's brightness is lower than this, it will not
+     * @param valueMin - If a pixel's brightness is lower than this, it will not
      * be valid.
-     * @param value_max - If a pixel's brightness is lower than this, it will not
+     * @param valueMax - If a pixel's brightness is lower than this, it will not
      * be valid.
      * @returns The filtered frame as a @ref cv::Mat.
      */
-    cv::Mat FilterHSVInverted(const cv::Mat& frame, int pv_hue_min,
-                                int pv_hue_max, int saturation_min,
-                                int saturation_max, int value_min, int value_max);
+    cv::Mat FilterHSVInverted(const cv::Mat& frame, int pvHueMin,
+                                int pvHueMax, int saturationMin,
+                                int saturationMax, int valueMin, int valueMax);
 
     /*!
      * @brief Returns object distance on the floor to the center of the robot in
@@ -178,15 +178,15 @@ class ObjectFrameProcessor : public FrmProcessor {
      * of the robot in radians.
      * @param contour - The cylinder fitted contour as provided by @ref
      * fit_cylinder_contour.
-     * @param focal_length - The focal length of the camera.
-     * @param actual_diamater - The actual diamater of the game piece(in this case
+     * @param focalLength - The focal length of the camera.
+     * @param actualDiamater - The actual diamater of the game piece(in this case
      * the coral).
-     * @param camera_center - The center of the camera as a Point2d, a constant.
+     * @param cameraCenter - The center of the camera as a Point2d, a constant.
      */
     Rebels::Point2d CalculateCoralVector(const std::vector<cv::Point>& contour,
-                                           double focal_length,
-                                           double actual_diameter,
-                                           const cv::Point2d& camera_center);
+                                           double focalLength,
+                                           double actualDiamater,
+                                           const cv::Point2d& cameraCenter);
 
     /*!
      * @brief Takes a C-style array of 4 points and orders them starting from

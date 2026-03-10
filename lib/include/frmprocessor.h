@@ -19,7 +19,7 @@ public:
   virtual ~CameraFrame() {}
   virtual int nRows() const { return m_nRows; }
   virtual int nCols() const { return m_nCols; }
-  virtual uint8_t const *pu8Image() const { return m_pu8Img; }
+  virtual uint8_t *pu8Image() const { return m_pu8Img; }
   virtual uint8_t *pu8Image() { return m_pu8Img; }
   virtual const struct timeval *ts() const { return &m_ts; }
 };

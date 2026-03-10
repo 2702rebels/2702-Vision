@@ -58,7 +58,7 @@ static void ShowHelp() {
          "- shuts the server down\nhelp - displays this text");
 }
 
-/*! \brief Shuts down the client. Note that this is not an immediate effect,
+/*! \brief Shuts down the client. Note that thisf is not an immediate effect,
  * program will run for another tick before exiting. */
 static void ShutdownClient() {
     bStop = true;
@@ -91,7 +91,7 @@ static void PrintNetworkTableValues() {
 /*! \brief Pushes a new coral distance value. User input is obtained through
  * cin, which pauses execution so the client may disconnect from the server for
  * a short time*/
-void pushDistanceValue() {
+void PushDistanceValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
@@ -101,22 +101,22 @@ void pushDistanceValue() {
 /*! \brief Pushes a new coral angle value. User input is obtained through cin,
  * which pauses execution so the client may disconnect from the server for a
  * short time*/
-void pushAngleValue() {
+void PushAngleValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
     coralAngleTopic.SetDefault(stof(value));
 }
 
-int main(int argc, char** argv) {
+int main(int /*argc*/, char** /*argv*/) {
     SetupTextLogger();
-    signal(SIGINT, Sighandler); // Handles Ctrl+C interrupts
+    (void)signal(SIGINT, Sighandler); // Handles Ctrl+C interrupts
     // Initialize the commands
     commandMap["help"] = ShowHelp;
     commandMap["stop"] = ShutdownClient;
     commandMap["print"] = PrintNetworkTableValues;
-    commandMap["pushdist"] = pushDistanceValue;
-    commandMap["pushangle"] = pushAngleValue;
+    commandMap["pushdist"] = PushDistanceValue;
+    commandMap["pushangle"] = PushAngleValue;
     nt::NetworkTableInstance netTableManager =
         nt::NetworkTableInstance::GetDefault();
     netTableManager.StartClient4("testnettableclient");

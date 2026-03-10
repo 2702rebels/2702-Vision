@@ -212,7 +212,7 @@ const T& ObjectDetectionConfig<T>::Get() {
 }
 
 template <typename T>
-void ObjectDetectionConfig<T>::RefreshConfigStructure() {
+void ObjectDetectionConfig<T>::RefreshConfigStructure() { //NOLINT
     for (auto& configValue : m_configValues) {
         std::visit(
             [&](auto& value) {

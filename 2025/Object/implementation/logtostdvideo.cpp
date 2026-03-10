@@ -8,12 +8,10 @@
 
 #include <LoggingUtils.h>
 
-using namespace std;
-
-#define WIDTH 640
-#define HEIGHT 480
-#define FRAME_RATE 20
-#define BITRATE 40000
+static constexpr int WIDTH = 640;
+static constexpr int HEIGHT = 480;
+static constexpr int FRAME_RATE = 30;
+static constexpr int BITRATE = 40000;
 
 #include "LogPlayer.h"
 #include "logtostdvideo.h"
@@ -21,7 +19,6 @@ using namespace std;
 #include <filesystem>
 #include <spdlog/spdlog.h>
 #include <string>
-using namespace spdlog;
 
 bool bStop = false;
 namespace fs = std::filesystem;
@@ -35,7 +32,7 @@ StdVideoLogProc::StdVideoLogProc(const std::string& outputPath,
       m_filteredLogger(outputPathFiltered, width, height, fps, bitrate) {}
 
 void StdVideoLogProc::ProcessFrame(int nCam, const CameraFrame* pcf) {
-    cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
+    cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, pcf->pu8Image());
     m_logger.LogFrame(frame);
     cv::Mat filteredFrame = m_imageProcessor.ProcessFrameWithRet(nCam, pcf);
     m_filteredLogger.LogFrame(filteredFrame);
@@ -43,7 +40,7 @@ void StdVideoLogProc::ProcessFrame(int nCam, const CameraFrame* pcf) {
     m_frameCount++;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) { //NOLINT
     SetupTextLogger();
     if (argc != 2) {
         error("Usage: {} inputdir|inputfile", argv[0]);

@@ -47,7 +47,7 @@ class ImgProc : public FrmProcessor {
     ~ImgProc() override = default;
 
     void ProcessFrame(int  /*nCam*/, const CameraFrame* pcf) override {
-        cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
+        cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, const_cast<uchar*>(pcf->pu8Image()));
         if (mMtxLastFrame.try_lock()) {
             mMatLastFrame = frame;
             mMtxLastFrame.unlock();
@@ -327,7 +327,7 @@ std::pair<int, int> GetPanFOV() {
     return {minPan, maxPan};
 }
 
-int main(int  /*argc*/, char**  /*argv*/) {
+int main(int  /*argc*/, char**  /*argv*/) { //NOLINT
     SetupTextLogger();
     std::string cameraPath;
     std::cout << "Enter camera path(eg /dev/video0): ";
@@ -405,13 +405,13 @@ int main(int  /*argc*/, char**  /*argv*/) {
         std::vector<cv::Point2i> boardPositions;
         int curLeftEdge = panFov.first;
         int curTopEdge = tiltFov.first;
-        if ((widthUnusedSpace / nChessboardsWide) <
+        if ((widthUnusedSpace / nChessboardsWide) < //NOLINT
             round(widthUnusedSpace / nChessboardsWide)) {
             curLeftEdge += floor(widthUnusedSpace / nChessboardsWide);
         } else {
             curLeftEdge += ceil(widthUnusedSpace / nChessboardsWide);
         }
-        if ((heightUnusedSpace / nChessboardsTall) <
+        if ((heightUnusedSpace / nChessboardsTall) < //NOLINT
             round(heightUnusedSpace / nChessboardsTall)) {
             curTopEdge += floor(heightUnusedSpace / nChessboardsTall);
         } else {

@@ -15,7 +15,7 @@ template <ObjLatencyReporting LatencyReporting, ObjVideoDebuggingInfo VideoDebug
           ObjMultipleObjectDetection MultipleObjectDetection, ObjSendPackets SendPackets, ObjUseOutputFiltering
           UseOutputFiltering>
 int64_t ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection, SendPackets,
-                             UseOutputFiltering>::m_i64TimeOffset;
+                             UseOutputFiltering>::m_i64TimeOffset; //NOLINT
 
 template <ObjLatencyReporting LatencyReporting,
           ObjVideoDebuggingInfo VideoDebugging, ObjUseGui UseGui,
@@ -193,7 +193,7 @@ template <ObjLatencyReporting LatencyReporting,
 void ObjectFrameProcessor<
     LatencyReporting, VideoDebugging, UseGui, MultipleObjectDetection,
     SendPackets, UseOutputFiltering>::OnTimeSync(const nt::Event& e) {
-    if ((e.flags & NT_EVENT_TIMESYNC) != 0u) {
+    if ((e.flags & NT_EVENT_TIMESYNC) != 0U) {
         spdlog::info("tscb::: Have TIMESYNC\n");
         const nt::TimeSyncEventData* ptsed = e.GetTimeSyncEventData();
         m_i64TimeOffset = ptsed->serverTimeOffset;
@@ -268,8 +268,8 @@ Rebels::Point2d
 ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
                      MultipleObjectDetection, SendPackets, UseOutputFiltering>::
     CalculateCoralVector(const std::vector<cv::Point>& contour,
-                           double focal_length, double actual_diameter,
-                           const cv::Point2d& camera_center) {
+                           double focalLength, double actualDiamater,
+                           const cv::Point2d& cameraCenter) {
     cv::RotatedRect rect = cv::fitEllipse(contour);
     // Calculate the vector from the sensor to the object
     Rebels::Point3d v(
@@ -345,9 +345,9 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
 
     cv::RotatedRect ellipse = cv::fitEllipse(contour);
     cv::Rect rect = ellipse.boundingRect();
-    cv::Point2f points[4];
-    ellipse.points(points);
-    std::array<cv::Point2f, 4> pointsSorted = OrderPointArray(points);
+    std::array<cv::Point2f, 4> points{};
+    ellipse.points(points.data());
+    std::array<cv::Point2f, 4> pointsSorted = OrderPointArray(points.data());
     // Sort points to get top-left in right spot
     cv::Point center = (rect.br() + rect.tl()) * 0.5;
     float majorAxisLength = std::max(rect.width, rect.height);
@@ -463,7 +463,7 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
     ProcessFrameWithRet(int nCam, const CameraFrame* pcf) {
     spdlog::info("Have Frame from cam {}: {}x{}", nCam, pcf->nRows(),
                  pcf->nCols());
-    cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, (void*)pcf->pu8Image());
+    cv::Mat frame(pcf->nRows(), pcf->nCols(), CV_8UC3, pcf->pu8Image());
     if (m_unfilteredLogger) {
         m_unfilteredLogger->AddFrameToQueueAsync(frame);
     }
@@ -583,7 +583,7 @@ ObjectFrameProcessor<LatencyReporting, VideoDebugging, UseGui,
             while (corals.size() < 4) {
                 corals.emplace_back();
             }
-            long time =
+            int64_t time =
                 nt::Now() + m_i64TimeOffset -
                 std::chrono::duration_cast<std::chrono::microseconds>(frameProcDelta)
                     .count();
