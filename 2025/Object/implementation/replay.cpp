@@ -22,7 +22,7 @@ void OnInterrupt(int /*signal*/)
 }
 
 int main(int argc, char** argv) {
-    signal(2, OnInterrupt);
+    (void)signal(2, OnInterrupt);
     if (argc != 4) {
         error("Usage: {} inputfile width height", argv[0]);
         error("try 640x480 for width and height");
