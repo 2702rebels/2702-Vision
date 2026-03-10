@@ -50,7 +50,7 @@ static std::string TypeName() {
     } else {
         // gcc magic trick, this is now dependent on the type and won't be evaluated
         // when first reading the function
-        static_assert(alwaysFalseV<T>,
+        static_assert(ALWAYS_FALSE_V<T>,
                       "Type not supported by NetworkTopicGeneric::type_name()");
     }
 }
@@ -111,7 +111,7 @@ T NetworkTopicGeneric<T>::GetValue() const {
     } else {
         // gcc magic trick, this is now dependent on the type and won't be evaluated
         // when first reading the function
-        static_assert(alwaysFalseV<T>,
+        static_assert(ALWAYS_FALSE_V<T>,
                       "Type not supported by NetworkTopicGeneric::GetValue()");
     }
 }
@@ -151,7 +151,7 @@ void NetworkTopicGeneric<T>::PushValue(const T& value) {
     } else {
         // gcc magic trick, this is now dependent on the type and won't be evaluated
         // when first reading the function
-        static_assert(alwaysFalseV<T>,
+        static_assert(ALWAYS_FALSE_V<T>,
                       "Type not supported by NetworkTopicGeneric::PushValue()");
     }
 }

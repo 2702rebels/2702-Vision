@@ -290,7 +290,7 @@ void ObjectDetectionConfig<T>::RefreshConfigStructure() { // NOLINT
                         reflection->AddInt64(&currentConfigStructure, field, val);
                     }
                 } else {
-                    static_assert(alwaysFalseV<T>,
+                    static_assert(ALWAYS_FALSE_V<T>,
                                   "Unsupported ValueType provided to "
                                   "ObjectDetectionConfig::RefreshConfigStructure");
                 }
