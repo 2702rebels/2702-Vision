@@ -2,7 +2,6 @@
 #include <iostream>
 #include <print>
 #include <vector>
-#include <fmt/format.h>
 
 int main(int argc, char **argv) {
     // 1. Settings
@@ -61,7 +60,7 @@ int main(int argc, char **argv) {
 	std::println( "1280 800" );
 	for( int r = 0; r < 3; r++) {
 		for( int c = 0; c < 3; c++ ) {
-			fmt::print( "%.8lf ", cameraMatrix.at<double>( r, c ) );
+			std::println( "%.8lf ", cameraMatrix.at<double>( r, c ) );
 		}
 		std::println( "" );
 	}
