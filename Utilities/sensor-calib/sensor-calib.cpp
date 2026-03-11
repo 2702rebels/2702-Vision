@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 	std::println( "1280 800" );
 	for( int r = 0; r < 3; r++) {
 		for( int c = 0; c < 3; c++ ) {
-			std::println( "%.8lf ", cameraMatrix.at<double>( r, c ) );
+			std::print( "{:.8f} ", cameraMatrix.at<double>( r, c ) );
 		}
 		std::println( "" );
 	}
