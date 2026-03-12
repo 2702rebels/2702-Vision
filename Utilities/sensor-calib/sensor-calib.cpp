@@ -1,7 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
-#include <print>
 #include <vector>
+#include <fmt/format.h>
 
 int main(int argc, char **argv) {
     // 1. Settings
@@ -57,19 +57,19 @@ int main(int argc, char **argv) {
     double rms = cv::calibrateCamera(objectPoints, imagePoints, imageSize,
                                      cameraMatrix, distCoeffs, rvecs, tvecs);
 
-	std::println( "1280 800" );
+	fmt::println( "1280 800" );
 	for( int r = 0; r < 3; r++) {
 		for( int c = 0; c < 3; c++ ) {
-			std::print( "{:.8f} ", cameraMatrix.at<double>( r, c ) );
+			fmt::print( "{:.8f} ", cameraMatrix.at<double>( r, c ) );
 		}
-		std::println( "" );
+		fmt::println( "" );
 	}
 	for( int d = 0; d < 5; d++) {
-		std::print( "{:.8f} ", distCoeffs.at<double>(d) );
+		fmt::print( "{:.8f} ", distCoeffs.at<double>(d) );
 	}
-	std::println( "" );
-	std::println( "1 0 0 0" );
-	std::println( "0 0 0" );
+	fmt::println( "" );
+	fmt::println( "1 0 0 0" );
+	fmt::println( "0 0 0" );
 
     // 5. Save Results
     cv::FileStorage fs("calibration.yml", cv::FileStorage::WRITE);
