@@ -77,6 +77,6 @@ int main(int argc, char **argv) {
     fs << "distortion_coefficients" << distCoeffs;
     fs << "rms_error" << rms;
 
-    std::cout << "Calibration complete. RMS error: " << rms << std::endl;
+    std::cout << "Calibration complete. RMS error: " << rms << '\n';
     return 0;
 }
