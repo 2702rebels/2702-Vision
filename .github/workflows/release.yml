@@ -57,26 +57,34 @@ jobs:
       - name: Create artifact
         run: |
           mkdir package
-          cp -r out/build/x64-release-linux/* package
-          rm package/2025/Object/*.h
-          rm package/2025/Object/*.cc
-          rm package/2025/Object/*.cmake
-          rm -rf package/2025/Object/CMakeFiles
-          rm -rf package/calibrationdevice/CMakeFiles
-          rm package/calibrationdevice/*.cmake
-          rm package/Utilities/*.cmake
-          rm -rf package/Utilities/CMakeFiles
-          rm package/lib/*.cmake
-          rm -rf package/lib/CMakeFiles
-          rm package/*.log
+          cp -r out/build/x64-${{matrix.build_type}}-linux/* package/
+          rm -f package/*.h
+          rm -f package/*.cc
+          rm -rf package/.cmake
+          rm -f package/*.cmake
           rm -rf package/CMakeFiles
-          rm -rf package/tests/CMakeFiles
-          rm -rf package/tests/*.cmake
-          rm package/tests/*.json
+          rm -f package/*.log
           rm -rf package/vcpkg_installed
-          rm package/build.ninja
-          rm package/*.cmake
-          rm package/CMakeCache.txt
+          rm -f package/auth.json
+          rm -f package/build.ninja
+          rm -f package/compile_commands.json
+          rm -f package/CMakeCache.txt
+          rm -rf package/CMakeFiles
+          rm -f package/*.ilk
+          rm -f package/*.pdb
+          (
+            cd package
+            find . -type d -name CMakeFiles -print0 |
+            while IFS= read -r -d '' dir; do
+              parent="$(dirname "$dir")"
+              echo "Processing: $parent"
+              rm -rf $parent/CMakeFiles
+              rm -f $parent/*.cmake
+              rm -f $parent/*.ilk
+              rm -f $parent/*.pdb
+              rm -f $parent/*.json
+            done
+          )
 
       - name: Upload assets to release
         uses: softprops/action-gh-release@v2
@@ -147,23 +155,30 @@ jobs:
         shell: bash
         run: |
           mkdir package
-          cp -r out/build/x64-release-win/* package
-          rm package/2025/Object/*.h
-          rm package/2025/Object/*.cc
-          rm package/2025/Object/*.cmake
-          rm -rf package/2025/Object/CMakeFiles
-          rm -rf package/calibrationdevice/CMakeFiles
-          rm package/calibrationdevice/*.cmake
-          rm package/Utilities/*.cmake
-          rm -rf package/Utilities/CMakeFiles
-          rm package/lib/*.cmake
-          rm -rf package/lib/CMakeFiles
-          rm package/*.log
+          cp -r out/build/x64-${{matrix.build_type}}-win/* package/
+          rm -f package/*.h
+          rm -f package/*.cc
+          rm -rf package/.cmake
+          rm -f package/*.cmake
           rm -rf package/CMakeFiles
-          rm -rf package/tests/CMakeFiles
-          rm -rf package/tests/*.cmake
-          rm package/tests/*.json
+          rm -f package/*.log
           rm -rf package/vcpkg_installed
-          rm package/build.ninja
-          rm package/*.cmake
-          rm package/CMakeCache.txt
+          rm -f package/build.ninja
+          rm -f package/compile_commands.json
+          rm -f package/CMakeCache.txt
+          rm -rf package/CMakeFiles
+          rm -f package/*.ilk
+          rm -f package/*.pdb
+          (
+            cd package
+            find . -type d -name CMakeFiles -print0 |
+            while IFS= read -r -d '' dir; do
+              parent="$(dirname "$dir")"
+              echo "Processing: $parent"
+              rm -rf $parent/CMakeFiles
+              rm -f $parent/*.cmake
+              rm -f $parent/*.ilk
+              rm -f $parent/*.pdb
+              rm -f $parent/*.json
+            done
+          )
