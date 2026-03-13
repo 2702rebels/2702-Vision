@@ -41,4 +41,6 @@ public:
 	Field &operator=( Field const &src );
 	size_t nTags() const;
 	FieldTag const &operator[]( int n ) const;
+
+	void vSetIgnore( std::string const &strIgnoreList );
 };

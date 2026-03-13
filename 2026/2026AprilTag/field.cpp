@@ -162,6 +162,20 @@ FieldTag const &Field::operator[]( int n ) const
 	return m_vxTags[n];
 }
 
+void Field::vSetIgnore( std::string const &strIgnoreList )
+{
+	size_t sPos = 0;
+	size_t sEnd;
+	while ((sEnd = strIgnoreList.find( ',', sPos )) != std::string::npos) {
+		std::string strID = strIgnoreList.substr( sPos, sEnd - sPos );
+		int nIdx = atoi( strID.c_str() ) - 1;
+		if (nIdx >= m_vxTags.size()) {
+			throw std::runtime_error( "Tag specified in IgnoreList is out of range" );
+		}
+		m_vxTags[nIdx].vSetIgnore( true );
+		sPos = sEnd + 1;
+	}
+}
 
 #ifdef TESTING
 int main( int argc, char **argv)

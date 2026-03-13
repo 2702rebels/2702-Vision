@@ -40,6 +40,7 @@ int main( int argc, char **argv )
 
 	try {
 		g_field = Field( g_cf["FieldFile"].c_str() );
+		g_field.vSetIgnore( g_cf["IgnoreTags"] );
 		if( !g_mcCam.bLoad( g_cf["camfile"].c_str() ) ) {
 			return 1;
 		}

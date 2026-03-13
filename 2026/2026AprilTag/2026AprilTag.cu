@@ -57,36 +57,8 @@ Rebels::MultiCam mcCam;
 Field g_field;
 ConfigFile cf;
 
-//#define NUM_CAMERAS	2
-
-static bool grbUseTag[23] =
-{
-	false,		// 0
-	false,		// 1
-	false,		// 2
-	false,		// 3
-	false,		// 4
-	false,		// 5
-	true,		// 6
-	true,		// 7
-	true,		// 8
-	true,		// 9
-	true,		// 10
-	true,		// 11
-	false,		// 12
-	false,		// 13
-	false,		// 14
-	false,		// 15
-	false,		// 16
-	true,		// 17
-	true,		// 18
-	true,		// 19
-	true,		// 20
-	true,		// 21
-	true,		// 22
-};
-
 using ApriltagReportStructType = wpi::Struct<ApriltagReport>; // Structure class that will contain the serialization and deserialization functions for the object detection packet
+
 #define MAX_EXP	0x18000
 
 uint32_t g_u32Gain = 45;
@@ -426,7 +398,7 @@ void tscb( nt::Event const &e )
 		nt::TimeSyncEventData const *ptsed = e.GetTimeSyncEventData();
 		i64TimeOffset = ptsed->serverTimeOffset;
 		printf( "Got Offset -> %ld\n", ptsed->serverTimeOffset );
-		i64TimeOffset /= 1000000;
+//		i64TimeOffset /= 1000000;
 		time_t tCur = -i64TimeOffset;
 
 		printf( "%s\n", ctime( &tCur) );
@@ -437,98 +409,45 @@ void tscb( nt::Event const &e )
 	}
 }
 
-#if 0
-bool bSolvePose( int nCam, cv::Mat &objPoints, cv::Mat &imgPoints, CUDPSender &udpSend, timeval const &ts  )
+void vSendFrame( CUDPSender &udpSend, QXfrm const &qxfm, struct timeval const &ts )
+		
 {
-	bool bHaveSolution = false;
+	Rebels::Point3d p3dX( 1.0, 0.0, 0.0 );
+	Rebels::Point3d p3dV2 = qxfm.Rotation().RotatePoint( p3dX );
 
-	cv::Mat rvec( 3, 1, CV_64F );
-	cv::Mat tvec( 3, 1, CV_64F );
+	double fDot = p3dX.DotProduct( p3dV2 );
 
-	if (solvePnP( objPoints, imgPoints, camMatrix( nCam ), camDistortion( nCam ), rvec, tvec )) {
-		cv::Mat reprojectPoints( objPoints.rows, 1, CV_32FC2);
-		cv::projectPoints(objPoints, rvec, tvec, camMatrix(nCam), camDistortion(nCam), reprojectPoints);
+	struct timespec tsCur;
+	struct timeval tvCur;
+	struct timeval tvDelta;
 
-		float sum = 0.;
-		sum = cv::norm(reprojectPoints, imgPoints);
-
-		Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
-		Rebels::Point3d p3Tvec( tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2) );
-		Rebels::Quaternion qRot( p3Rvec );
-
-		bool bUseSolve = sum < 10.;
-
-		if (bUseSolve) {
-			// Run through the apriltag corners transformed to "camera coordinates".
-			// If there are 2 tags in view, make sure that all corners are within 14ft of the camera.
-			// If there is only a single tag in view, make sure that corners are within 60 inches
-			float fMaxDist = (objPoints.rows == 4) ? 60.F : 14.F*12.F;
-			for (int i = 0; i < objPoints.rows; i++) {
-				Rebels::Point3d p3Crnr( objPoints.at<float>(i * 3), objPoints.at<float>(i * 3 + 1), objPoints.at<float>(i * 3 + 2) );
-				p3Crnr = qRot.RotatePoint(p3Crnr) + p3Tvec;
-
-//printf( "%.3f  %.3f  %.3f\n", p3Crnr.x(), p3Crnr.y(), p3Crnr.z() );
-				if (p3Crnr.z() > fMaxDist) {
-					bUseSolve = false;
-				}
-			}
-		}
-
-		if (bUseSolve)
-		{
-			if (nCam == 0) {
-				p3Tvec += g_p3dCam0;
-			}
-			else {
-				p3Tvec += g_p3dCam1;
-			}
-
-			qRot.Inverse();
-
-			Rebels::Point3d p3dField = qRot.RotatePoint( p3Tvec );
-			p3dField *= -1.;
-			
-			Rebels::Point3d p3dV1( 0.0, 0.0, 1.0 );
-			Rebels::Point3d p3dV2 = qRot.RotatePoint( p3dV1 );
-			Rebels::Point3d p3dX( 1.0, 0.0, 0.0 );
-
-			
-			double fDot = p3dX.DotProduct( p3dV2 );
-
-			struct timespec tsCur;
-			struct timeval tvCur;
-			struct timeval tvDelta;
-
-				// Get current time since power on
-			clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
-			TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
-			// Calculate delta between when frame was catured and now.
-			timersub( &tvCur, &ts, &tvDelta );
+		// Get current time since power on
+	clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
+	TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
+	// Calculate delta between when frame was catured and now.
+	timersub( &tvCur, &ts, &tvDelta );
 //							auto serverOffset = nt::GetServerTimeOffset( nt::GetDefaultInstance() );
 //							if (serverOffset) {
 //								i64TimeOffset = serverOffset.value();
 //							}
-			int64_t time = nt::Now() + i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+//printf( "now: %lld    Offset: %ld   delta: %u\n", nt::Now(), i64TimeOffset, tvDelta.tv_usec );
+	int64_t time = nt::Now() + i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
 
-			ApriltagReport ar( 0, time );
+	ApriltagReport ar( 0, time );
 
-			ar.vSetPose( 1, p3dField.x(), p3dField.y(), atan2( p3dV2.y(), p3dV2.x() ), 0. );
+	ar.vSetPose( 1, qxfm.Translation().x(), qxfm.Translation().y(), atan2( p3dV2.y(), p3dV2.x() ), 0. );
 
-			uint8_t gru8Packet[ApriltagReportStructType::GetSize()];
-			std::span<uint8_t> sPacket(gru8Packet, sizeof(gru8Packet));
-			ApriltagReportStructType::Pack(sPacket, ar );
-			udpSend.bSend( sPacket );
-//printf( "Cam %d -> sending solution %.3f %.3f %.3f\n", nCam, p3dField.x(), p3dField.y(), atan2( p3dV2.y(), p3dV2.x() ) * 180 / 3.14159 );
-			bHaveSolution = true;
-		}
-	}
-
-	return bHaveSolution;
+	uint8_t gru8Packet[ApriltagReportStructType::GetSize()];
+	std::span<uint8_t> sPacket(gru8Packet, sizeof(gru8Packet));
+	ApriltagReportStructType::Pack(sPacket, ar );
+	udpSend.bSend( sPacket );
+//printf( "-> sending solution %.3f %.3f %.3f\n", p3dField.x(), p3dField.y(), atan2( p3dV2.y(), p3dV2.x() ) * 180 / 3.14159 );
+//printf( "-> sending solution\n" );
 }
-#endif
 
 int main( int argc, char **argv )
 {
+	bool							bSendToRio = false;
 	SyncGen							sg;
 	nt::BooleanPublisher			bpLogging;
 	nt::BooleanSubscriber			bsIsLogging;
@@ -571,6 +490,7 @@ int main( int argc, char **argv )
 
 	try {
 		g_field = Field( cf["FieldFile"].c_str() );
+		g_field.vSetIgnore( cf["IgnoreTags"] );
 		if( !mcCam.bLoad( cf["camfile"].c_str() ) ) {
 			return 1;
 		}
@@ -582,6 +502,7 @@ int main( int argc, char **argv )
 		if (nSyncFreq > 0) {
 			nCamMode = 3;
 		}
+		bSendToRio = atoi( cf["SendToRio"].c_str() ) ? true : false;
 		std::string strSyncModule;
 		if (cf.bGetSetting("SyncModule", strSyncModule)) {
 			if( !sg.bConnect( strSyncModule.c_str() )) {
@@ -705,77 +626,40 @@ int main( int argc, char **argv )
 				}
 
 				if (bHaveAllCams && !(vCamFrames[0]->u32Seq() % 4))  {
-#if 0					
-					std::vector<ATFrame> vfrms;
-
-					for (int nCam = 0; nCam < NUM_CAMERAS; nCam++ ) {
-						vfrms.push_back( *vCamFrames[nCam] );
-					}
-#endif					
-					
 #if 1
+#if 0
 					if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
 						if( ps.bSolve( qxRobot, vCamFrames ) ) {
 							Quaternion const &q = qxRobot.Rotation();
 							Point3d const &p = qxRobot.Translation();
 							printf( "(%.4f %.4f %.4f %.4f) : (%.3f %.3f %.3f)\n",
 								q.q0(), q.x(), q.y(), q.z(), p.x(), p.y(), p.z() );
+
 							bHavePose = true;
+							if (bSendToRio) {
+								vSendFrame( udpSend, qxRobot, vCamFrames[0]->ts() );
+							}
 						}
 						else {
 							bHavePose = false;
 						}
 					}
+#else
+					if (ps.bEstimate( qxRobot, vCamFrames )) {
+						if (bSendToRio) {
+							vSendFrame( udpSend, qxRobot, vCamFrames[0]->ts() );
+						}
+						else {
+							printf( "(%.4f %.4f %.4f %.4f) (%.1f %.1f %.1f)\n",
+								qxRobot.Rotation().q0(), qxRobot.Rotation().x(),
+								qxRobot.Rotation().y(), qxRobot.Rotation().z(),
+								qxRobot.Translation().x(), qxRobot.Translation().y(),
+								qxRobot.Translation().z() );
+						}
+					}
+#endif
 #endif
 					fl.vLogFrame( vCamFrames );
-#if 0
-					bool bHaveSolution = false;
-					for (int nCam = 0; !bHaveSolution && nCam < NUM_CAMERAS; nCam++) {
-						int nTags = grpFrms[nCam]->sTags();
-						if (nTags >= 2) {
-							cv::Mat objPoints(4 * nTags, 1, CV_32FC3);
-							cv::Mat imgPoints(4 * nTags, 1, CV_32FC2);
-
-							int idx = 0;
-							for (size_t t = 0; t < grpFrms[nCam]->sTags(); t++ )
-							{
-								ATDetection const &d = (*grpFrms[nCam])[t];
-								Rebels::QXfrm const &xfm = g_field[d.uId() - 1];
-//printf( "Have Detection %d\n", d.uId() );
-								for (int c = 0; c < 4; c++, idx++ ) {
-									Rebels::Point3d pn = xfm.TransformPoint(grCorners[c]);
-//									Rebels::Point3d pn = grCorners[c];
-									objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
-									imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
-								}
-							}
-
-							bHaveSolution = bSolvePose( nCam, objPoints, imgPoints, udpSend, grpFrms[nCam]->ts() );
-						}
-					}
-					for (int nCam = 0; !bHaveSolution && nCam < 2; nCam++) {
-						int nTags = grpFrms[nCam]->sTags();
-						if (nTags >= 1) {
-							cv::Mat objPoints(4 * nTags, 1, CV_32FC3);
-							cv::Mat imgPoints(4 * nTags, 1, CV_32FC2);
-
-							int idx = 0;
-							for (size_t t = 0; t < grpFrms[nCam]->sTags(); t++ )
-							{
-								ATDetection const &d = (*grpFrms[nCam])[t];
-								Rebels::QXfrm const &xfm = g_field[d.uId() - 1];
-								for (int c = 0; c < 4; c++, idx++ ) {
-									Rebels::Point3d pn = xfm.TransformPoint( grCorners[c] );
-//									Rebels::Point3d pn = grCorners[c];
-									objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
-									imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
-								}
-							}
-
-							bHaveSolution = bSolvePose( nCam, objPoints, imgPoints, udpSend, grpFrms[nCam]->ts() );
-						}
-					}
-#endif
 				}
 				if (!bLogStarted) {
 					auto bLog = bsIsLogging.Get();

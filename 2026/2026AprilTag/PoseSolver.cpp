@@ -49,30 +49,32 @@ int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 			unsigned uTagId = atd.uId();
 
 			FieldTag const &ft = m_Field[uTagId - 1];
-			Point3d const *pCorners = ft.Corners();
-			for (int i = 0; i < 4; i++ ) {
-				// Transform the corner point into the "Multi-Camera" frame of reference.
-				Point3d p3dCam = qxF2C.TransformPoint( pCorners[i] );
-//				printf( "p2dCam -> %.4f %.4f %.4f\n", p3dCam.x(), p3dCam.y(), p3dCam.z() );
+			if (!ft.bIgnore()) {
+				Point3d const *pCorners = ft.Corners();
+				for (int i = 0; i < 4; i++ ) {
+					// Transform the corner point into the "Multi-Camera" frame of reference.
+					Point3d p3dCam = qxF2C.TransformPoint( pCorners[i] );
+	//				printf( "p2dCam -> %.4f %.4f %.4f\n", p3dCam.x(), p3dCam.y(), p3dCam.z() );
 
-				Point2d p2d = cp.ProjectPoint( p3dCam );
+					Point2d p2d = cp.ProjectPoint( p3dCam );
 
-				// Get the U/V position of this corner point.
-				auto p2f = atd[i];
-				
-//				printf( "%.4f -> %.4f  ,  %.4f -> %.4f\n", p2d.u(), p2f.x, p2d.v(), p2f.y );
-				fErr = p2d.u() - p2f.x;
-				fErr2 += fErr * fErr;
-				*pv++ = fErr;
-				fErr = p2d.v() - p2f.y;
-				fErr2 += fErr * fErr;
-				*pv++ = fErr;
-				nCnt++;
+					// Get the U/V position of this corner point.
+					auto p2f = atd[i];
+					
+	//				printf( "%.4f -> %.4f  ,  %.4f -> %.4f\n", p2d.u(), p2f.x, p2d.v(), p2f.y );
+					fErr = p2d.u() - p2f.x;
+					fErr2 += fErr * fErr;
+					*pv++ = fErr;
+					fErr = p2d.v() - p2f.y;
+					fErr2 += fErr * fErr;
+					*pv++ = fErr;
+					nCnt++;
+				}
 			}
 		}
 	}
 	if (iflag == 1) {
-		printf( "iflag: %d -> %f\n", iflag, sqrt(fErr2/nCnt) );
+//		printf( "iflag: %d -> %f\n", iflag, sqrt(fErr2/nCnt) );
 	}
 	return 1;
 }
@@ -83,8 +85,16 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	int nMost = 0;
 	int nMostIdx = 0;
 	for (int i = 0; i < vatf.size(); i++) {
-		if (vatf[i]->sTags() > nMost) {
-			nMost = vatf[i]->sTags();
+		int nUsableTags = 0;
+		for (size_t t = 0; t < vatf[i]->sTags(); t++ ) {
+			ATDetection const &d = (*vatf[i])[t];
+			FieldTag const &ft = m_Field[d.uId() - 1];
+			if (!ft.bIgnore()) {
+				nUsableTags++;
+			}
+		}
+		if (nUsableTags > nMost) {
+			nMost = nUsableTags;
 			nMostIdx = i;
 		}
 	}
@@ -102,13 +112,15 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	{
 		ATDetection const &d = (*vatf[nMostIdx])[t];
 		FieldTag const &ft = m_Field[d.uId() - 1];
+		if (!ft.bIgnore()) {
 //printf( "Have Detection %d\n", d.uId() );
-		for (int c = 0; c < 4; c++, idx++ ) {
-			Rebels::Point3d pn = ft.Corners()[c];
-//			Rebels::Point3d pn = ft.RawCorner(c);
-//printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), d[c].x, d[c].y );
-			objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
-			imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
+			for (int c = 0; c < 4; c++, idx++ ) {
+				Rebels::Point3d pn = ft.Corners()[c];
+	//			Rebels::Point3d pn = ft.RawCorner(c);
+	//printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), d[c].x, d[c].y );
+				objPoints.ptr<cv::Vec3f>(0)[idx] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
+				imgPoints.ptr<cv::Point2f>(0)[idx] = d[c];
+			}
 		}
 	}
 
@@ -125,8 +137,8 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 		}
 	}
 
-	cv::Mat md( 4, 1, CV_64F );
-	for (int i = 0; i < 4; i++) {
+	cv::Mat md( 5, 1, CV_64F );
+	for (int i = 0; i < 5; i++) {
 		md.at<double>(i) = cp.dist(i);
 	}
 
@@ -148,19 +160,21 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 		{
 			ATDetection const &d = (*vatf[nMostIdx])[t];
 			FieldTag const &ft = m_Field[d.uId() - 1];
-	printf( "For Tag %d\n", d.uId() );
-			for (int c = 0; c < 4; c++, idx++ ) {
-				Rebels::Point3d pn = qxmF2S.TransformPoint(ft.Corners()[c]);
-//				Rebels::Point3d pn = qxmF2S.TransformPoint(ft.RawCorner(c));
-				Rebels::QXfrm qi = cp.getXfrm().Inverse();
-				Point3d pn1 = qi.TransformPoint(pn);
-				Rebels::Point2d p2 = cp.ProjectPoint( pn1);
+			if (!ft.bIgnore()) {
+				printf( "For Tag %d\n", d.uId() );
+				for (int c = 0; c < 4; c++, idx++ ) {
+					Rebels::Point3d pn = qxmF2S.TransformPoint(ft.Corners()[c]);
+	//				Rebels::Point3d pn = qxmF2S.TransformPoint(ft.RawCorner(c));
+					Rebels::QXfrm qi = cp.getXfrm().Inverse();
+					Point3d pn1 = qi.TransformPoint(pn);
+					Rebels::Point2d p2 = cp.ProjectPoint( pn1);
 
-	printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), p2.u(), p2.v() );
+					printf( "%.3f %.3f %.3f -> %.2f %.2f\n", pn.x(), pn.y(), pn.z(), p2.u(), p2.v() );
+				}
 			}
 		}
 #endif
-		bool bUseSolve = sum < 10.;
+		bool bUseSolve = sum < 20.;
 		if (bUseSolve) {
 #if 1
 			// the xfrm we have just computed goes from the Field coordinate system to the sensor's.
@@ -186,7 +200,13 @@ bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	// count the number of unknowns...
 	int m = 0;
 	for (auto f : vatf ) {
-		m += f->sTags() * 8;  // there are 4 corners per tag and a u,v coordinate pair per corner
+		for ( size_t s = 0; s < f->sTags(); s++) {
+			ATDetection const &d = (*f)[s];
+			FieldTag const &ft = m_Field[d.uId() - 1];
+			if (!ft.bIgnore()) {
+				m += 8;  // there are 4 corners per tag and a u,v coordinate pair per corner
+			}
+		}
 	}
 
 	if (!m) {
