@@ -7,6 +7,7 @@
 #include <asm/termbits.h>
 #include <stdio.h>
 #include <errno.h>
+#include <thread>
 
 
 class SyncGen
@@ -55,6 +56,7 @@ public:
 		if (m_fd >= 0) {
 			char szTmp[128];
 			sprintf( szTmp, "%d\n", freq );
+			std::this_thread::sleep_for(  std::chrono::milliseconds(250) );
 			write( m_fd, szTmp, strlen(szTmp) );
 			int n = read( m_fd, szTmp, sizeof(szTmp) - 1 );
 			if (n > 0) {

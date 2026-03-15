@@ -27,6 +27,7 @@
 #include <cameraserver/CameraServer.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/BooleanTopic.h>
+#include <networktables/IntegerTopic.h>
 #include <networktables/NetworkTableListener.h>
 #include <drm/drm_fourcc.h>
 
@@ -117,55 +118,7 @@ frc971::apriltag::DistCoeffs create_distortion_coefficients( int nCam ) {
 
 	CamParm const &cp = mcCam[nSen];
 
-	return frc971::apriltag::DistCoeffs{ cp.dist(0), cp.dist(1), cp.dist(2), cp.dist(3), 0.F };
-}
-
-cv::Mat camMatrix( int nCam )
-{
-	cv::Mat m( 3, 3, CV_32F );
-	if (nCam == 0) {
-		float grfMat[3][3] = {
-			{ 1139.15, 0.00, 628.77 },
-			{ 0.00, 1137.01, 338.60 },
-			{ 0, 0, 1 }
-		};
-		for (int r = 0; r < 3; r++ ) {
-			for (int c = 0; c < 3; c++ ) {
-				m.at<float>( r, c ) = grfMat[r][c];
-			}
-		}
-	}
-	else {
-		float grfMat[3][3] = {
-			{ 1114.92,    0.00, 655.70 },
-			{    0.00, 1112.39, 331.96 },
-			{    0.00,    0.00,   1 }
-		};
-		for (int r = 0; r < 3; r++ ) {
-			for (int c = 0; c < 3; c++ ) {
-				m.at<float>( r, c ) = grfMat[r][c];
-			}
-		}
-	}
-	return m;
-}
-
-cv::Mat camDistortion( int nCam )
-{
-	cv::Mat md( 4, 1, CV_64F );
-	if (nCam == 0) {
-		double grdMat[] = { -0.453151, 0.209991, -0.000833, 0.000511 };
-
-		for (int i = 0; i < 4; i++ )
-			md.at<double>(i) = grdMat[i];
-	}
-	else {
-		double grdMat[] = { -0.437922, 0.204096,  0.001379, 0.001860 };
-		for (int i = 0; i < 4; i++ )
-			md.at<double>(i) = grdMat[i];
-	}
-
-	return md;
+	return frc971::apriltag::DistCoeffs{ cp.dist(0), cp.dist(1), cp.dist(2), cp.dist(3), cp.dist(4) };
 }
 
 // makes a tag detector.
@@ -210,6 +163,8 @@ class imgProc : public nvFrmProcessor
 	bool			m_bIsLogging = false;
 	bool			m_bLoggingDone = false;
 	time_t			m_tmLogEnd;
+	uint32_t		m_u32Exposure = 0;
+	uint32_t		m_u32Gain = 0;
 
 public:
 	imgProc( MailBox<ATFrame *> &mb ) :
@@ -240,8 +195,6 @@ public:
 			if (m_bFirstAT) {
 				pCam->bSetGain( 50 );
 				pCam->bSetExposure( 1001 );
-				pCam->bSetGain( g_u32Gain );
-				pCam->bSetExposure( g_u32Exposure );
 				detector.camera_matrix = create_camera_matrix( pCam->nCam() );
 				detector.dist_coeffs = create_distortion_coefficients( pCam->nCam() );
 				detector.apriltag_detector_ = maketagdetector(tag36h11_create());
@@ -250,6 +203,14 @@ public:
 					 detector.apriltag_detector_, 
 					 detector.camera_matrix, detector.dist_coeffs);
 				m_bFirstAT = false;
+			}
+			if (m_u32Exposure != g_u32Exposure) {
+				pCam->bSetExposure( g_u32Exposure );
+				m_u32Exposure = g_u32Exposure;
+			}
+			if (m_u32Gain != g_u32Gain) {
+				pCam->bSetGain( g_u32Gain );
+				m_u32Gain = g_u32Gain;
 			}
 			
 			ATFrame *patf = new ATFrame( pCam->nCam(), pcf->u32Sequence(), pcf->ts() );
@@ -333,12 +294,12 @@ public:
 					printf( "Cam %d: OutputStream set\n", pCam->nCam() );
 				}
 				
-	#if 0
+#if 0
 				char szTmp[128];
 				sprintf( szTmp, "Exp: %lu", u64Exp );
 				cv::putText( frame, szTmp, cv::Point( 10, 20 ), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar( 255, 0, 0) );
-	#endif
-	#if 0
+#endif
+#if 0
 				uint8_t *pu8 = (uint8_t *)pcf->pu8Image();
 				for( int r = 0; r < 10; r++ ) {
 					for( int c = 0; c < 640; c++ ) {
@@ -350,7 +311,7 @@ public:
 						pu8[r * 1280 + c] = 0;
 					}
 				}
-	#endif
+#endif
 				m_outputStream.PutFrame(frame);
 				m_mtxCS.unlock();
 			}
@@ -451,6 +412,10 @@ int main( int argc, char **argv )
 	SyncGen							sg;
 	nt::BooleanPublisher			bpLogging;
 	nt::BooleanSubscriber			bsIsLogging;
+	nt::IntegerSubscriber			isExposure;
+	nt::IntegerSubscriber			isGain;
+	nt::IntegerPublisher			ipExposure;
+	nt::IntegerPublisher			ipGain;
 	bool bLogStarted = false;
 	int nSyncFreq = -1;
 	char const *pszLog = 0;
@@ -564,6 +529,12 @@ int main( int argc, char **argv )
 
 	bpLogging = ntinst.GetBooleanTopic("/Vision/PiIsLogging").Publish( pso );
 	bsIsLogging = ntinst.GetBooleanTopic("/Vision/IsLogging").Subscribe(false);
+	ipExposure = ntinst.GetIntegerTopic("/Vision/Exposure").Publish();
+	ipGain = ntinst.GetIntegerTopic("/Vision/Gain").Publish();
+	ipExposure.Set( g_u32Exposure );
+	ipGain.Set( g_u32Gain );
+	isExposure = ntinst.GetIntegerTopic("/Vision/Exposure").Subscribe( g_u32Exposure );
+	isGain = ntinst.GetIntegerTopic("/Vision/Gain").Subscribe( g_u32Gain );
 	bpLogging.Set( false );
 
 	try {
@@ -603,6 +574,8 @@ int main( int argc, char **argv )
 		while( !bStop ) {
 			ATFrame *patf;
 
+			g_u32Gain = isGain.Get( g_u32Gain );
+			g_u32Exposure = isExposure.Get( g_u32Exposure );
 			if (mbFrame.waitfor( patf, 100 )) {
 				int nCam = patf->nCam();
 

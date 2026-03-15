@@ -4,7 +4,7 @@ MAKEFLAGS := --jobs=$(shell nproc)
 #/usr/bin/clang++-17  -DGFLAGS_IS_A_DLL=0 -DGOOGLE_GLOG_DLL_DECL="" -DGOOGLE_GLOG_DLL_DECL_FOR_UNITTESTS="" -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/../include/apriltag -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/../include/apriltag/common -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/build/cccl/src/CCCL/cub -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/build/cccl/src/CCCL/libcudacxx/include -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/build/cccl/src/CCCL/thrust -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/../include/opencv4 -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/../wpilib/include/ntcore -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/../wpilib/include/wpiutil -I/home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/../include --std c++20 -O3 -O3 -DNDEBUG --cuda-gpu-arch=sm_87 --cuda-path=/usr/local/cuda-11.8 -DGTEST_HAS_PTHREAD=1 -std=c++20 -MD -MT CMakeFiles/gpu_detector_test.dir/src/gpu_detector_test.cu.o -MF CMakeFiles/gpu_detector_test.dir/src/gpu_detector_test.cu.o.d -x cuda -c /home/terry/2702-Vision/2025/2025AprilTag/apriltags_cuda/src/gpu_detector_test.cu -o CMakeFiles/gpu_detector_test.dir/src/gpu_detector_test.cu.o
 
 #CXX=g++
-OBJS=field.o ApriltagReport.o udpsender.o PoseSolver.o cfgfile.o
+OBJS=field.o ApriltagReport.o udpsender.o PoseSolver.o cfgfile.o orin-sync.o
 
 #CXXFLAGS+=-I. -I../../lib  --std c++20
 #CXXFLAGS+=-I. -I../../lib  --std c++17
