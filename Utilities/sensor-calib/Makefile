@@ -7,6 +7,11 @@ CXXFLAGS+=-g
 #CXXFLAGS+=-O2
 LDFLAGS+=$(shell pkg-config --libs-only-L opencv4)
 
+all: sensor-calib calib-select
+
 sensor-calib: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o sensor-calib $(OBJS) $(LDFLAGS) -l2702 -lopencv_calib3d -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lpthread
+
+calib-select: calib-select.o
+	$(CXX) $(CXXFLAGS) -o calib-select calib-select.o $(LDFLAGS) -lopencv_calib3d -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lpthread
 
