@@ -26,7 +26,7 @@ struct ImageMetrics {
     int         gridRow       = 0;     // 5×5 grid cell
     int         gridCol       = 0;
     int         orientBucket  = 0;     // orientation category
-    double      convergenceScore = 0.0; // corner sub-pix convergence quality
+    cv::Size    imageSize     = {};    // original image dimensions
     std::vector<cv::Point2f> corners;
     std::vector<cv::Point3f> objPoints;
 };
@@ -104,13 +104,10 @@ static const char* orientLabel(int bucket) {
     }
 }
 
-static const char* positionLabel(int row, int col) {
-    // 5x5 grid position label
-    static char buf[16];
+static std::string positionLabel(int row, int col) {
     const char* vLabels[] = { "top", "upper", "mid", "lower", "bot" };
     const char* hLabels[] = { "L", "cL", "C", "cR", "R" };
-    snprintf(buf, sizeof(buf), "%s-%s", vLabels[row], hLabels[col]);
-    return buf;
+    return std::string(vLabels[row]) + "-" + hLabels[col];
 }
 
 // ─── Analyse a single image ─────────────────────────────────────────────────
@@ -122,6 +119,8 @@ static ImageMetrics analyzeImage(const std::string& path, cv::Size boardSize,
 
     cv::Mat img = cv::imread(path, cv::IMREAD_GRAYSCALE);
     if (img.empty()) return m;
+
+    m.imageSize = img.size();
 
     // Detect checkerboard
     bool found = cv::findChessboardCorners(img, boardSize, m.corners,
@@ -256,30 +255,24 @@ static std::vector<size_t> selectOptimal(std::vector<ImageMetrics>& candidates,
     std::vector<bool> used(candidates.size(), false);
     std::vector<size_t> selected;
 
+    // Composite candidate score: area(4) + spatial(3) + orientation(2) + sharpness(1)
+    auto scoreCandidate = [&](size_t i) -> double {
+        auto& c = candidates[i];
+        int r = c.gridRow, cl = c.gridCol;
+        double spatialScore = (double)cellWeight(r, cl) / (1.0 + cellCount[r][cl]);
+        double orientScore  = 1.0 / (1.0 + orientCount[c.orientBucket]);
+        double sharpNorm    = c.sharpness / maxSharp;
+        double areaNorm     = std::sqrt(c.areaFraction / maxArea);
+        return areaNorm * 4.0 + spatialScore * 3.0 + orientScore * 2.0 + sharpNorm * 1.0;
+    };
+
     while ((int)selected.size() < targetCount) {
         double bestScore = -1;
         int    bestIdx   = -1;
 
         for (size_t i = 0; i < candidates.size(); i++) {
             if (used[i]) continue;
-            auto& c = candidates[i];
-
-            int r = c.gridRow, cl = c.gridCol;
-            double spatialScore = (double)cellWeight(r, cl) / (1.0 + cellCount[r][cl]);
-            double orientScore  = 1.0 / (1.0 + orientCount[c.orientBucket]);
-            double sharpNorm    = c.sharpness / maxSharp;
-
-            // Board area is critical for corner localization accuracy.
-            // Larger board in frame = more pixels per corner = better sub-pixel accuracy.
-            // Use sqrt to compress the range (a 10% board is great, 2% is okay, 0.5% is poor).
-            double areaNorm = std::sqrt(c.areaFraction / maxArea);
-
-            // Composite scoring:
-            //   - Board area (weight 4): most important - determines corner accuracy
-            //   - Spatial coverage (weight 3): ensures we cover the full field of view
-            //   - Orientation diversity (weight 2): decouples intrinsic parameters
-            //   - Sharpness (weight 1): tiebreaker for similar candidates
-            double score = areaNorm * 4.0 + spatialScore * 3.0 + orientScore * 2.0 + sharpNorm * 1.0;
+            double score = scoreCandidate(i);
             if (score > bestScore) {
                 bestScore = score;
                 bestIdx   = (int)i;
@@ -296,10 +289,8 @@ static std::vector<size_t> selectOptimal(std::vector<ImageMetrics>& candidates,
     }
 
     // ── Calibration validation: drop high-reprojection-error outliers ────
-    // Remove images that hurt calibration quality. Uses both:
-    //   - Relative threshold: > 2× median (catches outliers within any error range)
-    //   - Absolute threshold: > 1.0 px (good calibration should be well under 1 px)
-    // Keep validating until no outliers remain or we run out of replacements
+    // Remove images whose reprojection error exceeds a relative threshold
+    // (2× median, floored at 0.5 px to avoid over-pruning).
     const int MAX_VALIDATION_ROUNDS = (int)candidates.size();
     for (int round = 0; round < MAX_VALIDATION_ROUNDS && selected.size() >= 4; round++) {
         // Build calibration inputs from selected set
@@ -321,12 +312,12 @@ static std::vector<size_t> selectOptimal(std::vector<ImageMetrics>& candidates,
         std::sort(sorted_err.begin(), sorted_err.end());
         double medianErr = sorted_err[sorted_err.size() / 2];
 
-        // Find worst outlier: > 2× median OR > 1.0 px absolute
-        double threshold = std::max(2.0 * medianErr, 0.5); // at least 0.5 px to avoid over-pruning
+        // Find worst outlier exceeding relative threshold
+        double threshold = std::max(2.0 * medianErr, 0.5);
         double worstErr = 0;
         int worstPos = -1;
         for (size_t i = 0; i < errors.size(); i++) {
-            if ((errors[i] > threshold || errors[i] > 1.0) && errors[i] > worstErr) {
+            if (errors[i] > threshold && errors[i] > worstErr) {
                 worstErr = errors[i];
                 worstPos = (int)i;
             }
@@ -340,27 +331,21 @@ static std::vector<size_t> selectOptimal(std::vector<ImageMetrics>& candidates,
         fprintf(stderr, "  Validation round %d: removed %s (reproj error %.2f px, median %.2f px)\n",
                 round + 1, candidates[removedIdx].path.c_str(), worstErr, medianErr);
 
+        // Update counts for removed image
+        cellCount[candidates[removedIdx].gridRow][candidates[removedIdx].gridCol]--;
+        orientCount[candidates[removedIdx].orientBucket]--;
+
         // Try to find a replacement
         double bestScore = -1;
         int bestReplace = -1;
         for (size_t i = 0; i < candidates.size(); i++) {
             if (used[i]) continue;
-            auto& c = candidates[i];
-            int r = c.gridRow, cl = c.gridCol;
-            double spatialScore = (double)cellWeight(r, cl) / (1.0 + cellCount[r][cl]);
-            double orientScore  = 1.0 / (1.0 + orientCount[c.orientBucket]);
-            double sharpNorm    = c.sharpness / maxSharp;
-            double areaNorm     = std::sqrt(c.areaFraction / maxArea);
-            double score = areaNorm * 4.0 + spatialScore * 3.0 + orientScore * 2.0 + sharpNorm * 1.0;
+            double score = scoreCandidate(i);
             if (score > bestScore) {
                 bestScore = score;
                 bestReplace = (int)i;
             }
         }
-
-        // Update counts for removed image
-        cellCount[candidates[removedIdx].gridRow][candidates[removedIdx].gridCol]--;
-        orientCount[candidates[removedIdx].orientBucket]--;
 
         if (bestReplace >= 0) {
             used[bestReplace] = true;
@@ -421,7 +406,7 @@ static void printResults(const std::vector<ImageMetrics>& candidates,
                m.path.c_str(),
                m.sharpness,
                m.areaFraction * 100.0,
-               positionLabel(m.gridRow, m.gridCol),
+               positionLabel(m.gridRow, m.gridCol).c_str(),
                orientLabel(m.orientBucket),
                errors[i]);
     }
@@ -452,7 +437,7 @@ static void printResults(const std::vector<ImageMetrics>& candidates,
                        (int)(i + 1), m.path.c_str(),
                        m.sharpness,
                        m.areaFraction * 100.0,
-                       positionLabel(m.gridRow, m.gridCol),
+                       positionLabel(m.gridRow, m.gridCol).c_str(),
                        orientLabel(m.orientBucket));
             }
         }
@@ -470,6 +455,7 @@ static void printUsage(const char* prog) {
         "  -r, --recursive       Scan directory recursively\n"
         "  -n, --count <N>       Number of images to select (default: 15)\n"
         "  -b, --board <WxH>     Board size as WxH inner corners (default: 9x6)\n"
+        "  -s, --square-size <F> Square size in mm (default: 30.0)\n"
         "  -p, --pipe            Machine-readable output (one filename per line)\n"
         "  -v, --verbose         Print metrics for all analysed images\n"
         "  -h, --help            Show this help\n\n"
@@ -515,6 +501,10 @@ int main(int argc, char** argv) {
                 return 1;
             }
             boardSize = cv::Size(w, h);
+        } else if (arg == "-s" || arg == "--square-size") {
+            if (++i >= argc) { fprintf(stderr, "Error: -s requires a value\n"); return 1; }
+            squareSize = std::atof(argv[i]);
+            if (squareSize <= 0.0f) { fprintf(stderr, "Error: square size must be > 0\n"); return 1; }
         } else if (arg[0] == '-') {
             fprintf(stderr, "Error: unknown option '%s'\n", arg.c_str());
             printUsage(argv[0]);
@@ -559,8 +549,7 @@ int main(int argc, char** argv) {
                     m.sharpness, m.areaFraction * 100.0);
             // Capture image size from first valid image
             if (imageSize.width == 0) {
-                cv::Mat tmp = cv::imread(imageFiles[i], cv::IMREAD_GRAYSCALE);
-                imageSize = tmp.size();
+                imageSize = m.imageSize;
             }
         } else {
             fprintf(stderr, " - no board detected\n");
