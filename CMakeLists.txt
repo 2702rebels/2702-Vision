@@ -55,7 +55,11 @@ include("${CMAKE_CURRENT_LIST_DIR}/cmake/MultiSourcePackageFinder.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/PackageFinders.cmake")
 
 add_subdirectory(lib) # ** Important: must be first to define library targets prior to initialization of other targets
-add_subdirectory(2025/Object)
+if(NOT IS_DESKTOP)
+    add_subdirectory(2025/Object)
+endif()
 add_subdirectory(Utilities)
-add_subdirectory(calibrationdevice)
+if(NOT IS_DESKTOP)
+    add_subdirectory(calibrationdevice)
+endif()
 add_subdirectory(tests)
