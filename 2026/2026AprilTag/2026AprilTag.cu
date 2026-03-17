@@ -475,6 +475,15 @@ int main( int argc, char **argv )
 				return 1;
 			}
 		}
+		try {
+			ConfigFile cfOverrides;
+			if (cfOverrides.bLoad("overrides.cfg")) {
+				g_u32Gain = atoi( cfOverrides["Gain"].c_str() );
+				g_u32Exposure = atoi( cfOverrides["Exposure"].c_str() );
+			}
+		}
+		catch( std::exception &e ) {
+		}
 	}
 	catch( std::exception &e ) {
 		fprintf( stderr, "Error: %s\n", e.what() );
@@ -574,8 +583,20 @@ int main( int argc, char **argv )
 		while( !bStop ) {
 			ATFrame *patf;
 
-			g_u32Gain = isGain.Get( g_u32Gain );
-			g_u32Exposure = isExposure.Get( g_u32Exposure );
+			uint32_t u32Gain = isGain.Get( g_u32Gain );
+			uint32_t u32Exp  = isExposure.Get( g_u32Exposure );
+
+			if (u32Gain != g_u32Gain || u32Exp != g_u32Exposure) {
+				FILE *fp = fopen( "overrides.cfg", "wb" );
+				if (fp) {
+					fprintf( fp, "Gain:%u\nExposure:%u\n", u32Gain, u32Exp );
+					fclose( fp );
+				}
+
+				g_u32Gain = u32Gain;
+				g_u32Exposure = u32Exp;
+			}
+
 			if (mbFrame.waitfor( patf, 100 )) {
 				int nCam = patf->nCam();
 
@@ -599,6 +620,7 @@ int main( int argc, char **argv )
 				}
 
 				if (bHaveAllCams && !(vCamFrames[0]->u32Seq() % 4))  {
+//				if (bHaveAllCams)  {
 #if 1
 #if 0
 					if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
