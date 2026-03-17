@@ -207,8 +207,6 @@ bool COrinSync::bSecondarySync()
 			}
 		}
 	}
-
-	
 }
 
 bool COrinSync::bSendCamStarted()
@@ -217,8 +215,7 @@ bool COrinSync::bSendCamStarted()
 		throw std::runtime_error( "OrinSync::bSendCamStarted() Primary not set\n" );
 	}
 	
-	int nErr = sendto( m_nSock, &s_u32CAMERA_STARTED_MESSAGE, sizeof(s_u32CAMERA_STARTED_MESSAGE), 0, (struct sockaddr *)&m_vSecondaries[0].GetSockaddr(), sizeof(struct sockaddr));
-static const uint32_t s_u32CAMERA_STARTED_MESSAGE	=	0xA5270204;
+	int nErr = sendto( m_nSock, &s_u32CAMERA_STARTED_MESSAGE, sizeof(s_u32CAMERA_STARTED_MESSAGE), 0, (struct sockaddr *)&m_vSecondaries[0].GetSockaddr(), sizeof(struct sockaddr_in));
 	
 	return true;
 }

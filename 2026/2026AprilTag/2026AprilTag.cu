@@ -599,7 +599,7 @@ int main( int argc, char **argv )
 				sg.bStart( nSyncFreq );
 			}
 		}
-		else if (nSyncMode == 20) {
+		else if (nSyncMode == 2) {
 			if (!orinSync.bSendCamStarted()) {
 				fprintf( stderr, "Unable Send Cam STarted\n" );
 				return 1;
