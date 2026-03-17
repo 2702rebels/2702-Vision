@@ -47,6 +47,9 @@ LIBS+=-lcminpacks
 pose-debug: pose-debug.o $(OBJS)
 	$(CXX) $(LDFLAGS) -o pose-debug pose-debug.o $(OBJS) -l2702 $(LIBS) -Lapriltags_cuda/build -lapriltag_cuda -lapriltag -lglog -lgflags
 
+sg: sg.o
+	$(CXX) $(LDFLAGS) -o sg sg.o
+
 frc971/orin/lib971.a:
 	make -C frc971/orin
 

@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sys/mman.h>
 #include <string.h>
 #include <fcntl.h>
@@ -38,6 +41,7 @@ using namespace std;
 #include "v4lcam.h"
 #include "fbdisp.h"
 #include "nvcam.h"
+#include "orin-sync.h"
 
 #include "mbox.h"
 
@@ -409,6 +413,7 @@ void vSendFrame( CUDPSender &udpSend, QXfrm const &qxfm, struct timeval const &t
 int main( int argc, char **argv )
 {
 	bool							bSendToRio = false;
+	bool							bSendToStdout = false;
 	SyncGen							sg;
 	nt::BooleanPublisher			bpLogging;
 	nt::BooleanSubscriber			bsIsLogging;
@@ -422,6 +427,7 @@ int main( int argc, char **argv )
 	CFrameLogger	fl;
 	int nCamMode = 0;
 	int nSyncMode = 0;
+	int nSecondaries = 0;
 
 	bool bNetTableServer = false;
 
@@ -467,7 +473,11 @@ int main( int argc, char **argv )
 		if (nSyncFreq > 0) {
 			nCamMode = 3;
 		}
+		if (nSyncMode == 1) {
+			nSecondaries = atoi(cf["Secondaries"].c_str());
+		}
 		bSendToRio = atoi( cf["SendToRio"].c_str() ) ? true : false;
+		bSendToStdout = atoi( cf["SendToStdout"].c_str() ) ? true : false;
 		std::string strSyncModule;
 		if (cf.bGetSetting("SyncModule", strSyncModule)) {
 			if( !sg.bConnect( strSyncModule.c_str() )) {
@@ -546,25 +556,54 @@ int main( int argc, char **argv )
 	isGain = ntinst.GetIntegerTopic("/Vision/Gain").Subscribe( g_u32Gain );
 	bpLogging.Set( false );
 
+	COrinSync orinSync( nSyncMode == 1 ? true : false, nSecondaries );
+
 	try {
 		PoseSolver ps( g_field, mcCam );
 		CUDPSender udpSend;
 
 		// stop sync generation.  This can always be done as the SyncGen class won't try to send
 		// if it hasn't been connected to a SyncModule Arduino
-		sg.vStop();
+		sg.bStop();
 
+		
 		imgProc proc0(mbFrame);
 		imgProc proc1(mbFrame);
+
+		if (nSyncMode == 1) {
+			// Primary
+			if (!orinSync.bPrimarySync()) {
+				fprintf( stderr, "Unable to sync to Secondaries\n" );
+				return 1;
+			}
+		}
+		else if (nSyncMode == 2) {
+			// Secondary
+			if (!orinSync.bSecondarySync()) {
+				fprintf( stderr, "Unable to sync to Primary\n" );
+				return 1;
+			}
+		}
+
 		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc0 );
 		nvCamera mycam1( "/dev/video1", 1, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc1 );
 
-		// If we are setting up the SyncGenerator,
-		// stop the frame clocks.
-		if (nSyncFreq > 0) {
-			std::this_thread::yield();
-			std::this_thread::sleep_for( std::chrono::milliseconds(5) );
-			sg.vStart( nSyncFreq );
+		if (nSyncMode == 1 ) {
+			// Primary
+			// If we are setting up the SyncGenerator,
+			// start sync generator.  Note, the SyncGenerator class will ignore this request if
+			// it has not been connected
+			if (nSyncFreq > 0) {
+				std::this_thread::yield();
+				std::this_thread::sleep_for( std::chrono::milliseconds(20) );
+				sg.bStart( nSyncFreq );
+			}
+		}
+		else if (nSyncMode == 20) {
+			if (!orinSync.bSendCamStarted()) {
+				fprintf( stderr, "Unable Send Cam STarted\n" );
+				return 1;
+			}
 		}
 //		mycam0.bSetExposure( 10000 );
 //		mycam1.bSetExposure( 10000 );
@@ -644,7 +683,7 @@ int main( int argc, char **argv )
 						if (bSendToRio) {
 							vSendFrame( udpSend, qxRobot, vCamFrames[0]->ts() );
 						}
-						else {
+						if (bSendToStdout) {
 							printf( "(%.4f %.4f %.4f %.4f) (%.1f %.1f %.1f)\n",
 								qxRobot.Rotation().q0(), qxRobot.Rotation().x(),
 								qxRobot.Rotation().y(), qxRobot.Rotation().z(),

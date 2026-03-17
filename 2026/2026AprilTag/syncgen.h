@@ -13,6 +13,26 @@
 class SyncGen
 {
 	int	m_fd = -1;
+	bool bSend( char const *psz )
+	{
+		if (m_fd >= 0) {
+			char szTmp[256];
+			size_t sLen = strlen(psz);
+
+			if( write( m_fd, psz, sLen ) != sLen ) {
+				printf( "Failed to write to SyncGen\n" );
+			}
+			int n = read( m_fd, szTmp, sizeof(szTmp) - 1 );
+			if (n > 0) {
+				szTmp[n] = '\0';
+				printf( "Read %s\n", szTmp );
+			}
+			else {
+				return false;
+			}
+		}
+		return true;
+	}
 public:
 	SyncGen() :
 		m_fd( -1 )
@@ -51,28 +71,28 @@ public:
 		return true;
 	}
 
-	void vStart( int freq )
+	bool bStart( int freq )
 	{
 		if (m_fd >= 0) {
 			char szTmp[128];
 			sprintf( szTmp, "%d\n", freq );
-			std::this_thread::sleep_for(  std::chrono::milliseconds(250) );
-			write( m_fd, szTmp, strlen(szTmp) );
-			int n = read( m_fd, szTmp, sizeof(szTmp) - 1 );
-			if (n > 0) {
-				szTmp[n] = '\0';
-				printf( "Read %s\n", szTmp );
+
+			// 3 tries to send command to sync-gen arduino
+			for (int i = 0; i < 3; i++) {
+				std::this_thread::sleep_for(  std::chrono::milliseconds(100) );
+				if( bSend(szTmp) ) {
+					return true;
+				}
 			}
-			else {
-				printf( "Failed reading from SG\n" );
-				_exit(1);
-			}
+			fprintf( stderr, "Unable to start sync gen\n" );
+			return false;
 		}
+		return true;
 	}
 
-	void vStop()
+	bool bStop()
 	{
-		vStart( 0 );
+		return bStart( 0 );
 	}
 	
 };
