@@ -27,10 +27,13 @@ static const uint32_t s_u32PRIMARY_READY_MESSAGE	=	0xA5270201;
 static const uint32_t s_u32SECONDARY_READY_MESSAGE	=	0xA5270202;
 static const uint32_t s_u32START_CAMERA_MESSAGE		=	0xA5270203;
 static const uint32_t s_u32CAMERA_STARTED_MESSAGE	=	0xA5270204;
+static const uint32_t s_u32SECONDARY_REBOOT_MESSAGE =	0xA5270205;
+static const uint32_t s_u32CAMERA_FRAME_MESSAGE		=	0xA5270206;
 
 
-COrinSync::COrinSync( bool bPrimary, int nSecondaries ) :
+COrinSync::COrinSync( bool bPrimary, MailBox<ATFrame *>&mbFrame, int nSecondaries ) :
 	m_bPrimary( bPrimary ),
+	m_mbFrame( mbFrame ),
 	m_nSecondaries( nSecondaries )
 {
 	m_nSock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -65,6 +68,11 @@ COrinSync::~COrinSync()
 	}
 }
 
+void COrinSync::vSyncThread()
+{
+	
+}
+
 void COrinSync::vBind()
 {
 	struct ifaddrs *ifap, *ifa;
@@ -89,6 +97,54 @@ void COrinSync::vBind()
 		}
 	}
 	freeifaddrs(ifap); // Free the allocated memory
+}
+
+// Primary continually waits for packets
+void COrinSync::vPrimaryWorker()
+{
+	enum { WAIT_FOR_SECONDARIES, WAIT_FOR_CAM_START, RUNNING } eState = WAIT_FOR_SECONDARIES;
+	// Space for
+	//   4 bytes message id
+	//   4 bytes Sequence#
+	//	 2 bytes cam #
+	//	 2 bytes # tags
+	//	32 tags
+	//		4 corners
+	//			2 floats (2 * 4 = 8 bytes);
+	uint32_t gru8Buff[1024 + 12];
+
+	while (!m_bShutdown) {
+		struct sockaddr_in saRemote;
+		socklen_t sLen = sizeof(saRemote);
+		bool bMsgRcvd;
+
+		int nRcv = recvfrom( m_nSock, &u32Msg, sizeof(u32Msg), 0, (struct sockaddr *)&saRemote, &sLen );
+		if (nRcv >= sizeof(u32Msg)) {
+			uint32_t u32MsgId;
+			memcpy( &u32MsgId, gru8Buff, sizeof(u32MsgId) );
+			switch ( u32MsgId ) {
+			case s_u32SECONDARY_READY_MESSAGE:
+				{
+					printf( "Have 2 rdy\n" );
+					bool bNew = true;
+					for( auto &s : m_vSecondaries ) {
+						if (s.GetSockaddr().sin_addr.s_addr == saRemote.sin_addr.s_addr) {
+							bNew = false;
+							break;
+						}
+					}
+					if (bNew) {
+						m_vSecondaries.push_back(saRemote);
+					}
+					if (m_vSecondaries.size() == m_nSecondaries) {
+						eState = WAIT_FOR_CAM_START;
+					}
+				}
+				break;
+			}
+		}
+		
+	}
 }
 
 bool COrinSync::bPrimarySync()

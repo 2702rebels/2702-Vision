@@ -1,6 +1,11 @@
 #pragma once
 #include <span>
+#include <thread>
 #include <vector>
+#include <mutex>
+
+#include "mbox.h"
+#include "ATFrame.h"
 
 class CSecondary
 {
@@ -39,18 +44,24 @@ public:
 	}
 };
 
-
 class COrinSync
 {
 	int		m_nSock = -1;
 	bool	m_bPrimary = false;
 	int		m_nSecondaries = 0;
+	bool	m_bShutdown = false;
 	std::vector <CSecondary>  m_vSecondaries;
+	std::thread	m_thSync;
+	std::mutex	m_mtx;
+	MailBox<ATFrame *>	&m_mbFrame;
+
+	void vPrimaryWorker();
+	void vSyncThread();
 
 	void vBind();
 
 public:
-	COrinSync( bool bPrimary, int nSecondaries = 1 );
+	COrinSync( bool bIsPrimary, MailBox<ATFrame *> &mbFrame, int nSecondaries );
 	~COrinSync();
 
 	bool bPrimarySync();
