@@ -556,7 +556,7 @@ int main( int argc, char **argv )
 	isGain = ntinst.GetIntegerTopic("/Vision/Gain").Subscribe( g_u32Gain );
 	bpLogging.Set( false );
 
-	COrinSync orinSync( nSyncMode == 1 ? true : false, nSecondaries );
+	COrinSync orinSync( nSyncMode == 1 ? true : false, mbFrame, nSecondaries );
 
 	try {
 		PoseSolver ps( g_field, mcCam );

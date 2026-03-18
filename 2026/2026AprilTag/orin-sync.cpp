@@ -117,10 +117,25 @@ COrinSync::COrinSync( bool bPrimary, MailBox<ATFrame *>&mbFrame, int nSecondarie
 printf( "About to Bind\n" );
 	vBind();
 
+printf( "About to start thread\n" );
+	m_thSync = std::thread( &COrinSync::vSyncThread, this );
+printf( "started thread\n" );
+
+	std::this_thread::yield();
+printf( "After yield\n" );
+	while( m_mtx.try_lock() ) {
+		m_mtx.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
+
 }
 
 COrinSync::~COrinSync()
 {
+	m_bShutdown = true;
+
+	m_thSync.join();
+
 	if (m_nSock >= 0) {
 		close( m_nSock );
 	}
@@ -220,6 +235,7 @@ void COrinSync::vPrimaryWorker()
 						if (bNew) {
 							m_vSecondaries.push_back(saRemote);
 						}
+						printf( "Have %ld of %d 2ndarys\n", m_vSecondaries.size(), m_nSecondaries );
 						if (m_vSecondaries.size() == m_nSecondaries) {
 							eState = WAIT_FOR_CAM_START;
 						}
@@ -308,17 +324,6 @@ void COrinSync::vPrimaryWorker()
 bool COrinSync::bPrimarySync()
 {
 #if 1
-printf( "About to start thread\n" );
-	m_thSync = std::thread( &COrinSync::vSyncThread, this );
-printf( "started thread\n" );
-
-	std::this_thread::yield();
-printf( "After yield\n" );
-	while( m_mtx.try_lock() ) {
-		m_mtx.unlock();
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	}
-
 	m_mtx.lock();
 	m_mtx.unlock();
 	return true;
@@ -414,6 +419,13 @@ void COrinSync::vSecondaryWorker()
 	uint8_t gru8Buff[1024 + 12];
 	enum { RESTARTED, WAIT_FOR_CAM, RCVD_CAM_START, CAM_STARTED } eState;
 
+	struct sockaddr_in saBroadcast;
+
+	saBroadcast.sin_family = AF_INET;
+	saBroadcast.sin_port = htons(nSyncPort);
+	uint32_t u32Addr = (10 << 24) | ((nTeamNumber / 100) << 16) | ((nTeamNumber % 100) << 8) | 0xFF;
+	saBroadcast.sin_addr.s_addr = htonl( u32Addr ); // Broadcast
+
 	while (!m_bShutdown) {
 		struct sockaddr_in saRemote;
 		uint32_t u32Msg;
@@ -421,9 +433,12 @@ void COrinSync::vSecondaryWorker()
 		socklen_t sLen = sizeof(saRemote);
 		bool bMsgRcvd = false;
 		int nRcv = recvfrom( m_nSock, gru8Buff, sizeof(gru8Buff), 0, (struct sockaddr *)&saRemote, &sLen );
-		if (nRcv >= sizeof(uint32_t)) {
+		if (nRcv < 0 ) {
+		}
+		else if (nRcv >= sizeof(uint32_t)) {
 			bMsgRcvd = true;
 			UnPack( u32Msg, gru8Buff, sizeof(gru8Buff) );
+//			printf( "Received %08x\n", u32Msg );
 			switch( u32Msg ) {
 			case s_u32PRIMARY_READY_MESSAGE:
 				{
@@ -451,12 +466,17 @@ void COrinSync::vSecondaryWorker()
 				break;
 			}
 		}
+
+		if (!bMsgRcvd && eState == RESTARTED) {
+			int nErr = sendto( m_nSock, &s_u32SECONDARY_RESTART_MESSAGE, sizeof(s_u32CAMERA_STARTED_MESSAGE), 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
+		}
 	}
 }
 
 bool COrinSync::bSecondarySync()
 {
 #if 1
+#if 0
 printf( "About to start thread\n" );
 	m_thSync = std::thread( &COrinSync::vSyncThread, this );
 printf( "started thread\n" );
@@ -467,7 +487,7 @@ printf( "After yield\n" );
 		m_mtx.unlock();
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
-
+#endif
 	m_mtx.lock();
 	m_mtx.unlock();
 	return true;
@@ -544,10 +564,16 @@ int main( int argc, char **argv )
 #ifdef TEST_SECONDARY
 int main( int argc, char **argv )
 {
-	COrinSync os( false );
-	os.bSecondarySync();
-
-	os.bSendCamStarted();
+	try {
+		MailBox<ATFrame *> mb;
+		COrinSync os( false, mb, 0 );
+		os.bSecondarySync();
+printf( "Cameras should start...\n" );
+		os.bSendCamStarted();
+	}
+	catch( std::exception &e ) {
+		printf( "Exception: %s\n", e.what() );
+	}
 	return 0;
 }
 
