@@ -256,6 +256,7 @@ void COrinSync::vPrimaryWorker()
 						}
 						// if all secondaries have started their cameras,  signal main thread to start cameras.
 						if (nStarted == m_nSecondaries) {
+							m_mtx.unlock();
 							eState = RUNNING;
 						}
 					}
