@@ -50,12 +50,14 @@ class COrinSync
 	bool	m_bPrimary = false;
 	int		m_nSecondaries = 0;
 	bool	m_bShutdown = false;
+	bool 	m_bCamStartSent = false;
 	std::vector <CSecondary>  m_vSecondaries;
 	std::thread	m_thSync;
 	std::mutex	m_mtx;
 	MailBox<ATFrame *>	&m_mbFrame;
 
 	void vPrimaryWorker();
+	void vSecondaryWorker();
 	void vSyncThread();
 
 	void vBind();
