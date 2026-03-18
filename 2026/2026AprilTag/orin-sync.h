@@ -73,4 +73,5 @@ public:
 	bool bSendCamStarted();
 
 	bool bSend( std::span<uint8_t> const &spBuf );
+	bool bSendFrame( ATFrame *patf );
 };

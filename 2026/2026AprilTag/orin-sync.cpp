@@ -68,7 +68,6 @@ inline size_t Pack( float const f, uint8_t *pu8, size_t s )
 
 inline size_t Pack( uint16_t u16, uint8_t *pu8, size_t s )
 {
-printf( "Pack 16\n" );
 	if (s < sizeof(u16)) {
 		throw std::runtime_error( "Pack u16 - out of space"  );
 	}
@@ -78,7 +77,6 @@ printf( "Pack 16\n" );
 
 inline size_t Pack( uint32_t u32, uint8_t *pu8, size_t s )
 {
-printf( "Pack 32\n" );
 	if (s < sizeof(u32)) {
 		throw std::runtime_error( "Pack u32 - out of space"  );
 	}
@@ -211,7 +209,6 @@ void COrinSync::vPrimaryWorker()
 			bool bMsgRcvd = false;
 
 			int nRcv = recvfrom( m_nSock, gru8Buff, sizeof(gru8Buff), 0, (struct sockaddr *)&saRemote, &sLen );
-			printf( "received %d bytes\n", nRcv );
 			if (nRcv == -1 ){
 			}
 			else if (nRcv >= sizeof(uint32_t)) {
@@ -324,95 +321,9 @@ void COrinSync::vPrimaryWorker()
 
 bool COrinSync::bPrimarySync()
 {
-#if 1
 	m_mtx.lock();
 	m_mtx.unlock();
 	return true;
-#else
-	struct sockaddr_in saBroadcast;
-
-	saBroadcast.sin_family = AF_INET;
-	saBroadcast.sin_port = htons(nSyncPort);
-	uint32_t u32Addr = (10 << 24) | ((nTeamNumber / 100) << 16) | ((nTeamNumber % 100) << 8) | 0xFF;
-	saBroadcast.sin_addr.s_addr = htonl( u32Addr ); // Broadcast
-
-	while (m_vSecondaries.size() < m_nSecondaries) {
-		int nErr = sendto( m_nSock, &s_u32PRIMARY_READY_MESSAGE, sizeof(s_u32PRIMARY_READY_MESSAGE), 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
-		
-		struct sockaddr_in saRemote;
-		uint32_t u32Msg;
-
-		bool bMsgRcvd;
-		do {
-			bMsgRcvd = false;
-			socklen_t sLen = sizeof(saRemote);
-			int nRcv = recvfrom( m_nSock, &u32Msg, sizeof(u32Msg), 0, (struct sockaddr *)&saRemote, &sLen );
-			if (nRcv == sizeof(u32Msg)) {
-				bMsgRcvd = true;
-				if( u32Msg == s_u32SECONDARY_READY_MESSAGE) {
-					printf( "Have 2 rdy\n" );
-					bool bNew = true;
-					for( auto &s : m_vSecondaries ) {
-						if (s.GetSockaddr().sin_addr.s_addr == saRemote.sin_addr.s_addr) {
-							bNew = false;
-							break;
-						}
-					}
-					if (bNew) {
-						m_vSecondaries.push_back(saRemote);
-					}
-				}
-			}
-			else {
-				if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				}
-				else {
-					throw std::runtime_error( "Failed receiving from Secondary" );
-				}
-			}
-		} while (bMsgRcvd );
-	}
-
-	// At this point all secondaries have reported in and are ready so start broadcasting the Start Cameras Message
-	int nStarted = 0;
-	while (nStarted < m_vSecondaries.size()) {
-		int nErr = sendto( m_nSock, &s_u32START_CAMERA_MESSAGE, sizeof(s_u32START_CAMERA_MESSAGE), 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
-		
-		nStarted = 0;
-		struct sockaddr_in saRemote;
-		uint32_t u32Msg;
-
-		bool bMsgRcvd;
-		do {
-			bMsgRcvd = false;
-			socklen_t sLen = sizeof(saRemote);
-			int nRcv = recvfrom( m_nSock, &u32Msg, sizeof(u32Msg), 0, (struct sockaddr *)&saRemote, &sLen );
-			if (nRcv == sizeof(u32Msg)) {
-				bMsgRcvd = true;
-				if( u32Msg == s_u32CAMERA_STARTED_MESSAGE ) {
-					printf( "Have 2 cam\n" );
-					for( auto &s : m_vSecondaries ) {
-						if (s.GetSockaddr().sin_addr.s_addr == saRemote.sin_addr.s_addr) {
-							s.bCamStarted() = true;
-							nStarted++;
-						}
-						else if (s.bCamStarted()) {
-							nStarted++;
-						}
-					}
-				}
-			}
-			else {
-				if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				}
-				else {
-					throw std::runtime_error( "Failed receiving from Secondary" );
-				}
-			}
-		} while( bMsgRcvd );
-	}
-	return true;
-#endif
 }
 
 void COrinSync::vSecondaryWorker()
@@ -476,51 +387,9 @@ void COrinSync::vSecondaryWorker()
 
 bool COrinSync::bSecondarySync()
 {
-#if 1
-#if 0
-printf( "About to start thread\n" );
-	m_thSync = std::thread( &COrinSync::vSyncThread, this );
-printf( "started thread\n" );
-
-	std::this_thread::yield();
-printf( "After yield\n" );
-	while( m_mtx.try_lock() ) {
-		m_mtx.unlock();
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	}
-#endif
 	m_mtx.lock();
 	m_mtx.unlock();
 	return true;
-#else
-	while (1) {
-		struct sockaddr_in saRemote;
-		uint32_t u32Msg;
-
-		socklen_t sLen = sizeof(saRemote);
-		int nRcv = recvfrom( m_nSock, &u32Msg, sizeof(u32Msg), 0, (struct sockaddr *)&saRemote, &sLen );
-		if (nRcv == sizeof(u32Msg)) {
-			if( u32Msg == s_u32PRIMARY_READY_MESSAGE ) {
-				if (!m_vSecondaries.size()) {
-					m_vSecondaries.push_back( saRemote );
-				}
-				int nErr = sendto( m_nSock, &s_u32SECONDARY_READY_MESSAGE, sizeof(s_u32SECONDARY_READY_MESSAGE), 0, (struct sockaddr *)&saRemote, sLen);
-			}
-			else if( u32Msg == s_u32START_CAMERA_MESSAGE ) {
-				// once the START_CAMERA Message is received, return tot he main pgm.  It is responsible for starting the camera and calling
-
-				return true;
-			}
-		}
-		else {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-			}
-			else {
-				throw std::runtime_error( "Failed receiving from Secondary" );
-			}
-		}
-	}
-#endif
 }
 
 bool COrinSync::bSendCamStarted()
@@ -532,6 +401,38 @@ bool COrinSync::bSendCamStarted()
 	int nErr = sendto( m_nSock, &s_u32CAMERA_STARTED_MESSAGE, sizeof(s_u32CAMERA_STARTED_MESSAGE), 0, (struct sockaddr *)&m_vSecondaries[0].GetSockaddr(), sizeof(struct sockaddr_in));
 	
 	return true;
+}
+
+bool COrinSync::bSendFrame( ATFrame *patf )
+{
+	uint8_t gru8Buff[1024];
+	uint8_t *pu8 = gru8Buff;
+	uint8_t const *pu8End = pu8 + sizeof(gru8Buff);
+	
+	uint32_t u32Seq = patf->u32Seq();
+	uint16_t u16Cam = patf->nCam();
+	uint16_t u16Tags = patf->sTags();
+
+	pu8 += Pack( s_u32CAMERA_FRAME_MESSAGE, pu8, pu8End - pu8 );
+	pu8 += Pack( u32Seq, pu8, pu8End - pu8 );
+	pu8 += Pack( u16Cam, pu8, pu8End - pu8 );
+	pu8 += Pack( u16Tags, pu8, pu8End - pu8 );
+
+	for (uint16_t u16 = 0; u16 < u16Tags; u16++ ) {
+		ATDetection const &atd = (*patf)[u16];
+		*pu8++ = atd.uId();
+		for (int i = 0; i < 4; i++) {
+			cv::Point2f const &c = atd[i];
+			float fU = c.x;
+			float fV = c.y;
+			pu8 += Pack( fU, pu8, pu8End - pu8 );
+			pu8 += Pack( fV, pu8, pu8End - pu8 );
+		}
+	}
+
+//	printf( "Sending Frame: Tags = %d size = %ld\n", u16Tags, pu8 - gru8Buff );
+	int nErr = sendto( m_nSock, gru8Buff, pu8 - gru8Buff, 0, (struct sockaddr *)&m_vSecondaries[0].GetSockaddr(), sizeof(struct sockaddr_in));
+
 }
 
 bool COrinSync::bSend( std::span<uint8_t> const &spBuf )

@@ -428,6 +428,7 @@ int main( int argc, char **argv )
 	int nCamMode = 0;
 	int nSyncMode = 0;
 	int nSecondaries = 0;
+	int nSensorOffset = 0;
 
 	bool bNetTableServer = false;
 
@@ -476,6 +477,8 @@ int main( int argc, char **argv )
 		if (nSyncMode == 1) {
 			nSecondaries = atoi(cf["Secondaries"].c_str());
 		}
+
+		nSensorOffset = atoi( cf["SensorOffset"].c_str() );
 		bSendToRio = atoi( cf["SendToRio"].c_str() ) ? true : false;
 		bSendToStdout = atoi( cf["SendToStdout"].c_str() ) ? true : false;
 		std::string strSyncModule;
@@ -585,8 +588,8 @@ int main( int argc, char **argv )
 			}
 		}
 
-		nvCamera mycam0( "/dev/video0", 0, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc0 );
-		nvCamera mycam1( "/dev/video1", 1, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc1 );
+		nvCamera mycam0( "/dev/video0", 0 + nSensorOffset, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc0 );
+		nvCamera mycam1( "/dev/video1", 1 + nSensorOffset, 1280, 800, V4L2_PIX_FMT_GREY, nCamMode, proc1 );
 
 		if (nSyncMode == 1 ) {
 			// Primary
@@ -637,74 +640,80 @@ int main( int argc, char **argv )
 			}
 
 			if (mbFrame.waitfor( patf, 100 )) {
-				int nCam = patf->nCam();
+				if (nSyncMode ==  2) {
+					orinSync.bSendFrame( patf );
+					delete patf;
+				}
+				else {
+					int nCam = patf->nCam();
 
-				// delete previous frame
-				delete vCamFrames[nCam];
-				vCamFrames[nCam] = patf;
+					// delete previous frame
+					delete vCamFrames[nCam];
+					vCamFrames[nCam] = patf;
 
-				bool bHaveAllCams = false;
-				// If Frame from Camera 0 is valid, see if frames from
-				// all other cameras are valid and match the sequence number
-				if (vCamFrames[0]) {
-					uint32_t u32Seq = vCamFrames[0]->u32Seq();
+					bool bHaveAllCams = false;
+					// If Frame from Camera 0 is valid, see if frames from
+					// all other cameras are valid and match the sequence number
+					if (vCamFrames[0]) {
+						uint32_t u32Seq = vCamFrames[0]->u32Seq();
 
-					bHaveAllCams = true;
-					for (int i = 1; i < mcCam.nCam(); i++) {
-						if (!vCamFrames[i] || vCamFrames[i]->u32Seq() != u32Seq) {
-							bHaveAllCams = false;
-							break;
+						bHaveAllCams = true;
+						for (int i = 1; i < mcCam.nCam(); i++) {
+							if (!vCamFrames[i] || vCamFrames[i]->u32Seq() != u32Seq) {
+								bHaveAllCams = false;
+								break;
+							}
 						}
 					}
-				}
 
-				if (bHaveAllCams && !(vCamFrames[0]->u32Seq() % 4))  {
-//				if (bHaveAllCams)  {
+//					if (bHaveAllCams && !(vCamFrames[0]->u32Seq() % 4))  {
+					if (bHaveAllCams)  {
 #if 1
 #if 0
-					if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
-						if( ps.bSolve( qxRobot, vCamFrames ) ) {
-							Quaternion const &q = qxRobot.Rotation();
-							Point3d const &p = qxRobot.Translation();
-							printf( "(%.4f %.4f %.4f %.4f) : (%.3f %.3f %.3f)\n",
-								q.q0(), q.x(), q.y(), q.z(), p.x(), p.y(), p.z() );
+						if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
+							if( ps.bSolve( qxRobot, vCamFrames ) ) {
+								Quaternion const &q = qxRobot.Rotation();
+								Point3d const &p = qxRobot.Translation();
+								printf( "(%.4f %.4f %.4f %.4f) : (%.3f %.3f %.3f)\n",
+									q.q0(), q.x(), q.y(), q.z(), p.x(), p.y(), p.z() );
 
-							bHavePose = true;
+								bHavePose = true;
+								if (bSendToRio) {
+									vSendFrame( udpSend, qxRobot, vCamFrames[0]->ts() );
+								}
+							}
+							else {
+								bHavePose = false;
+							}
+						}
+#else
+						if (ps.bEstimate( qxRobot, vCamFrames )) {
 							if (bSendToRio) {
 								vSendFrame( udpSend, qxRobot, vCamFrames[0]->ts() );
 							}
+							if (bSendToStdout) {
+								printf( "(%.4f %.4f %.4f %.4f) (%.1f %.1f %.1f)\n",
+									qxRobot.Rotation().q0(), qxRobot.Rotation().x(),
+									qxRobot.Rotation().y(), qxRobot.Rotation().z(),
+									qxRobot.Translation().x(), qxRobot.Translation().y(),
+									qxRobot.Translation().z() );
+							}
 						}
-						else {
-							bHavePose = false;
-						}
-					}
-#else
-					if (ps.bEstimate( qxRobot, vCamFrames )) {
-						if (bSendToRio) {
-							vSendFrame( udpSend, qxRobot, vCamFrames[0]->ts() );
-						}
-						if (bSendToStdout) {
-							printf( "(%.4f %.4f %.4f %.4f) (%.1f %.1f %.1f)\n",
-								qxRobot.Rotation().q0(), qxRobot.Rotation().x(),
-								qxRobot.Rotation().y(), qxRobot.Rotation().z(),
-								qxRobot.Translation().x(), qxRobot.Translation().y(),
-								qxRobot.Translation().z() );
-						}
-					}
 #endif
 #endif
-					fl.vLogFrame( vCamFrames );
+						fl.vLogFrame( vCamFrames );
+					}
+					if (!bLogStarted) {
+						auto bLog = bsIsLogging.Get();
+						if (bLog) {
+							bLogStarted = true;
+							proc0.vStartLogging();
+							proc1.vStartLogging();
+						}							
+					}
 				}
-				if (!bLogStarted) {
-					auto bLog = bsIsLogging.Get();
-					if (bLog) {
-						bLogStarted = true;
-						proc0.vStartLogging();
-						proc1.vStartLogging();
-					}							
-				}
+				
 			}
-			
 		}
 	}
 	catch (std::exception &e) {
