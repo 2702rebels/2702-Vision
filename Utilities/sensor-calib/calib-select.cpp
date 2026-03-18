@@ -45,18 +45,39 @@ static bool isImageFile(const fs::path& p) {
     return false;
 }
 
-static std::vector<std::string> findImages(const std::string& dir, bool recursive) {
+static bool isUsableFile(const fs::directory_entry& e) {
+    if (e.is_regular_file()) return true;
+    return e.is_symlink() && fs::is_regular_file(e.path());
+}
+
+static std::vector<std::string> findImages(const std::vector<std::string>& paths, bool recursive) {
     std::vector<std::string> out;
-    if (recursive) {
-        for (auto& e : fs::recursive_directory_iterator(dir))
-            if (e.is_regular_file() && isImageFile(e.path()))
-                out.push_back(e.path().string());
-    } else {
-        for (auto& e : fs::directory_iterator(dir))
-            if (e.is_regular_file() && isImageFile(e.path()))
-                out.push_back(e.path().string());
+    for (auto& p : paths) {
+        fs::path fp(p);
+        if (fs::is_directory(fp)) {
+            if (recursive) {
+                for (auto& e : fs::recursive_directory_iterator(fp))
+                    if (isUsableFile(e) && isImageFile(e.path()))
+                        out.push_back(e.path().string());
+            } else {
+                for (auto& e : fs::directory_iterator(fp))
+                    if (isUsableFile(e) && isImageFile(e.path()))
+                        out.push_back(e.path().string());
+            }
+        } else if (fs::exists(fp) || fs::is_symlink(fp)) {
+            // Direct file argument — check it's an image
+            fs::directory_entry e(fp);
+            if (isUsableFile(e) && isImageFile(fp))
+                out.push_back(fp.string());
+            else
+                fprintf(stderr, "Warning: skipping '%s' (not a supported image file)\n", p.c_str());
+        } else {
+            fprintf(stderr, "Warning: '%s' does not exist, skipping\n", p.c_str());
+        }
     }
     std::sort(out.begin(), out.end());
+    // Deduplicate (in case a file is matched by both a glob and a directory arg)
+    out.erase(std::unique(out.begin(), out.end()), out.end());
     return out;
 }
 
@@ -448,11 +469,14 @@ static void printResults(const std::vector<ImageMetrics>& candidates,
 
 static void printUsage(const char* prog) {
     fprintf(stderr,
-        "Usage: %s [options] <directory>\n\n"
+        "Usage: %s [options] <path> [path ...]\n\n"
         "Analyse calibration images and select the optimal subset for\n"
         "best lens characterisation.\n\n"
+        "Paths can be directories (scanned for images) or individual image files.\n"
+        "Shell globs are expanded before reaching this program, so patterns like\n"
+        "**/*.jpg work as expected.\n\n"
         "Options:\n"
-        "  -r, --recursive       Scan directory recursively\n"
+        "  -r, --recursive       Scan directories recursively\n"
         "  -n, --count <N>       Number of images to select (default: 15)\n"
         "  -b, --board <WxH>     Board size as WxH inner corners (default: 9x6)\n"
         "  -s, --square-size <F> Square size in mm (default: 30.0)\n"
@@ -461,9 +485,11 @@ static void printUsage(const char* prog) {
         "  -h, --help            Show this help\n\n"
         "Examples:\n"
         "  %s ./images/\n"
-        "  %s -r -n 20 ./images/\n"
+        "  %s -r -n 20 ./images/ ./more-images/\n"
+        "  %s img1.jpg img2.jpg img3.jpg\n"
+        "  %s images/**/*.png\n"
         "  sensor-calib $(%s -p ./images/)\n",
-        prog, prog, prog, prog);
+        prog, prog, prog, prog, prog, prog);
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────
@@ -475,7 +501,7 @@ int main(int argc, char** argv) {
     int  targetCount = 15;
     cv::Size boardSize(9, 6);
     float squareSize = 30.0f;
-    std::string directory;
+    std::vector<std::string> paths;
 
     // Parse arguments
     for (int i = 1; i < argc; i++) {
@@ -510,27 +536,22 @@ int main(int argc, char** argv) {
             printUsage(argv[0]);
             return 1;
         } else {
-            directory = arg;
+            paths.push_back(arg);
         }
     }
 
-    if (directory.empty()) {
-        fprintf(stderr, "Error: no directory specified\n\n");
+    if (paths.empty()) {
+        fprintf(stderr, "Error: no files or directories specified\n\n");
         printUsage(argv[0]);
         return 1;
     }
 
-    if (!fs::is_directory(directory)) {
-        fprintf(stderr, "Error: '%s' is not a directory\n", directory.c_str());
-        return 1;
-    }
-
     // ── Step 1: Find images ──────────────────────────────────────────────
-    auto imageFiles = findImages(directory, recursive);
+    auto imageFiles = findImages(paths, recursive);
     int totalScanned = (int)imageFiles.size();
 
     if (totalScanned == 0) {
-        fprintf(stderr, "No image files found in '%s'\n", directory.c_str());
+        fprintf(stderr, "No image files found in the specified paths\n");
         return 1;
     }
     fprintf(stderr, "Found %d image files, analysing...\n", totalScanned);
