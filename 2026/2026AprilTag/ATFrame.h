@@ -7,8 +7,11 @@ class ATDetection
 {
 	unsigned					m_uId;
 	std::vector<cv::Point2f>	m_vxCorners;
+	bool						m_bUse;				// true if Apriltag is usable.
 public:
-	ATDetection( unsigned uId, double grCrnrs[4][2] )
+	ATDetection( unsigned uId, double grCrnrs[4][2] ) :
+		m_uId( uId ),
+		m_bUse( true )
 	{
 		m_uId = uId;
 		for( int i = 0; i < 4; i++ )
@@ -18,7 +21,8 @@ public:
 	}
 	ATDetection( const ATDetection &src ) :
 		m_uId( src.m_uId ),
-		m_vxCorners( src.m_vxCorners )
+		m_vxCorners( src.m_vxCorners ),
+		m_bUse( src.m_bUse )
 	{
 	}
 	~ATDetection()
@@ -33,6 +37,7 @@ public:
 	{
 		m_uId = src.m_uId;
 		m_vxCorners = src.m_vxCorners;
+		m_bUse = src.m_bUse;
 
 		return *this;
 	}
@@ -40,6 +45,16 @@ public:
 	cv::Point2f const &operator[](int n) const
 	{
 		return m_vxCorners[n];
+	}
+
+	void vSetUse( bool bUse )
+	{
+		m_bUse = bUse;
+	}
+
+	bool bUse() const
+	{
+		return m_bUse;
 	}
 };
 
@@ -82,6 +97,11 @@ public:
 	}
 
 	ATDetection const &operator[]( int n ) const
+	{
+		return m_vxTags[n];
+	}
+
+	ATDetection &operator[]( int n )
 	{
 		return m_vxTags[n];
 	}

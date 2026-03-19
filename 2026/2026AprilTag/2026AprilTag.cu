@@ -230,6 +230,7 @@ public:
 //				if (nId >= 1 && nId <= 22 && grbUseTag[nId] )
 				if (1) 
 				{
+								
 					ATDetection atd( gpu_detection->id, gpu_detection->p );
 					patf->vAddDetection( atd );
 #if 1
@@ -250,7 +251,7 @@ public:
 		}
 
 		// We only log and send every 2nd frame to the camera server
-		if (pcf->u32Sequence() % 2) {
+		if (pcf->u32Sequence() % 4) {
 			if (m_mtxLog.try_lock()) {
 				if (m_bLoggingDone) {
 				}
@@ -380,13 +381,11 @@ void vSendFrame( CUDPSender &udpSend, QXfrm const &qxfm, struct timeval const &t
 	Rebels::Point3d p3dX( 1.0, 0.0, 0.0 );
 	Rebels::Point3d p3dV2 = qxfm.Rotation().RotatePoint( p3dX );
 
-	double fDot = p3dX.DotProduct( p3dV2 );
-
 	struct timespec tsCur;
 	struct timeval tvCur;
 	struct timeval tvDelta;
 
-		// Get current time since power on
+	// Get current time since power on
 	clock_gettime(CLOCK_MONOTONIC_RAW, &tsCur );
 	TIMESPEC_TO_TIMEVAL( &tvCur, &tsCur );
 	// Calculate delta between when frame was catured and now.
@@ -429,6 +428,8 @@ int main( int argc, char **argv )
 	int nSyncMode = 0;
 	int nSecondaries = 0;
 	int nSensorOffset = 0;
+	float fMaxTagDist = 30 * 12;
+	int nMinTagSize = 1;
 
 	bool bNetTableServer = false;
 
@@ -478,6 +479,8 @@ int main( int argc, char **argv )
 			nSecondaries = atoi(cf["Secondaries"].c_str());
 		}
 
+		nMinTagSize = atoi( cf["MinTagSize"].c_str() );
+		fMaxTagDist = atol( cf["MaxTagDistance"].c_str() );
 		nSensorOffset = atoi( cf["SensorOffset"].c_str() );
 		bSendToRio = atoi( cf["SendToRio"].c_str() ) ? true : false;
 		bSendToStdout = atoi( cf["SendToStdout"].c_str() ) ? true : false;
@@ -501,11 +504,6 @@ int main( int argc, char **argv )
 	catch( std::exception &e ) {
 		fprintf( stderr, "Error: %s\n", e.what() );
 		return 1;
-	}
-	for( int i = 0; i < g_field.nTags(); i++ ) {
-		Rebels::QXfrm const &q = g_field[i];
-		
-		printf( "%d: %f\n", int(g_field[i]), q.Translation().x() );
 	}
 
 	// start NetworkTables
@@ -565,6 +563,9 @@ int main( int argc, char **argv )
 		PoseSolver ps( g_field, mcCam );
 		CUDPSender udpSend;
 
+		ps.vSetMinTagPixels( nMinTagSize );
+		ps.vSetMaxDistance( fMaxTagDist );
+
 		// stop sync generation.  This can always be done as the SyncGen class won't try to send
 		// if it hasn't been connected to a SyncModule Arduino
 		sg.bStop();
@@ -622,6 +623,7 @@ int main( int argc, char **argv )
 
 		QXfrm qxRobot;
 		bool bHavePose = false;
+		FILE *fpFrmLog = fopen( "FrameLog.log", "w" );
 		while( !bStop ) {
 			ATFrame *patf;
 
@@ -646,6 +648,7 @@ int main( int argc, char **argv )
 				}
 				else {
 					int nCam = patf->nCam();
+//printf( "Cam %d: %u\n", patf->nCam(), patf->u32Seq() );
 
 					// delete previous frame
 					delete vCamFrames[nCam];
@@ -669,14 +672,15 @@ int main( int argc, char **argv )
 //					if (bHaveAllCams && !(vCamFrames[0]->u32Seq() % 4))  {
 					if (bHaveAllCams)  {
 #if 1
-#if 0
+#if 1
 //						if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
+						ps.bFilterTags( vCamFrames );
 						if (ps.bEstimate( qxRobot, vCamFrames )) {
-							if( ps.bSolve( qxRobot, vCamFrames ) ) {
+//							if( ps.bSolve( qxRobot, vCamFrames ) ) {
+						 	if( ps.bSolve( qxRobot, vCamFrames ) || 1 ) {
 								Quaternion const &q = qxRobot.Rotation();
 								Point3d const &p = qxRobot.Translation();
-								printf( "(%.4f %.4f %.4f %.4f) : (%.3f %.3f %.3f)\n",
-									q.q0(), q.x(), q.y(), q.z(), p.x(), p.y(), p.z() );
+//								printf( "(%.4f %.4f %.4f %.4f) : (%.3f %.3f %.3f)\n", q.q0(), q.x(), q.y(), q.z(), p.x(), p.y(), p.z() );
 
 								bHavePose = true;
 								if (bSendToRio) {
@@ -720,9 +724,15 @@ int main( int argc, char **argv )
 						}							
 					}
 				}
-				
+				if (fpFrmLog) {
+//					fprintf( fpFrmLog, "C%d S%u 
+				}
 			}
 		}
+		if (fpFrmLog) {
+			fclose( fpFrmLog );
+		}
+
 	}
 	catch (std::exception &e) {
 		printf( "Exception: %s\n", e.what() );

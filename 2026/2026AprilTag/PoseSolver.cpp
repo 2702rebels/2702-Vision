@@ -49,7 +49,7 @@ int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 			unsigned uTagId = atd.uId();
 
 			FieldTag const &ft = m_Field[uTagId - 1];
-			if (!ft.bIgnore()) {
+			if (atd.bUse()) {
 				Point3d const *pCorners = ft.Corners();
 				for (int i = 0; i < 4; i++ ) {
 					// Transform the corner point into the "Multi-Camera" frame of reference.
@@ -79,41 +79,150 @@ int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 	return 1;
 }
 
+void PoseSolver::vSetMinTagPixels( uint32_t u32MinPixels )
+{
+	m_u32MinTagPixels = u32MinPixels;
+}
+
+void PoseSolver::vSetMaxDistance( uint32_t fMaxDist )
+{
+	m_fMaxDistSqd = fMaxDist * fMaxDist;
+}
+
+#define USE_MOST_PIXELS 1
+
+bool PoseSolver::bFilterTags( std::vector<ATFrame *> &vatf )
+{
+	int nMostTags = 0;
+	int nMostPixels = 0;
+	int nMostIdx = 0;
+	// run through all frames (1 for each camera)
+	for (int nFrm = 0; nFrm < vatf.size(); nFrm++) {
+		int nUsableTags = 0;
+		// run through the detected tags for this camera
+		for (size_t t = 0; t < vatf[nFrm]->sTags(); t++ ) {
+			ATDetection &d = (*vatf[nFrm])[t];
+
+			// Get the Field information for this tag
+			FieldTag const &ft = m_Field[d.uId() - 1];
+
+			// if the tag is to be ignored, set flag and move on
+			if (ft.bIgnore()) {
+				d.vSetUse( false );
+				continue;
+			}
+				
+			float fSizeU = fabs( d[2].x - d[0].x );
+			float fSizeV = fabs( d[2].y - d[0].y );
+			uint32_t u32Pixels = uint32_t(fSizeU * fSizeV);
+			if (u32Pixels < m_u32MinTagPixels) {
+				d.vSetUse( false );
+				continue;
+			}
+
+			cv::Mat objPoints(4, 1, CV_32FC3);
+			cv::Mat imgPoints(4, 1, CV_32FC2);
+
+			for (int c = 0; c < 4; c++) {
+				Rebels::Point3d pn = ft.RawCorners()[c];
+				objPoints.ptr<cv::Vec3f>(0)[c] = cv::Vec3f(pn.x(), pn.y(), pn.z() );
+				imgPoints.ptr<cv::Point2f>(0)[c] = d[c];
+			}
+
+			cv::Mat rvec( 3, 1, CV_64F );
+			cv::Mat tvec( 3, 1, CV_64F );
+
+			cv::Mat m( 3, 3, CV_32F );
+			auto cp = m_mc[nFrm];
+			for( int nR = 0; nR < 3; nR++ ) {
+				for( int nC = 0; nC < 3; nC++ ) {
+					m.at<float>( nR, nC ) = cp.pinhole( nR, nC );
+				}
+			}
+
+			cv::Mat md( 5, 1, CV_64F );
+			for (int i = 0; i < 5; i++) {
+				md.at<double>(i) = cp.dist(i);
+			}
+
+	//		if (!solvePnP( objPoints, imgPoints, m, md, rvec, tvec, false, cv::SOLVEPNP_IPPE_SQUARE )) {
+			if (!solvePnP( objPoints, imgPoints, m, md, rvec, tvec )) {
+				d.vSetUse( false );
+			}
+
+			float fX = float(tvec.at<double>(0));
+			float fY = float(tvec.at<double>(1));
+			float fZ = float(tvec.at<double>(2));
+			
+			float fDistSqd = fX * fX + fY * fY + fZ * fZ;
+
+			
+//			printf( "%-5u   C%d   T%d  Dist = %.2f\n", vatf[nFrm]->u32Seq(), vatf[nFrm]->nCam(), d.uId(), sqrt(fDistSqd));
+			if (fDistSqd > m_fMaxDistSqd) {
+//				printf( "Removed\n" );
+				d.vSetUse( false );
+			}
+		}
+	}
+	return true;
+}
+
 bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 {
 	// Find the Sensor with the most AprilTags in view
-	int nMost = 0;
+	int nMostTags = 0;
+	int nMostPixels = 0;
 	int nMostIdx = 0;
 	for (int i = 0; i < vatf.size(); i++) {
 		int nUsableTags = 0;
+		int nPixels = 0;
 		for (size_t t = 0; t < vatf[i]->sTags(); t++ ) {
 			ATDetection const &d = (*vatf[i])[t];
 			FieldTag const &ft = m_Field[d.uId() - 1];
-			if (!ft.bIgnore()) {
+			if (d.bUse()) {
 				nUsableTags++;
+				float fSizeU = fabs( d[2].x - d[0].x );
+				float fSizeV = fabs( d[2].y - d[0].y );
+				nPixels += fSizeU * fSizeV;
 			}
 		}
-		if (nUsableTags > nMost) {
-			nMost = nUsableTags;
+#if USE_MOST_PIXELS
+		if (nPixels > nMostPixels && nUsableTags > 1) {
+			nMostPixels = nPixels;
+			nMostIdx = i;
+			nMostTags = nUsableTags;
+		}
+#else
+		if (nUsableTags > nMostTags) {
+			nMostTags = nUsableTags;
 			nMostIdx = i;
 		}
+#endif
 	}
 
-	if (nMost == 0 ) {
+#if USE_MOST_PIXELS
+	if (nMostPixels <= 1) {
 		return false;
 	}
+#else
+	if (nMostTags <= 1 ) {
+		return false;
+	}
+#endif
 
 	ATFrame *patf = vatf[nMostIdx];
-	cv::Mat objPoints(4 * nMost, 1, CV_32FC3);
-	cv::Mat imgPoints(4 * nMost, 1, CV_32FC2);
+	cv::Mat objPoints(4 * nMostTags, 1, CV_32FC3);
+	cv::Mat imgPoints(4 * nMostTags, 1, CV_32FC2);
 
+//	printf( "Using Camera %d", vatf[nMostIdx]->nCam() );
 	int idx = 0;
 	for (size_t t = 0; t < vatf[nMostIdx]->sTags(); t++ )
 	{
 		ATDetection const &d = (*vatf[nMostIdx])[t];
 		FieldTag const &ft = m_Field[d.uId() - 1];
-		if (!ft.bIgnore()) {
+		if (d.bUse()) {
 //printf( "Have Detection %d\n", d.uId() );
+//printf( " %02d", d.uId() );
 			for (int c = 0; c < 4; c++, idx++ ) {
 				Rebels::Point3d pn = ft.Corners()[c];
 	//			Rebels::Point3d pn = ft.RawCorner(c);
@@ -123,6 +232,7 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 			}
 		}
 	}
+//	printf( "\n" );
 
 	bool bHaveSolution = false;
 
@@ -160,7 +270,7 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 		{
 			ATDetection const &d = (*vatf[nMostIdx])[t];
 			FieldTag const &ft = m_Field[d.uId() - 1];
-			if (!ft.bIgnore()) {
+			if (d.bUse()) {
 				printf( "For Tag %d\n", d.uId() );
 				for (int c = 0; c < 4; c++, idx++ ) {
 					Rebels::Point3d pn = qxmF2S.TransformPoint(ft.Corners()[c]);
@@ -197,19 +307,26 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 
 bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 {
+#if 1
 	// count the number of unknowns...
+	int nCams = 0;
 	int m = 0;
 	for (auto f : vatf ) {
+		bool bHasUsableTag = false;
 		for ( size_t s = 0; s < f->sTags(); s++) {
 			ATDetection const &d = (*f)[s];
 			FieldTag const &ft = m_Field[d.uId() - 1];
-			if (!ft.bIgnore()) {
+			if (d.bUse()) {
 				m += 8;  // there are 4 corners per tag and a u,v coordinate pair per corner
+				bHasUsableTag = true;
 			}
+		}
+		if (bHasUsableTag) {
+			nCams++;
 		}
 	}
 
-	if (!m) {
+	if (!m || nCams < 2) {
 		return false;
 	}
 
@@ -246,6 +363,7 @@ bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	QXfrm qxNew( euNew, p3 );
 
 	xfm = qxNew.Inverse();
+#endif
 
 	return true;
 }

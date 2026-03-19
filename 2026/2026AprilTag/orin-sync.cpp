@@ -112,15 +112,12 @@ COrinSync::COrinSync( bool bPrimary, MailBox<ATFrame *>&mbFrame, int nSecondarie
 		throw std::runtime_error( "COrinSync:: failed setting SO_BROADCAST" );
 	}
 
-printf( "About to Bind\n" );
 	vBind();
 
-printf( "About to start thread\n" );
 	m_thSync = std::thread( &COrinSync::vSyncThread, this );
-printf( "started thread\n" );
 
 	std::this_thread::yield();
-printf( "After yield\n" );
+
 	while( m_mtx.try_lock() ) {
 		m_mtx.unlock();
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -141,9 +138,7 @@ COrinSync::~COrinSync()
 
 void COrinSync::vSyncThread()
 {
-	printf( "vSyncThread()\n" );
 	m_mtx.lock();
-	printf( "After Lock()\n" );
 	if (m_bPrimary) {
 		vPrimaryWorker();
 	}
@@ -164,13 +159,12 @@ void COrinSync::vBind()
 		if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) {
 			struct sockaddr_in const *pAddr = (struct sockaddr_in const *)ifa->ifa_addr;
 			uint32_t u32Addr = ntohl( pAddr->sin_addr.s_addr );
-			printf( "%08x\n", u32Addr );
+
 			if ((u32Addr & 0xFFFFFF00) == ((10 << 24) | ((nTeamNumber / 100) << 16) | ((nTeamNumber % 100) << 8)) ) {
 				sockaddr_in sa = *pAddr;
 				sa.sin_port = htons(nSyncPort);
 				sa.sin_addr.s_addr = htonl(INADDR_ANY);
 				int nErr = bind( m_nSock, (struct sockaddr *)&sa, sizeof(sa) );
-				printf( "Bind Returned %d\n", nErr );
 				break;
 			}
 		}
@@ -181,7 +175,6 @@ void COrinSync::vBind()
 // Primary continually waits for packets
 void COrinSync::vPrimaryWorker()
 {
-	printf( "starting Primary Worker\n" );
 
 	enum { WAIT_FOR_SECONDARIES, WAIT_FOR_CAM_START, RUNNING } eState = WAIT_FOR_SECONDARIES;
 	// Space for
@@ -221,7 +214,6 @@ void COrinSync::vPrimaryWorker()
 				switch ( u32MsgId ) {
 				case s_u32SECONDARY_READY_MESSAGE:
 					{
-						printf( "Have 2 rdy\n" );
 						bool bNew = true;
 						for( auto &s : m_vSecondaries ) {
 							if (s.GetSockaddr().sin_addr.s_addr == saRemote.sin_addr.s_addr) {
@@ -232,7 +224,6 @@ void COrinSync::vPrimaryWorker()
 						if (bNew) {
 							m_vSecondaries.push_back(saRemote);
 						}
-						printf( "Have %ld of %d 2ndarys\n", m_vSecondaries.size(), m_nSecondaries );
 						if (m_vSecondaries.size() == m_nSecondaries) {
 							eState = WAIT_FOR_CAM_START;
 						}
@@ -241,7 +232,6 @@ void COrinSync::vPrimaryWorker()
 				case s_u32CAMERA_STARTED_MESSAGE:
 					{
 						int nStarted = 0;
-						printf( "Have 2 cam\n" );
 						for( auto &s : m_vSecondaries ) {
 							if (s.GetSockaddr().sin_addr.s_addr == saRemote.sin_addr.s_addr) {
 								s.bCamStarted() = true;
@@ -311,7 +301,6 @@ void COrinSync::vPrimaryWorker()
 				}
 				if (u32Msg) {
 					int nErr = sendto( m_nSock, &u32Msg, sizeof(u32Msg), 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
-					printf( "Sending %08X\n", u32Msg );
 				}
 			}
 		}

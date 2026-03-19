@@ -58,7 +58,8 @@ int main( int argc, char **argv )
 		while( fl.bReadFrame( vatf ) ) {
 			printf( "%u\n", vatf[0]->u32Seq() );
 
-			if (bHaveSolve || ps.bEstimate( qxfm, vatf )) {
+//			if (bHaveSolve || ps.bEstimate( qxfm, vatf )) {
+			if (ps.bEstimate( qxfm, vatf )) {
 				printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
 				if (ps.bSolve( qxfm, vatf )) {
 					bHaveSolve = true;

@@ -14,6 +14,14 @@ class PoseSolver
 	MultiCam				m_mc;
 	std::vector<CamParm>	m_vcp;
 	std::vector<ATFrame *>	*m_pvatf;
+
+	uint32_t				m_u32MinTagPixels = 1;
+#if FIELD_UNIT_INCHES
+	float					m_fMaxDistSqd = (27.F * 12) * (27.F * 12);
+#else
+	float					m_fMaxDistSqd = (8.F * 8.F);
+#endif
+
 static int eval( void *p, int m, int n, float const *x, float *fv, int iflag );
 
 	int eval( int m, int n, float const *x, float *fv, int iflag );
@@ -21,6 +29,10 @@ public:
 	PoseSolver( Field const &fld, MultiCam const &mc );
 	~PoseSolver();
 
+	bool bFilterTags( std::vector<ATFrame *>&vatf );
 	bool bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf );
 	bool bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf );
+
+	void vSetMinTagPixels( uint32_t u32MinPixels );
+	void vSetMaxDistance( uint32_t fMaxDist );
 };
