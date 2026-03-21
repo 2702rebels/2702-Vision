@@ -12,19 +12,71 @@ The main binary, contains object(production binary), replay, logtostdvideo and m
 Helper binaries that only use lib, such as rpisample which records a video and saves it in a .log file
 
 ### Installing dependencies
-**Linux**
-2. Run ```chmod +x installpackages.sh```
-3. Run ```sudo ./installpackages.sh```
+
+#### On the Jetson / Raspberry Pi (full robot build)
+Run the install script — it downloads and compiles everything including wpilib:
+```bash
+chmod +x installpackages.sh
+sudo ./installpackages.sh
+```
+> This takes a while (20–40 min) because it compiles wpilib from source. Grab a snack.
+
+#### On your Desktop / Laptop (calibration tools only)
+If you just want to build the calibration tools (`calib-select`, `sensor-calib`),
+you do **not** need wpilib. Just install OpenCV and the lightweight dependencies:
+```bash
+sudo apt install -y libopencv-dev libprotobuf-dev protobuf-compiler \
+    libspdlog-dev libgtest-dev libavdevice-dev libavfilter-dev \
+    nlohmann-json3-dev pkg-config cmake build-essential
+```
+Then build CSerialPort from source (small library, takes about 30 seconds):
+```bash
+git clone https://github.com/itas109/cserialport --depth=1 -b v4.3.3 /tmp/cserialport
+cmake -S /tmp/cserialport -B /tmp/cserialport/build \
+    -DCSERIALPORT_BUILD_EXAMPLES=OFF -DCSERIALPORT_BUILD_TEST=OFF
+sudo cmake --build /tmp/cserialport/build --target install --parallel $(nproc)
+```
+> **Why not wpilib?** wpilib is the FRC robot library — it handles talking to the robot
+> over the network. The calibration tools don't talk to a robot, so they don't need it.
+> CMake will automatically detect that you're on a desktop and skip the parts that need wpilib.
 
 
 ### Building the program
-Currently only supported on linux
-**Linux**
-1. ```mkdir build```
-2. ```cd build```
-3. ```cmake ..```
-4. ```cmake --build .```
-The hierarchical structure of the build folder will somewhat ressemble the structure of the build folder. Eg lib2702.a will be in build/lib.
+Currently only supported on Linux.
+
+#### How does CMake know which machine I'm on?
+It checks automatically — you don't need to set any flags yourself:
+
+| Machine | How it's detected | CMake flag |
+|---|---|---|
+| Jetson Orin (robot vision computer) | CUDA compiler is present | `IS_JETSON = TRUE` |
+| Raspberry Pi | Running on ARM64 (aarch64) without CUDA | `IS_RPI = TRUE` |
+| Desktop / Laptop | Everything else (your PC) | `IS_DESKTOP = TRUE` |
+
+When `IS_DESKTOP` is true, CMake automatically skips the subdirectories that require
+wpilib (`2025/Object` and `calibrationdevice`). Everything in `Utilities/` always builds.
+
+#### Full build (Jetson / RPi — requires wpilib from installpackages.sh)
+```bash
+cmake -B build
+cmake --build build
+```
+
+#### Desktop build (calibration tools only)
+```bash
+cmake -B build
+cmake --build build --target calib-select sensor-calib
+```
+Or just build everything available on desktop (CMake skips the wpilib parts automatically):
+```bash
+cmake -B build
+cmake --build build
+```
+
+Build outputs:
+- `build/Utilities/calib-select` — picks the best images from a folder for calibration
+- `build/Utilities/sensor-calib` — runs the calibration and saves a `.cam` file
+- `build/lib/lib2702.a` — shared vision library (Jetson/RPi builds only)
 
 ### Building the docs
 

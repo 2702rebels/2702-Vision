@@ -42,3 +42,8 @@ target_link_libraries(v1logtov2 PRIVATE 2702)
 target_include_directories(v1logtov2 PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
 add_package_to_target("opencv" "v1logtov2" TRUE)
+add_executable(calib-select sensor-calib/calib-select.cpp)
+add_package_to_target("opencv" "calib-select" TRUE)
+
+add_executable(sensor-calib sensor-calib/sensor-calib.cpp)
+add_package_to_target("opencv" "sensor-calib" TRUE)
