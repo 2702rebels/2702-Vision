@@ -1,148 +1,179 @@
-/*! \brief This is a program that acts as a network tables client to test sending values to a server for debugging purposes, can also print out object detection parameters that are received from the server.
-* Depends on:
-* - wpilib ntcore
-*/
+/*! \brief This is a program that acts as a network tables client to test
+ * sending values to a server for debugging purposes, can also print out object
+ * detection parameters that are received from the server. Depends on:
+ * - wpilib ntcore
+ */
 
-#include <iostream>
-#include <networktables/NetworkTable.h>
-#include <networktables/NetworkTableInstance.h>
-#include <networktables/IntegerTopic.h>
-#include <networktables/DoubleTopic.h>
-#include <signal.h>
+#include "LoggingUtils.h"
+
 #include <chrono>
-#include <thread>
+#include <csignal>
 #include <functional>
 #include <future>
+#include <iostream>
 #include <map>
-#include "LoggingUtils.h"
+#include <networktables/DoubleTopic.h>
+#include <networktables/IntegerTopic.h>
+#include <networktables/NetworkTable.h>
+#include <networktables/NetworkTableInstance.h>
+#include <thread>
 
 using namespace std::literals;
 
-std::map<std::string, std::function<void()>> commandMap;
-bool bStop = false;
-bool readyForNewCmdThread = false;
+static std::map<std::string, std::function<void()>> commandMap;
+static bool bStop = false;
+static bool readyForNewCmdThread = false;
 
-nt::IntegerSubscriber hueMinTopic;
-nt::IntegerSubscriber hueMaxTopic;
-nt::IntegerSubscriber saturationMinTopic;
-nt::IntegerSubscriber saturationMaxTopic;
-nt::IntegerSubscriber valueMinTopic;
-nt::IntegerSubscriber valueMaxTopic;
-nt::DoublePublisher coralDistanceTopic;
-nt::DoublePublisher coralAngleTopic;
-nt::IntegerSubscriber minWidthTopic;
-nt::IntegerSubscriber maxWidthTopic;
-nt::IntegerSubscriber minHeightTopic;
-nt::IntegerSubscriber maxHeightTopic;
-nt::IntegerSubscriber minAreaTopic;
-nt::IntegerSubscriber maxAreaTopic;
-nt::DoubleSubscriber  minPercentFillTopic;
-nt::DoubleSubscriber  camOffsetXTopic;
-nt::DoubleSubscriber  camOffsetYTopic;
-nt::DoubleSubscriber  camHeightTopic;
-nt::DoubleSubscriber camAngleTopic;
-nt::IntegerSubscriber filterWindowTopic;
+static nt::IntegerSubscriber hueMinTopic;
+static nt::IntegerSubscriber hueMaxTopic;
+static nt::IntegerSubscriber saturationMinTopic;
+static nt::IntegerSubscriber saturationMaxTopic;
+static nt::IntegerSubscriber valueMinTopic;
+static nt::IntegerSubscriber valueMaxTopic;
+static nt::DoublePublisher coralDistanceTopic;
+static nt::DoublePublisher coralAngleTopic;
+static nt::IntegerSubscriber minWidthTopic;
+static nt::IntegerSubscriber maxWidthTopic;
+static nt::IntegerSubscriber minHeightTopic;
+static nt::IntegerSubscriber maxHeightTopic;
+static nt::IntegerSubscriber minAreaTopic;
+static nt::IntegerSubscriber maxAreaTopic;
+static nt::DoubleSubscriber minPercentFillTopic;
+static nt::DoubleSubscriber camOffsetXTopic;
+static nt::DoubleSubscriber camOffsetYTopic;
+static nt::DoubleSubscriber camHeightTopic;
+static nt::DoubleSubscriber camAngleTopic;
+static nt::IntegerSubscriber filterWindowTopic;
 
 /*! \brief Handle Ctrl+C interrupts */
-void sighandler(int nSig){
+static void Sighandler(int nSig) {
     info("Received Signal: {}", nSig);
     info("Can't use Ctrl+C to exit, use stop command");
 }
 
 /*! \brief Print the list of commands to the console */
-void showHelp(){
-    info("Valid commands are: \nprint - logs all current topic values\npushdist - push a new distance value\npushangle - push a new angle value\nstop - shuts the server down\nhelp - displays this text");
+static void ShowHelp() {
+    info("Valid commands are: \nprint - logs all current topic values\npushdist "
+         "- push a new distance value\npushangle - push a new angle value\nstop "
+         "- shuts the server down\nhelp - displays this text");
 }
 
-/*! \brief Shuts down the client. Note that this is not an immediate effect, program will run for another tick before exiting. */
-void shutdownClient(){
+/*! \brief Shuts down the client. Note that thisf is not an immediate effect,
+ * program will run for another tick before exiting. */
+static void ShutdownClient() {
     bStop = true;
 }
 
-/*! \brief Prints the current parameter networktable values. 
-This function does not automatically update as new topics are added and will need to be modified if new topics are added
+/*! \brief Prints the current parameter networktable values.
+This function does not automatically update as new topics are added and will
+need to be modified if new topics are added
 */
-void printNetworkTableValues(){
-    info("huemin: {}", hueMinTopic.GetAtomic(0.0f).value);
-    info("huemax: {}", hueMaxTopic.GetAtomic(0.0f).value);
-    info("satmin: {}", saturationMinTopic.GetAtomic(0.0f).value);
-    info("satmax: {}", saturationMaxTopic.GetAtomic(0.0f).value);
-    info("valmin: {}", valueMinTopic.GetAtomic(0.0f).value);
-    info("valmax: {}", valueMaxTopic.GetAtomic(0.0f).value);
+static void PrintNetworkTableValues() {
+    info("huemin: {}", hueMinTopic.GetAtomic(0.0F).value);
+    info("huemax: {}", hueMaxTopic.GetAtomic(0.0F).value);
+    info("satmin: {}", saturationMinTopic.GetAtomic(0.0F).value);
+    info("satmax: {}", saturationMaxTopic.GetAtomic(0.0F).value);
+    info("valmin: {}", valueMinTopic.GetAtomic(0.0F).value);
+    info("valmax: {}", valueMaxTopic.GetAtomic(0.0F).value);
     info("minwidth: {}", minWidthTopic.GetAtomic(0).value);
     info("maxwidth: {}", maxWidthTopic.GetAtomic(0).value);
     info("minheight: {}", minHeightTopic.GetAtomic(0).value);
     info("maxheight: {}", maxHeightTopic.GetAtomic(0).value);
     info("minarea: {}", minAreaTopic.GetAtomic(0).value);
     info("maxarea: {}", maxAreaTopic.GetAtomic(0).value);
-    info("minpercentfill: {}", minPercentFillTopic.GetAtomic(0.0f).value);
-    info("offsetx: {}", camOffsetXTopic.GetAtomic(0.0f).value);
-    info("offsety: {}", camOffsetYTopic.GetAtomic(0.0f).value);
-    info("camheight: {}", camHeightTopic.GetAtomic(0.0f).value);
-    info("camangle: {}", camAngleTopic.GetAtomic(0.0f).value);
+    info("minpercentfill: {}", minPercentFillTopic.GetAtomic(0.0F).value);
+    info("offsetx: {}", camOffsetXTopic.GetAtomic(0.0F).value);
+    info("offsety: {}", camOffsetYTopic.GetAtomic(0.0F).value);
+    info("camheight: {}", camHeightTopic.GetAtomic(0.0F).value);
+    info("camangle: {}", camAngleTopic.GetAtomic(0.0F).value);
 }
 
-/*! \brief Pushes a new coral distance value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
-void pushDistanceValue(){
+/*! \brief Pushes a new coral distance value. User input is obtained through
+ * cin, which pauses execution so the client may disconnect from the server for
+ * a short time*/
+void PushDistanceValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
     coralDistanceTopic.SetDefault(stof(value));
 }
 
-/*! \brief Pushes a new coral angle value. User input is obtained through cin, which pauses execution so the client may disconnect from the server for a short time*/
-void pushAngleValue(){
+/*! \brief Pushes a new coral angle value. User input is obtained through cin,
+ * which pauses execution so the client may disconnect from the server for a
+ * short time*/
+void PushAngleValue() {
     std::string value;
     info("Please enter a value: ");
     std::cin >> value;
     coralAngleTopic.SetDefault(stof(value));
 }
 
-int main( int argc, char **argv ){
+int main(int /*argc*/, char** /*argv*/) {
     SetupTextLogger();
-    signal(SIGINT, sighandler); // Handles Ctrl+C interrupts
+    (void)signal(SIGINT, Sighandler); // Handles Ctrl+C interrupts
     // Initialize the commands
-    commandMap["help"] = showHelp;
-    commandMap["stop"] = shutdownClient;
-    commandMap["print"] = printNetworkTableValues;
-    commandMap["pushdist"] = pushDistanceValue;
-    commandMap["pushangle"] = pushAngleValue;
-    nt::NetworkTableInstance netTableManager = nt::NetworkTableInstance::GetDefault();
+    commandMap["help"] = ShowHelp;
+    commandMap["stop"] = ShutdownClient;
+    commandMap["print"] = PrintNetworkTableValues;
+    commandMap["pushdist"] = PushDistanceValue;
+    commandMap["pushangle"] = PushAngleValue;
+    nt::NetworkTableInstance netTableManager =
+        nt::NetworkTableInstance::GetDefault();
     netTableManager.StartClient4("testnettableclient");
     netTableManager.SetServer("localhost", 5810U);
     auto objectDetectionTable = netTableManager.GetTable("ObjectDetection");
     // Initialize the topics
     hueMinTopic = objectDetectionTable->GetIntegerTopic("HueMin").Subscribe(0);
     hueMaxTopic = objectDetectionTable->GetIntegerTopic("HueMax").Subscribe(0);
-    saturationMinTopic = objectDetectionTable->GetIntegerTopic("SaturationMin").Subscribe(0);
-    saturationMaxTopic = objectDetectionTable->GetIntegerTopic("SaturationMax").Subscribe(0);
-    valueMinTopic = objectDetectionTable->GetIntegerTopic("ValueMin").Subscribe(0);
-    valueMaxTopic = objectDetectionTable->GetIntegerTopic("ValueMax").Subscribe(0);
-    coralDistanceTopic = objectDetectionTable->GetDoubleTopic("CoralDistance").Publish();
-    coralAngleTopic = objectDetectionTable->GetDoubleTopic("CoralAngle").Publish();
-    minWidthTopic = objectDetectionTable->GetIntegerTopic("MinPixelWidth").Subscribe(0);
-    maxWidthTopic = objectDetectionTable->GetIntegerTopic("MaxPixelWidth").Subscribe(0);
-    minHeightTopic = objectDetectionTable->GetIntegerTopic("MinPixelHeight").Subscribe(0);
-    maxHeightTopic = objectDetectionTable->GetIntegerTopic("MaxPixelHeight").Subscribe(0);
-    minAreaTopic = objectDetectionTable->GetIntegerTopic("MinPixelArea").Subscribe(0);
-    maxAreaTopic = objectDetectionTable->GetIntegerTopic("MaxPixelArea").Subscribe(0);
-    minPercentFillTopic = objectDetectionTable->GetDoubleTopic("MinPercentFill").Subscribe(0.0f);
-    camOffsetXTopic = objectDetectionTable->GetDoubleTopic("CamOffsetX").Subscribe(0.0f);
-    camOffsetYTopic = objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(0.0f);
-    camAngleTopic = objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(0.0f);
-    camHeightTopic = objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(0.0f);
-    filterWindowTopic = objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Subscribe(0);
-    showHelp(); // Print the available commands to the console
+    saturationMinTopic =
+        objectDetectionTable->GetIntegerTopic("SaturationMin").Subscribe(0);
+    saturationMaxTopic =
+        objectDetectionTable->GetIntegerTopic("SaturationMax").Subscribe(0);
+    valueMinTopic =
+        objectDetectionTable->GetIntegerTopic("ValueMin").Subscribe(0);
+    valueMaxTopic =
+        objectDetectionTable->GetIntegerTopic("ValueMax").Subscribe(0);
+    coralDistanceTopic =
+        objectDetectionTable->GetDoubleTopic("CoralDistance").Publish();
+    coralAngleTopic =
+        objectDetectionTable->GetDoubleTopic("CoralAngle").Publish();
+    minWidthTopic =
+        objectDetectionTable->GetIntegerTopic("MinPixelWidth").Subscribe(0);
+    maxWidthTopic =
+        objectDetectionTable->GetIntegerTopic("MaxPixelWidth").Subscribe(0);
+    minHeightTopic =
+        objectDetectionTable->GetIntegerTopic("MinPixelHeight").Subscribe(0);
+    maxHeightTopic =
+        objectDetectionTable->GetIntegerTopic("MaxPixelHeight").Subscribe(0);
+    minAreaTopic =
+        objectDetectionTable->GetIntegerTopic("MinPixelArea").Subscribe(0);
+    maxAreaTopic =
+        objectDetectionTable->GetIntegerTopic("MaxPixelArea").Subscribe(0);
+    minPercentFillTopic =
+        objectDetectionTable->GetDoubleTopic("MinPercentFill").Subscribe(0.0F);
+    camOffsetXTopic =
+        objectDetectionTable->GetDoubleTopic("CamOffsetX").Subscribe(0.0F);
+    camOffsetYTopic =
+        objectDetectionTable->GetDoubleTopic("CamOffsetY").Subscribe(0.0F);
+    camAngleTopic =
+        objectDetectionTable->GetDoubleTopic("CamAngle").Subscribe(0.0F);
+    camHeightTopic =
+        objectDetectionTable->GetDoubleTopic("CamHeight").Subscribe(0.0F);
+    filterWindowTopic =
+        objectDetectionTable->GetIntegerTopic("FilterPacketWindow").Subscribe(0);
+    ShowHelp(); // Print the available commands to the console
     auto commandInputThread = std::async(std::launch::async, [] {
         std::string input;
         std::cin >> input;
         return input;
     });
-    while(!bStop){
+    while (!bStop) {
         // Print connection status
-        info("Connection status of networktables: {}", netTableManager.IsConnected());
-        if(readyForNewCmdThread){
-            // Launch an async thread to take user input so client can respond to any server requests while waiting for input
+        info("Connection status of networktables: {}",
+             netTableManager.IsConnected());
+        if (readyForNewCmdThread) {
+            // Launch an async thread to take user input so client can respond to any
+            // server requests while waiting for input
             commandInputThread = std::async(std::launch::async, [] {
                 std::string input;
                 std::cin >> input;
@@ -151,12 +182,11 @@ int main( int argc, char **argv ){
             readyForNewCmdThread = false;
         }
         // If the async thread has gotten the input, process it
-        if(commandInputThread.wait_for(0.5s) == std::future_status::ready){
+        if (commandInputThread.wait_for(0.5s) == std::future_status::ready) {
             std::string commandInput = commandInputThread.get();
-            if(commandMap[commandInput] != NULL){
+            if (commandMap[commandInput] != nullptr) {
                 commandMap[commandInput]();
-            }
-            else{
+            } else {
                 info("Command not recognized");
             }
             readyForNewCmdThread = true;

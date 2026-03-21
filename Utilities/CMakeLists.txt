@@ -47,3 +47,8 @@ add_package_to_target("opencv" "calib-select" TRUE)
 
 add_executable(sensor-calib sensor-calib/sensor-calib.cpp)
 add_package_to_target("opencv" "sensor-calib" TRUE)
+
+add_executable(sensor-calib sensor-calib/sensor-calib.cpp)
+
+add_package_to_target("opencv" "sensor-calib" TRUE)
+add_package_to_target("fmt" "sensor-calib" TRUE)

@@ -1,0 +1,127 @@
+name: build.yml
+on:
+  pull_request:
+    branches-ignore:
+      - "terry-jetson"
+  push:
+    branches: [ main ]
+
+jobs:
+  build-ubuntu:
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Update vcpkg submodule
+        run: git submodule update --init vcpkg
+
+      - name: Install compiler
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential ninja-build curl zip unzip tar autoconf autoconf-archive automake libtool linux-libc-dev pkg-config software-properties-common lsb-release nasm bison flex python3 python3.12-venv libx11-dev libxext-dev libxrender-dev libxtst-dev libxrandr-dev libltdl-dev libxi-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libvulkan-dev libwayland-dev libxkbcommon-dev libssl-dev libbz2-dev liblzma-dev libudev-dev libdrm-dev libglfw3-dev libgtk-3-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev curl
+          sudo curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc -o /usr/share/keyrings/kitware-archive-keyring.asc
+          echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.asc] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/kitware.list  
+          sudo apt-get update
+          sudo apt-get install -y cmake
+
+      - name: Get vcpkg commit
+        run: git submodule status vcpkg > vcpkgcommit.txt
+
+      - name: Cache vcpkg archives directory
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
+          fail-on-cache-miss: ${{ runner.environment != 'self-hosted' }}
+
+      - name: Configure ${{matrix.build_type}} ${{matrix.os}}
+        run: |
+          /usr/bin/cmake . --preset x64-${{matrix.build_type}}-linux
+
+      - name: Build ${{matrix.build_type}} ${{matrix.os}}
+        run: /usr/bin/cmake --build out/build/x64-${{matrix.build_type}}-linux
+
+      - name: Clean up vcpkg folder
+        shell: bash
+        run: |
+          rm -rf ./vcpkg/buildtrees
+          rm -rf ./vcpkg/downloads
+          rm -rf ./vcpkg/packages
+
+      - name: Run tests
+        run: |
+          chmod +x out/build/x64-${{matrix.build_type}}-linux/tests/tests
+          cd out/build/x64-${{matrix.build_type}}-linux/tests
+          ./tests
+
+  build-windows:
+      #runs-on: windows-latest
+      runs-on: [self-hosted, windows]
+      strategy:
+        fail-fast: false
+        matrix:
+          build_type: [debug, release]
+      steps:
+        - name: Clone repo
+          uses: actions/checkout@v4
+
+        - name: Update vcpkg submodule
+          run: git submodule update --init vcpkg
+
+        - name: Ensure CMake and Ninja are installed
+          shell: powershell
+          run: |
+            choco install cmake ninja -y --force
+            echo "C:\Program Files\CMake\bin" >> $GITHUB_PATH
+            echo "C:\ProgramData\chocolatey\bin" >> $GITHUB_PATH
+
+        - name: Setup MSVC
+          uses: ilammy/msvc-dev-cmd@v1
+          with:
+            arch: x64
+
+        - name: Resolve LOCALAPPDATA
+          id: localappdata
+          shell: powershell
+          run: |
+            echo "value=$env:LOCALAPPDATA" >> $env:GITHUB_OUTPUT
+
+        - name: Get vcpkg commit
+          shell: powershell
+          run: git submodule status vcpkg | Out-File -Encoding utf8 vcpkgcommit.txt
+
+        - name: Cache vcpkg archives directory
+          uses: actions/cache@v4
+          with:
+            path: ${{steps.localappdata.outputs.value}}\vcpkg\archives
+            key: ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}-${{hashFiles('vcpkg.json')}}
+            restore-keys: |
+              ${{ runner.os }}-vcpkg-${{hashFiles('vcpkgcommit.txt')}}
+            fail-on-cache-miss: ${{ runner.environment != 'self-hosted' }}
+
+        - name: Configure and build ${{matrix.build_type}}
+          run: cmake . --preset x64-${{matrix.build_type}}-win
+
+        - name: Build ${{matrix.build_type}}
+          run: cmake --build out/build/x64-${{matrix.build_type}}-win
+
+        - name: Clean up vcpkg folder
+          shell: powershell
+          run: |
+            Remove-Item ./vcpkg/buildtrees -Recurse -Force
+            Remove-Item ./vcpkg/downloads -Recurse -Force
+            Remove-Item ./vcpkg/packages -Recurse -Force
+
+        - name: Run tests
+          shell: powershell
+          run: |
+            cd out\build\x64-${{matrix.build_type}}-win\tests\
+            .\tests.exe

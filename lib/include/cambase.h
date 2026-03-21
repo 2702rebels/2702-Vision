@@ -1,12 +1,7 @@
 #pragma once
 
-class CamBase
-{
+class CamBase {
 public:
-	CamBase()
-	{
-	}
-	virtual ~CamBase()
-	{
-	}
+  CamBase() {}
+  virtual ~CamBase() {}
 };

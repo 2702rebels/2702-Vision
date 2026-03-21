@@ -1,7 +1,7 @@
 #include "2702camera.h"
+#include "2702math.h"
 #include <stdio.h>
 #include <string.h>
-#include "2702math.h"
 
 #include <fstream>
 
@@ -28,9 +28,9 @@ CamParm::CamParm() {
 }
 
 /*! \brief Loads a camera configuration from a file path.
-* \param psz - The file path to load the camera config from
-* \returns true if successful, false otherwise. 
-*/
+ * \param psz - The file path to load the camera config from
+ * \returns true if successful, false otherwise.
+ */
 bool CamParm::Load(char const *psz) {
   char szTmp[128];
   ifstream flCam;
@@ -97,10 +97,10 @@ bool CamParm::Load(char const *psz) {
   return true;
 }
 
-/*! \brief Save the current camera configuration to a file. 
-* \param psz - The file path to save the configuration to.
-* \returns true if successful, false otherwise. 
-*/
+/*! \brief Save the current camera configuration to a file.
+ * \param psz - The file path to save the configuration to.
+ * \returns true if successful, false otherwise.
+ */
 bool CamParm::Save(char const *psz) {
   ofstream of;
   of.open(psz);
@@ -134,7 +134,7 @@ void CamParm::Undistort(float fU, float fV, float &fUndistU,
   fUndistU = fU;
   fUndistV = fV;
   for (int iter = 0; iter < 5; iter++) {
-    float r2 = fUndistU * fUndistU + fUndistV * fUndistV;  // radius squared
+    float r2 = fUndistU * fUndistU + fUndistV * fUndistV; // radius squared
     float icdist = 1.F / (1.F + ((m_fk3 * r2 + m_fk2) * r2 + m_fk1) * r2);
     float deltaX = 2.F * m_fp1 * fUndistU * fUndistV +
                    m_fp2 * (r2 + 2.F * fUndistU * fUndistU);
@@ -145,11 +145,11 @@ void CamParm::Undistort(float fU, float fV, float &fUndistU,
   }
 }
 
-void CamParm::UndistortPixels(float fU, float fV, float &fUndistU, float &fUndistV) const
-{
-	Undistort( (fU - m_fU0)/m_fU, (fV - m_fV0)/m_fV, fUndistU, fUndistV );
-	fUndistU = fUndistU * m_fU + m_fU0;
-	fUndistV = fUndistV * m_fV + m_fV0;
+void CamParm::UndistortPixels(float fU, float fV, float &fUndistU,
+                              float &fUndistV) const {
+  Undistort((fU - m_fU0) / m_fU, (fV - m_fV0) / m_fV, fUndistU, fUndistV);
+  fUndistU = fUndistU * m_fU + m_fU0;
+  fUndistV = fUndistV * m_fV + m_fV0;
 }
 
 void CamParm::UpdateResolution(int nURes, int nVRes) {
@@ -236,9 +236,11 @@ bool StereoCam::bLoad(char const *psz) {
       return false;
     }
     int nLen = strlen(szTmp);
-    while (nLen > 0 && isspace(szTmp[nLen - 1])) nLen--;
+    while (nLen > 0 && isspace(szTmp[nLen - 1]))
+      nLen--;
     szTmp[nLen] = '\0';
-    if (!m_grCams[i].Load(szTmp)) return false;
+    if (!m_grCams[i].Load(szTmp))
+      return false;
     if (cfile.getline(szTmp, sizeof(szTmp)).eof()) {
       return false;
     }
@@ -362,8 +364,8 @@ float StereoCam::fCalc3D(Point2d const &uv1, Point2d const &uv2, Point3d &res) {
   Point3d mid = (c2 + c1) / 2;
 
   // rotate and translate into robot coordinate system.
-//  res = m_CamToRobotRot * mid;
-//  res += m_CamToRobotXlat;
+  //  res = m_CamToRobotRot * mid;
+  //  res += m_CamToRobotXlat;
   res = mid;
 
   return fLineSep;

@@ -6,10 +6,10 @@ using namespace Rebels;
 /*! \brief Creates a \ref Point3d from another \ref Point3d */
 Point3d::Point3d(Point3d const &src) { *this = src; }
 
-/*! \brief Assigns the values of this class to the values of the other \ref Point3d .
-* \param other - The other \ref Point3d to get the values from.
-* \returns The current \ref Point3d with the new values.
-*/
+/*! \brief Assigns the values of this class to the values of the other \ref
+ * Point3d . \param other - The other \ref Point3d to get the values from.
+ * \returns The current \ref Point3d with the new values.
+ */
 Point3d &Point3d::operator=(Point3d const &other) {
   m_fX = other.m_fX;
   m_fY = other.m_fY;
@@ -18,10 +18,10 @@ Point3d &Point3d::operator=(Point3d const &other) {
   return *this;
 }
 
-/*! \brief Adds two \ref Point3d classes together. 
-* \param other - The other \ref Point3d to add.
-* \returns A new \ref Point3d that is the result of the sum of the coordinates
-*/
+/*! \brief Adds two \ref Point3d classes together.
+ * \param other - The other \ref Point3d to add.
+ * \returns A new \ref Point3d that is the result of the sum of the coordinates
+ */
 Point3d Point3d::operator+(Point3d const &other) const {
   float x = m_fX + other.x();
   float y = m_fY + other.y();
@@ -30,9 +30,10 @@ Point3d Point3d::operator+(Point3d const &other) const {
 }
 
 /*! \brief Adds a \ref Point3d to this class.
-* \param other - The other \ref Point3d to add.
-* \returns This class with the coordinates of the other class added to the coordinates. 
-*/
+ * \param other - The other \ref Point3d to add.
+ * \returns This class with the coordinates of the other class added to the
+ * coordinates.
+ */
 Point3d &Point3d::operator+=(Point3d const &other) {
   m_fX += other.x();
   m_fY += other.y();
@@ -42,9 +43,10 @@ Point3d &Point3d::operator+=(Point3d const &other) {
 }
 
 /*! \brief Subtracts a \ref Point3d from this class.
-* \param other - The other \ref Point3d to subtract from this class. 
-* \returns This class with the coordinates of the other class subtracted from the current coordinates. 
-*/
+ * \param other - The other \ref Point3d to subtract from this class.
+ * \returns This class with the coordinates of the other class subtracted from
+ * the current coordinates.
+ */
 Point3d &Point3d::operator-=(Point3d const &other) {
   m_fX -= other.x();
   m_fY -= other.y();
@@ -54,9 +56,10 @@ Point3d &Point3d::operator-=(Point3d const &other) {
 }
 
 /*! \brief Subtracts two \ref Point3d classes.
-* \param other - The other \ref Point3d class to subtract.
-* \returns A new \ref Point3d class that is the result of the subtraction of the coordinates. 
-*/
+ * \param other - The other \ref Point3d class to subtract.
+ * \returns A new \ref Point3d class that is the result of the subtraction of
+ * the coordinates.
+ */
 Point3d Point3d::operator-(Point3d const &other) const {
   float x = m_fX - other.x();
   float y = m_fY - other.y();
@@ -64,19 +67,21 @@ Point3d Point3d::operator-(Point3d const &other) const {
   return Point3d(x, y, z);
 }
 
-/*! \brief Multiples a \ref Point3d by a scalar value. 
-* \param scalar - The float value to multiply all coordinates by. 
-* \returns A new \ref Point3d with all the coordinates multiplied by the scalar. 
-*/
+/*! \brief Multiples a \ref Point3d by a scalar value.
+ * \param scalar - The float value to multiply all coordinates by.
+ * \returns A new \ref Point3d with all the coordinates multiplied by the
+ * scalar.
+ */
 Point3d Point3d::operator*(float const scalar) const {
   Point3d ret(m_fX * scalar, m_fY * scalar, m_fZ * scalar);
   return ret;
 }
 
 /*! \brief Multiples the current \ref Point3d by a scalar
-* \param scalar - The scalar value to multiply the coordinates of this \ref Point3d by.
-* \returns This \ref Point3d with all coordinates multiplied by the scalar. 
-*/
+ * \param scalar - The scalar value to multiply the coordinates of this \ref
+ * Point3d by. \returns This \ref Point3d with all coordinates multiplied by the
+ * scalar.
+ */
 Point3d &Point3d::operator*=(float const scalar) {
   m_fX *= scalar;
   m_fY *= scalar;
@@ -85,18 +90,18 @@ Point3d &Point3d::operator*=(float const scalar) {
 }
 
 /*! \brief Divides a \ref Point3d by a scalar.
-* \param scalar - The value to divide the coordinates by.
-* \returns A new \ref Point3d with the values divided by the scalar. 
-*/
+ * \param scalar - The value to divide the coordinates by.
+ * \returns A new \ref Point3d with the values divided by the scalar.
+ */
 Point3d Point3d::operator/(float const scalar) const {
   Point3d ret(m_fX / scalar, m_fY / scalar, m_fZ / scalar);
   return ret;
 }
 
-/*! \brief Divides the current \ref Point3d by a scalar. 
-* \param scalar - The value to divide the coordinates by.
-* \returns The current \ref Point3d with the values divided by the scalar. 
-*/
+/*! \brief Divides the current \ref Point3d by a scalar.
+ * \param scalar - The value to divide the coordinates by.
+ * \returns The current \ref Point3d with the values divided by the scalar.
+ */
 Point3d &Point3d::operator/=(float const scalar) {
   // todo: catch divide by 0
   m_fX /= scalar;
@@ -106,8 +111,8 @@ Point3d &Point3d::operator/=(float const scalar) {
 }
 
 /*! \brief Returns the length of the current \ref Point3d .
-* \returns The length of the vector as a float.
-*/
+ * \returns The length of the vector as a float.
+ */
 float Point3d::length() const {
   return sqrt(m_fX * m_fX + m_fY * m_fY + m_fZ * m_fZ);
 }
@@ -124,7 +129,8 @@ float Point3d::DotProduct(Point3d const &v2) const {
   return m_fX * v2.m_fX + m_fY * v2.m_fY + m_fZ * v2.m_fZ;
 }
 
-/*! \brief Normalizes the current \ref Point3d by dividing all coordinates by the result of \ref length() .*/
+/*! \brief Normalizes the current \ref Point3d by dividing all coordinates by
+ * the result of \ref length() .*/
 void Point3d::Normalize() {
   float fMag = sqrt(m_fX * m_fX + m_fY * m_fY + m_fZ * m_fZ);
   if (fMag == 0.F) {
@@ -373,53 +379,43 @@ Point2d &Point2d::operator=(Point2d const &src) {
   return *this;
 }
 
-double Point2d::length() {
-  return sqrt(m_fU * m_fU + m_fV * m_fV);
-}
+double Point2d::length() { return sqrt(m_fU * m_fU + m_fV * m_fV); }
 
-LinearSlope::LinearSlope(){
+LinearSlope::LinearSlope() {
   m_slope = 0;
   m_yIntercept = 0;
 }
 
-LinearSlope::LinearSlope(double slope, double yIntercept){
+LinearSlope::LinearSlope(double slope, double yIntercept) {
   m_slope = slope;
   m_yIntercept = yIntercept;
 }
 
-LinearSlope::LinearSlope(double x1, double y1, double x2, double y2){
+LinearSlope::LinearSlope(double x1, double y1, double x2, double y2) {
   m_slope = (y2 - y1) / (x2 - x1);
   m_yIntercept = y2 - (m_slope * x2);
 }
 
-double LinearSlope::CalculateY(double x){
-  return x * m_slope + m_yIntercept;
-}
+double LinearSlope::CalculateY(double x) { return x * m_slope + m_yIntercept; }
 
-double LinearSlope::CalculateX(double y){
+double LinearSlope::CalculateX(double y) {
   return (y - m_yIntercept) / m_slope;
 }
 
-bool LinearSlope::IsPointAboveLine(double x, double y){
+bool LinearSlope::IsPointAboveLine(double x, double y) {
   return y > CalculateY(x);
 }
 
-bool LinearSlope::IsPointBelowLine(double x, double y){
+bool LinearSlope::IsPointBelowLine(double x, double y) {
   return y < CalculateY(x);
 }
 
-double LinearSlope::getSlope(){
-  return m_slope;
-}
+double LinearSlope::getSlope() { return m_slope; }
 
-double LinearSlope::getYIntercept(){
-  return m_yIntercept;
-}
+double LinearSlope::getYIntercept() { return m_yIntercept; }
 
-void LinearSlope::setSlope(double slope){
-  m_slope = slope;
-}
+void LinearSlope::setSlope(double slope) { m_slope = slope; }
 
-void LinearSlope::setYIntercept(double yIntercept){
+void LinearSlope::setYIntercept(double yIntercept) {
   m_yIntercept = yIntercept;
 }
