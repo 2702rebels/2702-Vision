@@ -1,14 +1,16 @@
 #include <fmt/format.h>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <iostream>
 #include <vector>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     // 1. Settings
     cv::Size boardSize(9, 6); // Number of internal corners (width, height)
+    float squareSize = 30.0f; // Size of a square in your chosen unit (e.g., mm)
     std::vector<std::string> imageFiles;
     for (int i = 1; i < argc; i++) {
-        imageFiles.emplace_back(argv[i]);
+        imageFiles.push_back(argv[i]);
     }
 
     std::vector<std::vector<cv::Point3f>> objectPoints;
@@ -20,7 +22,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < boardSize.height; i++) {
         for (int j = 0; j < boardSize.width; j++) {
             float squareSize = 30.0F;
-            objp.emplace_back(j * squareSize, i * squareSize, 0.0F);
+            objp.push_back(cv::Point3f(j * squareSize, i * squareSize, 0.0f));
         }
     }
 
@@ -36,12 +38,12 @@ int main(int argc, char** argv) {
         std::vector<cv::Point2f> corners;
         // Detect chessboard corners
         bool found = cv::findChessboardCorners(gray, boardSize, corners,
-                                               cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+                        cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
 
         if (found) {
             // Refine corner locations for sub-pixel accuracy
             cv::cornerSubPix(gray, corners, cv::Size(11, 11), cv::Size(-1, -1),
-                             cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
+                cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
 
             imagePoints.push_back(corners);
             objectPoints.push_back(objp);
