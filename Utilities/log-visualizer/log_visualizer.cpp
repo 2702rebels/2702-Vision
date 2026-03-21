@@ -7,7 +7,7 @@
  * - Frame-by-frame stepping or continuous playback
  *
  * Usage:
- *   log-visualizer <field.json> <framelog> [poses-file]
+ *   log-visualizer <framelog> [poses-file] [--field <field.json>]
  *
  * Controls:
  *   Space       - Play/Pause
@@ -22,6 +22,12 @@
 #include <cmath>
 #include <cstring>
 #include <string>
+#ifdef _WIN32
+#include <direct.h>
+#define getcwd _getcwd
+#else
+#include <unistd.h>
+#endif
 #include <vector>
 #include <map>
 #include <fstream>
@@ -483,16 +489,85 @@ static cv::Mat drawCameraViews(const FrameSet &fs, int nCams,
 
 // ---- Main ----
 
+// Try to find the default field JSON relative to the executable
+static std::string findDefaultFieldJson(const char *argv0) {
+    // Walk up from the executable to find the repo root
+    // Expected layout: <repo>/Utilities/log-visualizer/build/log-visualizer
+    std::string exe(argv0);
+    // Normalize: if argv0 is relative, prepend cwd
+    if (!exe.empty() && exe[0] != '/' && exe[0] != '\\') {
+        char cwd[4096];
+        if (getcwd(cwd, sizeof(cwd))) {
+            exe = std::string(cwd) + "/" + exe;
+        }
+    }
+
+    // Try going up from executable location
+    std::vector<std::string> candidates;
+    // From build/log-visualizer -> repo is ../../../..
+    // From log-visualizer dir   -> repo is ../..
+    std::string dir = exe;
+    for (int ups = 0; ups < 6; ups++) {
+        size_t slash = dir.find_last_of("/\\");
+        if (slash == std::string::npos) break;
+        dir = dir.substr(0, slash);
+        std::string candidate = dir + "/2026/2026AprilTag/2026-rebuilt-welded.json";
+        FILE *fp = fopen(candidate.c_str(), "r");
+        if (fp) { fclose(fp); return candidate; }
+    }
+
+    // Also try relative to cwd
+    const char *cwdCandidates[] = {
+        "2026/2026AprilTag/2026-rebuilt-welded.json",
+        "../2026/2026AprilTag/2026-rebuilt-welded.json",
+        "../../2026/2026AprilTag/2026-rebuilt-welded.json",
+    };
+    for (auto &c : cwdCandidates) {
+        FILE *fp = fopen(c, "r");
+        if (fp) { fclose(fp); return c; }
+    }
+
+    return "";
+}
+
 int main(int argc, char **argv)
 {
-    if (argc < 3 || argc > 4) {
-        fprintf(stderr, "Usage: %s <field.json> <framelog> [poses-file]\n", argv[0]);
+    const char *fieldPath = nullptr;
+    const char *logPath   = nullptr;
+    const char *posePath  = nullptr;
+
+    // Parse args: <framelog> [poses-file] [--field <field.json>]
+    for (int i = 1; i < argc; i++) {
+        if ((strcmp(argv[i], "--field") == 0 || strcmp(argv[i], "-f") == 0) && i+1 < argc) {
+            fieldPath = argv[++i];
+        } else if (!logPath) {
+            logPath = argv[i];
+        } else if (!posePath) {
+            posePath = argv[i];
+        } else {
+            fprintf(stderr, "Usage: %s <framelog> [poses-file] [--field <field.json>]\n", argv[0]);
+            return 1;
+        }
+    }
+
+    if (!logPath) {
+        fprintf(stderr, "Usage: %s <framelog> [poses-file] [--field <field.json>]\n", argv[0]);
+        fprintf(stderr, "\nIf --field is omitted, defaults to 2026-rebuilt-welded.json\n");
         return 1;
     }
 
-    const char *fieldPath = argv[1];
-    const char *logPath   = argv[2];
-    const char *posePath  = argc > 3 ? argv[3] : nullptr;
+    // Default field JSON
+    std::string defaultField;
+    if (!fieldPath) {
+        defaultField = findDefaultFieldJson(argv[0]);
+        if (defaultField.empty()) {
+            fprintf(stderr, "Could not find default field JSON (2026-rebuilt-welded.json).\n");
+            fprintf(stderr, "Specify with --field <path>\n");
+            return 1;
+        }
+        fieldPath = defaultField.c_str();
+        printf("Using default field: %s\n", fieldPath);
+    }
 
     // Load data
     std::map<int,FieldTag> fieldTags;
