@@ -58,7 +58,8 @@ nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint3
 	m_nWorkersRunning( 0 ),
 	m_nWorkersWaiting( 0 ),
 	m_pNextFrame( 0 ),
-	m_nfp( nfp )
+	m_nfp( nfp ),
+	m_bCamRunning( false )
 {
 //	printf( "Instance:: %x\n", (uint32_t)frc::CameraServer::GetInstance() );
 
@@ -82,6 +83,10 @@ nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint3
 		std::this_thread::sleep_for( std::chrono::milliseconds(10) );
 
 	m_thCamera = std::thread( &nvCamera::cameraThreadFn, this );
+
+	while (!m_bCamRunning) {
+		std::this_thread::sleep_for( std::chrono::milliseconds(10) );
+	}
 }
 
 nvCamera::~nvCamera()
@@ -299,7 +304,11 @@ bool nvCamera::bStart()
 		m_pFrames[i].m_pu8Img = (uint8_t *)m_grBuffers[i].m_pMem;
 	}
 
-	return v4lcam::bStart();
+	if( v4lcam::bStart() ) {
+		m_bCamRunning = true;
+		return true;
+	}
+	return false;
 }
 
 bool nvCamera::bStop()

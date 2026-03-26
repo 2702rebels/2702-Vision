@@ -5,6 +5,8 @@
 class CFrameLogger
 {
 	bool		m_bWrite = false;
+	time_t		m_tEndLog = 0;
+	bool		m_bMatchLog = false;
 	FILE 		*m_fp = 0;
 public:
 	CFrameLogger()
@@ -29,6 +31,41 @@ public:
 		return true;
 	}
 
+	bool bCreateMatchLog( char const *pszDir )
+	{
+		// If log file is already open, don't start match log.
+		if (m_fp) {
+			return true;
+		}
+		try {
+			char szTmp[128];
+			for (int i = 0; ; i++ )
+			{
+				snprintf( szTmp, sizeof(szTmp), "%s/FrmLog-%04d.log", pszDir, i );
+				if (access( szTmp, F_OK ) == -1) 
+					break;
+			}
+			printf( "Opening log file at %s\n", szTmp );
+
+			m_fp = fopen( szTmp, "wt" );
+			if (!m_fp) {
+				fprintf( stderr, "Unable to open log file '%s' for writing\n", szTmp );
+				return false;
+			}
+			m_bMatchLog = true;
+			m_tEndLog = time(0) + 160;
+			m_bWrite = true;
+			return true;
+		}
+		catch( exception &e ) {
+			if (m_fp) {
+				fclose( m_fp );
+				m_fp = 0;
+			}
+			printf( "Unable to start logging: %s\n", e.what() );
+		}
+		return true;
+	}
 	bool bOpenLog( char const *psz )
 	{
 		m_bWrite = false;
@@ -57,6 +94,11 @@ public:
 					}
 					fprintf( m_fp, "\n" );
 				}
+			}
+			if (m_bMatchLog && time(0) > m_tEndLog) {
+				m_bWrite = false;
+				fclose( m_fp );
+				m_fp = 0;
 			}
 		}
 	}

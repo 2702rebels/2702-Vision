@@ -251,7 +251,7 @@ public:
 		}
 
 		// We only log and send every 2nd frame to the camera server
-		if (pcf->u32Sequence() % 4) {
+		if (pcf->u32Sequence() % 5) {
 			if (m_mtxLog.try_lock()) {
 				if (m_bLoggingDone) {
 				}
@@ -623,7 +623,7 @@ int main( int argc, char **argv )
 
 		QXfrm qxRobot;
 		bool bHavePose = false;
-		FILE *fpFrmLog = fopen( "FrameLog.log", "w" );
+//		FILE *fpFrmLog = fopen( "FrameLog.log", "w" );
 		while( !bStop ) {
 			ATFrame *patf;
 
@@ -719,19 +719,20 @@ int main( int argc, char **argv )
 						auto bLog = bsIsLogging.Get();
 						if (bLog) {
 							bLogStarted = true;
+							fl.bCreateMatchLog( LOG_DIR );
 							proc0.vStartLogging();
 							proc1.vStartLogging();
 						}							
 					}
 				}
-				if (fpFrmLog) {
+//				if (fpFrmLog) {
 //					fprintf( fpFrmLog, "C%d S%u 
-				}
+//				}
 			}
 		}
-		if (fpFrmLog) {
-			fclose( fpFrmLog );
-		}
+//		if (fpFrmLog) {
+//			fclose( fpFrmLog );
+//		}
 
 	}
 	catch (std::exception &e) {

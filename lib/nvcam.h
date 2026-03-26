@@ -118,6 +118,7 @@ class nvCamera : public v4lcam
 
 	std::mutex		m_mtxLog;
 
+	bool			m_bCamRunning = false;
 	uint32_t		m_u32Frames = 0;
 	std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds> m_tpStart;
 public:
