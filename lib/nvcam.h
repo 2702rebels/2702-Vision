@@ -130,6 +130,7 @@ public:
 	virtual uint64_t u64GetExposure();
 	virtual bool bSetGain( uint32_t u32Gain );
 	virtual bool bSetMode( uint32_t u32Mode );
+	virtual bool bSetTimeout( int nTimeoutMS );
 
 	virtual void UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure );
 	virtual bool bProcessFrame( v4l2_buffer &buf );

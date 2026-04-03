@@ -69,6 +69,7 @@ nvCamera::nvCamera( char const *pszVid, int nCam, int nWidth, int nHeight, uint3
 //	bSetRes( RES_COLS, RES_ROWS, V4L2_PIX_FMT_Y10 );
 	bSetRes( RES_COLS, RES_ROWS, u32PixFmt );
 	bSetMode( u32SyncMode );
+	bSetTimeout( 10000 );
 
 	m_u64MaxExp = MAX_EXP;
 	m_u64NextExp = MAX_EXP;
@@ -209,6 +210,31 @@ bool nvCamera::bSetMode( uint32_t u32Mode )
 	if( ioctl( m_fd, VIDIOC_S_EXT_CTRLS, &ctrls ) ) {
 		char szTmp[1024];
 		sprintf( szTmp, "bSetMode(%u) failed: %d\n", u32Mode, errno );
+		throw invalid_argument( szTmp );
+	}
+
+	return true;
+}
+
+bool nvCamera::bSetTimeout( int nTimeoutMS )
+{
+	v4l2_ext_control ctrl;
+	v4l2_ext_controls ctrls;
+
+	memset( &ctrl, 0, sizeof(ctrl) );
+	memset( &ctrls, 0, sizeof(ctrls) );
+	//ctrl.id = 0x009a2009;
+	//ctrl.id = TEGRA_CAMERA_CID_BASE + 8;
+	ctrl.id = 0x009a206f;
+	ctrl.value64 = nTimeoutMS;
+	printf( "Setting Camera Timeout to %d\n", nTimeoutMS );
+
+	ctrls.count = 1;
+	ctrls.controls = &ctrl;
+
+	if( ioctl( m_fd, VIDIOC_S_EXT_CTRLS, &ctrls ) ) {
+		char szTmp[1024];
+		sprintf( szTmp, "bSetTimeout(%d) failed: %d\n", nTimeoutMS, errno );
 		throw invalid_argument( szTmp );
 	}
 
