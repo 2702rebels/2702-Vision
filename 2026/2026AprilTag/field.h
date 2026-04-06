@@ -16,6 +16,8 @@ public:
 	FieldTag( FieldTag const &ft );
 	~FieldTag();
 
+	void vUpdateXfm( Rebels::QXfrm const &qxm );
+
 	bool bIgnore() const;
 	void vSetIgnore( bool bIgnore );
 
@@ -38,9 +40,11 @@ public:
 	Field( Field const &src );
 	virtual ~Field();
 
+	void vUpdateTag( int nIdx, Rebels::QXfrm const &qx );
 	Field &operator=( Field const &src );
 	size_t nTags() const;
 	FieldTag const &operator[]( int n ) const;
+	FieldTag &operator[]( int n );
 
 	void vSetIgnore( std::string const &strIgnoreList );
 };

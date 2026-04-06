@@ -21,10 +21,13 @@ class PoseSolver
 #else
 	float					m_fMaxDistSqd = (8.F * 8.F);
 #endif
+	bool					m_bSolveUseAll = false;
+	float					m_fMaxRMS2 = 100.F;
 
 static int eval( void *p, int m, int n, float const *x, float *fv, int iflag );
 
 	int eval( int m, int n, float const *x, float *fv, int iflag );
+
 public:
 	PoseSolver( Field const &fld, MultiCam const &mc );
 	~PoseSolver();
@@ -33,6 +36,15 @@ public:
 	bool bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf );
 	bool bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf );
 
+	bool bGuessPose( QXfrm &xfm, std::vector<ATFrame *>&vatf );
+
+	// returns number of residuals for this frame...  if pfRes == null, simply counts the
+	// number of residuals for this frame.
+	int nCalcResiduals( QXfrm &xfm, std::vector<ATFrame *> &vatf, float *pfRes );
 	void vSetMinTagPixels( uint32_t u32MinPixels );
 	void vSetMaxDistance( uint32_t fMaxDist );
+	void vSetSolveMode( bool bUseAll );
+	void vSetMaxRMS( float fRMS );
+
+	int nEnumerateEqns( std::vector<ATFrame *> const &vatf, int &nCams, uint64_t &u64TagMask ) const;
 };

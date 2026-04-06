@@ -79,6 +79,74 @@ int PoseSolver::eval( int m, int n, float const *px, float *pv, int iflag )
 	return 1;
 }
 
+int PoseSolver::nEnumerateEqns( std::vector<ATFrame *> const &vatf, int &nCams, uint64_t &u64TagMask ) const
+{
+	// count the number of equations...
+	int m = 0;
+	nCams = 0;
+	for (auto f : vatf ) {
+		bool bHasUsableTag = false;
+		for ( size_t s = 0; s < f->sTags(); s++) {
+			ATDetection const &d = (*f)[s];
+			FieldTag const &ft = m_Field[d.uId() - 1];
+			u64TagMask |= (1 <<(d.uId() - 1));
+
+			if (m_bSolveUseAll || d.bUse()) {
+				m += 8;  // there are 4 corners per tag and a u,v coordinate pair per corner
+				bHasUsableTag = true;
+			}
+		}
+		if (bHasUsableTag) {
+			nCams++;
+		}
+	}
+
+	return m;
+}
+
+int PoseSolver::nCalcResiduals( QXfrm &xfm, std::vector<ATFrame *> &vatf, float *pfRes )
+{
+	int nRes = 0;
+	int nCnt = 0;
+	QXfrm qxF2R = xfm.Inverse();
+	QXfrm qxF2C = m_mc.qxmR2C() * qxF2R;
+	for (auto f : vatf ) {
+		size_t sTags = f->sTags();
+		int nCam = f->nCam();
+		CamParm const &cp = m_mc[nCam];
+
+		for (size_t sTag = 0; sTag < sTags; sTag++) {
+			ATDetection const &atd = (*f)[sTag];
+			unsigned uTagId = atd.uId();
+
+			FieldTag const &ft = m_Field[uTagId - 1];
+			if (m_bSolveUseAll || atd.bUse()) {
+				Point3d const *pCorners = ft.Corners();
+				nRes += 8;
+
+				if (pfRes) {
+					for (int i = 0; i < 4; i++ ) {
+						// Transform the corner point into the "Multi-Camera" frame of reference.
+						Point3d p3dCam = qxF2C.TransformPoint( pCorners[i] );
+//						printf( "p2dCam -> %.4f %.4f %.4f\n", p3dCam.x(), p3dCam.y(), p3dCam.z() );
+
+						Point2d p2d = cp.ProjectPoint( p3dCam );
+
+						// Get the U/V position of this corner point.
+						auto p2f = atd[i];
+						
+//						printf( "%.4f -> %.4f  ,  %.4f -> %.4f\n", p2d.u(), p2f.x, p2d.v(), p2f.y );
+						*pfRes++ = p2d.u() - p2f.x;
+						*pfRes++ = p2d.v() - p2f.y;
+						nCnt++;
+					}
+				}
+			}
+		}
+	}
+	return nRes;
+}
+
 void PoseSolver::vSetMinTagPixels( uint32_t u32MinPixels )
 {
 	m_u32MinTagPixels = u32MinPixels;
@@ -87,6 +155,15 @@ void PoseSolver::vSetMinTagPixels( uint32_t u32MinPixels )
 void PoseSolver::vSetMaxDistance( uint32_t fMaxDist )
 {
 	m_fMaxDistSqd = fMaxDist * fMaxDist;
+}
+
+void PoseSolver::vSetSolveMode( bool bUseAll )
+{
+	m_bSolveUseAll = bUseAll;
+}
+void PoseSolver::vSetMaxRMS( float fRMS )
+{
+	m_fMaxRMS2 = fRMS * fRMS;
 }
 
 #define USE_MOST_PIXELS 1
@@ -148,6 +225,7 @@ bool PoseSolver::bFilterTags( std::vector<ATFrame *> &vatf )
 	//		if (!solvePnP( objPoints, imgPoints, m, md, rvec, tvec, false, cv::SOLVEPNP_IPPE_SQUARE )) {
 			if (!solvePnP( objPoints, imgPoints, m, md, rvec, tvec )) {
 				d.vSetUse( false );
+				continue;
 			}
 
 			float fX = float(tvec.at<double>(0));
@@ -257,7 +335,8 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 		cv::projectPoints(objPoints, rvec, tvec, m, md, reprojectPoints);
 
 		float sum = 0.;
-		sum = cv::norm(reprojectPoints, imgPoints);
+		sum = cv::norm(reprojectPoints, imgPoints, cv::NORM_L2SQR);
+		sum = sum / idx;
 
 //printf( "Sum = %.4f\n", sum );
 		Rebels::Point3d p3Rvec( rvec.at<double>(0), rvec.at<double>(1), rvec.at<double>(2) );
@@ -284,7 +363,7 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 			}
 		}
 #endif
-		bool bUseSolve = sum < 20.;
+		bool bUseSolve = sum < m_fMaxRMS2;
 		if (bUseSolve) {
 #if 1
 			// the xfrm we have just computed goes from the Field coordinate system to the sensor's.
@@ -298,33 +377,101 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 #else
 			xfm = qxmF2S.Inverse();
 #endif
+			return true;
 		}
-		return true;
+		else {
+			printf( "RMS2 = %.2f\n", sum );
+		}
+	}
+	else {
+		printf( "SolvePNP failed\n" );
 	}
 
 	return false;
 }
 
-bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
+bool PoseSolver::bGuessPose( QXfrm &xfm, std::vector<ATFrame *>&vatf )
 {
-#if 1
-	// count the number of unknowns...
-	int nCams = 0;
-	int m = 0;
-	for (auto f : vatf ) {
-		bool bHasUsableTag = false;
-		for ( size_t s = 0; s < f->sTags(); s++) {
-			ATDetection const &d = (*f)[s];
+	// Determine Min/Max X/Y locations for robot based on which Tags are seen
+	float fMaxX = 600;
+	float fMinX = 0;
+	float fMaxY = 300;
+	float fMinY = 0;
+
+	Rebels::Point3d vXNorm( 1., 0., 0. );
+	Rebels::Point3d vZNorm( 0., 0., 1. );
+	
+	float fThetaSum = 0.;
+	int nTags = 0;
+	for (int i = 0; i < vatf.size(); i++) {
+		for (size_t t = 0; t < vatf[i]->sTags(); t++ ) {
+			ATDetection const &d = (*vatf[i])[t];
 			FieldTag const &ft = m_Field[d.uId() - 1];
 			if (d.bUse()) {
-				m += 8;  // there are 4 corners per tag and a u,v coordinate pair per corner
-				bHasUsableTag = true;
+				nTags++;
+				Rebels::QXfrm const &q = ft;
+				Rebels::Point3d vDir = q.Rotation().RotatePoint( vXNorm );
+
+				// is tag pointing along the field or across???
+				if (fabs(vDir.x()) > fabs(vDir.y())) {
+					// tag pointing positively down field, so robot can't be any closer than this tag
+					if (vDir.x() > 0) {
+						if (fMinX < q.Translation().x()) {
+							fMinX = q.Translation().x();
+						}
+					}
+					else {
+						if (fMaxX > q.Translation().x()) {
+							fMaxX = q.Translation().x();
+						}
+					}
+				}
+				else {
+					if (vDir.y() > 0) {
+						if (fMinY < q.Translation().y()) {
+							fMinY = q.Translation().y();
+						}
+					}
+					else {
+						if (fMaxY > q.Translation().y()) {
+							fMaxY = q.Translation().y();
+						}
+					}
+				}
+
+				auto const &cp = m_mc[vatf[i]->nCam()];
+				Quaternion qCam = cp.getRotation().Inverse();
+				Rebels::Point3d p3Cam = qCam.RotatePoint( vZNorm ) * -1;
+
+				// both vectors are unit vectors...
+				float fCosTheta = vXNorm.DotProduct(p3Cam);
+				float fTheta = acos( fCosTheta );
+				if (fTheta < 0) {
+					printf( "Theta < 0\n" );
+				}
+				fThetaSum += fTheta;
 			}
 		}
-		if (bHasUsableTag) {
-			nCams++;
-		}
 	}
+
+	if (!nTags)
+		return false;
+
+	Rebels::Point3d p3Robot( (fMaxX + fMinX) / 2, (fMaxY + fMinY) / 2, 0. );
+	Rebels::Quaternion qRobot( fThetaSum/nTags, Rebels::Point3d( 0., 0., 1. ) );
+
+	xfm = QXfrm( qRobot, p3Robot );
+	return true;
+}
+
+bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
+{
+	// count the number of equations...
+	int nCams;
+	int m;
+	uint64_t u64Mask;
+
+	m = nEnumerateEqns( vatf, nCams, u64Mask );
 
 	if (!m || nCams < 2) {
 		return false;
@@ -363,7 +510,6 @@ bool PoseSolver::bSolve( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 	QXfrm qxNew( euNew, p3 );
 
 	xfm = qxNew.Inverse();
-#endif
 
 	return true;
 }

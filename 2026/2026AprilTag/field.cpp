@@ -56,6 +56,16 @@ FieldTag::~FieldTag()
 {
 }
 
+void FieldTag::vUpdateXfm( Rebels::QXfrm const &qxm )
+{
+	m_qfm = qxm;
+
+	// compute corners
+	for( int i = 0; i < 4; i++ ) {
+		m_grCorners[i] = m_qfm.TransformPoint( m_grBaseCorners[i] );
+	}
+}
+
 bool FieldTag::bIgnore() const 
 {
 	return m_bIgnore;
@@ -137,6 +147,13 @@ Field::Field( char const *pszJson )
 
 }
 
+void Field::vUpdateTag( int nIdx, Rebels::QXfrm const &qx )
+{
+	FieldTag &ft = m_vxTags[nIdx];
+
+	ft.vUpdateXfm( qx );
+}
+
 Field::Field( Field const &src )
 {
 	m_vxTags = src.m_vxTags;
@@ -158,6 +175,11 @@ size_t Field::nTags() const
 }
 
 FieldTag const &Field::operator[]( int n ) const
+{
+	return m_vxTags[n];
+}
+
+FieldTag &Field::operator[]( int n )
 {
 	return m_vxTags[n];
 }

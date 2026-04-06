@@ -77,6 +77,11 @@ public:
 		return true;
 	}
 
+	void vRewind()
+	{
+		fseek( m_fp, 0, SEEK_SET );
+	}
+
 	void vLogFrame( std::vector<ATFrame *> const &vaf )
 	{
 		if (m_fp && m_bWrite) {
@@ -117,7 +122,9 @@ public:
 			unsigned uSeq;
 			unsigned uCams;
 			if (!fgets( szTmp, sizeof(szTmp), m_fp) || sscanf( szTmp, "S:%u", &uSeq ) != 1) {
-				fprintf( stderr, "Unable to read frame #... end of file?" );
+				if (!feof(m_fp)) {
+					fprintf( stderr, "Unable to read frame #..." );
+				}
 				return false;
 			}
 			if (!fgets( szTmp, sizeof(szTmp), m_fp) || sscanf( szTmp, "Cams:%u", &uCams ) != 1) {
