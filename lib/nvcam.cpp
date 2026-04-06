@@ -241,6 +241,11 @@ bool nvCamera::bSetTimeout( int nTimeoutMS )
 	return true;
 }
 
+bool nvCamera::bRunning() const
+{
+	return m_bRunning;
+}
+
 void nvCamera::UpdateExposure( uint32_t u32Frame, uint64_t u64Exposure )
 {
 	if( u64Exposure > m_u64MaxExp )

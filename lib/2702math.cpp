@@ -552,7 +552,8 @@ Quaternion const &QXfrm::Rotation() const
 void QXfrm::Invert()
 {
 	m_q = m_q.Inverse();
-	m_p = m_q.RotatePoint( m_p ) * -1;
+	Point3d p = m_q.RotatePoint( m_p );
+	m_p = p * -1;
 }
 
 QXfrm QXfrm::Inverse() const

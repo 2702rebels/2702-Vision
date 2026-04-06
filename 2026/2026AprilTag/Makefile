@@ -5,6 +5,7 @@ MAKEFLAGS := --jobs=$(shell nproc)
 
 #CXX=g++
 OBJS=field.o ApriltagReport.o udpsender.o PoseSolver.o cfgfile.o orin-sync.o
+PD_OBJS=field.o PoseSolver.o cfgfile.o orin-sync.o
 
 #CXXFLAGS+=-I. -I../../lib  --std c++20
 #CXXFLAGS+=-I. -I../../lib  --std c++17
@@ -12,7 +13,7 @@ CXXFLAGS+=-I. -I../../lib -std=c++20
 CXXFLAGS+=-DDISPLAY=0
 CXXFLAGS+=-DCAMSERVER=0
 CXXFLAGS+=-Iwpilib/include/cameraserver -Iwpilib/include/cscore -Iwpilib/include/hal -Iwpilib/include/ntcore -Iwpilib/include/romiVendordep -Iwpilib/include/wpilibc -Iwpilib/include/wpilibNewCommands -Iwpilib/include/wpimath -Iwpilib/include/wpinet -Iwpilib/include/wpiutil -Iwpilib/include/xrpVendordep
-CXXFLAGS+=-Iinclude/opencv4
+CXXFLAGS+=-I/usr/include/opencv4
 CXXFLAGS+=-Iinclude/apriltag
 CXXFLAGS+=-Iapriltags_cuda/src
 CXXFLAGS+=-I/usr/local/cuda/include
@@ -44,8 +45,11 @@ LIBS+=-lcminpacks
 	$(CXX) $(LDFLAGS) -o 2026AprilTag 2026AprilTag.o $(OBJS) -l2702 $(LIBS) -Lapriltags_cuda/build -lapriltag_cuda -lapriltag -lglog -lgflags
 
 
-pose-debug: pose-debug.o $(OBJS)
-	$(CXX) $(LDFLAGS) -o pose-debug pose-debug.o $(OBJS) -l2702 $(LIBS) -Lapriltags_cuda/build -lapriltag_cuda -lapriltag -lglog -lgflags
+pose-debug: pose-debug.o $(PD_OBJS)
+	$(CXX) $(LDFLAGS) -o pose-debug pose-debug.o $(PD_OBJS) -l2702 $(LIBS) #-Lapriltags_cuda/build -lapriltag_cuda -lapriltag -lglog -lgflags
+
+CalRobot: CalRobot.o $(PD_OBJS)
+	$(CXX) $(LDFLAGS) -o CalRobot CalRobot.o $(PD_OBJS) -l2702 $(LIBS) #-Lapriltags_cuda/build -lapriltag_cuda -lapriltag -lglog -lgflags
 
 sg: sg.o
 	$(CXX) $(LDFLAGS) -o sg sg.o

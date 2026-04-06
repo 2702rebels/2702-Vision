@@ -88,6 +88,7 @@ class nvCamera : public v4lcam
 	uint64_t	m_u64MaxExp;
 	uint64_t	m_u64NextExp;
 	uint32_t	m_u32PixFmt;
+	bool		m_bCamRunning = false;
 
 	bool 		m_bSave = true;
 
@@ -136,6 +137,7 @@ public:
 	virtual bool bProcessFrame( v4l2_buffer &buf );
 	virtual bool bStart();
 	virtual bool bStop();
+	virtual bool bRunning() const;
 
 	virtual void FrameComplete( nvFrame *pFrame );
 

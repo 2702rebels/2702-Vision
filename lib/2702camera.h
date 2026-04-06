@@ -129,6 +129,10 @@ public:
 	{
 		return m_vcp[n];
 	}
+	inline CamParm &operator[]( size_t n )
+	{
+		return m_vcp[n];
+	}
 
 	inline QXfrm const &qxmR2C() const
 	{
