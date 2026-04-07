@@ -148,6 +148,7 @@ void COrinSync::vPrimaryWorker()
 			bool bMsgRcvd = false;
 
 			int nRcv = recvfrom( m_nSock, gru8Buff, sizeof(gru8Buff), 0, (struct sockaddr *)&saRemote, &sLen );
+			//printf( "nRcv = %d\n", nRcv );
 			if (nRcv == -1 ){
 			}
 			else if (nRcv >= sizeof(uint32_t)) {
@@ -156,7 +157,7 @@ void COrinSync::vPrimaryWorker()
 				uint8_t const *pu8 = gru8Buff;
 
 				pu8 += UnPack( u32MsgId, pu8, sizeof(gru8Buff) );
-//				printf( "Rcvd: %08x\n", u32MsgId );
+				//printf( "Rcvd: %08x\n", u32MsgId );
 				switch ( u32MsgId ) {
 				case s_u32SECONDARY_READY_MESSAGE:
 					{
@@ -250,7 +251,10 @@ void COrinSync::vPrimaryWorker()
 				if (u32Msg) {
 					uint8_t gru8Buff[sizeof(u32Msg)];
 					size_t sIdx = Pack( u32Msg, gru8Buff, sizeof(gru8Buff) );
+					uint32_t u32Tmp;
+					UnPack( u32Tmp, gru8Buff, sizeof(gru8Buff) );
 
+//printf( "Sending %08x -> %08x -> %02X:%02X:%02X:%02X\n", u32Msg, u32Tmp, gru8Buff[0], gru8Buff[1], gru8Buff[2], gru8Buff[3] );
 					int nErr = sendto( m_nSock, gru8Buff, sIdx, 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
 				}
 			}
@@ -292,7 +296,7 @@ void COrinSync::vSecondaryWorker()
 		else if (nRcv >= sizeof(uint32_t)) {
 			bMsgRcvd = true;
 			UnPack( u32Msg, gru8Buff, sizeof(gru8Buff) );
-//			printf( "Received %08x\n", u32Msg );
+			//printf( "Received %08x\n", u32Msg );
 			switch( u32Msg ) {
 			case s_u32PRIMARY_READY_MESSAGE:
 				{

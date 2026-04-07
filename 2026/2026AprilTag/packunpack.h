@@ -6,7 +6,7 @@ inline size_t UnPack( float &f, uint8_t const *pu8, size_t sBufLen = sizeof(floa
 		throw std::runtime_error( "UnPack float - not enough data" );
 	}
 	uint32_t	*pu32 = (uint32_t *)&f;
-	*pu32 = pu8[0] | (pu8[1] << 8) || (pu8[2] << 16) | (pu8[3] << 24);
+	*pu32 = pu8[0] | (pu8[1] << 8) | (pu8[2] << 16) | (pu8[3] << 24);
 	return sizeof(float);
 }
 
@@ -33,7 +33,7 @@ inline size_t UnPack( uint32_t &u32, uint8_t const *pu8, size_t sBufLen = sizeof
 	if (sBufLen < sizeof(u32)) {
 		throw std::runtime_error( "UnPack u32 - not enough data" );
 	}
-	u32 = pu8[0] | (pu8[1] << 8) || (pu8[2] << 16) | (pu8[3] << 24);
+	u32 = pu8[0] | ((uint32_t)pu8[1] << 8) | ((uint32_t)pu8[2] << 16) | ((uint32_t)pu8[3] << 24);
 	return sizeof(u32);
 }
 

@@ -394,8 +394,6 @@ int main( int argc, char **argv )
 
 	signal( SIGINT, sighandler );
 
-	timeval tv;
-printf( "Size of tv: %ld / %ld\n", sizeof(tv.tv_sec), sizeof(tv.tv_usec) );
 	if (argc < 2) {
 		Usage();
 		return 1;
