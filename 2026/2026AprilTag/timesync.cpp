@@ -249,7 +249,7 @@ void CTimeSync::vHandlePong( uint8_t const *pu8, size_t sLen )
 
 		// if the clock is successfully updated, adjust the
 		// offset by the difference between old time and new
-		if (clock_settime( CLOCK_TO_REALTIME, &ts ) == 0) {
+		if (clock_settime( CLOCK_REALTIME, &ts ) == 0) {
 			m_i64Offset += u64Delta * 1000000LL;
 		}
 #ifdef TEST
