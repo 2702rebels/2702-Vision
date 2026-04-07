@@ -248,7 +248,10 @@ void COrinSync::vPrimaryWorker()
 					break;
 				}
 				if (u32Msg) {
-					int nErr = sendto( m_nSock, &u32Msg, sizeof(u32Msg), 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
+					uint8_t gru8Buff[sizeof(u32Msg)];
+					size_t sIdx = Pack( u32Msg, gru8Buff, sizeof(gru8Buff) );
+
+					int nErr = sendto( m_nSock, gru8Buff, sIdx, 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
 				}
 			}
 		}
@@ -299,7 +302,10 @@ void COrinSync::vSecondaryWorker()
 					if (!m_vSecondaries.size()) {
 						m_vSecondaries.push_back( saRemote );
 					}
-					int nErr = sendto( m_nSock, &s_u32SECONDARY_READY_MESSAGE, sizeof(s_u32SECONDARY_READY_MESSAGE), 0, (struct sockaddr *)&saRemote, sLen);
+					uint8_t gru8Buff[sizeof(s_u32SECONDARY_READY_MESSAGE)];
+					size_t sIdx = Pack( s_u32SECONDARY_READY_MESSAGE, gru8Buff, sizeof(gru8Buff) );
+
+					int nErr = sendto( m_nSock, gru8Buff, sIdx, 0, (struct sockaddr *)&saRemote, sLen);
 				}
 				break;
 			case s_u32START_CAMERA_MESSAGE:
@@ -312,14 +318,20 @@ void COrinSync::vSecondaryWorker()
 				}
 				// if Camera Started has been sent, primary probably didn't receive, so send again
 				else if (m_bCamStartSent) {
-					int nErr = sendto( m_nSock, &s_u32CAMERA_STARTED_MESSAGE, sizeof(s_u32CAMERA_STARTED_MESSAGE), 0, (struct sockaddr *)&saRemote, sLen);
+					uint8_t gru8Buff[sizeof(s_u32CAMERA_STARTED_MESSAGE)];
+					size_t sIdx = Pack( s_u32CAMERA_STARTED_MESSAGE, gru8Buff, sizeof(gru8Buff) );
+
+					int nErr = sendto( m_nSock, gru8Buff, sIdx, 0, (struct sockaddr *)&saRemote, sLen);
 				}
 				break;
 			}
 		}
 
 		if (!bMsgRcvd && eState == RESTARTED) {
-			int nErr = sendto( m_nSock, &s_u32SECONDARY_RESTART_MESSAGE, sizeof(s_u32CAMERA_STARTED_MESSAGE), 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
+			uint8_t gru8Buff[sizeof(s_u32SECONDARY_RESTART_MESSAGE)];
+			size_t sIdx = Pack( s_u32SECONDARY_RESTART_MESSAGE, gru8Buff, sizeof(gru8Buff) );
+
+			int nErr = sendto( m_nSock, gru8Buff, sIdx, 0, (struct sockaddr *)&saBroadcast, sizeof(saBroadcast));
 		}
 	}
 }
@@ -336,8 +348,11 @@ bool COrinSync::bSendCamStarted()
 	if (m_vSecondaries.size() == 0) {
 		throw std::runtime_error( "OrinSync::bSendCamStarted() Primary not set\n" );
 	}
+	uint8_t gru8Buff[sizeof(s_u32CAMERA_STARTED_MESSAGE)];
+	size_t sIdx = Pack( s_u32CAMERA_STARTED_MESSAGE, gru8Buff, sizeof(gru8Buff) );
+
 	
-	int nErr = sendto( m_nSock, &s_u32CAMERA_STARTED_MESSAGE, sizeof(s_u32CAMERA_STARTED_MESSAGE), 0, (struct sockaddr *)&m_vSecondaries[0].GetSockaddr(), sizeof(struct sockaddr_in));
+	int nErr = sendto( m_nSock, gru8Buff, sIdx, 0, (struct sockaddr *)&m_vSecondaries[0].GetSockaddr(), sizeof(struct sockaddr_in));
 	
 	return true;
 }
