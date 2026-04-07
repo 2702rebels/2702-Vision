@@ -37,7 +37,7 @@ inline size_t UnPack( uint32_t &u32, uint8_t const *pu8, size_t sBufLen = sizeof
 	return sizeof(u32);
 }
 
-inline size_t UnPackU64( uint64_t &u64, uint8_t const *pu8, size_t sBufLen = sizeof(uint64_t) )
+inline size_t UnPack( uint64_t &u64, uint8_t const *pu8, size_t sBufLen = sizeof(uint64_t) )
 {
 	if (sBufLen < sizeof(u64)) {
 		throw std::runtime_error( "UnPack u64 - not enough data" );
