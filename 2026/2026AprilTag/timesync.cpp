@@ -17,6 +17,8 @@
 static const int nSyncPort = 27020;
 static const int nRIOAddr = 2;
 
+//#define CLOCK_TO_USE	CLOCK_REALTIME
+#define CLOCK_TO_USE	CLOCK_MONOTONIC_RAW
 class  TSPing
 {
 	uint8_t		m_u8ProtoVers;
@@ -101,7 +103,7 @@ CTimeSync::CTimeSync( int nTeamNum, int nPollMS ) :
 	m_nTeamNum( nTeamNum ),
 	m_nPollMS( nPollMS )
 {
-	m_u32RIOAddr = (10 << 24) | ((m_nTeamNum / 100) << 16) | ((m_nTeamNum % 100) << 8);
+	m_u32RIOAddr = (10 << 24) | ((m_nTeamNum / 100) << 16) | ((m_nTeamNum % 100) << 8) | 2;
 
 	m_nSock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (m_nSock < 0) {
@@ -203,7 +205,7 @@ void CTimeSync::vSendPing()
 	uint8_t	gru8Buff[sizeof(TSPing)];
 
 	struct timespec ts;
-	clock_gettime( CLOCK_REALTIME, &ts );
+	clock_gettime( CLOCK_TO_USE, &ts );
 	uint64_t u64ClntTime = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
 
 	TSPing tpi( u64ClntTime );
@@ -218,7 +220,7 @@ void CTimeSync::vSendPing()
 void CTimeSync::vHandlePong( uint8_t const *pu8, size_t sLen )
 {
 	timespec ts;
-	clock_gettime( CLOCK_REALTIME, &ts );
+	clock_gettime( CLOCK_TO_USE, &ts );
 	uint64_t u64CurTime = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
 
 	TSPong tpo( pu8, sLen );
@@ -227,7 +229,9 @@ void CTimeSync::vHandlePong( uint8_t const *pu8, size_t sLen )
 	unsigned uOneWay = uRoundTrip / 2;
 	// Calculate the difference between our time and the RIO time assuming that
 	// the round trip network time is the same both directions.
-	m_i64Offset = (u64CurTime - uOneWay) - tpo.u64SrvrTime();
+	m_i64Offset = tpo.u64SrvrTime() - (u64CurTime - uOneWay);
+	m_u8MatchType = tpo.u8MatchType();
+	m_u8MatchNum = tpo.u8MatchNum();
 
 #ifdef TEST
 	printf( "Offset = %ld\n", m_i64Offset );
@@ -237,7 +241,7 @@ void CTimeSync::vHandlePong( uint8_t const *pu8, size_t sLen )
 	// adjust our stytem time.
 	if (tpo.u64EpochTime() > (ts.tv_sec + 24 * 3600)) {
 
-		clock_gettime( CLOCK_REALTIME, &ts );
+		clock_gettime( CLOCK_TO_USE, &ts );
 		// calculate the delta between current time and new time
 		uint64_t u64Delta = (tpo.u64EpochTime() - ts.tv_sec);
 
@@ -245,9 +249,14 @@ void CTimeSync::vHandlePong( uint8_t const *pu8, size_t sLen )
 
 		// if the clock is successfully updated, adjust the
 		// offset by the difference between old time and new
-		if (clock_settime( CLOCK_REALTIME, &ts ) == 0) {
+		if (clock_settime( CLOCK_TO_REALTIME, &ts ) == 0) {
 			m_i64Offset += u64Delta * 1000000LL;
 		}
+#ifdef TEST
+		else {
+			printf( "Tried to set date but failed\n" );
+		}
+#endif
 	}
 	
 }

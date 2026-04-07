@@ -29,7 +29,7 @@ public:
 	CTimeSync( int nTeamNum, int nPollMS = 10000 );
 	~CTimeSync();
 
-	inline int64_t i64Offst() const
+	inline int64_t i64Offset() const
 	{
 		return m_i64Offset;
 	}

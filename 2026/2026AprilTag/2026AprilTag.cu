@@ -57,10 +57,12 @@ using namespace std;
 #include "FrameLogger.h"
 
 #include "syncgen.h"
+#include "timesync.h"
 
 Rebels::MultiCam mcCam;
 Field g_field;
 ConfigFile cf;
+CTimeSync g_ts( 2702, 5000);
 
 using ApriltagReportStructType = wpi::Struct<ApriltagReport>; // Structure class that will contain the serialization and deserialization functions for the object detection packet
 
@@ -325,54 +327,11 @@ public:
 	}
 };
 
-#if 0
-Rebels::Point3d grCorners[] =
-{
-	{ -3.25,  3.25, 0. },
-	{  3.25,  3.25, 0. },
-	{  3.25, -3.25, 0. },
-	{ -3.25, -3.25, 0. }
-};
-#else
-Rebels::Point3d grCorners[] =
-{
-	{ 0., -3.25, -3.25 },
-	{ 0.,  3.25, -3.25 },
-	{ 0.,  3.25,  3.25 },
-	{ 0., -3.25,  3.25 }
-};
-#endif
-
 void Usage()
 {
 	printf( "Usage: 2025AprilTag cfgfile [-s]\n" );
 	printf( "    -s            run as NetTables Server\n" );
 	exit(1);
-}
-
-Rebels::Point3d g_p3dCam0( -13.125, 0.00, 8.75 );
-Rebels::Point3d g_p3dCam1(  13.125, 0.00, 8.75 );
-
-#include <ntcore_cpp.h>
-
-int64_t i64TimeOffset = 0;
-
-void tscb( nt::Event const &e )
-{
-	if (e.flags & NT_EVENT_TIMESYNC) {
-		printf( "tscb::: Have TIMESYNC\n" );
-		nt::TimeSyncEventData const *ptsed = e.GetTimeSyncEventData();
-		i64TimeOffset = ptsed->serverTimeOffset;
-		printf( "Got Offset -> %ld\n", ptsed->serverTimeOffset );
-//		i64TimeOffset /= 1000000;
-		time_t tCur = -i64TimeOffset;
-
-		printf( "%s\n", ctime( &tCur) );
-
-	}
-	else {
-		printf( "tscb::: -> %x\n", e.flags );
-	}
 }
 
 void vSendFrame( CUDPSender &udpSend, QXfrm const &qxfm, struct timeval const &ts )
@@ -395,7 +354,7 @@ void vSendFrame( CUDPSender &udpSend, QXfrm const &qxfm, struct timeval const &t
 //								i64TimeOffset = serverOffset.value();
 //							}
 //printf( "now: %lld    Offset: %ld   delta: %u\n", nt::Now(), i64TimeOffset, tvDelta.tv_usec );
-	int64_t time = nt::Now() + i64TimeOffset - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
+	int64_t time = nt::Now() + g_ts.i64Offset() - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
 
 	ApriltagReport ar( 0, time );
 
@@ -435,6 +394,8 @@ int main( int argc, char **argv )
 
 	signal( SIGINT, sighandler );
 
+	timeval tv;
+printf( "Size of tv: %ld / %ld\n", sizeof(tv.tv_sec), sizeof(tv.tv_usec) );
 	if (argc < 2) {
 		Usage();
 		return 1;
@@ -529,7 +490,6 @@ int main( int argc, char **argv )
 		}
 	}
 
-	nt::NetworkTableListener	ntl = nt::NetworkTableListener::CreateTimeSyncListener( ntinst, true, tscb );
 	nt::PubSubOptions pso = 
 	{
 		.structSize = sizeof(nt::PubSubOptions),
@@ -569,13 +529,13 @@ int main( int argc, char **argv )
 		// stop sync generation.  This can always be done as the SyncGen class won't try to send
 		// if it hasn't been connected to a SyncModule Arduino
 		sg.bStop();
-
 		
 		imgProc proc0(mbFrame);
 		imgProc proc1(mbFrame);
 
 		if (nSyncMode == 1) {
 			// Primary
+			std::this_thread::sleep_for( std::chrono::milliseconds(400) );
 			if (!orinSync.bPrimarySync()) {
 				fprintf( stderr, "Unable to sync to Secondaries\n" );
 				return 1;

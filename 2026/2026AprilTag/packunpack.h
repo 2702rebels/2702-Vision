@@ -37,16 +37,28 @@ inline size_t UnPack( uint32_t &u32, uint8_t const *pu8, size_t sBufLen = sizeof
 	return sizeof(u32);
 }
 
-inline size_t UnPack( uint64_t &u64, uint8_t const *pu8, size_t sBufLen = sizeof(uint64_t) )
+inline size_t UnPackU64( uint64_t &u64, uint8_t const *pu8, size_t sBufLen = sizeof(uint64_t) )
 {
 	if (sBufLen < sizeof(u64)) {
 		throw std::runtime_error( "UnPack u64 - not enough data" );
 	}
 	u64 = 0;
-	for (int i = 7; i > 0; i--) {
+	for (int i = 7; i >= 0; i--) {
 		u64 = (u64 << 8) | pu8[i];
 	}
 	return sizeof(u64);
+}
+
+inline size_t UnPack( int64_t &i64, uint8_t const *pu8, size_t sBufLen = sizeof(uint64_t) )
+{
+	if (sBufLen < sizeof(i64)) {
+		throw std::runtime_error( "UnPack i64 - not enough data" );
+	}
+	i64 = 0;
+	for (int i = 7; i >= 0; i--) {
+		i64 = (i64 << 8) | pu8[i];
+	}
+	return sizeof(i64);
 }
 
 inline size_t Pack( float const f, uint8_t *pu8, size_t s )
@@ -110,5 +122,22 @@ inline size_t Pack( uint64_t u64, uint8_t *pu8, size_t s )
 	pu8[7] = (u64 >> 56) & 0xFF;
 
 	return sizeof(u64);
+}
+
+inline size_t Pack( int64_t i64, uint8_t *pu8, size_t s )
+{
+	if (s < sizeof(i64)) {
+		throw std::runtime_error( "Pack i64 - out of space"  );
+	}
+	pu8[0] = i64 & 0xFF;
+	pu8[1] = (i64 >> 8) & 0xFF;
+	pu8[2] = (i64 >> 16) & 0xFF;
+	pu8[3] = (i64 >> 24) & 0xFF;
+	pu8[4] = (i64 >> 32) & 0xFF;
+	pu8[5] = (i64 >> 40) & 0xFF;
+	pu8[6] = (i64 >> 48) & 0xFF;
+	pu8[7] = (i64 >> 56) & 0xFF;
+
+	return sizeof(i64);
 }
 

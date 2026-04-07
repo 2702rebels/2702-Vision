@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include "orin-sync.h"
+#include "packunpack.h"
 
 // Set up Synchronization between cameras on multiple ORINs
 //
@@ -29,61 +30,6 @@ static const uint32_t s_u32START_CAMERA_MESSAGE		=	0xA5270203;
 static const uint32_t s_u32CAMERA_STARTED_MESSAGE	=	0xA5270204;
 static const uint32_t s_u32SECONDARY_RESTART_MESSAGE =	0xA5270205;
 static const uint32_t s_u32CAMERA_FRAME_MESSAGE		=	0xA5270206;
-
-inline size_t UnPack( float &f, uint8_t const *pu8, size_t sBufLen = sizeof(float) )
-{
-	if (sBufLen < sizeof(float)) {
-		throw std::runtime_error( "UnPack float - not enough data" );
-	}
-	memcpy( &f, pu8, sizeof(float) );
-	return sizeof(float);
-}
-
-inline size_t UnPack( uint16_t &u16, uint8_t const *pu8, size_t sBufLen = sizeof(uint16_t) )
-{
-	if (sBufLen < sizeof(u16)) {
-		throw std::runtime_error( "UnPack u16 - not enough data" );
-	}
-	memcpy( &u16, pu8, sizeof(u16) );
-	return sizeof(u16);
-}
-
-inline size_t UnPack( uint32_t &u32, uint8_t const *pu8, size_t sBufLen = sizeof(uint32_t) )
-{
-	if (sBufLen < sizeof(u32)) {
-		throw std::runtime_error( "UnPack u32 - not enough data" );
-	}
-	memcpy( &u32, pu8, sizeof(u32) );
-	return sizeof(u32);
-}
-
-inline size_t Pack( float const f, uint8_t *pu8, size_t s )
-{
-	if (s < sizeof(f)) {
-		throw std::runtime_error( "Pack float - out of space"  );
-	}
-	memcpy( pu8, &f, sizeof(f) );
-	return sizeof(f);
-}
-
-inline size_t Pack( uint16_t u16, uint8_t *pu8, size_t s )
-{
-	if (s < sizeof(u16)) {
-		throw std::runtime_error( "Pack u16 - out of space"  );
-	}
-	memcpy( pu8, &u16, sizeof(u16) );
-	return sizeof(u16);
-}
-
-inline size_t Pack( uint32_t u32, uint8_t *pu8, size_t s )
-{
-	if (s < sizeof(u32)) {
-		throw std::runtime_error( "Pack u32 - out of space"  );
-	}
-	memcpy( pu8, &u32, sizeof(u32) );
-	return sizeof(u32);
-
-}
 
 COrinSync::COrinSync( bool bPrimary, MailBox<ATFrame *>&mbFrame, int nSecondaries ) :
 	m_bPrimary( bPrimary ),
@@ -262,6 +208,8 @@ void COrinSync::vPrimaryWorker()
 						uint16_t u16Tags;
 
 						pu8 += UnPack( u32Seq, pu8 );
+						pu8 += UnPack( ts.tv_sec, pu8 );
+						pu8 += UnPack( ts.tv_usec, pu8 );
 						pu8 += UnPack( u16Cam, pu8 );
 						pu8 += UnPack( u16Tags, pu8 );
 						ATFrame *patf = new ATFrame( u16Cam, u32Seq, &ts );
@@ -403,9 +351,12 @@ bool COrinSync::bSendFrame( ATFrame *patf )
 	uint32_t u32Seq = patf->u32Seq();
 	uint16_t u16Cam = patf->nCam();
 	uint16_t u16Tags = patf->sTags();
+	timeval const &ts = patf->ts();
 
 	pu8 += Pack( s_u32CAMERA_FRAME_MESSAGE, pu8, pu8End - pu8 );
 	pu8 += Pack( u32Seq, pu8, pu8End - pu8 );
+	pu8 += Pack( ts.tv_sec, pu8, pu8End - pu8 );
+	pu8 += Pack( ts.tv_usec, pu8, pu8End - pu8 );
 	pu8 += Pack( u16Cam, pu8, pu8End - pu8 );
 	pu8 += Pack( u16Tags, pu8, pu8End - pu8 );
 
@@ -424,6 +375,7 @@ bool COrinSync::bSendFrame( ATFrame *patf )
 //	printf( "Sending Frame: Tags = %d size = %ld\n", u16Tags, pu8 - gru8Buff );
 	int nErr = sendto( m_nSock, gru8Buff, pu8 - gru8Buff, 0, (struct sockaddr *)&m_vSecondaries[0].GetSockaddr(), sizeof(struct sockaddr_in));
 
+	return true;
 }
 
 bool COrinSync::bSend( std::span<uint8_t> const &spBuf )
