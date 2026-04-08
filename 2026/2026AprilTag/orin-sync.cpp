@@ -157,7 +157,7 @@ void COrinSync::vPrimaryWorker()
 				uint8_t const *pu8 = gru8Buff;
 
 				pu8 += UnPack( u32MsgId, pu8, sizeof(gru8Buff) );
-				//printf( "Rcvd: %08x\n", u32MsgId );
+//				printf( "Rcvd: %08x\n", u32MsgId );
 				switch ( u32MsgId ) {
 				case s_u32SECONDARY_READY_MESSAGE:
 					{
@@ -296,7 +296,7 @@ void COrinSync::vSecondaryWorker()
 		else if (nRcv >= sizeof(uint32_t)) {
 			bMsgRcvd = true;
 			UnPack( u32Msg, gru8Buff, sizeof(gru8Buff) );
-			//printf( "Received %08x\n", u32Msg );
+//			printf( "Received %08x\n", u32Msg );
 			switch( u32Msg ) {
 			case s_u32PRIMARY_READY_MESSAGE:
 				{

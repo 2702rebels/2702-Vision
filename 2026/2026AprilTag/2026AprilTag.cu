@@ -356,6 +356,8 @@ void vSendFrame( CUDPSender &udpSend, QXfrm const &qxfm, struct timeval const &t
 //printf( "now: %lld    Offset: %ld   delta: %u\n", nt::Now(), i64TimeOffset, tvDelta.tv_usec );
 	int64_t time = nt::Now() + g_ts.i64Offset() - tvDelta.tv_usec; // timestamp is at frame capture time in microseconds with NetworkTables server-adjusted time
 
+//	printf( "Now: %lld   Offset: %lld\n", nt::Now(), g_ts.i64Offset() );
+//	printf( "Delta : %lld.%06lld  -> ts : %lld\n", tvDelta.tv_sec, tvDelta.tv_usec, time );
 	ApriltagReport ar( 0, time );
 
 	ar.vSetPose( 1, qxfm.Translation().x(), qxfm.Translation().y(), atan2( p3dV2.y(), p3dV2.x() ), 0. );
@@ -481,6 +483,7 @@ int main( int argc, char **argv )
 		int nCount = 0;
 		while( !ntinst.IsConnected() && !bStop ) {
 			if (nCount++ >2) {
+				printf( "No Network Tables...Exitting\n" );
 				exit(1);
 			}
 			printf( "." ); fflush( stdout );
@@ -533,7 +536,8 @@ int main( int argc, char **argv )
 
 		if (nSyncMode == 1) {
 			// Primary
-			std::this_thread::sleep_for( std::chrono::milliseconds(400) );
+			// shut off sync for 1 second
+			std::this_thread::sleep_for( std::chrono::milliseconds(1000) );
 			if (!orinSync.bPrimarySync()) {
 				fprintf( stderr, "Unable to sync to Secondaries\n" );
 				return 1;

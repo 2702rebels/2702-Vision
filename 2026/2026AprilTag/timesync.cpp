@@ -17,8 +17,8 @@
 static const int nSyncPort = 27020;
 static const int nRIOAddr = 2;
 
-//#define CLOCK_TO_USE	CLOCK_REALTIME
-#define CLOCK_TO_USE	CLOCK_MONOTONIC_RAW
+#define CLOCK_TO_USE	CLOCK_REALTIME
+//#define CLOCK_TO_USE	CLOCK_MONOTONIC_RAW
 class  TSPing
 {
 	uint8_t		m_u8ProtoVers;
@@ -229,11 +229,11 @@ void CTimeSync::vHandlePong( uint8_t const *pu8, size_t sLen )
 	unsigned uOneWay = uRoundTrip / 2;
 	// Calculate the difference between our time and the RIO time assuming that
 	// the round trip network time is the same both directions.
-	m_i64Offset = tpo.u64SrvrTime() - (u64CurTime - uOneWay);
+	m_i64Offset = tpo.u64SrvrTime() - (u64CurTime - uOneWay) + m_i64WPILibCorrection;
 	m_u8MatchType = tpo.u8MatchType();
 	m_u8MatchNum = tpo.u8MatchNum();
 
-#ifdef TEST
+#if defined(TEST)
 	printf( "Offset = %ld\n", m_i64Offset );
 #endif
 
@@ -250,7 +250,9 @@ void CTimeSync::vHandlePong( uint8_t const *pu8, size_t sLen )
 		// if the clock is successfully updated, adjust the
 		// offset by the difference between old time and new
 		if (clock_settime( CLOCK_REALTIME, &ts ) == 0) {
-			m_i64Offset += u64Delta * 1000000LL;
+//			printf( "Clock Delta = %lu\n", u64Delta );
+			m_i64WPILibCorrection = u64Delta * 1000000LL;
+			m_i64Offset += m_i64WPILibCorrection;
 		}
 #ifdef TEST
 		else {

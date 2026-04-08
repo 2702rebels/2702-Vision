@@ -13,6 +13,14 @@ class CTimeSync
 	uint32_t	m_u32RIOAddr = 0;
 
 	int64_t	m_i64Offset = 0;
+	// On bootup, the ORIN time is not correct.
+	// WPILib grabs the current REALTIME on startup...
+	// when the RIO connects to the FMS/Driverstation, it gets an
+	// updated real time, and sends the current time in the Pong packets
+	// The ORIN sets the current time based on this new "proper" time, but
+	// the base time offset is incorrect, so we need to keep track of the
+	// time offset that was applied...
+	int64_t m_i64WPILibCorrection = 0;
 
 	uint8_t	m_u8MatchType = 0;
 	uint8_t m_u8MatchNum = 0;
