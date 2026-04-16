@@ -1,5 +1,4 @@
 #include <stdexcept>
-
 #include "field.h"
 #include "FrameLogger.h"
 #include "PoseSolver.h"
@@ -59,15 +58,27 @@ int main( int argc, char **argv )
 			printf( "%u\n", vatf[0]->u32Seq() );
 
 //			if (bHaveSolve || ps.bEstimate( qxfm, vatf )) {
+//			if (ps.bEstimate( qxfm, vatf )) {
 			if (ps.bEstimate( qxfm, vatf )) {
-				printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
+				printf( "Estimate : %.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
+			}
+//			if (ps.bPose2D( qxfm, vatf )) {
+//			ps.bPose2D( qxfm, vatf );
+//			printf( "Pose2d   : %.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
+
+			if (ps.bPoseHorn( qxfm, vatf )) {
+				printf( "PoseHorn : %.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
+			}
+
+			if (ps.bPose2D( qxfm, vatf )) {
+				printf( "Pose2d   : %.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
 				if (ps.bSolve( qxfm, vatf )) {
 					bHaveSolve = true;
-					printf( "%.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
+					printf( "PoseSolve: %.4f %.4f %.4f %.4f : %.3f %.3f %.3f\n", qxfm.Rotation().q0(), qxfm.Rotation().x(), qxfm.Rotation().y(), qxfm.Rotation().z(),qxfm.Translation().x(), qxfm.Translation().y(), qxfm.Translation().z() );
 				}
 				else {
 					bHaveSolve = false;
-					printf( "Lost Tracking\n" );
+//					printf( "Lost Tracking\n" );
 				}
 			}
 		}

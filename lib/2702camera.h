@@ -6,15 +6,11 @@ namespace Rebels {
 
 class CamParm {
   float m_grfMat[3][3];
+  float m_grfDist[5];	 // distortion paramters
   float m_fU;
   float m_fV;
   float m_fU0;
   float m_fV0;
-  float m_fk1;  // radial distortion terms
-  float m_fk2;
-  float m_fk3;
-  float m_fp1;  // tangential distortion terms;
-  float m_fp2;
   int m_nURes;
   int m_nVRes;
 
@@ -23,6 +19,13 @@ class CamParm {
  public:
   CamParm();
   ~CamParm() {}
+
+  inline float const (*(intrinsics)() const)[3] {
+  	return m_grfMat;
+  }
+  inline float const *distortion() const {
+  	return m_grfDist;
+  }
   float pinhole(int r, int c) const
   {
   	return m_grfMat[r][c];
@@ -44,21 +47,30 @@ class CamParm {
   	return m_fV0;
   }
   
-  float dist(int i) const {
-    switch (i) {
-      case 0:
-        return m_fk1;
-      case 1:
-        return m_fk2;
-      case 2:
-        return m_fp1;
-      case 3:
-        return m_fp2;
-      case 4:
-        return m_fk3;
-    }
-    return 0.;
+  inline float fk1() const {
+  	return m_grfDist[0];
   }
+  
+  inline float fk2() const {
+  	return m_grfDist[1];
+  }
+  
+  inline float fp1() const {
+  	return m_grfDist[2];
+  }
+  
+  inline float fp2() const {
+  	return m_grfDist[3];
+  }
+  
+  inline float fk3() const {
+  	return m_grfDist[4];
+  }
+
+  float dist(int i) const {
+  	return m_grfDist[i];
+  }
+
   bool Load(char const *psz);
   bool Save(char const *psz);
   void SetRotation(Quaternion const &q) { m_qxm.vSetRotation( q ); }

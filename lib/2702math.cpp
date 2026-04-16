@@ -1,9 +1,19 @@
-#include "2702math.h"
 #include <stdio.h>
+
+#include "2702math.h"
+#include "2702PackUnpack.h"
 
 using namespace Rebels;
 
-Point3d::Point3d(Point3d const &src) { *this = src; }
+Point3d::Point3d(Point3d const &src)
+{
+	*this = src;
+}
+
+Point3d::Point3d(uint8_t const *pu8, size_t stLen)
+{
+	UnPack( pu8, stLen );
+}
 
 Point3d &Point3d::operator=(Point3d const &other)
 {
@@ -110,6 +120,17 @@ void Point3d::Normalize()
     m_fY /= fMag;
     m_fZ /= fMag;
   }
+}
+
+size_t Point3d::UnPack(uint8_t const *pu8, size_t stLen)
+{
+	size_t stIdx = 0;
+
+	stIdx += ::UnPack(m_fX, pu8, stLen);
+	stIdx += ::UnPack(m_fY, pu8 + stIdx, stLen - stIdx);
+	stIdx += ::UnPack(m_fZ, pu8 + stIdx, stLen - stIdx);
+	
+	return stIdx;
 }
 
 #if 0
@@ -359,6 +380,23 @@ Quaternion::Quaternion(Point3d const &rvec) {
 	Normalize();
 }
 
+Quaternion::Quaternion(uint8_t const *pu8, size_t stLen)
+{
+	UnPack(pu8, stLen);
+}
+
+size_t Quaternion::UnPack(uint8_t const *pu8, size_t stLen)
+{
+	size_t stIdx = 0;
+
+	stIdx += ::UnPack(m_fQ0, pu8, stLen);
+	stIdx += ::UnPack(m_fX, pu8 + stIdx, stLen - stIdx);
+	stIdx += ::UnPack(m_fY, pu8 + stIdx, stLen - stIdx);
+	stIdx += ::UnPack(m_fZ, pu8 + stIdx, stLen - stIdx);
+
+	return stIdx;
+}
+
 Quaternion &Quaternion::operator=(RotationMatrix const &rm) {
   float fT = rm.m_grfMat[0][0] + rm.m_grfMat[1][1] + rm.m_grfMat[2][2] + 1;
   if (fT > 0.00000001F) {
@@ -485,10 +523,36 @@ Point2d::Point2d(Point2d const &src) :
 {
 }
 
+Point2d::Point2d(uint8_t const *pu8, size_t stLen) 
+{
+	UnPack(pu8, stLen);
+}
+
+size_t Point2d::UnPack(uint8_t const *pu8, size_t stLen)
+{
+	size_t stIdx = 0;
+	stIdx += ::UnPack( m_fU, pu8, stLen );
+	stIdx += ::UnPack( m_fV, pu8 + stIdx, stLen - stIdx );
+	return stIdx;
+}
+
 Point2d &Point2d::operator=(Point2d const &src) {
   m_fU = src.m_fU;
   m_fV = src.m_fV;
   return *this;
+}
+
+QXfrm::QXfrm(uint8_t const *pu8, size_t stLen)
+{
+	UnPack(pu8, stLen);
+}
+
+size_t QXfrm::UnPack(uint8_t const *pu8, size_t stLen)
+{
+	size_t stIdx = m_q.UnPack(pu8, stLen);
+	stIdx = m_p.UnPack(pu8 + stIdx, stLen - stIdx);
+
+	return stIdx;
 }
 
 QXfrm QXfrm::operator*( QXfrm const &rhs ) const

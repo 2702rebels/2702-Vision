@@ -23,11 +23,9 @@ CamParm::CamParm() {
   m_fV = 190.F;
   m_fU0 = 160.F;
   m_fV0 = 90.F;
-  m_fk1 = 0.F;
-  m_fk2 = 0.F;
-  m_fk3 = 0.F;
-  m_fp1 = 0.F;
-  m_fp2 = 0.F;
+  for (int i = 0; i < 5; i++) {
+    m_grfDist[i] = 0.F;
+  }
 }
 
 bool CamParm::Load(char const *psz) {
@@ -65,9 +63,9 @@ bool CamParm::Load(char const *psz) {
   m_fV0 = m_grfMat[1][2];
 
   if (!flCam.getline(szTmp, sizeof(szTmp)).eof()) {
-    int nParm = sscanf(szTmp, "%f %f %f %f %f", &m_fk1, &m_fk2, &m_fp1, &m_fp2, &m_fk3);
+    int nParm = sscanf(szTmp, "%f %f %f %f %f", &m_grfDist[0], &m_grfDist[1], &m_grfDist[2], &m_grfDist[3], &m_grfDist[4]);
 	if (nParm == 4) {
-		m_fk3 = 0.;
+		m_grfDist[4] = 0.;
 	}
 	else if (nParm != 5) {
       printf("Camfile '%s' - invalid distortion terms\n", psz);
@@ -118,7 +116,12 @@ bool CamParm::Save(char const *psz) {
       of << szTmp;
     }
   }
-  sprintf(szTmp, "%.7f %.7f %.7f %.7f\n", m_fk1, m_fk2, m_fp1, m_fp2);
+  if (m_grfDist[4] == 0.F) {
+    sprintf(szTmp, "%.7f %.7f %.7f %.7f\n", m_grfDist[0], m_grfDist[1], m_grfDist[2], m_grfDist[3] );
+  }
+  else {
+    sprintf(szTmp, "%.7f %.7f %.7f %.7f %.7f\n", m_grfDist[0], m_grfDist[1], m_grfDist[2], m_grfDist[3], m_grfDist[4] );
+  }
   of << szTmp;
   sprintf(szTmp, "%.7f %.7f %.7f %.7f\n", m_qxm.Rotation().q0(), m_qxm.Rotation().x(),
           m_qxm.Rotation().y(), m_qxm.Rotation().z());
@@ -135,11 +138,11 @@ void CamParm::Undistort(float fU, float fV, float &fUndistU,
   fUndistV = fV;
   for (int iter = 0; iter < 5; iter++) {
     float r2 = fUndistU * fUndistU + fUndistV * fUndistV;  // radius squared
-    float icdist = 1.F / (1.F + ((m_fk3 * r2 + m_fk2) * r2 + m_fk1) * r2);
-    float deltaX = 2.F * m_fp1 * fUndistU * fUndistV +
-                   m_fp2 * (r2 + 2.F * fUndistU * fUndistU);
-    float deltaY = m_fp1 * (r2 + 2.F * fUndistV * fUndistV) +
-                   2.F * m_fp2 * fUndistU * fUndistV;
+    float icdist = 1.F / (1.F + ((fk3() * r2 + fk2()) * r2 + fk1()) * r2);
+    float deltaX = 2.F * fp1() * fUndistU * fUndistV +
+                   fp2() * (r2 + 2.F * fUndistU * fUndistU);
+    float deltaY = fp1() * (r2 + 2.F * fUndistV * fUndistV) +
+                   2.F * fp2() * fUndistU * fUndistV;
     fUndistU = (fU - deltaX) * icdist;
     fUndistV = (fV - deltaY) * icdist;
   }
@@ -156,9 +159,9 @@ Point2d CamParm::ProjectPoint( Point3d const &p3d ) const
 
 	float fR2 = fXp * fXp + fYp * fYp;
 
-	float linCoef = 1 + m_fk1 * fR2 + m_fk2 * fR2 * fR2 + m_fk3 * fR2 * fR2 * fR2;
-	float fXpp = fXp * linCoef + 2 * m_fp1 * fXp * fYp + m_fp2 * (fR2 + 2 * fXp * fXp);
-	float fYpp = fYp * linCoef + m_fp1 * (fR2 + 2 * fYp * fYp) + 2 * m_fp2 * fXp * fYp;
+	float linCoef = 1 + fk1() * fR2 + fk2() * fR2 * fR2 + fk3() * fR2 * fR2 * fR2;
+	float fXpp = fXp * linCoef + 2 * fp1() * fXp * fYp + fp2() * (fR2 + 2 * fXp * fXp);
+	float fYpp = fYp * linCoef + fp1() * (fR2 + 2 * fYp * fYp) + 2 * fp2() * fXp * fYp;
 
 	return Point2d( fXpp * m_fU + m_fU0, fYpp * m_fV + m_fV0 );
 }
@@ -256,11 +259,11 @@ CamParm &CamParm::operator=(CamParm const &src) {
   m_fV = src.m_fV;
   m_fU0 = src.m_fU0;
   m_fV0 = src.m_fV0;
-  m_fk1 = src.m_fk1;
-  m_fk2 = src.m_fk2;
-  m_fk3 = src.m_fk3;
-  m_fp1 = src.m_fp1;
-  m_fp2 = src.m_fp2;
+
+  for (int i = 0; i < 5; i++) {
+  	m_grfDist[i] = src.m_grfDist[i];
+  }
+
   m_nURes = src.m_nURes;
   m_nVRes = src.m_nVRes;
 

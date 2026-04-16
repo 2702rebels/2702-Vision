@@ -57,7 +57,7 @@ public:
 			m_bWrite = true;
 			return true;
 		}
-		catch( exception &e ) {
+		catch( std::exception &e ) {
 			if (m_fp) {
 				fclose( m_fp );
 				m_fp = 0;

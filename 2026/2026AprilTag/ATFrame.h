@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "2702math.h"
 
 #include <opencv2/core/core.hpp>
 
@@ -7,6 +8,7 @@ class ATDetection
 {
 	unsigned					m_uId;
 	std::vector<cv::Point2f>	m_vxCorners;
+	Rebels::QXfrm				m_qxm;
 	bool						m_bUse;				// true if Apriltag is usable.
 public:
 	ATDetection( unsigned uId, double grCrnrs[4][2] ) :
@@ -19,9 +21,21 @@ public:
 			m_vxCorners.push_back( cv::Point2f( grCrnrs[i][0], grCrnrs[i][1] ) );
 		}
 	}
+	ATDetection( unsigned uId, double grCrnrs[4][2], Rebels::QXfrm const &qxm ) :
+		m_uId( uId ),
+		m_qxm( qxm ),
+		m_bUse( true )
+	{
+		m_uId = uId;
+		for( int i = 0; i < 4; i++ )
+		{
+			m_vxCorners.push_back( cv::Point2f( grCrnrs[i][0], grCrnrs[i][1] ) );
+		}
+	}
 	ATDetection( const ATDetection &src ) :
 		m_uId( src.m_uId ),
 		m_vxCorners( src.m_vxCorners ),
+		m_qxm( src.m_qxm ),
 		m_bUse( src.m_bUse )
 	{
 	}
@@ -37,6 +51,7 @@ public:
 	{
 		m_uId = src.m_uId;
 		m_vxCorners = src.m_vxCorners;
+		m_qxm = src.m_qxm;
 		m_bUse = src.m_bUse;
 
 		return *this;
@@ -55,6 +70,21 @@ public:
 	bool bUse() const
 	{
 		return m_bUse;
+	}
+
+	inline bool bXfmValid() const 
+	{
+		return !(m_qxm.Rotation().q0() == 1.f && m_qxm.Rotation().x() == 0.F && m_qxm.Rotation().y() == 0.F && m_qxm.Rotation().z() == 0.F &&
+			m_qxm.Translation().x() == 0.F && m_qxm.Translation().y() == 0.F && m_qxm.Translation().z() == 0.F);
+	}
+	void vSetQxm( Rebels::QXfrm const &q )
+	{
+		m_qxm = q;
+	}
+
+	operator Rebels::QXfrm const &() const
+	{
+		return m_qxm;
 	}
 };
 

@@ -3,6 +3,7 @@
 //
 //
 #include <math.h>
+#include <stdint.h>
 
 namespace Rebels {
 	class Point3d;
@@ -26,8 +27,12 @@ class Point2d {
   Point2d();
   Point2d(float fU, float fV);
   Point2d(Point2d const &src);
+  Point2d(uint8_t const *pu8, size_t sLen );
 
   Point2d &operator=(Point2d const &src);
+
+  size_t Pack(uint8_t *pu8, size_t stLen) const;
+  size_t UnPack(uint8_t const *pu8, size_t stLen);
 
   inline void set(float fU, float fV) {
     m_fU = fU;
@@ -48,6 +53,7 @@ class Point3d {
   Point3d() : m_fX(0.F), m_fY(0.F), m_fZ(0.F) {}
   Point3d(float fX, float fY, float fZ) : m_fX(fX), m_fY(fY), m_fZ(fZ) {}
   Point3d(Point3d const &src);
+  Point3d(uint8_t const *pu8, size_t sLen);
 
   Point3d &operator=(Point3d const &other);
 
@@ -59,6 +65,9 @@ class Point3d {
   Point3d &operator/=(float const scalar);
   Point3d &operator+=(Point3d const &other);
   Point3d &operator-=(Point3d const &other);
+
+  size_t Pack(uint8_t *pu8, size_t stLen) const;
+  size_t UnPack(uint8_t const *pu8, size_t stLen);
 
   Point3d CrossProduct(Point3d const &v2) const;
   float DotProduct(Point3d const &v2) const;
@@ -168,6 +177,7 @@ class Quaternion {
 	}
 	Quaternion(RotationMatrix const &rm);
 	Quaternion(Euler const &er );
+	Quaternion(uint8_t const *pu8, size_t sLen);
 	~Quaternion()
 	{
 	}
@@ -180,6 +190,8 @@ class Quaternion {
 	Quaternion operator*(const Quaternion &other) const;
 	Quaternion &operator*=(const Quaternion &other);
 
+	size_t Pack( uint8_t *pu8, size_t stLen) const;
+	size_t UnPack( uint8_t const *pu8, size_t stLen );
 	void Invert();
 	Quaternion Inverse() const;
 
@@ -206,6 +218,7 @@ public:
 		m_q( x.m_q ), m_p( x.m_p )
 	{
 	}
+	QXfrm( uint8_t const *pu8, size_t sLen );
 	~QXfrm()
 	{
 	}
@@ -218,6 +231,9 @@ public:
 
 	Rebels::Point3d const &Translation() const;
 	Rebels::Quaternion const &Rotation() const;
+
+	size_t Pack(uint8_t *pu8, size_t stLen) const;
+	size_t UnPack(uint8_t const *pu8, size_t stLen);
 
 	void vSetTranslation( Point3d const &p3d );
 	void vSetRotation( Quaternion const &q );

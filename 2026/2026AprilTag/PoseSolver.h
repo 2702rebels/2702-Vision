@@ -23,10 +23,15 @@ class PoseSolver
 #endif
 	bool					m_bSolveUseAll = false;
 	float					m_fMaxRMS2 = 100.F;
+	float					m_fMax3DErr = 10.F;
 
 static int eval( void *p, int m, int n, float const *x, float *fv, int iflag );
 
 	int eval( int m, int n, float const *x, float *fv, int iflag );
+
+	bool bTagPNP( unsigned uCam, ATDetection &d );
+
+	bool bCalcHorn( QXfrm &xfm, std::vector<Rebels::Point3d> const &vp3Ref, std::vector<Rebels::Point3d> const &vpMeas );
 
 public:
 	PoseSolver( Field const &fld, MultiCam const &mc );
@@ -38,13 +43,20 @@ public:
 
 	bool bGuessPose( QXfrm &xfm, std::vector<ATFrame *>&vatf );
 
+	bool bPose2D( QXfrm &xfm, std::vector<ATFrame *>&vatf );
+
+	// Uses Horn Algorithm from "Closed-Form solution to absolute orientation using unit quaternions"
+	bool bPoseHorn( QXfrm &xfm, std::vector<ATFrame *>&vatf );
+
 	// returns number of residuals for this frame...  if pfRes == null, simply counts the
 	// number of residuals for this frame.
-	int nCalcResiduals( QXfrm &xfm, std::vector<ATFrame *> &vatf, float *pfRes );
+	int nCalcResidualsUV( QXfrm &xfm, std::vector<ATFrame *> &vatf, float *pfRes );
+	int nCalcResiduals3D( QXfrm &xfm, std::vector<ATFrame *> &vatf, float *pfRes );
 	void vSetMinTagPixels( uint32_t u32MinPixels );
 	void vSetMaxDistance( uint32_t fMaxDist );
 	void vSetSolveMode( bool bUseAll );
 	void vSetMaxRMS( float fRMS );
 
-	int nEnumerateEqns( std::vector<ATFrame *> const &vatf, int &nCams, uint64_t &u64TagMask ) const;
+	int nEnumerateEqnsUV( std::vector<ATFrame *> const &vatf, int &nCams, uint64_t &u64TagMask ) const;
+	int nEnumerateEqns3D( std::vector<ATFrame *> const &vatf, int &nCams, uint64_t &u64TagMask ) const;
 };

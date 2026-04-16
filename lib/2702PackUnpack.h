@@ -1,4 +1,6 @@
 #pragma once
+#include <stdint.h>
+#include <stdexcept>
 
 inline size_t UnPack( float &f, uint8_t const *pu8, size_t sBufLen = sizeof(float) )
 {
