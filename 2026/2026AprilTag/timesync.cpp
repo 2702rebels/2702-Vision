@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 #include "timesync.h"
-#include "packunpack.h"
+#include "2702PackUnpack.h"
 
 // Time synchronization with RIO
 

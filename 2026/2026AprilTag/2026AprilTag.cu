@@ -70,6 +70,7 @@ using ApriltagReportStructType = wpi::Struct<ApriltagReport>; // Structure class
 
 uint32_t g_u32Gain = 45;
 uint32_t g_u32Exposure = 1000;
+bool g_bNewVision = false;
 
 void printinfo( v4lcam &cam )
 {
@@ -377,6 +378,8 @@ int main( int argc, char **argv )
 	SyncGen							sg;
 	nt::BooleanPublisher			bpLogging;
 	nt::BooleanSubscriber			bsIsLogging;
+	nt::BooleanPublisher			bpNewVision;
+	nt::BooleanSubscriber			bsNewVision;
 	nt::IntegerSubscriber			isExposure;
 	nt::IntegerSubscriber			isGain;
 	nt::IntegerPublisher			ipExposure;
@@ -510,6 +513,8 @@ int main( int argc, char **argv )
 
 	bpLogging = ntinst.GetBooleanTopic("/Vision/PiIsLogging").Publish( pso );
 	bsIsLogging = ntinst.GetBooleanTopic("/Vision/IsLogging").Subscribe(false);
+	bsNewVision = ntinst.GetBooleanTopic("/Vision/NewVision").Subscribe(false);
+	bpNewVision = ntinst.GetBooleanTopic("/Vision/NewVision").Publish();
 	ipExposure = ntinst.GetIntegerTopic("/Vision/Exposure").Publish();
 	ipGain = ntinst.GetIntegerTopic("/Vision/Gain").Publish();
 	ipExposure.Set( g_u32Exposure );
@@ -517,6 +522,8 @@ int main( int argc, char **argv )
 	isExposure = ntinst.GetIntegerTopic("/Vision/Exposure").Subscribe( g_u32Exposure );
 	isGain = ntinst.GetIntegerTopic("/Vision/Gain").Subscribe( g_u32Gain );
 	bpLogging.Set( false );
+
+	bpNewVision.Set( g_bNewVision );
 
 	COrinSync orinSync( nSyncMode == 1 ? true : false, mbFrame, nSecondaries );
 
@@ -633,12 +640,19 @@ int main( int argc, char **argv )
 
 //					if (bHaveAllCams && !(vCamFrames[0]->u32Seq() % 4))  {
 					if (bHaveAllCams)  {
+						g_bNewVision = bsNewVision.Get( g_bNewVision );
 #if 1
 #if 1
 //						if (bHavePose || ps.bEstimate( qxRobot, vCamFrames )) {
-						ps.bFilterTags( vCamFrames );
-						if (ps.bEstimate( qxRobot, vCamFrames )) {
-//							if( ps.bSolve( qxRobot, vCamFrames ) ) {
+						bool bHavePose = false;
+						if (g_bNewVision) {
+							bHavePose = ps.bPoseHorn( qxRobot, vCamFrames );
+						}
+						else {
+							ps.bFilterTags( vCamFrames );
+							bHavePose = ps.bEstimate( qxRobot, vCamFrames );
+						}
+						if (bHavePose) {
 						 	if( ps.bSolve( qxRobot, vCamFrames ) || 1 ) {
 								Quaternion const &q = qxRobot.Rotation();
 								Point3d const &p = qxRobot.Translation();
@@ -681,7 +695,7 @@ int main( int argc, char **argv )
 						auto bLog = bsIsLogging.Get();
 						if (bLog) {
 							bLogStarted = true;
-							fl.bCreateMatchLog( LOG_DIR );
+							fl.bCreateMatchLog( LOG_DIR, g_ts.u8MatchType(), g_ts.u8MatchNum() );
 							proc0.vStartLogging();
 							proc1.vStartLogging();
 						}							

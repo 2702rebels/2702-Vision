@@ -31,7 +31,7 @@ public:
 		return true;
 	}
 
-	bool bCreateMatchLog( char const *pszDir )
+	bool bCreateMatchLog( char const *pszDir, int nMatchType, int nMatchNum )
 	{
 		// If log file is already open, don't start match log.
 		if (m_fp) {
@@ -41,7 +41,7 @@ public:
 			char szTmp[128];
 			for (int i = 0; ; i++ )
 			{
-				snprintf( szTmp, sizeof(szTmp), "%s/FrmLog-%04d.log", pszDir, i );
+				snprintf( szTmp, sizeof(szTmp), "%s/FrmLog-%d-%d-%04d.log", pszDir, nMatchType, nMatchNum, i );
 				if (access( szTmp, F_OK ) == -1) 
 					break;
 			}
@@ -57,7 +57,7 @@ public:
 			m_bWrite = true;
 			return true;
 		}
-		catch( std::exception &e ) {
+		catch( exception &e ) {
 			if (m_fp) {
 				fclose( m_fp );
 				m_fp = 0;
