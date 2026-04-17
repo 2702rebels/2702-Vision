@@ -22,7 +22,7 @@ class PoseSolver
 	float					m_fMaxDistSqd = (8.F * 8.F);
 #endif
 	bool					m_bSolveUseAll = false;
-	float					m_fMaxRMS2 = 100.F;
+	float					m_fMaxRMS = 10.F;
 	float					m_fMax3DErr = 10.F;
 
 static int eval( void *p, int m, int n, float const *x, float *fv, int iflag );

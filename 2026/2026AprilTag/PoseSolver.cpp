@@ -305,7 +305,7 @@ void PoseSolver::vSetSolveMode( bool bUseAll )
 }
 void PoseSolver::vSetMaxRMS( float fRMS )
 {
-	m_fMaxRMS2 = fRMS * fRMS;
+	m_fMaxRMS = fRMS;
 }
 
 #define USE_MOST_PIXELS 1
@@ -634,7 +634,13 @@ bool PoseSolver::bPoseHorn( QXfrm &xfm, std::vector<ATFrame *>&vatf )
 		}
 
 		if (!bUpdated) {
-			return true;
+			double fMax;
+			double fRMS = fCalcRMS( xfm, vp3Robot, vp3Field, fMax );
+//			printf( "--> %.4f %.4f %.4f %.4f : %.3f  %.3f  %.3f  -- N: %d Max: %.3f  RMS: %.3f\n", xfm.Rotation().q0(), xfm.Rotation().x(), xfm.Rotation().y(), xfm.Rotation().z(), xfm.Translation().x(), xfm.Translation().y(), xfm.Translation().z(), vp3Robot.size(), fMax, fRMS );
+			if (fRMS < m_fMaxRMS) {
+				return true;
+			}
+			return false;
 		}
 	}
 //	printf( "Not enough tags\n" );
@@ -657,7 +663,7 @@ bool PoseSolver::bPoseHorn( QXfrm &xfm, std::vector<ATFrame *>&vatf )
 	if (bIterativeQ3drigid( vp3Robot, vp3Field, xfm)) {
 		double fMax;
 		double fRMS = fCalcRMS( xfm, vp3Robot, vp3Field, fMax );
-//		printf( "--> %.4f %.4f %.4f %.4f : %.3f  %.3f  %3.f  -- Max: %.3f  RMS: %.3f\n", xfm.Rotation().q0(), xfm.Rotation().x(), xfm.Rotation().y(), xfm.Rotation().z(), xfm.Translation().x(), xfm.Translation().y(), xfm.Translation().z(), fMax, fRMS );
+		printf( "--> %.4f %.4f %.4f %.4f : %.3f  %.3f  %3.f  -- Max: %.3f  RMS: %.3f\n", xfm.Rotation().q0(), xfm.Rotation().x(), xfm.Rotation().y(), xfm.Rotation().z(), xfm.Translation().x(), xfm.Translation().y(), xfm.Translation().z(), fMax, fRMS );
 		if (fRMS < 10.f) {
 			return true;
 		}
@@ -784,7 +790,7 @@ bool PoseSolver::bEstimate( QXfrm &xfm, std::vector<ATFrame *> &vatf )
 			}
 		}
 #endif
-		bool bUseSolve = sum < m_fMaxRMS2;
+		bool bUseSolve = sqrt(sum) < m_fMaxRMS;
 		if (bUseSolve) {
 #if 1
 			// the xfrm we have just computed goes from the Field coordinate system to the sensor's.
